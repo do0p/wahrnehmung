@@ -1,0 +1,2 @@
+serviceClass: at.lws.wnm.client.WahrnehmungsService
+path: 4E9FD8E3970078DA4C8399C56D8EEFA5.gwt.rpc
