@@ -7,14 +7,23 @@
 
   <!-- Servlets -->
   <servlet>
-    <servlet-name>greetServlet</servlet-name>
-    <servlet-class>at.lws.wnm.server.WahrnehmungsServiceImpl</servlet-class>
+    <servlet-name>wahrnehmungServlet</servlet-name>
+    <servlet-class>at.lws.wnm.server.service.WahrnehmungsServiceImpl</servlet-class>
   </servlet>
-  
   <servlet-mapping>
-    <servlet-name>greetServlet</servlet-name>
-    <url-pattern>/wahrnehmung/greet</url-pattern>
+    <servlet-name>wahrnehmungServlet</servlet-name>
+    <url-pattern>/wahrnehmung/store</url-pattern>
   </servlet-mapping>
+
+  <servlet>
+    <servlet-name>childServlet</servlet-name>
+    <servlet-class>at.lws.wnm.server.service.ChildServiceImpl</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>childServlet</servlet-name>
+    <url-pattern>/wahrnehmung/child</url-pattern>
+  </servlet-mapping>
+  
   
   <!-- Default page to serve -->
   <welcome-file-list>

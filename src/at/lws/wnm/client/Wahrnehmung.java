@@ -32,7 +32,7 @@ public class Wahrnehmung implements EntryPoint {
 	/**
 	 * Create a remote service proxy to talk to the server-side Greeting service.
 	 */
-	private final WahrnehmungsServiceAsync greetingService = GWT
+	private final WahrnehmungsServiceAsync wahrnehmungService = GWT
 			.create(WahrnehmungsService.class);
 
 	/**
@@ -119,7 +119,7 @@ public class Wahrnehmung implements EntryPoint {
 				sendButton.setEnabled(false);
 				textToServerLabel.setText(textToServer);
 				serverResponseLabel.setText("");
-				greetingService.greetServer(textToServer,
+				wahrnehmungService.storeText(textToServer,
 						new AsyncCallback<String>() {
 							public void onFailure(Throwable caught) {
 								// Show the RPC error message to the user
