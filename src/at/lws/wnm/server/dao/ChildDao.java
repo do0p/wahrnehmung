@@ -1,5 +1,6 @@
 package at.lws.wnm.server.dao;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -15,7 +16,7 @@ public class ChildDao {
 		try {
 			final Query query = em.createQuery("select from "
 					+ Child.class.getName());
-			return query.getResultList();
+			return new ArrayList<Child>(query.getResultList());
 		} finally {
 			em.close();
 		}
