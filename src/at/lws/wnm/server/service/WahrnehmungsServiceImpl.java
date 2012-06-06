@@ -1,6 +1,9 @@
 package at.lws.wnm.server.service;
 
+import java.util.List;
+
 import at.lws.wnm.client.WahrnehmungsService;
+import at.lws.wnm.server.dao.SectionDao;
 import at.lws.wnm.shared.FieldVerifier;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
@@ -11,6 +14,13 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 @SuppressWarnings("serial")
 public class WahrnehmungsServiceImpl extends RemoteServiceServlet implements
 		WahrnehmungsService {
+	
+	private SectionDao sectionDao;
+
+	public WahrnehmungsServiceImpl()
+	{
+		sectionDao = new SectionDao();
+	}
 
 	public String storeText(String input) throws IllegalArgumentException {
 		// Verify that the input is valid. 
@@ -46,4 +56,10 @@ public class WahrnehmungsServiceImpl extends RemoteServiceServlet implements
 		return html.replaceAll("&", "&amp;").replaceAll("<", "&lt;")
 				.replaceAll(">", "&gt;");
 	}
+
+	@Override
+	public List<String> getSections() {
+		return sectionDao.getAllSections();
+	}
+
 }
