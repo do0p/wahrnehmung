@@ -17,8 +17,9 @@ import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.datepicker.client.DateBox;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 
 public class EditContent extends VerticalPanel {
 
@@ -39,6 +40,7 @@ public class EditContent extends VerticalPanel {
 	
 	public EditContent()
 	{
+		setSize("744px", "550px");
 		// init fields
 		sendButton = new Button("Send");
 		dialogBox = new PopUp(sendButton);
@@ -52,12 +54,25 @@ public class EditContent extends VerticalPanel {
 	
 		final HorizontalPanel selectionContainer = new HorizontalPanel();
 		selectionContainer.add(nameSelection);
+		nameSelection.setSize("260px", "20px");
+		selectionContainer.setCellVerticalAlignment(nameSelection, HasVerticalAlignment.ALIGN_MIDDLE);
 		selectionContainer.add(sectionSelection);
+		sectionSelection.setSize("150px", "20px");
+		selectionContainer.setCellVerticalAlignment(sectionSelection, HasVerticalAlignment.ALIGN_MIDDLE);
 		selectionContainer.add(dateBox);
+		dateBox.setSize("150px", "20px");
+		selectionContainer.setCellHorizontalAlignment(dateBox, HasHorizontalAlignment.ALIGN_RIGHT);
+		selectionContainer.setCellVerticalAlignment(dateBox, HasVerticalAlignment.ALIGN_MIDDLE);
 		
 		add(selectionContainer);
+		setCellHorizontalAlignment(selectionContainer, HasHorizontalAlignment.ALIGN_CENTER);
+		setCellVerticalAlignment(selectionContainer, HasVerticalAlignment.ALIGN_MIDDLE);
+		selectionContainer.setSize("100%", "40px");
 		add(textArea);
+		textArea.setSize("100%", "440px");
 		add(sendButton);
+		sendButton.setSize("80px", "40px");
+		setCellHorizontalAlignment(sendButton, HasHorizontalAlignment.ALIGN_CENTER);
 	}
 	
 	private MultiWordSuggestOracle createChildNameList() {
