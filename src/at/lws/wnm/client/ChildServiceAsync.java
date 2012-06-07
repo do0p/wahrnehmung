@@ -10,4 +10,6 @@ public interface ChildServiceAsync {
 
 	void queryChildren(AsyncCallback<List<Child>> callback);
 
+	void storeChild(Child child, AsyncCallback<Void> callback);
+
 }

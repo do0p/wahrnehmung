@@ -25,4 +25,10 @@ public class ChildServiceImpl extends RemoteServiceServlet implements ChildServi
 		
 	}
 
+	@Override
+	public void storeChild(Child child) {
+		childDao.storeChild(child);
+		
+	}
+
 }

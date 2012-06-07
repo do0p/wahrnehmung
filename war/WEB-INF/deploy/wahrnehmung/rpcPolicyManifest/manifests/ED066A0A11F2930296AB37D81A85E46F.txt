@@ -1,0 +1,2 @@
+serviceClass: at.lws.wnm.client.ChildService
+path: 5B6E46994D07CA8142ADAD1C647FD8CD.gwt.rpc

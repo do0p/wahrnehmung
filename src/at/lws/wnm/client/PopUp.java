@@ -14,8 +14,8 @@ public class PopUp extends DialogBox {
 			+ "attempting to contact the server. Please check your network "
 			+ "connection and try again.";
 
-	private HTML serverResponseLabel;
-	private Button closeButton;
+	private final HTML serverResponseLabel;
+	private final Button closeButton;
 
 	private final FocusWidget focusOnClose;
 

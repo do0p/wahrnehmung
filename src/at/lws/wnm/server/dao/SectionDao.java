@@ -11,12 +11,21 @@ import at.lws.wnm.shared.model.Section;
 public class SectionDao {
 
 	@SuppressWarnings("unchecked")
-	public List<String> getAllSections() {
+	public List<Section> getAllSections() {
 		final EntityManager em = EMF.get().createEntityManager();
 		try {
-			final Query query = em.createQuery("select s.sectionName from "
-					+ Section.class.getName() + " s");
-			return new ArrayList<String>(query.getResultList());
+			final Query query = em.createQuery("select from "
+					+ Section.class.getName() );
+			return new ArrayList<Section>(query.getResultList());
+		} finally {
+			em.close();
+		}
+	}
+	
+	public void storeSection(Section section) {
+		final EntityManager em = EMF.get().createEntityManager();
+		try {
+			em.persist(section);
 		} finally {
 			em.close();
 		}

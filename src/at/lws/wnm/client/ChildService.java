@@ -10,4 +10,6 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RemoteServiceRelativePath("child")
 public interface ChildService extends RemoteService {
 	List<Child> queryChildren();
+	
+	void storeChild(Child child);
 }

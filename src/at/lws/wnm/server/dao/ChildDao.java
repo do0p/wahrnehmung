@@ -21,4 +21,13 @@ public class ChildDao {
 			em.close();
 		}
 	}
+
+	public void storeChild(Child child) {
+		final EntityManager em = EMF.get().createEntityManager();
+		try {
+			em.persist(child);
+		} finally {
+			em.close();
+		}
+	}
 }

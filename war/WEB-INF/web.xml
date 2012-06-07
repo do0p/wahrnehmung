@@ -24,6 +24,14 @@
     <url-pattern>/wahrnehmung/child</url-pattern>
   </servlet-mapping>
   
+    <servlet>
+    <servlet-name>sectionServlet</servlet-name>
+    <servlet-class>at.lws.wnm.server.service.SectionServiceImpl</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>sectionServlet</servlet-name>
+    <url-pattern>/wahrnehmung/section</url-pattern>
+  </servlet-mapping>
   
   <!-- Default page to serve -->
   <welcome-file-list>
