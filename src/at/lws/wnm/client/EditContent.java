@@ -49,7 +49,6 @@ public class EditContent extends VerticalPanel {
 	private final Map<String, Long> childMap = new HashMap<String, Long>();
 	
 	public EditContent() {
-		setSize("744px", "550px");
 		// init fields
 		sendButton = new Button("Speichern");
 		dialogBox = new PopUp();
@@ -67,6 +66,7 @@ public class EditContent extends VerticalPanel {
 		saveSuccess.add(new HTML("erfolgreich gespeichert"));
 		saveSuccess.setAutoHideEnabled(true);
 
+		setSize("744px", "550px");
 		final HorizontalPanel selectionContainer = new HorizontalPanel();
 		selectionContainer.add(nameSelection);
 		nameSelection.setSize("260px", "20px");
@@ -78,6 +78,7 @@ public class EditContent extends VerticalPanel {
 				HasVerticalAlignment.ALIGN_MIDDLE);
 		selectionContainer.add(dateBox);
 		dateBox.setSize("150px", "20px");
+		dateBox.setFormat(Utils.DATEBOX_FORMAT );
 		selectionContainer.setCellHorizontalAlignment(dateBox,
 				HasHorizontalAlignment.ALIGN_RIGHT);
 		selectionContainer.setCellVerticalAlignment(dateBox,
@@ -138,15 +139,13 @@ public class EditContent extends VerticalPanel {
 			public void onSuccess(List<GwtChild> result) {
 				for (GwtChild child : result) {
 					
-					final String formattedChildName = formatChildName(child);
+					final String formattedChildName = Utils.formatChildName(child);
 					names.add(formattedChildName);
 					childMap.put(formattedChildName, child.getKey());
 				}
 			}
 
-			private String formatChildName(GwtChild child) {
-				return child.getFirstName() + " " + child.getLastName();
-			}
+
 
 		});
 		return names;

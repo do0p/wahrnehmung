@@ -30,6 +30,7 @@ public class ChildAdmin extends VerticalPanel {
 		fnBox = new TextBox();
 		lnBox = new TextBox();
 		bdBox = new DateBox();
+		bdBox.setFormat(Utils.DATEBOX_FORMAT);
 		saveButton = new Button("Speichern");
 		dialogBox = new PopUp();
 
