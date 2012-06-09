@@ -8,6 +8,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
+import at.lws.wnm.shared.model.GwtBeobachtung;
+
 import com.google.appengine.api.datastore.Text;
 
 @Entity
@@ -67,5 +69,15 @@ public class Beobachtung implements Serializable {
 
 	public Date getDate() {
 		return date;
+	}
+
+	public static Beobachtung valueOf(GwtBeobachtung gwtBeobachtung) {
+		final Beobachtung beobachtung = new Beobachtung();
+		beobachtung.setChildKey(gwtBeobachtung.getChildKey());
+		beobachtung.setSectionKey(gwtBeobachtung.getSectionKey());
+		beobachtung.setDate(gwtBeobachtung.getDate());
+		beobachtung.setText(new Text(gwtBeobachtung.getText()));
+		beobachtung.setKey(gwtBeobachtung.getKey());
+		return beobachtung;
 	}
 }

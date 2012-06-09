@@ -12,13 +12,8 @@ public class BeobachtungDao {
 	public void storeBeobachtung(GwtBeobachtung gwtBeobachtung) {
 		final EntityManager em = EMF.get().createEntityManager();
 		try {
-			final Beobachtung beobachtung = new Beobachtung();
-			beobachtung.setChildKey(gwtBeobachtung.getChildKey());
-			beobachtung.setSectionKey(gwtBeobachtung.getSectionKey());
-			beobachtung.setDate(gwtBeobachtung.getDate());
-			beobachtung.setText(new Text(gwtBeobachtung.getText()));
-			beobachtung.setKey(gwtBeobachtung.getKey());
-			em.persist(beobachtung);
+
+			em.persist(Beobachtung.valueOf(gwtBeobachtung));
 		} finally {
 			em.close();
 		}
