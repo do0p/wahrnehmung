@@ -1,6 +1,6 @@
 package at.lws.wnm.client;
 
-import at.lws.wnm.shared.model.Child;
+import at.lws.wnm.shared.model.GwtChild;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -31,7 +31,7 @@ public class ChildAdmin extends VerticalPanel {
 		lnBox = new TextBox();
 		bdBox = new DateBox();
 		saveButton = new Button("Speichern");
-		dialogBox = new PopUp(saveButton);
+		dialogBox = new PopUp();
 
 		Grid grid = new Grid(3, 2);
 		grid.setWidget(0, 0, new Label("Vorname"));
@@ -52,7 +52,7 @@ public class ChildAdmin extends VerticalPanel {
 
 		@Override
 		public void onClick(ClickEvent event) {
-			final Child child = new Child();
+			final GwtChild child = new GwtChild();
 			child.setFirstName(fnBox.getValue());
 			child.setLastName(lnBox.getValue());
 			child.setBirthDay(bdBox.getValue());
@@ -62,6 +62,7 @@ public class ChildAdmin extends VerticalPanel {
 				@Override
 				public void onFailure(Throwable caught) {
 					dialogBox.setErrorMessage(caught.getLocalizedMessage());
+					dialogBox.setDisableWhileShown(saveButton);
 					dialogBox.center();
 				}
 

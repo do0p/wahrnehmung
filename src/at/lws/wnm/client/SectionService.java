@@ -2,16 +2,16 @@ package at.lws.wnm.client;
 
 import java.util.List;
 
+import at.lws.wnm.shared.model.GwtSection;
+
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
-
-import at.lws.wnm.shared.model.Section;
 
 @RemoteServiceRelativePath("section")
 public interface SectionService extends RemoteService {
 
-	List<Section> querySections();
+	List<GwtSection> querySections();
 
-	void storeSection(Section section);
+	void storeSection(GwtSection section);
 
 }

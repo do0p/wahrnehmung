@@ -2,14 +2,14 @@ package at.lws.wnm.client;
 
 import java.util.List;
 
-import at.lws.wnm.shared.model.Child;
+import at.lws.wnm.shared.model.GwtChild;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public interface ChildServiceAsync {
 
-	void queryChildren(AsyncCallback<List<Child>> callback);
+	void queryChildren(AsyncCallback<List<GwtChild>> callback);
 
-	void storeChild(Child child, AsyncCallback<Void> callback);
+	void storeChild(GwtChild child, AsyncCallback<Void> callback);
 
 }

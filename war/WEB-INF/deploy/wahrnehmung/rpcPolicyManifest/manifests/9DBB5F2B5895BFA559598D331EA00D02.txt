@@ -1,2 +1,0 @@
-serviceClass: at.lws.wnm.client.GreetingService
-path: 0A2F42929DB840825B7BBC33272BF275.gwt.rpc

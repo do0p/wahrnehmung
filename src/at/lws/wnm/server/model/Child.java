@@ -1,4 +1,4 @@
-package at.lws.wnm.shared.model;
+package at.lws.wnm.server.model;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -7,6 +7,9 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+
+import at.lws.wnm.shared.model.GwtChild;
+
 
 @Entity
 public class Child implements Serializable{
@@ -20,6 +23,7 @@ public class Child implements Serializable{
 	private String firstName;
 	private String lastName;
 	private Date birthDay;
+
 
 	public Long getKey() {
 		return key;
@@ -51,5 +55,24 @@ public class Child implements Serializable{
 
 	public void setBirthDay(Date birthDay) {
 		this.birthDay = birthDay;
+	}
+
+
+	public static Child valueOf(GwtChild gwtChild) {
+		final Child child = new Child();
+		child.key = gwtChild.getKey();
+		child.firstName = gwtChild.getFirstName();
+		child.lastName = gwtChild.getLastName();
+		child.birthDay = gwtChild.getBirthDay();
+		return child;
+	}
+
+	public GwtChild toGwt() {
+		final GwtChild child = new GwtChild();
+		child.setKey(key);
+		child.setFirstName(firstName);
+		child.setLastName(lastName);
+		child.setBirthDay(birthDay);
+		return child;
 	}
 }

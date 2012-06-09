@@ -4,7 +4,7 @@ import java.util.List;
 
 import at.lws.wnm.client.SectionService;
 import at.lws.wnm.server.dao.SectionDao;
-import at.lws.wnm.shared.model.Section;
+import at.lws.wnm.shared.model.GwtSection;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
@@ -19,14 +19,14 @@ public class SectionServiceImpl extends RemoteServiceServlet implements SectionS
 	}
 	
 	@Override
-	public List<Section> querySections() {
+	public List<GwtSection> querySections() {
 		
 		return sectionDao.getAllSections();
 		
 	}
 
 	@Override
-	public void storeSection(Section section) {
+	public void storeSection(GwtSection section) {
 		sectionDao.storeSection(section);
 		
 	}

@@ -1,5 +1,7 @@
 package at.lws.wnm.client;
 
+import at.lws.wnm.shared.model.GwtBeobachtung;
+
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
@@ -8,5 +10,5 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
  */
 @RemoteServiceRelativePath("store")
 public interface WahrnehmungsService extends RemoteService {
-	String storeText(String text) throws IllegalArgumentException;
+	void storeBeobachtung(GwtBeobachtung beobachtung);
 }

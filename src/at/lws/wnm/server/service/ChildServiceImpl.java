@@ -4,7 +4,7 @@ import java.util.List;
 
 import at.lws.wnm.client.ChildService;
 import at.lws.wnm.server.dao.ChildDao;
-import at.lws.wnm.shared.model.Child;
+import at.lws.wnm.shared.model.GwtChild;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
@@ -19,14 +19,14 @@ public class ChildServiceImpl extends RemoteServiceServlet implements ChildServi
 	}
 	
 	@Override
-	public List<Child> queryChildren() {
+	public List<GwtChild> queryChildren() {
 		
 		return childDao.getAllChildren();
 		
 	}
 
 	@Override
-	public void storeChild(Child child) {
+	public void storeChild(GwtChild child) {
 		childDao.storeChild(child);
 		
 	}

@@ -1,6 +1,6 @@
 package at.lws.wnm.client;
 
-import at.lws.wnm.shared.model.Section;
+import at.lws.wnm.shared.model.GwtSection;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -24,10 +24,10 @@ public class SectionAdmin extends VerticalPanel {
 
 		sectionBox = new TextBox();
 		saveButton = new Button("Speichern");
-		dialogBox = new PopUp(saveButton);
+		dialogBox = new PopUp();
 
 		Grid grid = new Grid(3, 2);
-		grid.setWidget(0, 0, new Label("Vorname"));
+		grid.setWidget(0, 0, new Label("Bereich"));
 		grid.setWidget(0, 1, sectionBox);
 
 		add(grid);
@@ -41,13 +41,14 @@ public class SectionAdmin extends VerticalPanel {
 
 		@Override
 		public void onClick(ClickEvent event) {
-			final Section section = new Section();
+			final GwtSection section = new GwtSection();
 			section.setSectionName(sectionBox.getValue());
 			sectionService.storeSection(section, new AsyncCallback<Void>() {
 
 				@Override
 				public void onFailure(Throwable caught) {
 					dialogBox.setErrorMessage(caught.getLocalizedMessage());
+					dialogBox.setDisableWhileShown(saveButton);
 					dialogBox.center();
 				}
 

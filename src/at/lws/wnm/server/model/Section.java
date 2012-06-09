@@ -1,4 +1,4 @@
-package at.lws.wnm.shared.model;
+package at.lws.wnm.server.model;
 
 import java.io.Serializable;
 
@@ -6,6 +6,9 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+
+import at.lws.wnm.shared.model.GwtSection;
+
 
 @Entity
 public class Section implements Serializable{
@@ -28,6 +31,22 @@ public class Section implements Serializable{
 
 	public void setSectionName(String sectionName) {
 		this.sectionName = sectionName;
+	}
+
+	public GwtSection toGwt()
+	{
+		final GwtSection section = new GwtSection();
+		section.setKey(key);
+		section.setSectionName(sectionName);
+		return section;
+	}
+	
+	public static Section valueOf(GwtSection gwtSection) {
+		final Section section = new Section();
+		section.key = gwtSection.getKey();
+		section.sectionName = gwtSection.getSectionName();
+		return section;
+		
 	}
 
 }

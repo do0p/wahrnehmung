@@ -17,10 +17,9 @@ public class PopUp extends DialogBox {
 	private final HTML serverResponseLabel;
 	private final Button closeButton;
 
-	private final FocusWidget focusOnClose;
+	private FocusWidget[] focusOnClose;
 
-	public PopUp(FocusWidget focusOnClose) {
-		this.focusOnClose = focusOnClose;
+	public PopUp() {
 		serverResponseLabel = new HTML();
 		closeButton = new Button("Close");
 		closeButton.getElement().setId("closeButton");
@@ -28,6 +27,10 @@ public class PopUp extends DialogBox {
 		setText("Remote Procedure Call");
 		setAnimationEnabled(true);
 		setWidget(createPanel());
+	}
+
+	public void setDisableWhileShown(FocusWidget... focusWidget) {
+		focusOnClose = focusWidget;
 	}
 
 	private VerticalPanel createPanel() {
@@ -61,9 +64,27 @@ public class PopUp extends DialogBox {
 	private class CloseButtonHandler implements ClickHandler {
 		public void onClick(ClickEvent event) {
 			hide();
-			focusOnClose.setEnabled(true);
-			focusOnClose.setFocus(true);
 		}
+	}
+
+	@Override
+	public void hide() {
+		if (focusOnClose != null) {
+			for (FocusWidget widget : focusOnClose) {
+				widget.setEnabled(true);
+				widget.setFocus(true);
+			}
+		}super.hide();
+	}
+
+	@Override
+	public void center() {
+		if (focusOnClose != null) {
+			for (FocusWidget widget : focusOnClose) {
+				widget.setEnabled(false);
+			}
+		}
+		super.center();
 	}
 
 }
