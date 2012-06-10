@@ -11,6 +11,8 @@ public class GwtBeobachtung implements Serializable{
 	private Long sectionKey;
 	private Date date;
 	private Long key;
+	private String childName;
+	private String sectionName;
 
 	public void setText(String text) {
 		this.text = text;
@@ -48,6 +50,26 @@ public class GwtBeobachtung implements Serializable{
 
 	public Long getKey() {
 		return key;
+	}
+
+	public void setKey(Long key) {
+		this.key = key;
+	}
+
+	public String getChildName() {
+		return childName;
+	}
+
+	public String getSectionName() {
+		return sectionName;
+	}
+
+	public void setChildName(String childName) {
+		this.childName = childName;
+	}
+
+	public void setSectionName(String sectionName) {
+		this.sectionName = sectionName;
 	}
 
 }

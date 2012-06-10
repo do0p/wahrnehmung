@@ -1,2 +1,0 @@
-serviceClass: at.lws.wnm.client.SectionService
-path: 26F3A22E82BF5CFEAFC11273D4D650E2.gwt.rpc

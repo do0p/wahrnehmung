@@ -1,5 +1,7 @@
 package at.lws.wnm.client;
 
+import java.util.List;
+
 import at.lws.wnm.shared.model.GwtBeobachtung;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -11,5 +13,11 @@ public interface WahrnehmungsServiceAsync {
 
 	void storeBeobachtung(GwtBeobachtung beobachtung,
 			AsyncCallback<Void> callback);
+
+	void getBeobachtungen(Long childNo, Long sectionNo,
+			AsyncCallback<List<GwtBeobachtung>> callback);
+
+	void getBeobachtung(Long beobachtungsKey,
+			AsyncCallback<GwtBeobachtung> callback);
 
 }

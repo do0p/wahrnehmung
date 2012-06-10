@@ -13,6 +13,7 @@ public class Wahrnehmung implements EntryPoint, ValueChangeHandler<String> {
 
 	private static final String ADMIN = "admin";
 	private static final String NEW_ENTRY = "new";
+	private static final String LIST_ENTRY = "list";
 
 	public void onModuleLoad() {
 
@@ -31,6 +32,7 @@ public class Wahrnehmung implements EntryPoint, ValueChangeHandler<String> {
 		final HorizontalPanel navigation = new HorizontalPanel();
 		navigation.setSpacing(10);
 		navigation.add(new Hyperlink("erfassen", NEW_ENTRY));
+		navigation.add(new Hyperlink("anzeigen", LIST_ENTRY));
 		navigation.add(new Hyperlink("administrieren", ADMIN));
 		return navigation;
 	}
@@ -45,6 +47,8 @@ public class Wahrnehmung implements EntryPoint, ValueChangeHandler<String> {
 		rootPanel.clear();
 		if (token.equals(NEW_ENTRY)) {
 			rootPanel.add(new EditContent());
+		} else if (token.equals(LIST_ENTRY)) {
+			rootPanel.add(new SplitListContent());
 		} else if (token.equals(ADMIN)) {
 			rootPanel.add(new AdminContent());
 		} else {

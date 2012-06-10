@@ -80,4 +80,14 @@ public class Beobachtung implements Serializable {
 		beobachtung.setKey(gwtBeobachtung.getKey());
 		return beobachtung;
 	}
+
+	public GwtBeobachtung toGwt() {
+		final GwtBeobachtung beobachtung = new GwtBeobachtung();
+		beobachtung.setKey(key);
+		beobachtung.setChildKey(childKey);
+		beobachtung.setSectionKey(sectionKey);
+		beobachtung.setDate(date);
+		beobachtung.setText(text.getValue());
+		return beobachtung;
+	}
 }
