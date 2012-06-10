@@ -2,6 +2,7 @@ package at.lws.wnm.client;
 
 import java.util.Date;
 
+
 import at.lws.wnm.shared.model.GwtChild;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -9,6 +10,7 @@ import com.google.gwt.user.datepicker.client.DateBox;
 import com.google.gwt.user.datepicker.client.DateBox.Format;
 
 public class Utils {
+	public static final String SAVE = "Speichern";
 	public static final DateTimeFormat DATE_FORMAT = DateTimeFormat
 			.getFormat("d.M.yy");
 	public static final Format DATEBOX_FORMAT = new DateBox.DefaultFormat(
@@ -42,5 +44,10 @@ public class Utils {
 
 	public static boolean isNotEmpty(String lastName) {
 		return lastName != null && lastName.matches(".*\\w.*");
+	}
+
+
+	public static boolean isEmpty(String sectionKey) {
+		return !isNotEmpty(sectionKey);
 	}
 }

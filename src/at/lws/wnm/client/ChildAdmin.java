@@ -15,7 +15,6 @@ import com.google.gwt.user.datepicker.client.DateBox;
 
 public class ChildAdmin extends VerticalPanel {
 
-
 	private final ChildServiceAsync childService = GWT
 			.create(ChildService.class);
 
@@ -24,6 +23,7 @@ public class ChildAdmin extends VerticalPanel {
 	private final DateBox bdBox;
 	private final Button saveButton;
 	private final PopUp dialogBox;
+	private final SaveSuccess saveSuccess;
 
 	public ChildAdmin() {
 
@@ -31,8 +31,9 @@ public class ChildAdmin extends VerticalPanel {
 		lnBox = new TextBox();
 		bdBox = new DateBox();
 		bdBox.setFormat(Utils.DATEBOX_FORMAT);
-		saveButton = new Button("Speichern");
+		saveButton = new Button(Utils.SAVE);
 		dialogBox = new PopUp();
+		saveSuccess = new SaveSuccess();
 
 		Grid grid = new Grid(3, 2);
 		grid.setWidget(0, 0, new Label("Vorname"));
@@ -48,6 +49,11 @@ public class ChildAdmin extends VerticalPanel {
 		saveButton.addClickHandler(new SaveClickHandler());
 	}
 
+	private void resetForm() {
+		fnBox.setText("");
+		lnBox.setText("");
+		bdBox.setValue(null);
+	}
 
 	public class SaveClickHandler implements ClickHandler {
 
@@ -57,7 +63,7 @@ public class ChildAdmin extends VerticalPanel {
 			child.setFirstName(fnBox.getValue());
 			child.setLastName(lnBox.getValue());
 			child.setBirthDay(bdBox.getValue());
-			
+
 			childService.storeChild(child, new AsyncCallback<Void>() {
 
 				@Override
@@ -69,8 +75,11 @@ public class ChildAdmin extends VerticalPanel {
 
 				@Override
 				public void onSuccess(Void result) {
-					// do nothing
+					saveSuccess.center();
+					saveSuccess.show();
+					resetForm();
 				}
+
 			});
 		}
 

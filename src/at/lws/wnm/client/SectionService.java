@@ -12,6 +12,6 @@ public interface SectionService extends RemoteService {
 
 	List<GwtSection> querySections();
 
-	void storeSection(GwtSection section);
+	void storeSection(GwtSection section) throws IllegalArgumentException;
 
 }

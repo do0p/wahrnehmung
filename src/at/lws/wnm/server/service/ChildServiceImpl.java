@@ -9,26 +9,25 @@ import at.lws.wnm.shared.model.GwtChild;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 @SuppressWarnings("serial")
-public class ChildServiceImpl extends RemoteServiceServlet implements ChildService {
+public class ChildServiceImpl extends RemoteServiceServlet implements
+		ChildService {
 
 	private final ChildDao childDao;
-	
-	public ChildServiceImpl()
-	{
+
+	public ChildServiceImpl() {
 		childDao = new ChildDao();
 	}
-	
+
 	@Override
 	public List<GwtChild> queryChildren() {
-		
+
 		return childDao.getAllChildren();
-		
+
 	}
 
 	@Override
 	public void storeChild(GwtChild child) {
 		childDao.storeChild(child);
-		
 	}
 
 }

@@ -14,13 +14,11 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
-import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -37,7 +35,7 @@ public class EditContent extends VerticalPanel {
 
 	// popups
 	private final PopUp dialogBox;
-	private final PopupPanel saveSuccess;
+	private final SaveSuccess saveSuccess;
 
 	// main window
 	private final TextArea textArea;
@@ -47,10 +45,10 @@ public class EditContent extends VerticalPanel {
 	private final Button sendButton;
 
 	private final Map<String, Long> childMap = new HashMap<String, Long>();
-	
+
 	public EditContent() {
 		// init fields
-		sendButton = new Button("Speichern");
+		sendButton = new Button(Utils.SAVE);
 		dialogBox = new PopUp();
 		textArea = new TextArea();
 		dateBox = new DateBox();
@@ -60,13 +58,9 @@ public class EditContent extends VerticalPanel {
 		createSectionSelectsions();
 		nameSelection = new SuggestBox(createChildNameList());
 		sendButton.addClickHandler(new SendbuttonHandler());
+		saveSuccess = new SaveSuccess();
 
-		saveSuccess = new PopupPanel();
-		saveSuccess.setGlassEnabled(true);
-		saveSuccess.add(new HTML("erfolgreich gespeichert"));
-		saveSuccess.setAutoHideEnabled(true);
-
-		setSize("744px", "550px");
+		setSize("100%", "550px");
 		final HorizontalPanel selectionContainer = new HorizontalPanel();
 		selectionContainer.add(nameSelection);
 		nameSelection.setSize("260px", "20px");
@@ -78,7 +72,7 @@ public class EditContent extends VerticalPanel {
 				HasVerticalAlignment.ALIGN_MIDDLE);
 		selectionContainer.add(dateBox);
 		dateBox.setSize("150px", "20px");
-		dateBox.setFormat(Utils.DATEBOX_FORMAT );
+		dateBox.setFormat(Utils.DATEBOX_FORMAT);
 		selectionContainer.setCellHorizontalAlignment(dateBox,
 				HasHorizontalAlignment.ALIGN_RIGHT);
 		selectionContainer.setCellVerticalAlignment(dateBox,
@@ -100,7 +94,7 @@ public class EditContent extends VerticalPanel {
 
 	private void resetForm() {
 		nameSelection.setText("");
-		sectionSelection.setSelectedIndex(-1);
+		sectionSelection.setSelectedIndex(0);
 		textArea.setValue("");
 	}
 
@@ -115,6 +109,7 @@ public class EditContent extends VerticalPanel {
 
 			@Override
 			public void onSuccess(List<GwtSection> result) {
+				sectionSelection.addItem("- Bereich -", "");
 				for (GwtSection section : result) {
 					final String keyString = section.getKey().toString();
 					sectionSelection.addItem(section.getSectionName(),
@@ -138,14 +133,13 @@ public class EditContent extends VerticalPanel {
 			@Override
 			public void onSuccess(List<GwtChild> result) {
 				for (GwtChild child : result) {
-					
-					final String formattedChildName = Utils.formatChildName(child);
+
+					final String formattedChildName = Utils
+							.formatChildName(child);
 					names.add(formattedChildName);
 					childMap.put(formattedChildName, child.getKey());
 				}
 			}
-
-
 
 		});
 		return names;
@@ -161,27 +155,29 @@ public class EditContent extends VerticalPanel {
 
 			final String text = textArea.getValue();
 			final Long childKey = childMap.get(nameSelection.getValue());
-			final String sectionKey = sectionSelection.getValue(sectionSelection
-			.getSelectedIndex());
+			final String sectionKey = sectionSelection
+					.getValue(sectionSelection.getSelectedIndex());
 			final Date date = dateBox.getValue();
 
 			String errorMessage = new String();
-			if (childKey == null) {
-				errorMessage = errorMessage + "Kein Kind mit Name "
-						+ nameSelection.getValue() + "\n";
+			if(Utils.isEmpty(nameSelection.getValue()))
+			{
+				errorMessage = errorMessage + "W&auml;hle einen Namen!<br/>";
 			}
-			if (sectionKey == null) {
+			else if (childKey == null) {
+				errorMessage = errorMessage + "Kein Kind mit Name "
+						+ nameSelection.getValue() + "!<br/>";
+			}
+			if (Utils.isEmpty(sectionKey)) {
 				errorMessage = errorMessage
-						+ "Kein Bereich mit Name "
-						+ sectionSelection.getValue(sectionSelection
-								.getSelectedIndex()) + "\n";
+						+ "W&auml;hle einen Bereich!<br/>";
 			}
 			if (date == null) {
-				errorMessage = errorMessage + "Kein Datum angegeben\n";
+				errorMessage = errorMessage + "Gib ein Datum an!<br/>";
 			}
 			if (text.isEmpty()) {
 				errorMessage = errorMessage
-						+ "Bitte eine Beobachtung / Wahrnehmung eintragen\n";
+						+ "Trage eine Wahrnehmung ein!<br/>";
 			}
 			if (!errorMessage.isEmpty()) {
 				dialogBox.setErrorMessage(errorMessage);

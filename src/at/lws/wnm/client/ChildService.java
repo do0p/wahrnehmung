@@ -11,5 +11,5 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 public interface ChildService extends RemoteService {
 	List<GwtChild> queryChildren();
 	
-	void storeChild(GwtChild child);
+	void storeChild(GwtChild child) throws IllegalArgumentException;
 }

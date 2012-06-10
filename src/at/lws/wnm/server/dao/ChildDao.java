@@ -25,21 +25,30 @@ public class ChildDao {
 
 	private List<GwtChild> mapToGwtChildren(List<Child> resultList) {
 		final List<GwtChild> result = new ArrayList<GwtChild>();
-		for(Child child : resultList)
-		{
+		for (Child child : resultList) {
 			result.add(child.toGwt());
 		}
 		return result;
 	}
 
-	public void storeChild(GwtChild gwtChild) {
+	public void storeChild(GwtChild gwtChild) throws IllegalArgumentException {
 		final EntityManager em = EMF.get().createEntityManager();
 		try {
+			if (gwtChild.getKey() == null) {
+				final Query query = em
+						.createQuery("select from "
+								+ Child.class.getName()
+								+ " c where c.firstName = :firstName and c.lastName = :lastName and c.birthDay = :birthDay");
+				query.setParameter("firstName", gwtChild.getFirstName());
+				query.setParameter("lastName", gwtChild.getLastName());
+				query.setParameter("birthDay", gwtChild.getBirthDay());
+				if (!query.getResultList().isEmpty()) {
+					throw new IllegalArgumentException(gwtChild.getFirstName() + " " + gwtChild.getLastName() + " existiert bereits!");
+				}
+			}
 			em.persist(Child.valueOf(gwtChild));
 		} finally {
 			em.close();
 		}
 	}
-
-
 }

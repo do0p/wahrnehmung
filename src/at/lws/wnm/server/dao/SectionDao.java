@@ -26,6 +26,16 @@ public class SectionDao {
 	public void storeSection(GwtSection gwtSection) {
 		final EntityManager em = EMF.get().createEntityManager();
 		try {
+			if(gwtSection.getKey() == null)
+			{
+				final Query query = em.createQuery("select from "
+						+ Section.class.getName() + " s where s.sectionName = :sectionName");
+				query.setParameter("sectionName", gwtSection.getSectionName());
+				if(!query.getResultList().isEmpty())
+				{
+					throw new IllegalArgumentException(gwtSection.getSectionName() + " existiert bereits!");
+				}
+			}
 			em.persist(Section.valueOf(gwtSection));
 		} finally {
 			em.close();

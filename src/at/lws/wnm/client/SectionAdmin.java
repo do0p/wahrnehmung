@@ -19,12 +19,14 @@ public class SectionAdmin extends VerticalPanel {
 	private final TextBox sectionBox;
 	private final Button saveButton;
 	private final PopUp dialogBox;
+	private final SaveSuccess saveSuccess;
 
 	public SectionAdmin() {
 
 		sectionBox = new TextBox();
-		saveButton = new Button("Speichern");
+		saveButton = new Button(Utils.SAVE);
 		dialogBox = new PopUp();
+		saveSuccess = new SaveSuccess();
 
 		Grid grid = new Grid(3, 2);
 		grid.setWidget(0, 0, new Label("Bereich"));
@@ -36,6 +38,9 @@ public class SectionAdmin extends VerticalPanel {
 		saveButton.addClickHandler(new SaveClickHandler());
 	}
 
+	private void resetForm() {
+		sectionBox.setText("");
+	}
 
 	public class SaveClickHandler implements ClickHandler {
 
@@ -54,8 +59,11 @@ public class SectionAdmin extends VerticalPanel {
 
 				@Override
 				public void onSuccess(Void result) {
-					// do nothing
+					saveSuccess.center();
+					saveSuccess.show();
+					resetForm();
 				}
+
 			});
 		}
 

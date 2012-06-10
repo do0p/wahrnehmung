@@ -5,8 +5,6 @@ import javax.persistence.EntityManager;
 import at.lws.wnm.server.model.Beobachtung;
 import at.lws.wnm.shared.model.GwtBeobachtung;
 
-import com.google.appengine.api.datastore.Text;
-
 public class BeobachtungDao {
 
 	public void storeBeobachtung(GwtBeobachtung gwtBeobachtung) {
