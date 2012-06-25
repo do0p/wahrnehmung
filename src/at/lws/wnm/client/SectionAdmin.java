@@ -12,6 +12,7 @@ import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HasTreeItems;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -33,6 +34,8 @@ public class SectionAdmin extends VerticalPanel {
 
 	private Button cancelButton;
 	private List<SaveItem> saveItems = new ArrayList<SaveItem>();
+
+	private int countDown = 0;
 
 	public SectionAdmin() {
 
@@ -69,7 +72,14 @@ public class SectionAdmin extends VerticalPanel {
 		sectionService.querySections(new TreeBuilder());
 	}
 
+	private void resetFormAtTheEnd() {
+		if (--countDown < 1) {
+			resetForm();
+		}
+	}
+
 	private void resetForm() {
+		countDown = 0;
 		saveItems.clear();
 		tree.clear();
 		refresh();
@@ -89,38 +99,90 @@ public class SectionAdmin extends VerticalPanel {
 			final Map<Long, List<GwtSection>> groupedSections = groupSections(sections);
 			final List<GwtSection> rootSections = groupedSections.get(null);
 
-			final HasTreeItems parent = tree;
-			addChildSections(rootSections, parent, groupedSections);
+			addChildSections(rootSections, tree, groupedSections);
+			tree.add(createSaveItem((Long) null));
 
 		}
 
-		private void addChildSections(final List<GwtSection> sections,
+		private SaveItem createSaveItem(Long parentKey) {
+			final SaveItem saveItem = new SaveItem(parentKey);
+			saveItems.add(saveItem);
+			return saveItem;
+		}
+
+		protected SaveItem createSaveItem(GwtSection section) {
+			final SaveItem saveItem = new SaveItem(section);
+			saveItems.add(saveItem);
+			return saveItem;
+		}
+
+		private void addChildSections(List<GwtSection> sections,
 				final HasTreeItems parent,
 				Map<Long, List<GwtSection>> groupedSections) {
 			if (sections == null) {
 				return;
 			}
 			for (final GwtSection section : sections) {
-				final TreeItem sectionItem = new TreeItem(
+				final InlineLabel sectionName = new InlineLabel(
 						section.getSectionName());
-				final InlineLabel addLabel = new InlineLabel("+");
-				final TreeItem addItem = new TreeItem(addLabel);
-				sectionItem.addItem(addItem);
-				addLabel.addClickHandler(new ClickHandler() {
+				final Anchor sectionEdit = new Anchor(Utils.EDIT);
+				final Anchor sectionDel = new Anchor(Utils.DEL);
+
+				final TreeItem sectionItem = new TreeItem(createSectionLabel(
+						sectionName, sectionEdit, sectionDel));
+				sectionDel.addClickHandler(new ClickHandler() {
 					@Override
 					public void onClick(ClickEvent event) {
 						if (NativeEvent.BUTTON_LEFT == event.getNativeButton()) {
-							final SaveItem saveItem = new SaveItem(section
-									.getKey());
-							saveItems.add(saveItem);
-							sectionItem.insertItem(1, saveItem);
+
 						}
 					}
 				});
+
+				sectionEdit.addClickHandler(new ClickHandler() {
+					@Override
+					public void onClick(ClickEvent event) {
+						if (NativeEvent.BUTTON_LEFT == event.getNativeButton()) {
+							sectionItem.setWidget(createSaveItem(section));
+						}
+					}
+				});
+
+				addPlusItem(section.getKey(), sectionItem);
 				addChildSections(groupedSections.get(section.getKey()),
 						sectionItem, groupedSections);
 				parent.addItem(sectionItem);
 			}
+		}
+
+		private HorizontalPanel createSectionLabel(
+				final InlineLabel sectionName, final Anchor sectionEdit,
+				final Anchor sectionDel) {
+			final HorizontalPanel sectionLabel = new HorizontalPanel();
+			sectionLabel.setSpacing(Utils.BUTTON_SPACING);
+			sectionLabel.add(sectionName);
+			sectionLabel.add(new InlineLabel(" ("));
+			sectionLabel.add(sectionEdit);
+			sectionLabel.add(new InlineLabel("/"));
+			sectionLabel.add(sectionDel);
+			sectionLabel.add(new InlineLabel(")"));
+			return sectionLabel;
+		}
+
+		private void addPlusItem(final Long parentKey,
+				final TreeItem sectionItem) {
+			final Anchor addLabel = new Anchor(Utils.NEW);
+			final TreeItem addItem = new TreeItem(addLabel);
+			sectionItem.addItem(addItem);
+			addLabel.addClickHandler(new ClickHandler() {
+				@Override
+				public void onClick(ClickEvent event) {
+					if (NativeEvent.BUTTON_LEFT == event.getNativeButton()) {
+						sectionItem.insertItem(1, createSaveItem(parentKey));
+					}
+				}
+
+			});
 		}
 
 		private Map<Long, List<GwtSection>> groupSections(
@@ -145,49 +207,62 @@ public class SectionAdmin extends VerticalPanel {
 		@Override
 		public void onClick(ClickEvent event) {
 			final List<String> errors = new ArrayList<String>();
-			for (SaveItem saveItem : saveItems) {
+			final List<SaveItem> tmpSaveItems = new ArrayList<SaveItem>(
+					saveItems);
+			countDown = saveItems.size();
+			for (SaveItem saveItem : tmpSaveItems) {
 
 				final String value = saveItem.getValue();
-				if(Utils.isEmpty(value))
-				{
+				if (Utils.isEmpty(value)) {
+					countDown--;
 					continue;
 				}
-				final GwtSection section = new GwtSection();
+
+				sectionService.storeSection(
+						createSectionFromSaveItem(saveItem, value),
+						new AsyncCallback<Void>() {
+
+							@Override
+							public void onFailure(Throwable caught) {
+								dialogBox
+										.setErrorMessage(buildErrorMessage(errors));
+								dialogBox.setDisableWhileShown(saveButton);
+								dialogBox.center();
+								resetFormAtTheEnd();
+							}
+
+							@Override
+							public void onSuccess(Void result) {
+								saveSuccess.center();
+								saveSuccess.show();
+								resetFormAtTheEnd();
+							}
+
+						});
+			}
+		}
+
+		private GwtSection createSectionFromSaveItem(SaveItem saveItem,
+				final String value) {
+
+			final GwtSection section;
+
+			if (saveItem.section != null) {
+				section = saveItem.section;
+				section.setSectionName(value);
+			} else {
+				section = new GwtSection();
 				section.setParentKey(saveItem.parentKey);
 				section.setSectionName(value);
-				sectionService.storeSection(section, new AsyncCallback<Void>() {
-
-					@Override
-					public void onFailure(Throwable caught) {
-						errors.add(caught.getLocalizedMessage());
-					}
-
-					@Override
-					public void onSuccess(Void result) {
-						
-					}
-
-				});
 			}
-			if(errors.isEmpty())
-			{
-				saveSuccess.center();
-				saveSuccess.show();
-			}
-			else
-			{
-				dialogBox.setErrorMessage(buildErrorMessage(errors));
-				dialogBox.setDisableWhileShown(saveButton);
-				dialogBox.center();
-			}
-			resetForm();
+			return section;
 		}
 
 		private String buildErrorMessage(List<String> errors) {
 			final StringBuilder errorMsg = new StringBuilder();
-			errorMsg.append(errors.size()).append(" Fehler sind aufgetreten:<br/><br/>");
-			for(String error : errors)
-			{
+			errorMsg.append(errors.size()).append(
+					" Fehler sind aufgetreten:<br/><br/>");
+			for (String error : errors) {
 				errorMsg.append(error).append("<br/><br/>");
 			}
 			return errorMsg.toString();
@@ -197,10 +272,19 @@ public class SectionAdmin extends VerticalPanel {
 
 	public class SaveItem extends TextBox {
 
-		private final Long parentKey;
+		private Long parentKey;
+		private GwtSection section;
 
 		public SaveItem(Long parentKey) {
 			this.parentKey = parentKey;
+			setFocus(true);
+		}
+
+		public SaveItem(GwtSection section) {
+			this.section = section;
+			setText(section.getSectionName());
+			selectAll();
+			setFocus(true);
 		}
 
 	}

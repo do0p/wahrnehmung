@@ -51,4 +51,9 @@ public class Utils {
 	public static boolean isEmpty(String sectionKey) {
 		return !isNotEmpty(sectionKey);
 	}
+
+
+	static final String DEL = "entf";
+	static final String EDIT = "edit";
+	static final String NEW = "neu";
 }
