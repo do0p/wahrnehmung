@@ -11,6 +11,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
@@ -116,6 +117,11 @@ public class SectionAdmin extends VerticalPanel {
 			return saveItem;
 		}
 
+		private void createDelItem(GwtSection section) {
+			final SaveItem saveItem = new SaveItem(section, true);
+			saveItems.add(saveItem);
+		}
+
 		private void addChildSections(List<GwtSection> sections,
 				final HasTreeItems parent,
 				Map<Long, List<GwtSection>> groupedSections) {
@@ -130,22 +136,29 @@ public class SectionAdmin extends VerticalPanel {
 
 				final TreeItem sectionItem = new TreeItem(createSectionLabel(
 						sectionName, sectionEdit, sectionDel));
+				final HandlerRegistration editClickHandler = sectionEdit
+						.addClickHandler(new ClickHandler() {
+							@Override
+							public void onClick(ClickEvent event) {
+								if (NativeEvent.BUTTON_LEFT == event
+										.getNativeButton()) {
+									sectionItem
+											.setWidget(createSaveItem(section));
+								}
+							}
+						});
 				sectionDel.addClickHandler(new ClickHandler() {
 					@Override
 					public void onClick(ClickEvent event) {
 						if (NativeEvent.BUTTON_LEFT == event.getNativeButton()) {
-
+							// new DialogBox(false, true);
+							sectionName.setStylePrimaryName("deleted");
+							sectionItem.setState(false);
+							editClickHandler.removeHandler();
+							createDelItem(section);
 						}
 					}
-				});
 
-				sectionEdit.addClickHandler(new ClickHandler() {
-					@Override
-					public void onClick(ClickEvent event) {
-						if (NativeEvent.BUTTON_LEFT == event.getNativeButton()) {
-							sectionItem.setWidget(createSaveItem(section));
-						}
-					}
 				});
 
 				addPlusItem(section.getKey(), sectionItem);
@@ -206,39 +219,24 @@ public class SectionAdmin extends VerticalPanel {
 
 		@Override
 		public void onClick(ClickEvent event) {
-			final List<String> errors = new ArrayList<String>();
 			final List<SaveItem> tmpSaveItems = new ArrayList<SaveItem>(
 					saveItems);
 			countDown = saveItems.size();
 			for (SaveItem saveItem : tmpSaveItems) {
 
-				final String value = saveItem.getValue();
-				if (Utils.isEmpty(value)) {
-					countDown--;
-					continue;
+				if (saveItem.delete) {
+					sectionService.deleteSection(saveItem.section,
+							new AsyncVoidCallBack());
+				} else {
+					final String value = saveItem.getValue();
+					if (Utils.isEmpty(value)) {
+						countDown--;
+						continue;
+					}
+					sectionService.storeSection(
+							createSectionFromSaveItem(saveItem, value),
+							new AsyncVoidCallBack());
 				}
-
-				sectionService.storeSection(
-						createSectionFromSaveItem(saveItem, value),
-						new AsyncCallback<Void>() {
-
-							@Override
-							public void onFailure(Throwable caught) {
-								dialogBox
-										.setErrorMessage(buildErrorMessage(errors));
-								dialogBox.setDisableWhileShown(saveButton);
-								dialogBox.center();
-								resetFormAtTheEnd();
-							}
-
-							@Override
-							public void onSuccess(Void result) {
-								saveSuccess.center();
-								saveSuccess.show();
-								resetFormAtTheEnd();
-							}
-
-						});
 			}
 		}
 
@@ -258,22 +256,13 @@ public class SectionAdmin extends VerticalPanel {
 			return section;
 		}
 
-		private String buildErrorMessage(List<String> errors) {
-			final StringBuilder errorMsg = new StringBuilder();
-			errorMsg.append(errors.size()).append(
-					" Fehler sind aufgetreten:<br/><br/>");
-			for (String error : errors) {
-				errorMsg.append(error).append("<br/><br/>");
-			}
-			return errorMsg.toString();
-		}
-
 	}
 
 	public class SaveItem extends TextBox {
 
 		private Long parentKey;
 		private GwtSection section;
+		private boolean delete;
 
 		public SaveItem(Long parentKey) {
 			this.parentKey = parentKey;
@@ -285,6 +274,35 @@ public class SectionAdmin extends VerticalPanel {
 			setText(section.getSectionName());
 			selectAll();
 			setFocus(true);
+		}
+
+		public SaveItem(GwtSection section, boolean delete) {
+			this.section = section;
+			this.delete = delete;
+		}
+
+	}
+
+	public class AsyncVoidCallBack implements AsyncCallback<Void> {
+
+		@Override
+		public void onFailure(Throwable caught) {
+			if (saveSuccess.isShowing()) {
+				saveSuccess.hide();
+			}
+			dialogBox.setErrorMessage(caught.getLocalizedMessage());
+			dialogBox.setDisableWhileShown(saveButton);
+			dialogBox.center();
+			resetFormAtTheEnd();
+		}
+
+		@Override
+		public void onSuccess(Void result) {
+			if (!dialogBox.isShowing()) {
+				saveSuccess.center();
+				saveSuccess.show();
+			}
+			resetFormAtTheEnd();
 		}
 
 	}

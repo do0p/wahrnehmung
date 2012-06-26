@@ -91,4 +91,35 @@ public class BeobachtungDao {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
+	public List<GwtBeobachtung> getBeobachtungen(List<Long> sectionNos) {
+		if(sectionNos == null || sectionNos.isEmpty())
+		{
+			return new ArrayList<GwtBeobachtung>();
+		}
+		
+		final StringBuilder queryBuilder = new StringBuilder();
+		queryBuilder.append("select b from Beobachtung b where b.sectionKey in ( ?");
+		for(int i = 1; i < sectionNos.size(); i++)
+		{
+			queryBuilder.append(i);
+			queryBuilder.append(", ?");
+		}
+		queryBuilder.append(sectionNos.size());
+		queryBuilder.append(" )");
+		
+		final EntityManager em = EMF.get().createEntityManager();
+		try {
+			final Query query = em.createQuery(queryBuilder.toString());
+			for(int i = 0; i <sectionNos.size(); i++)
+			{
+				query.setParameter(i + 1, sectionNos.get(i));
+				
+			}
+			return mapToGwtBeobachtung(query.getResultList(), em);
+		} finally {
+			em.close();
+		}
+	}
+
 }
