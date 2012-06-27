@@ -25,6 +25,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class SectionAdmin extends VerticalPanel {
 
+	private static final String SECTION_DEL_WARNING = "Achtung, dieser Bereich und alle Subbereiche werden gel&ouml;scht. Nach dem Speichern kann der Vorgang nicht mehr r&uuml;ckg&auml;nig gemacht werden!";
 	private final SectionServiceAsync sectionService = GWT
 			.create(SectionService.class);
 
@@ -37,6 +38,7 @@ public class SectionAdmin extends VerticalPanel {
 	private List<SaveItem> saveItems = new ArrayList<SaveItem>();
 
 	private int countDown = 0;
+	private DecisionBox decisionBox;
 
 	public SectionAdmin() {
 
@@ -54,6 +56,9 @@ public class SectionAdmin extends VerticalPanel {
 		buttonPanel.setSpacing(Utils.BUTTON_SPACING);
 		add(buttonPanel);
 
+		decisionBox = new DecisionBox();
+		decisionBox.setText(SECTION_DEL_WARNING);
+		
 		saveButton.addClickHandler(new SaveClickHandler());
 		cancelButton.addClickHandler(new ClickHandler() {
 
@@ -151,11 +156,16 @@ public class SectionAdmin extends VerticalPanel {
 					@Override
 					public void onClick(ClickEvent event) {
 						if (NativeEvent.BUTTON_LEFT == event.getNativeButton()) {
-							// new DialogBox(false, true);
-							sectionName.setStylePrimaryName("deleted");
-							sectionItem.setState(false);
-							editClickHandler.removeHandler();
-							createDelItem(section);
+							decisionBox.addOkClickHandler(new ClickHandler() {
+								@Override
+								public void onClick(ClickEvent event) {
+									sectionName.setStylePrimaryName("deleted");
+									sectionItem.setState(false);
+									editClickHandler.removeHandler();
+									createDelItem(section);
+								}
+							});
+							decisionBox.center();
 						}
 					}
 
@@ -217,12 +227,13 @@ public class SectionAdmin extends VerticalPanel {
 
 	public class SaveClickHandler implements ClickHandler {
 
+
 		@Override
 		public void onClick(ClickEvent event) {
 			final List<SaveItem> tmpSaveItems = new ArrayList<SaveItem>(
 					saveItems);
 			countDown = saveItems.size();
-			for (SaveItem saveItem : tmpSaveItems) {
+			for (final SaveItem saveItem : tmpSaveItems) {
 
 				if (saveItem.delete) {
 					sectionService.deleteSection(saveItem.section,

@@ -9,8 +9,12 @@ import com.google.gwt.user.datepicker.client.DateBox;
 import com.google.gwt.user.datepicker.client.DateBox.Format;
 
 public class Utils {
-	public static final String SAVE = "speichern";
-	public static final String CANCEL = "abbrechen";
+	static final String DEL = "entf";
+	static final String EDIT = "edit";
+	static final String NEW = "neu";
+	static final String OK = "ok";
+	static final String SAVE = "speichern";
+	static final String CANCEL = "abbrechen";
 	public static final DateTimeFormat DATE_FORMAT = DateTimeFormat
 			.getFormat("d.M.yy");
 	public static final Format DATEBOX_FORMAT = new DateBox.DefaultFormat(
@@ -53,7 +57,4 @@ public class Utils {
 	}
 
 
-	static final String DEL = "entf";
-	static final String EDIT = "edit";
-	static final String NEW = "neu";
 }
