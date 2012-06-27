@@ -1,5 +1,7 @@
 package at.lws.wnm.client;
 
+import java.util.List;
+
 import at.lws.wnm.shared.model.GwtChild;
 
 import com.google.gwt.core.client.GWT;
@@ -8,12 +10,16 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.datepicker.client.DateBox;
 
 public class ChildAdmin extends VerticalPanel {
+
+	private static final String CHILD_DEL_WARNING = "Achtung, dieses Kind und alle seine Beobachtungen werden gel&ouml;scht. Der Vorgang nicht mehr r&uuml;ckg&auml;nig gemacht werden!";
 
 	private final ChildServiceAsync childService = GWT
 			.create(ChildService.class);
@@ -22,8 +28,16 @@ public class ChildAdmin extends VerticalPanel {
 	private final TextBox lnBox;
 	private final DateBox bdBox;
 	private final Button saveButton;
+	private final Button cancelButton;
+	private final Button deleteButton;
 	private final PopUp dialogBox;
 	private final SaveSuccess saveSuccess;
+
+	private final ListBox children;
+
+	private Long childNo;
+
+	private DecisionBox decisionBox;
 
 	public ChildAdmin() {
 
@@ -31,11 +45,14 @@ public class ChildAdmin extends VerticalPanel {
 		lnBox = new TextBox();
 		bdBox = new DateBox();
 		bdBox.setFormat(Utils.DATEBOX_FORMAT);
-		saveButton = new Button(Utils.SAVE);
+		saveButton = new Button(Utils.ADD);
+		deleteButton = new Button(Utils.DEL);
+		deleteButton.setEnabled(false);
+		cancelButton = new Button(Utils.CANCEL);
 		dialogBox = new PopUp();
 		saveSuccess = new SaveSuccess();
 
-		Grid grid = new Grid(3, 2);
+		final Grid grid = new Grid(3, 2);
 		grid.setWidget(0, 0, new Label("Vorname"));
 		grid.setWidget(0, 1, fnBox);
 		grid.setWidget(1, 0, new Label("Nachname"));
@@ -43,16 +60,63 @@ public class ChildAdmin extends VerticalPanel {
 		grid.setWidget(2, 0, new Label("Geburtstag"));
 		grid.setWidget(2, 1, bdBox);
 
-		add(grid);
-		add(saveButton);
+		final VerticalPanel data = new VerticalPanel();
+		data.add(grid);
 
+		final HorizontalPanel buttonPanel = new HorizontalPanel();
+		buttonPanel.add(saveButton);
+		buttonPanel.add(deleteButton);
+		buttonPanel.add(cancelButton);
+		data.add(buttonPanel);
+
+		children = new ListBox(false);
+		children.setVisibleItemCount(20);
+		children.addClickHandler(new ChildClichHandler());
+		rebuildChildList();
+
+		final HorizontalPanel root = new HorizontalPanel();
+		root.add(data);
+		root.add(children);
+
+		add(root);
 		saveButton.addClickHandler(new SaveClickHandler());
+		cancelButton.addClickHandler(new CancelClickHandler());
+		deleteButton.addClickHandler(new DeleteClickHandler());
+
+		decisionBox = new DecisionBox();
+		decisionBox.setText(CHILD_DEL_WARNING);
+	}
+
+	private void rebuildChildList() {
+		children.clear();
+		childService.queryChildren(new AsyncCallback<List<GwtChild>>() {
+
+			@Override
+			public void onFailure(Throwable caught) {
+				dialogBox.setErrorMessage(caught.getLocalizedMessage());
+				dialogBox.setDisableWhileShown(saveButton);
+				dialogBox.center();
+			}
+
+			@Override
+			public void onSuccess(List<GwtChild> result) {
+				for (GwtChild child : result) {
+					children.addItem(Utils.formatChildName(child), child
+							.getKey().toString());
+				}
+			}
+		});
 	}
 
 	private void resetForm() {
+		childNo = null;
 		fnBox.setText("");
 		lnBox.setText("");
 		bdBox.setValue(null);
+		if (deleteButton.isEnabled()) {
+			deleteButton.setEnabled(false);
+		}
+			saveButton.setHTML(Utils.ADD);
 	}
 
 	public class SaveClickHandler implements ClickHandler {
@@ -60,6 +124,7 @@ public class ChildAdmin extends VerticalPanel {
 		@Override
 		public void onClick(ClickEvent event) {
 			final GwtChild child = new GwtChild();
+			child.setKey(childNo);
 			child.setFirstName(fnBox.getValue());
 			child.setLastName(lnBox.getValue());
 			child.setBirthDay(bdBox.getValue());
@@ -77,10 +142,99 @@ public class ChildAdmin extends VerticalPanel {
 				public void onSuccess(Void result) {
 					saveSuccess.center();
 					saveSuccess.show();
+					rebuildChildList();
 					resetForm();
 				}
 
 			});
+		}
+
+	}
+
+	public class ChildClichHandler implements ClickHandler {
+
+		@Override
+		public void onClick(ClickEvent event) {
+			final int selectedIndex = children.getSelectedIndex();
+			if(selectedIndex < 0 )
+			{
+				return;
+			}
+			final Long childKey = Long.valueOf(children.getValue(selectedIndex));
+			childService.getChild(childKey, new AsyncCallback<GwtChild>() {
+
+				@Override
+				public void onFailure(Throwable caught) {
+					dialogBox.setErrorMessage(caught
+							.getLocalizedMessage());
+					dialogBox
+							.setDisableWhileShown(deleteButton);
+					dialogBox.center();
+				}
+
+	
+
+				@Override
+				public void onSuccess(GwtChild child) {
+					childNo = child.getKey();
+					fnBox.setText(child.getFirstName());
+					lnBox.setText(child.getLastName());
+					bdBox.setValue(child.getBirthDay());
+					saveButton.setHTML(Utils.CHANGE);
+					deleteButton.setEnabled(true);
+					
+				}
+			});
+		}
+
+	}
+
+	public class DeleteClickHandler implements ClickHandler {
+
+		@Override
+		public void onClick(ClickEvent event) {
+			if (childNo != null) {
+				final GwtChild child = new GwtChild();
+				child.setKey(childNo);
+				child.setFirstName(fnBox.getValue());
+				child.setLastName(lnBox.getValue());
+				child.setBirthDay(bdBox.getValue());
+
+				decisionBox.addOkClickHandler(new ClickHandler() {
+					@Override
+					public void onClick(ClickEvent event) {
+						childService.deleteChild(child,
+								new AsyncCallback<Void>() {
+
+									@Override
+									public void onFailure(Throwable caught) {
+										dialogBox.setErrorMessage(caught
+												.getLocalizedMessage());
+										dialogBox
+												.setDisableWhileShown(deleteButton);
+										dialogBox.center();
+									}
+
+									@Override
+									public void onSuccess(Void result) {
+										rebuildChildList();
+										resetForm();
+									}
+								});
+					}
+				});
+				decisionBox.center();
+			}
+
+		}
+
+	}
+
+	public class CancelClickHandler implements ClickHandler {
+
+		@Override
+		public void onClick(ClickEvent event) {
+			resetForm();
 		}
 
 	}

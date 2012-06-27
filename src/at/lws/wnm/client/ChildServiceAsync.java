@@ -12,4 +12,8 @@ public interface ChildServiceAsync {
 
 	void storeChild(GwtChild child, AsyncCallback<Void> callback);
 
+	void deleteChild(GwtChild child, AsyncCallback<Void> callback);
+
+	void getChild(Long key, AsyncCallback<GwtChild> callback);
+
 }

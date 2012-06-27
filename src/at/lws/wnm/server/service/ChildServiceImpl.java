@@ -3,6 +3,7 @@ package at.lws.wnm.server.service;
 import java.util.List;
 
 import at.lws.wnm.client.ChildService;
+import at.lws.wnm.server.dao.BeobachtungDao;
 import at.lws.wnm.server.dao.ChildDao;
 import at.lws.wnm.shared.model.GwtChild;
 
@@ -13,9 +14,11 @@ public class ChildServiceImpl extends RemoteServiceServlet implements
 		ChildService {
 
 	private final ChildDao childDao;
+	private final BeobachtungDao beobachtungsDao;
 
 	public ChildServiceImpl() {
 		childDao = new ChildDao();
+		beobachtungsDao = new BeobachtungDao();
 	}
 
 	@Override
@@ -28,6 +31,17 @@ public class ChildServiceImpl extends RemoteServiceServlet implements
 	@Override
 	public void storeChild(GwtChild child) {
 		childDao.storeChild(child);
+	}
+
+	@Override
+	public void deleteChild(GwtChild child) throws IllegalArgumentException {
+		beobachtungsDao.deleteAllFromChild(child.getKey());
+		childDao.deleteChild(child);
+	}
+
+	@Override
+	public GwtChild getChild(Long key) {
+		return childDao.getChild(key);
 	}
 
 }

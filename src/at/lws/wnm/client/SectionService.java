@@ -12,7 +12,7 @@ public interface SectionService extends RemoteService {
 
 	List<GwtSection> querySections();
 
-	String storeSection(GwtSection section) throws IllegalArgumentException;
+	void storeSection(GwtSection section) throws IllegalArgumentException;
 
-	String deleteSection(GwtSection section);
+	void deleteSection(GwtSection section) throws IllegalArgumentException;
 }

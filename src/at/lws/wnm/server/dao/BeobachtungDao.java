@@ -122,4 +122,15 @@ public class BeobachtungDao {
 		}
 	}
 
+	public void deleteAllFromChild(Long key) {
+		final EntityManager em = EMF.get().createEntityManager();
+		try {
+			final Query query = em.createQuery("delete from Beobachtung b where b.childKey = :childKey");
+				query.setParameter("childKey", key);
+			query.executeUpdate();
+		} finally {
+			em.close();
+		}
+	}
+
 }

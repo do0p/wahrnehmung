@@ -237,7 +237,7 @@ public class SectionAdmin extends VerticalPanel {
 
 				if (saveItem.delete) {
 					sectionService.deleteSection(saveItem.section,
-							new AsyncErrorMessageCallBack());
+							new AsyncVoidCallBack());
 				} else {
 					final String value = saveItem.getValue();
 					if (Utils.isEmpty(value)) {
@@ -246,7 +246,7 @@ public class SectionAdmin extends VerticalPanel {
 					}
 					sectionService.storeSection(
 							createSectionFromSaveItem(saveItem, value),
-							new AsyncErrorMessageCallBack());
+							new AsyncVoidCallBack());
 				}
 			}
 		}
@@ -294,7 +294,7 @@ public class SectionAdmin extends VerticalPanel {
 
 	}
 
-	public class AsyncErrorMessageCallBack implements AsyncCallback<String> {
+	public class AsyncVoidCallBack implements AsyncCallback<Void> {
 
 		@Override
 		public void onFailure(Throwable caught) {
@@ -304,10 +304,8 @@ public class SectionAdmin extends VerticalPanel {
 		}
 
 		@Override
-		public void onSuccess(String result) {
-			if (Utils.isNotEmpty(result)) {
-				showError(result);
-			} else if (!dialogBox.isShowing()) {
+		public void onSuccess(Void result) {
+			if (!dialogBox.isShowing()) {
 				saveSuccess.center();
 				saveSuccess.show();
 			}

@@ -15,6 +15,8 @@ public class Utils {
 	static final String OK = "ok";
 	static final String SAVE = "speichern";
 	static final String CANCEL = "abbrechen";
+	static final String ADD = "anlegen";
+	static final String CHANGE = "&auml;ndern";
 	public static final DateTimeFormat DATE_FORMAT = DateTimeFormat
 			.getFormat("d.M.yy");
 	public static final Format DATEBOX_FORMAT = new DateBox.DefaultFormat(
@@ -55,6 +57,8 @@ public class Utils {
 	public static boolean isEmpty(String sectionKey) {
 		return !isNotEmpty(sectionKey);
 	}
+
+	
 
 
 }

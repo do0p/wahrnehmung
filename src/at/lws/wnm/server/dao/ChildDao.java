@@ -51,4 +51,29 @@ public class ChildDao {
 			em.close();
 		}
 	}
+
+	public void deleteChild(GwtChild child) {
+		final EntityManager em = EMF.get().createEntityManager();
+		try {
+			final Query query = em.createQuery("delete from Child c where c.key = :key");
+				query.setParameter("key", child.getKey());
+			query.executeUpdate();
+		} finally {
+			em.close();
+		}
+	}
+
+	public GwtChild getChild(Long key) {
+		final EntityManager em = EMF.get().createEntityManager();
+		try {
+			final Child child = em.find(Child.class, key);
+			if(child == null)
+			{
+				throw new IllegalArgumentException("no child with key " + key);
+			}
+			return child.toGwt();
+		} finally {
+			em.close();
+		}
+	}
 }

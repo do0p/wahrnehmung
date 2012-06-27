@@ -29,30 +29,23 @@ public class SectionServiceImpl extends RemoteServiceServlet implements
 	}
 
 	@Override
-	public String storeSection(GwtSection section) {
-		try {
+	public void storeSection(GwtSection section) throws IllegalArgumentException {
 			sectionDao.storeSection(section);
-			return null;
-		} catch (IllegalArgumentException e) {
-			return e.getMessage();
-		}
-
 	}
 
 	@Override
-	public String deleteSection(GwtSection section) {
+	public void deleteSection(GwtSection section) throws IllegalArgumentException{
 
 		final List<Long> allSectionKeysToDelete = sectionDao
 				.getAllChildKeys(section.getKey());
 		allSectionKeysToDelete.add(section.getKey());
 		if (beobachtungDao.getBeobachtungen(allSectionKeysToDelete).isEmpty()) {
 			sectionDao.deleteSections(allSectionKeysToDelete);
-			return null;
 		}
 
-		return "Kann den Bereich "
+		throw new IllegalArgumentException("Kann den Bereich "
 				+ section.getSectionName()
-				+ " nicht löschen, da es noch Wahrnehmungen in dem Bereich (oder Subbereichen) gibt.";
+				+ " nicht löschen, da es noch Wahrnehmungen in dem Bereich (oder Subbereichen) gibt.");
 
 	}
 
