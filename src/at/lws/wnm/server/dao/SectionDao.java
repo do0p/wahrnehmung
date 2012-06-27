@@ -13,13 +13,8 @@ import at.lws.wnm.shared.model.GwtSection;
 
 public class SectionDao {
 
-	private Map<Long, List<Long>> childKeys;
 
-	public SectionDao() {
-		buildChildKeys();
-	}
-
-	private void buildChildKeys() {
+	private Map<Long, List<Long>> buildChildKeys() {
 		final Map<Long, List<Long>> result = new HashMap<Long, List<Long>>();
 		final EntityManager em = EMF.get().createEntityManager();
 		try {
@@ -27,7 +22,7 @@ public class SectionDao {
 		} finally {
 			em.close();
 		}
-		childKeys = result;
+		return result;
 	}
 
 	private List<Long> addChildKeys(Long parentKey,
@@ -77,9 +72,7 @@ public class SectionDao {
 	public void storeSection(GwtSection gwtSection) {
 		final EntityManager em = EMF.get().createEntityManager();
 		try {
-			boolean isNew = false;
 			if (gwtSection.getKey() == null) {
-				isNew = true;
 				final Query query = em.createQuery("select from "
 						+ Section.class.getName()
 						+ " s where s.sectionName = :sectionName");
@@ -90,9 +83,6 @@ public class SectionDao {
 				}
 			}
 			em.persist(Section.valueOf(gwtSection));
-			if (isNew) {
-				buildChildKeys();
-			}
 		} finally {
 			em.close();
 		}
@@ -109,12 +99,12 @@ public class SectionDao {
 	}
 
 	public List<Long> getAllChildKeys(Long key) {
-		List<Long> keys = childKeys.get(key);
-		if (keys == null) {
-			buildChildKeys();
-			keys = childKeys.get(key);
+		final List<Long> children = buildChildKeys().get(key);
+		if(children == null)
+		{
+			return new ArrayList<Long>();
 		}
-		return new ArrayList<Long>(keys);
+		return new ArrayList<Long>(children);
 	}
 
 	public void deleteSections(List<Long> sectionNos) {
@@ -140,7 +130,6 @@ public class SectionDao {
 			query.executeUpdate();
 		} finally {
 			em.close();
-			buildChildKeys();
 		}
 	}
 }

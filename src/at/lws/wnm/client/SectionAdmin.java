@@ -226,7 +226,7 @@ public class SectionAdmin extends VerticalPanel {
 
 				if (saveItem.delete) {
 					sectionService.deleteSection(saveItem.section,
-							new AsyncVoidCallBack());
+							new AsyncErrorMessageCallBack());
 				} else {
 					final String value = saveItem.getValue();
 					if (Utils.isEmpty(value)) {
@@ -235,7 +235,7 @@ public class SectionAdmin extends VerticalPanel {
 					}
 					sectionService.storeSection(
 							createSectionFromSaveItem(saveItem, value),
-							new AsyncVoidCallBack());
+							new AsyncErrorMessageCallBack());
 				}
 			}
 		}
@@ -283,26 +283,33 @@ public class SectionAdmin extends VerticalPanel {
 
 	}
 
-	public class AsyncVoidCallBack implements AsyncCallback<Void> {
+	public class AsyncErrorMessageCallBack implements AsyncCallback<String> {
 
 		@Override
 		public void onFailure(Throwable caught) {
-			if (saveSuccess.isShowing()) {
-				saveSuccess.hide();
-			}
-			dialogBox.setErrorMessage(caught.getLocalizedMessage());
-			dialogBox.setDisableWhileShown(saveButton);
-			dialogBox.center();
+			final String errorMessage = caught.getLocalizedMessage();
+			showError(errorMessage);
 			resetFormAtTheEnd();
 		}
 
 		@Override
-		public void onSuccess(Void result) {
-			if (!dialogBox.isShowing()) {
+		public void onSuccess(String result) {
+			if (Utils.isNotEmpty(result)) {
+				showError(result);
+			} else if (!dialogBox.isShowing()) {
 				saveSuccess.center();
 				saveSuccess.show();
 			}
 			resetFormAtTheEnd();
+		}
+
+		private void showError(final String errorMessage) {
+			if (saveSuccess.isShowing()) {
+				saveSuccess.hide();
+			}
+			dialogBox.setErrorMessage(errorMessage);
+			dialogBox.setDisableWhileShown(saveButton);
+			dialogBox.center();
 		}
 
 	}

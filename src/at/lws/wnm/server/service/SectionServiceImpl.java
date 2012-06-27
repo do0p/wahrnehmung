@@ -10,44 +10,50 @@ import at.lws.wnm.shared.model.GwtSection;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 @SuppressWarnings("serial")
-public class SectionServiceImpl extends RemoteServiceServlet implements SectionService {
+public class SectionServiceImpl extends RemoteServiceServlet implements
+		SectionService {
 
 	private final SectionDao sectionDao;
 	private final BeobachtungDao beobachtungDao;
-	
-	public SectionServiceImpl()
-	{
+
+	public SectionServiceImpl() {
 		sectionDao = new SectionDao();
 		beobachtungDao = new BeobachtungDao();
 	}
-	
+
 	@Override
 	public List<GwtSection> querySections() {
-		
+
 		return sectionDao.getAllSections();
-		
+
 	}
 
 	@Override
-	public void storeSection(GwtSection section) {
-		sectionDao.storeSection(section);
-		
+	public String storeSection(GwtSection section) {
+		try {
+			sectionDao.storeSection(section);
+			return null;
+		} catch (IllegalArgumentException e) {
+			return e.getMessage();
+		}
+
 	}
 
 	@Override
-	public void deleteSection(GwtSection section) {
+	public String deleteSection(GwtSection section) {
 
-		final List<Long> allSectionKeysToDelete = sectionDao.getAllChildKeys(section.getKey());
+		final List<Long> allSectionKeysToDelete = sectionDao
+				.getAllChildKeys(section.getKey());
 		allSectionKeysToDelete.add(section.getKey());
-		if(beobachtungDao.getBeobachtungen(allSectionKeysToDelete).isEmpty())
-		{
+		if (beobachtungDao.getBeobachtungen(allSectionKeysToDelete).isEmpty()) {
 			sectionDao.deleteSections(allSectionKeysToDelete);
+			return null;
 		}
-		else
-		{
-			throw new IllegalStateException("Kann den Bereich " + section.getSectionName() + " nicht löschen, da es noch Wahrnehmungen in dem Bereich (oder Subbereichen) gibt.");
-		}
-		
+
+		return "Kann den Bereich "
+				+ section.getSectionName()
+				+ " nicht löschen, da es noch Wahrnehmungen in dem Bereich (oder Subbereichen) gibt.";
+
 	}
 
 }
