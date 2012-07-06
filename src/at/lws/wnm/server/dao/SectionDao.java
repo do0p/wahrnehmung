@@ -13,6 +13,11 @@ import at.lws.wnm.shared.model.GwtSection;
 
 public class SectionDao {
 
+	private final BeobachtungDao beobachtungDao;
+
+	public SectionDao() {
+		beobachtungDao = new BeobachtungDao();
+	}
 
 	private Map<Long, List<Long>> buildChildKeys() {
 		final Map<Long, List<Long>> result = new HashMap<Long, List<Long>>();
@@ -100,8 +105,7 @@ public class SectionDao {
 
 	public List<Long> getAllChildKeys(Long key) {
 		final List<Long> children = buildChildKeys().get(key);
-		if(children == null)
-		{
+		if (children == null) {
 			return new ArrayList<Long>();
 		}
 		return new ArrayList<Long>(children);
@@ -111,7 +115,11 @@ public class SectionDao {
 		if (sectionNos == null || sectionNos.isEmpty()) {
 			return;
 		}
-
+		if (!beobachtungDao.getBeobachtungen(sectionNos).isEmpty()) {
+			throw new IllegalStateException(
+					"Es noch Wahrnehmungen in den Bereichen.");
+		}
+		
 		final StringBuilder queryBuilder = new StringBuilder();
 		queryBuilder.append("delete from Section s where s.key in ( ?");
 		for (int i = 1; i < sectionNos.size(); i++) {
