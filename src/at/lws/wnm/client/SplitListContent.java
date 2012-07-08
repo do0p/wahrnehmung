@@ -30,7 +30,7 @@ public class SplitListContent extends HorizontalPanel implements ChangeHandler, 
 		listBox.addClickHandler(this);
 		add(listBox);
 
-		listContent = new ListContent("530px");
+		listContent = new ListContent("650px");
 		listContent.getNameSelection().getTextBox().addChangeHandler(this);
 		listContent.getSectionSelection().addChangeHandler(this);
 		add(listContent);

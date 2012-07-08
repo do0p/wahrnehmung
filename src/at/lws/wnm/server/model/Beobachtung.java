@@ -9,6 +9,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
 import at.lws.wnm.shared.model.GwtBeobachtung;
+import at.lws.wnm.shared.model.GwtBeobachtung.DurationEnum;
+import at.lws.wnm.shared.model.GwtBeobachtung.SocialEnum;
 
 import com.google.appengine.api.datastore.Text;
 
@@ -16,7 +18,7 @@ import com.google.appengine.api.datastore.Text;
 public class Beobachtung implements Serializable {
 
 	private static final long serialVersionUID = -2625046453601678465L;
-	
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long key;
@@ -24,10 +26,14 @@ public class Beobachtung implements Serializable {
 	private Long childKey;
 
 	private Long sectionKey;
-	
+
 	private Text text;
 
 	private Date date;
+
+	private String duration;
+
+	private String social;
 
 	public Long getKey() {
 		return key;
@@ -63,8 +69,7 @@ public class Beobachtung implements Serializable {
 
 	public void setDate(Date date) {
 		this.date = date;
-		
-		
+
 	}
 
 	public Date getDate() {
@@ -78,6 +83,14 @@ public class Beobachtung implements Serializable {
 		beobachtung.setDate(gwtBeobachtung.getDate());
 		beobachtung.setText(new Text(gwtBeobachtung.getText()));
 		beobachtung.setKey(gwtBeobachtung.getKey());
+		final DurationEnum gwtDuration = gwtBeobachtung.getDuration();
+		if (gwtDuration != null) {
+			beobachtung.setDuration(gwtDuration.name());
+		}
+		final SocialEnum gwtSocial = gwtBeobachtung.getSocial();
+		if (gwtSocial != null) {
+			beobachtung.setSocial(gwtSocial.name());
+		}
 		return beobachtung;
 	}
 
@@ -88,6 +101,28 @@ public class Beobachtung implements Serializable {
 		beobachtung.setSectionKey(sectionKey);
 		beobachtung.setDate(date);
 		beobachtung.setText(text.getValue());
+		if (duration != null) {
+			beobachtung.setDuration(DurationEnum.valueOf(duration));
+		}
+		if (social != null) {
+			beobachtung.setSocial(SocialEnum.valueOf(social));
+		}
 		return beobachtung;
+	}
+
+	public String getDuration() {
+		return duration;
+	}
+
+	public void setDuration(String duration) {
+		this.duration = duration;
+	}
+
+	public String getSocial() {
+		return social;
+	}
+
+	public void setSocial(String social) {
+		this.social = social;
 	}
 }

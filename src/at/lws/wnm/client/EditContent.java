@@ -9,7 +9,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 
 public class EditContent extends AbstractTextContent {
@@ -21,19 +20,18 @@ public class EditContent extends AbstractTextContent {
 	private Button sendButton;
 
 	public EditContent() {
-		super("100%");
+		super("850px");
 		saveSuccess = new SaveSuccess();
 	}
 
 	protected HorizontalPanel createButtonContainer() {
-		final HorizontalPanel buttonContainer = new HorizontalPanel();
 		sendButton = new Button(Utils.SAVE);
 		sendButton.addClickHandler(new SendbuttonHandler());
 		sendButton.addStyleName("sendButton");
-		sendButton.setSize("80px", "40px");
-		setCellHorizontalAlignment(sendButton,
-				HasHorizontalAlignment.ALIGN_CENTER);
+		
+		final HorizontalPanel buttonContainer = new HorizontalPanel();
 		buttonContainer.add(sendButton);
+		formatLeftCenter(buttonContainer, sendButton, BUTTON_WIDTH, ROW_HEIGHT);
 		return buttonContainer;
 	}
 
@@ -79,6 +77,8 @@ public class EditContent extends AbstractTextContent {
 			beobachtung.setChildKey(childKey);
 			beobachtung.setSectionKey(sectionKey);
 			beobachtung.setDate(date);
+			beobachtung.setDuration(getDuration());
+			beobachtung.setSocial(getSocialForm());
 			wahrnehmungService.storeBeobachtung(beobachtung,
 					new AsyncCallback<Void>() {
 
