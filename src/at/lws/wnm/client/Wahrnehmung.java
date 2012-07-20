@@ -1,9 +1,14 @@
 package at.lws.wnm.client;
 
+import at.lws.wnm.shared.model.GwtUserInfo;
+
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
@@ -15,8 +20,25 @@ public class Wahrnehmung implements EntryPoint, ValueChangeHandler<String> {
 	private static final String NEW_ENTRY = "new";
 	private static final String LIST_ENTRY = "list";
 
-	public void onModuleLoad() {
+	private final UserServiceAsync userService = GWT.create(UserService.class);
 
+	public void onModuleLoad() {
+		userService.getUserInfo(GWT.getHostPageBaseURL(), new AsyncCallback<GwtUserInfo>() {
+			@Override
+			public void onSuccess(GwtUserInfo userInfo) {
+				if (userInfo.isLoggedIn()) {
+					RootPanel.get("logout").add(
+							new Anchor("logout", userInfo.getLogoutUrl()));
+				} else {
+					RootPanel.get("logout").add(
+							new Anchor("login", userInfo.getLoginUrl()));
+				}
+			}
+
+			@Override
+			public void onFailure(Throwable caught) {
+			}
+		});
 		final HorizontalPanel navigation = createNavigation();
 		RootPanel.get("navigation").add(navigation);
 		History.addValueChangeHandler(this);
@@ -55,5 +77,4 @@ public class Wahrnehmung implements EntryPoint, ValueChangeHandler<String> {
 			rootPanel.add(new HTML("Hello"));
 		}
 	}
-
 }
