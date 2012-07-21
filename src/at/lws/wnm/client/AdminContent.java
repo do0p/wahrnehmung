@@ -7,6 +7,7 @@ public class AdminContent extends TabPanel {
 		setSize("100%", "550px");
 		add(new ChildAdmin(), "Kinder / Jungendliche", false);
 		add(new SectionAdmin(), "Bereiche", false);
+		add(new AuthorizationAdmin(), "Benutzer", false);
 
 		
 	}

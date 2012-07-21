@@ -14,6 +14,8 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import at.lws.wnm.server.dao.AuthorizationDao;
+
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
@@ -23,10 +25,10 @@ public class AuthorizationFilter implements Filter {
 	private static final Set<String> ALLOWED_USERIDS = new HashSet<String>();
 	private static final Logger LOGGER = Logger
 			.getLogger(AuthorizationFilter.class.getName());
+	private AuthorizationDao authorizationDao;
 
 	static {
 		ALLOWED_USERIDS.add("dbrandl72@gmail.com");
-		ALLOWED_USERIDS.add("test@example.com");
 	}
 
 	@Override
@@ -46,12 +48,13 @@ public class AuthorizationFilter implements Filter {
 			return;
 		}
 
-		if (ALLOWED_USERIDS.contains(currentUser.getEmail())) {
+		final String email = currentUser.getEmail();
+		if (ALLOWED_USERIDS.contains(email) || authorizationDao.isAuthorized(email)) {
 			chain.doFilter(request, response);
 			return;
 		}
 
-		LOGGER.warning("unknown user " + currentUser.getEmail()
+		LOGGER.warning("unknown user " + email
 				+ " tried to log in");
 		redirect(response,
 				userService.createLogoutURL(((HttpServletRequest) request)
@@ -71,6 +74,7 @@ public class AuthorizationFilter implements Filter {
 
 	@Override
 	public void init(FilterConfig arg0) throws ServletException {
+		authorizationDao = new AuthorizationDao();
 	}
 
 }

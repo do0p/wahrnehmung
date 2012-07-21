@@ -18,7 +18,26 @@
       <filter-name>authorizationFilter</filter-name>
       <url-pattern>*.html</url-pattern>
   </filter-mapping>
-  
+  <filter-mapping>
+      <filter-name>authorizationFilter</filter-name>
+      <servlet-name>authServlet</servlet-name>
+  </filter-mapping>
+  <filter-mapping>
+      <filter-name>authorizationFilter</filter-name>
+      <servlet-name>wahrnehmungServlet</servlet-name>
+  </filter-mapping>
+  <filter-mapping>
+      <filter-name>authorizationFilter</filter-name>
+      <servlet-name>childServlet</servlet-name>
+  </filter-mapping>
+  <filter-mapping>
+      <filter-name>authorizationFilter</filter-name>
+      <servlet-name>sectionServlet</servlet-name>
+  </filter-mapping>
+  <filter-mapping>
+      <filter-name>authorizationFilter</filter-name>
+      <servlet-name>userServlet</servlet-name>
+  </filter-mapping>
   
   <!-- Servlets -->
   <servlet>
@@ -57,6 +76,15 @@
     <url-pattern>/wahrnehmung/user</url-pattern>
   </servlet-mapping>
 
+  <servlet>
+    <servlet-name>authServlet</servlet-name>
+    <servlet-class>at.lws.wnm.server.service.AuthorizationServiceImpl</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>authServlet</servlet-name>
+    <url-pattern>/wahrnehmung/auth</url-pattern>
+  </servlet-mapping>
+  
   <security-constraint>
     <web-resource-collection>
         <url-pattern>/*</url-pattern>
