@@ -7,6 +7,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.HTML;
@@ -23,7 +24,7 @@ public class Wahrnehmung implements EntryPoint, ValueChangeHandler<String> {
 	private final UserServiceAsync userService = GWT.create(UserService.class);
 
 	public void onModuleLoad() {
-		userService.getUserInfo(GWT.getHostPageBaseURL(), new AsyncCallback<GwtUserInfo>() {
+		userService.getUserInfo(Window.Location.createUrlBuilder().buildString(), new AsyncCallback<GwtUserInfo>() {
 			@Override
 			public void onSuccess(GwtUserInfo userInfo) {
 				if (userInfo.isLoggedIn()) {
