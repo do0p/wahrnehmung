@@ -1,5 +1,8 @@
 package at.lws.wnm.client;
 
+import at.lws.wnm.client.admin.AdminContent;
+import at.lws.wnm.client.service.UserService;
+import at.lws.wnm.client.service.UserServiceAsync;
 import at.lws.wnm.shared.model.GwtUserInfo;
 
 import com.google.gwt.core.client.EntryPoint;

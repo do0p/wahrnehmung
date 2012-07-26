@@ -1,4 +1,5 @@
-package at.lws.wnm.client;
+package at.lws.wnm.client.admin;
+
 
 import com.google.gwt.user.client.ui.TabPanel;
 

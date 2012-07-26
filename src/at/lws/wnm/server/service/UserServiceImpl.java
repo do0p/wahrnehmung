@@ -1,6 +1,6 @@
 package at.lws.wnm.server.service;
 
-import at.lws.wnm.client.UserService;
+import at.lws.wnm.client.service.UserService;
 import at.lws.wnm.shared.model.GwtUserInfo;
 
 import com.google.appengine.api.users.User;

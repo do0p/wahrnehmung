@@ -6,6 +6,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import at.lws.wnm.client.service.ChildService;
+import at.lws.wnm.client.service.ChildServiceAsync;
+import at.lws.wnm.client.service.SectionService;
+import at.lws.wnm.client.service.SectionServiceAsync;
+import at.lws.wnm.client.utils.PopUp;
+import at.lws.wnm.client.utils.Utils;
 import at.lws.wnm.shared.model.GwtBeobachtung.DurationEnum;
 import at.lws.wnm.shared.model.GwtBeobachtung.SocialEnum;
 import at.lws.wnm.shared.model.GwtChild;

@@ -2,7 +2,7 @@ package at.lws.wnm.server.service;
 
 import java.util.List;
 
-import at.lws.wnm.client.ChildService;
+import at.lws.wnm.client.service.ChildService;
 import at.lws.wnm.server.dao.BeobachtungDao;
 import at.lws.wnm.server.dao.ChildDao;
 import at.lws.wnm.shared.model.GwtChild;

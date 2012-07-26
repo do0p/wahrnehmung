@@ -1,4 +1,5 @@
-package at.lws.wnm.client;
+package at.lws.wnm.client.utils;
+
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;

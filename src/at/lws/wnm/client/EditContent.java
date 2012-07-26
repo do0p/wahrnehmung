@@ -2,6 +2,10 @@ package at.lws.wnm.client;
 
 import java.util.Date;
 
+import at.lws.wnm.client.service.WahrnehmungsService;
+import at.lws.wnm.client.service.WahrnehmungsServiceAsync;
+import at.lws.wnm.client.utils.SaveSuccess;
+import at.lws.wnm.client.utils.Utils;
 import at.lws.wnm.shared.model.GwtBeobachtung;
 
 import com.google.gwt.core.client.GWT;

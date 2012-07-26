@@ -1,10 +1,16 @@
-package at.lws.wnm.client;
+package at.lws.wnm.client.admin;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import at.lws.wnm.client.service.SectionService;
+import at.lws.wnm.client.service.SectionServiceAsync;
+import at.lws.wnm.client.utils.DecisionBox;
+import at.lws.wnm.client.utils.PopUp;
+import at.lws.wnm.client.utils.SaveSuccess;
+import at.lws.wnm.client.utils.Utils;
 import at.lws.wnm.shared.model.GwtSection;
 
 import com.google.gwt.core.client.GWT;

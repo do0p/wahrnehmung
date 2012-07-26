@@ -17,6 +17,15 @@ public class GwtBeobachtung implements Serializable {
 	private String sectionName;
 	private SocialEnum social;
 	private DurationEnum duration;
+//	private User user;
+//
+//	public User getUser() {
+//		return user;
+//	}
+//
+//	public void setUser(User user) {
+//		this.user = user;
+//	}
 
 	public void setText(String text) {
 		this.text = text;

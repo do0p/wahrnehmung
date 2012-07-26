@@ -1,7 +1,13 @@
-package at.lws.wnm.client;
+package at.lws.wnm.client.admin;
 
 import java.util.List;
 
+import at.lws.wnm.client.service.ChildService;
+import at.lws.wnm.client.service.ChildServiceAsync;
+import at.lws.wnm.client.utils.DecisionBox;
+import at.lws.wnm.client.utils.PopUp;
+import at.lws.wnm.client.utils.SaveSuccess;
+import at.lws.wnm.client.utils.Utils;
 import at.lws.wnm.shared.model.GwtChild;
 
 import com.google.gwt.core.client.GWT;

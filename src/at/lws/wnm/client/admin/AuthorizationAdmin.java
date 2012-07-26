@@ -1,7 +1,12 @@
-package at.lws.wnm.client;
+package at.lws.wnm.client.admin;
 
 import java.util.List;
 
+import at.lws.wnm.client.service.AuthorizationService;
+import at.lws.wnm.client.service.AuthorizationServiceAsync;
+import at.lws.wnm.client.utils.PopUp;
+import at.lws.wnm.client.utils.SaveSuccess;
+import at.lws.wnm.client.utils.Utils;
 import at.lws.wnm.shared.model.Authorization;
 
 import com.google.gwt.core.client.GWT;

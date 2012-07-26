@@ -1,4 +1,4 @@
-package at.lws.wnm.client;
+package at.lws.wnm.client.service;
 
 import at.lws.wnm.shared.model.GwtUserInfo;
 

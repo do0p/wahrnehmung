@@ -2,7 +2,7 @@ package at.lws.wnm.server.service;
 
 import java.util.List;
 
-import at.lws.wnm.client.AuthorizationService;
+import at.lws.wnm.client.service.AuthorizationService;
 import at.lws.wnm.server.dao.AuthorizationDao;
 import at.lws.wnm.shared.model.Authorization;
 

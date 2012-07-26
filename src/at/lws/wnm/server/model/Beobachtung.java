@@ -13,6 +13,7 @@ import at.lws.wnm.shared.model.GwtBeobachtung.DurationEnum;
 import at.lws.wnm.shared.model.GwtBeobachtung.SocialEnum;
 
 import com.google.appengine.api.datastore.Text;
+import com.google.appengine.api.users.User;
 
 @Entity
 public class Beobachtung implements Serializable {
@@ -34,6 +35,8 @@ public class Beobachtung implements Serializable {
 	private String duration;
 
 	private String social;
+
+	private User user;
 
 	public Long getKey() {
 		return key;
@@ -91,8 +94,10 @@ public class Beobachtung implements Serializable {
 		if (gwtSocial != null) {
 			beobachtung.setSocial(gwtSocial.name());
 		}
+	//	beobachtung.setUser(gwtBeobachtung.getUser());
 		return beobachtung;
 	}
+
 
 	public GwtBeobachtung toGwt() {
 		final GwtBeobachtung beobachtung = new GwtBeobachtung();
@@ -107,6 +112,7 @@ public class Beobachtung implements Serializable {
 		if (social != null) {
 			beobachtung.setSocial(SocialEnum.valueOf(social));
 		}
+		//beobachtung.setUser(user);
 		return beobachtung;
 	}
 
@@ -125,4 +131,13 @@ public class Beobachtung implements Serializable {
 	public void setSocial(String social) {
 		this.social = social;
 	}
+	
+	public void setUser(User user) {
+		this.user = user;
+	}
+
+	public User getUser() {
+		return user;
+	}
+
 }

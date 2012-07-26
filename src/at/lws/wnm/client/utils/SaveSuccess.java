@@ -1,4 +1,4 @@
-package at.lws.wnm.client;
+package at.lws.wnm.client.utils;
 
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.PopupPanel;
