@@ -130,6 +130,8 @@ public abstract class AbstractTextContent extends VerticalPanel {
 	protected void resetForm() {
 		nameSelection.setText("");
 		sectionSelection.setSelectedIndex(0);
+		durationSelection.setSelectedIndex(0);
+		socialSelection.setSelectedIndex(0);
 		textArea.setValue("");
 	}
 

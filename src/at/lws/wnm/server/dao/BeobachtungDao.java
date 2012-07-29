@@ -7,41 +7,27 @@ import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
 import com.google.appengine.api.users.User;
+import com.google.gwt.view.client.Range;
 
 import at.lws.wnm.server.model.Beobachtung;
 import at.lws.wnm.server.model.Child;
 import at.lws.wnm.server.model.Section;
+import at.lws.wnm.shared.model.BeobachtungsFilter;
 import at.lws.wnm.shared.model.GwtBeobachtung;
 
 public class BeobachtungDao {
 
 	@SuppressWarnings("unchecked")
-	public List<GwtBeobachtung> getBeobachtungen(Long childNo, Long sectionNo) {
+	public List<GwtBeobachtung> getBeobachtungen(BeobachtungsFilter filter, Range range) {
 		final StringBuilder queryBuilder = new StringBuilder();
-		queryBuilder.append("select b from Beobachtung b");
-		final boolean childKeyExists = childNo != null;
-		final boolean sectionKeyExists = sectionNo != null;
-		if (childKeyExists || sectionKeyExists) {
-			queryBuilder.append(" where");
-			if (childKeyExists) {
-				queryBuilder.append(" b.childKey = :childKey");
-				if (sectionKeyExists) {
-					queryBuilder.append(" and");
-				}
-			}
-			if (sectionKeyExists) {
-				queryBuilder.append(" b.sectionKey = :sectionKey");
-			}
-		}
+		queryBuilder.append("select b from Beobachtung b order by b.date desc");
+
 		final EntityManager em = EMF.get().createEntityManager();
 		try {
 			final Query query = em.createQuery(queryBuilder.toString());
-			if (childKeyExists) {
-				query.setParameter("childKey", childNo);
-			}
-			if (sectionKeyExists) {
-				query.setParameter("sectionKey", sectionNo);
-			}
+			query.setFirstResult(range.getStart());
+			query.setMaxResults(range.getLength());
+			
 			return mapToGwtBeobachtung(query.getResultList(), em);
 		} finally {
 			em.close();
@@ -132,6 +118,21 @@ public class BeobachtungDao {
 			final Query query = em.createQuery("delete from Beobachtung b where b.childKey = :childKey");
 				query.setParameter("childKey", key);
 			query.executeUpdate();
+		} finally {
+			em.close();
+		}
+	}
+
+	public int getRowCount(BeobachtungsFilter filter) {
+		final StringBuilder queryBuilder = new StringBuilder();
+		queryBuilder.append("select count(b) from Beobachtung b order by b.date desc");
+
+		final EntityManager em = EMF.get().createEntityManager();
+		try {
+			final Query query = em.createQuery(queryBuilder.toString());
+			
+			
+			return ((Integer)query.getSingleResult()).intValue();
 		} finally {
 			em.close();
 		}
