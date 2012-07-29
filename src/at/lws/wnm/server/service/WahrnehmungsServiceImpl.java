@@ -6,6 +6,8 @@ import at.lws.wnm.client.service.WahrnehmungsService;
 import at.lws.wnm.server.dao.BeobachtungDao;
 import at.lws.wnm.shared.model.GwtBeobachtung;
 
+import com.google.appengine.api.users.UserService;
+import com.google.appengine.api.users.UserServiceFactory;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 /**
@@ -17,17 +19,16 @@ public class WahrnehmungsServiceImpl extends RemoteServiceServlet implements
 
 	private final BeobachtungDao beobachtungsDao;
 
-	// private final UserService userService;
+	private final UserService userService;
 
 	public WahrnehmungsServiceImpl() {
 		beobachtungsDao = new BeobachtungDao();
-		// userService = UserServiceFactory.getUserService();
+		userService = UserServiceFactory.getUserService();
 	}
 
 	@Override
 	public void storeBeobachtung(GwtBeobachtung beobachtung) {
-		// beobachtung.setUser(userService.getCurrentUser());
-		beobachtungsDao.storeBeobachtung(beobachtung);
+		beobachtungsDao.storeBeobachtung(beobachtung, userService.getCurrentUser());
 	}
 
 	@Override

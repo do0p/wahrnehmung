@@ -6,6 +6,8 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
+import com.google.appengine.api.users.User;
+
 import at.lws.wnm.server.model.Beobachtung;
 import at.lws.wnm.server.model.Child;
 import at.lws.wnm.server.model.Section;
@@ -71,11 +73,13 @@ public class BeobachtungDao {
 		return child.getFirstName() + " " + child.getLastName();
 	}
 
-	public void storeBeobachtung(GwtBeobachtung gwtBeobachtung) {
+	public void storeBeobachtung(GwtBeobachtung gwtBeobachtung, User user) {
 		final EntityManager em = EMF.get().createEntityManager();
 		try {
 
-			em.persist(Beobachtung.valueOf(gwtBeobachtung));
+			final Beobachtung beobachtung = Beobachtung.valueOf(gwtBeobachtung);
+			beobachtung.setUser(user);
+			em.persist(beobachtung);
 		} finally {
 			em.close();
 		}
