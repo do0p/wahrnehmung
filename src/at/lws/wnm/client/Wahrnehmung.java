@@ -74,7 +74,7 @@ public class Wahrnehmung implements EntryPoint, ValueChangeHandler<String> {
 		if (token.equals(NEW_ENTRY)) {
 			rootPanel.add(new EditContent());
 		} else if (token.equals(LIST_ENTRY)) {
-			rootPanel.add(new Search());
+			rootPanel.add(new Search("850px"));
 		} else if (token.equals(ADMIN)) {
 			rootPanel.add(new AdminContent());
 		} else {

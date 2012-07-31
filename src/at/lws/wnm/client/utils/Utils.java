@@ -9,6 +9,7 @@ import com.google.gwt.user.datepicker.client.DateBox;
 import com.google.gwt.user.datepicker.client.DateBox.Format;
 
 public class Utils {
+	public static final String SHORTEN_POSTFIX = "...";
 	public static final String DEL = "entf";
 	public static final String EDIT = "edit";
 	public static final String NEW = "neu";
@@ -56,6 +57,18 @@ public class Utils {
 
 	public static boolean isEmpty(String sectionKey) {
 		return !isNotEmpty(sectionKey);
+	}
+
+	public static String shorten(String text, int length) {
+		if(text == null||text.length() <= length)
+		{
+			return text;
+		}
+		if(length < SHORTEN_POSTFIX.length())
+		{
+			return text.substring(0, length);
+		}
+		return text.substring(0, length - SHORTEN_POSTFIX.length()) + SHORTEN_POSTFIX;
 	}
 
 	

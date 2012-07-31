@@ -39,7 +39,7 @@ public class BeobachtungDao {
 		final List<GwtBeobachtung> result = new ArrayList<GwtBeobachtung>();
 		for (Beobachtung beobachtung : resultList) {
 			final GwtBeobachtung gwtBeobachtung = beobachtung.toGwt();
-			gwtBeobachtung.setText("");
+			//gwtBeobachtung.setText("");
 			gwtBeobachtung.setChildName(getChildName(beobachtung.getChildKey(),
 					em));
 			gwtBeobachtung.setSectionName(getSectionName(

@@ -12,13 +12,17 @@ import at.lws.wnm.shared.model.GwtBeobachtung;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy.KeyboardSelectionPolicy;
 import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.AsyncDataProvider;
 import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.Range;
+import com.google.gwt.view.client.SelectionChangeEvent;
+import com.google.gwt.view.client.SingleSelectionModel;
 
 public class Search extends VerticalPanel {
 
@@ -26,10 +30,13 @@ public class Search extends VerticalPanel {
 
 	private final PopUp dialogBox = new PopUp();
 	private final WahrnehmungsServiceAsync wahrnehmungsService = GWT.create(WahrnehmungsService.class);
+	private final TextArea textArea = new TextArea();
+	
+	
+	public Search(String width) {
+		
 
-	
-	
-	public Search() {
+
 		
 		wahrnehmungsService.getRowCount(new BeobachtungsFilter(), new AsyncCallback<Integer>() {
 
@@ -80,15 +87,37 @@ public class Search extends VerticalPanel {
 				return object.getDuration().getText();
 			}
 		};
+
+		final Column<GwtBeobachtung, String> textColumn = new TextColumn<GwtBeobachtung>() {
+			@Override
+			public String getValue(GwtBeobachtung object) {
+				return Utils.shorten(object.getText(), 20);
+			}
+		};
+
 		
 		table = new CellTable<GwtBeobachtung>();
-		table.setPageSize(3);
+		table.setKeyboardSelectionPolicy(KeyboardSelectionPolicy.ENABLED);
+		table.setPageSize(7);
 		table.addColumn(dateColumn, "Datum");
 		table.addColumn(nameColumn, "Name");
 		table.addColumn(sectionColumn, "Bereich");
 		table.addColumn(durationColumn, "Dauer");
 		table.addColumn(socialColumn, "Sozialform");
+		table.addColumn(textColumn, "Beobachtung");
 		add(table);
+		
+		final SingleSelectionModel<GwtBeobachtung> selectionModel = new SingleSelectionModel<GwtBeobachtung>();
+		table.setSelectionModel(selectionModel );
+		 selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+			
+			@Override
+			public void onSelectionChange(SelectionChangeEvent event) {
+				final GwtBeobachtung selectedObject = selectionModel.getSelectedObject();
+				textArea.setText(selectedObject.getText());
+			}
+		});
+
 
 		final AsyncDataProvider<GwtBeobachtung> asyncDataProvider = new AsyncDataProvider<GwtBeobachtung>() {
 
@@ -117,6 +146,9 @@ public class Search extends VerticalPanel {
 		pager.setDisplay(table);
 		
 		add(pager);
+		
+		textArea.setSize(width, "400px");
+		add(textArea);
 	}
 
 }
