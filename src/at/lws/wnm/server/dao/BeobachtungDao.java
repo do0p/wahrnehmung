@@ -20,7 +20,9 @@ public class BeobachtungDao {
 	@SuppressWarnings("unchecked")
 	public List<GwtBeobachtung> getBeobachtungen(BeobachtungsFilter filter, Range range) {
 		final StringBuilder queryBuilder = new StringBuilder();
-		queryBuilder.append("select b from Beobachtung b order by b.date desc");
+		queryBuilder.append("select b from Beobachtung b");
+		queryBuilder.append(createWhereQuery(filter));
+		queryBuilder.append(" order by b.date desc");
 
 		final EntityManager em = EMF.get().createEntityManager();
 		try {
@@ -32,6 +34,36 @@ public class BeobachtungDao {
 		} finally {
 			em.close();
 		}
+	}
+	
+	public int getRowCount(BeobachtungsFilter filter) {
+		final StringBuilder queryBuilder = new StringBuilder();
+		queryBuilder.append("select count(b) from Beobachtung b");
+		queryBuilder.append(createWhereQuery(filter));
+
+		final EntityManager em = EMF.get().createEntityManager();
+		try {
+			final Query query = em.createQuery(queryBuilder.toString());
+			
+			
+			return ((Integer)query.getSingleResult()).intValue();
+		} finally {
+			em.close();
+		}
+	}
+
+	private String createWhereQuery(BeobachtungsFilter filter) {
+		final StringBuilder query = new StringBuilder();
+		if(filter.getChildKey() != null)
+		{
+			query.append(" b.childKey = ");
+			query.append(filter.getChildKey());
+		}
+		if(query.length() > 0)
+		{
+			return " where " + query.toString();
+		}
+		return "";
 	}
 
 	private List<GwtBeobachtung> mapToGwtBeobachtung(
@@ -123,19 +155,6 @@ public class BeobachtungDao {
 		}
 	}
 
-	public int getRowCount(BeobachtungsFilter filter) {
-		final StringBuilder queryBuilder = new StringBuilder();
-		queryBuilder.append("select count(b) from Beobachtung b order by b.date desc");
 
-		final EntityManager em = EMF.get().createEntityManager();
-		try {
-			final Query query = em.createQuery(queryBuilder.toString());
-			
-			
-			return ((Integer)query.getSingleResult()).intValue();
-		} finally {
-			em.close();
-		}
-	}
 
 }

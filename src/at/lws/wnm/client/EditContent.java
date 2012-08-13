@@ -29,13 +29,12 @@ public class EditContent extends AbstractTextContent {
 	}
 
 	protected HorizontalPanel createButtonContainer() {
+		final HorizontalPanel buttonContainer = new HorizontalPanel();
 		sendButton = new Button(Utils.SAVE);
 		sendButton.addClickHandler(new SendbuttonHandler());
 		sendButton.addStyleName("sendButton");
 		
-		final HorizontalPanel buttonContainer = new HorizontalPanel();
-		buttonContainer.add(sendButton);
-		formatLeftCenter(buttonContainer, sendButton, BUTTON_WIDTH, ROW_HEIGHT);
+		Utils.formatLeftCenter(buttonContainer, sendButton, Utils.BUTTON_WIDTH, Utils.ROW_HEIGHT);
 		return buttonContainer;
 	}
 
@@ -48,7 +47,7 @@ public class EditContent extends AbstractTextContent {
 		private void sendNameToServer() {
 
 			final String text = getTextArea().getValue();
-			final Long childKey = getSelectedChildKey();
+			final Long childKey = getNameSelection().getSelectedChildKey();
 			final Long sectionKey = getSelectedSectionKey();
 			final Date date = getDateBox().getValue();
 

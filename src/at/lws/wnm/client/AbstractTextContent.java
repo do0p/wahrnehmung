@@ -6,15 +6,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import at.lws.wnm.client.service.ChildService;
-import at.lws.wnm.client.service.ChildServiceAsync;
 import at.lws.wnm.client.service.SectionService;
 import at.lws.wnm.client.service.SectionServiceAsync;
+import at.lws.wnm.client.utils.NameSelection;
 import at.lws.wnm.client.utils.PopUp;
 import at.lws.wnm.client.utils.Utils;
 import at.lws.wnm.shared.model.GwtBeobachtung.DurationEnum;
 import at.lws.wnm.shared.model.GwtBeobachtung.SocialEnum;
-import at.lws.wnm.shared.model.GwtChild;
 import at.lws.wnm.shared.model.GwtSection;
 
 import com.google.gwt.core.client.GWT;
@@ -22,25 +20,16 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.CellPanel;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
-import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.datepicker.client.DateBox;
 
 public abstract class AbstractTextContent extends VerticalPanel {
 
-	protected static final String FIELD_HEIGHT = "20px";
-	protected static final String ROW_HEIGHT = "40px";
-	protected static final String BUTTON_WIDTH = "80px";
 	private static final String LISTBOX_WIDTH = "150px";
-	private final ChildServiceAsync childService = GWT
-			.create(ChildService.class);
+
 	private final SectionServiceAsync sectionService = GWT
 			.create(SectionService.class);
 
@@ -54,10 +43,10 @@ public abstract class AbstractTextContent extends VerticalPanel {
 	private final ListBox subSectionSelection = new ListBox();
 	private final ListBox durationSelection = new ListBox();
 	private final ListBox socialSelection = new ListBox();
-	private SuggestBox nameSelection;
+	private NameSelection nameSelection;
 
 	private final Map<Long, List<String[]>> subSectionSelections = new HashMap<Long, List<String[]>>();
-	private final Map<String, Long> childMap = new HashMap<String, Long>();
+
 
 	public AbstractTextContent(String width) {
 		init();
@@ -65,7 +54,7 @@ public abstract class AbstractTextContent extends VerticalPanel {
 	}
 
 	private void init() {
-		nameSelection = new SuggestBox(createChildNameList());
+		nameSelection = new NameSelection(dialogBox);
 		dateBox.setValue(new Date());
 
 		sectionSelection.addChangeHandler(new SectionChangeHandler());
@@ -89,42 +78,24 @@ public abstract class AbstractTextContent extends VerticalPanel {
 		dateBox.setFormat(Utils.DATEBOX_FORMAT);
 		
 		final HorizontalPanel childAndDateContainer = new HorizontalPanel();
-		childAndDateContainer.add(nameSelection);
-		childAndDateContainer.add(dateBox);
-		formatLeftCenter(this, childAndDateContainer, width, ROW_HEIGHT);
-		formatLeftCenter(childAndDateContainer, nameSelection, "300px", FIELD_HEIGHT);
-		formatLeftCenter(childAndDateContainer, dateBox, "50px", FIELD_HEIGHT);
+		Utils.formatLeftCenter(this, childAndDateContainer, width, Utils.ROW_HEIGHT);
+		Utils.formatLeftCenter(childAndDateContainer, nameSelection, NameSelection.WIDTH, Utils.FIELD_HEIGHT);
+		Utils.formatLeftCenter(childAndDateContainer, dateBox, "50px", Utils.FIELD_HEIGHT);
 		
 		final HorizontalPanel selectionContainer = new HorizontalPanel();
-		selectionContainer.add(sectionSelection);
-		selectionContainer.add(subSectionSelection);
-		selectionContainer.add(durationSelection);
-		selectionContainer.add(socialSelection);
-		formatLeftCenter(this, selectionContainer, width, ROW_HEIGHT);
-		formatLeftCenter(selectionContainer, sectionSelection, LISTBOX_WIDTH, FIELD_HEIGHT);
-		formatLeftCenter(selectionContainer, subSectionSelection, LISTBOX_WIDTH, FIELD_HEIGHT);
-		formatLeftCenter(selectionContainer, durationSelection, LISTBOX_WIDTH, FIELD_HEIGHT);
-		formatLeftCenter(selectionContainer, socialSelection, LISTBOX_WIDTH, FIELD_HEIGHT);
+		Utils.formatLeftCenter(this, selectionContainer, width, Utils.ROW_HEIGHT);
+		Utils.formatLeftCenter(selectionContainer, sectionSelection, LISTBOX_WIDTH, Utils.FIELD_HEIGHT);
+		Utils.formatLeftCenter(selectionContainer, subSectionSelection, LISTBOX_WIDTH, Utils.FIELD_HEIGHT);
+		Utils.formatLeftCenter(selectionContainer, durationSelection, LISTBOX_WIDTH, Utils.FIELD_HEIGHT);
+		Utils.formatLeftCenter(selectionContainer, socialSelection, LISTBOX_WIDTH, Utils.FIELD_HEIGHT);
 
 		textArea.setSize(width, "400px");
+		add(textArea);
 		
-		final CellPanel buttonContainer = createButtonContainer();
-		formatLeftCenter(this, buttonContainer, width, ROW_HEIGHT);
+		Utils.formatLeftCenter(this, createButtonContainer(), width, Utils.ROW_HEIGHT);
 		
 		setSize(width, "550px");
-		add(childAndDateContainer);
-		add(selectionContainer);
-		add(textArea);
-		add(buttonContainer);
-	}
 
-	protected void formatLeftCenter(CellPanel panel, Widget widget, String width, String height) {
-		panel.setCellVerticalAlignment(widget,
-				HasVerticalAlignment.ALIGN_MIDDLE);
-		panel.setCellHorizontalAlignment(widget,
-				HasHorizontalAlignment.ALIGN_LEFT);
-		widget.setSize(width, height);
-		panel.setCellWidth(widget, width + "px");
 	}
 
 	protected void resetForm() {
@@ -199,40 +170,12 @@ public abstract class AbstractTextContent extends VerticalPanel {
 
 	}
 
-	private MultiWordSuggestOracle createChildNameList() {
-		final MultiWordSuggestOracle names = new MultiWordSuggestOracle();
-		childService.queryChildren(new AsyncCallback<List<GwtChild>>() {
-
-			@Override
-			public void onFailure(Throwable caught) {
-				getDialogBox().setErrorMessage();
-				getDialogBox().center();
-			}
-
-			@Override
-			public void onSuccess(List<GwtChild> result) {
-				for (GwtChild child : result) {
-
-					final String formattedChildName = Utils
-							.formatChildName(child);
-					names.add(formattedChildName);
-					getChildMap().put(formattedChildName, child.getKey());
-				}
-			}
-
-		});
-		return names;
-	}
-
+	
 	public TextArea getTextArea() {
 		return textArea;
 	}
 
-	public Map<String, Long> getChildMap() {
-		return childMap;
-	}
-
-	public SuggestBox getNameSelection() {
+	public NameSelection getNameSelection() {
 		return nameSelection;
 	}
 
@@ -248,9 +191,7 @@ public abstract class AbstractTextContent extends VerticalPanel {
 		return dialogBox;
 	}
 
-	public Long getSelectedChildKey() {
-		return childMap.get(nameSelection.getValue());
-	}
+
 
 	public Long getSelectedSectionKey() {
 

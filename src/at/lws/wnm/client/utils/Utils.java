@@ -5,6 +5,10 @@ import java.util.Date;
 import at.lws.wnm.shared.model.GwtChild;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.user.client.ui.CellPanel;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.datepicker.client.DateBox;
 import com.google.gwt.user.datepicker.client.DateBox.Format;
 
@@ -15,6 +19,7 @@ public class Utils {
 	public static final String NEW = "neu";
 	public static final String OK = "ok";
 	public static final String SAVE = "speichern";
+	public static final String FILTER = "filter";
 	public static final String CANCEL = "abbrechen";
 	public static final String ADD = "anlegen";
 	public static final String CHANGE = "&auml;ndern";
@@ -70,6 +75,20 @@ public class Utils {
 		}
 		return text.substring(0, length - SHORTEN_POSTFIX.length()) + SHORTEN_POSTFIX;
 	}
+
+	public static void formatLeftCenter(CellPanel panel, Widget widget, String width, String height) {
+		panel.add(widget);
+		panel.setCellVerticalAlignment(widget,
+				HasVerticalAlignment.ALIGN_MIDDLE);
+		panel.setCellHorizontalAlignment(widget,
+				HasHorizontalAlignment.ALIGN_LEFT);
+		widget.setSize(width, height);
+		panel.setCellWidth(widget, width + "px");
+	}
+
+	public static final String FIELD_HEIGHT = "20px";
+	public static final String BUTTON_WIDTH = "80px";
+	public static final String ROW_HEIGHT = "40px";
 
 	
 
