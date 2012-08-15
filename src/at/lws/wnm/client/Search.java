@@ -98,14 +98,20 @@ public class Search extends VerticalPanel {
 		final Column<GwtBeobachtung, String> socialColumn = new TextColumn<GwtBeobachtung>() {
 			@Override
 			public String getValue(GwtBeobachtung object) {
-				return object.getSocial().getText();
+				if (object.getSocial() != null) {
+					return object.getSocial().getText();
+				}
+				return null;
 			}
 		};
 
 		final Column<GwtBeobachtung, String> durationColumn = new TextColumn<GwtBeobachtung>() {
 			@Override
 			public String getValue(GwtBeobachtung object) {
-				return object.getDuration().getText();
+				if (object.getDuration() != null) {
+					return object.getDuration().getText();
+				}
+				return null;
 			}
 		};
 

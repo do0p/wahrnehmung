@@ -64,4 +64,8 @@ public class NameSelection extends SuggestBox {
 
 	}
 
+	public void reset() {
+		setText("");
+	}
+
 }

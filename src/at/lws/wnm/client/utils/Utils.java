@@ -28,6 +28,10 @@ public class Utils {
 	public static final Format DATEBOX_FORMAT = new DateBox.DefaultFormat(
 			DATE_FORMAT);
 	public static final int BUTTON_SPACING = 5;
+	public static final String FIELD_HEIGHT = "20px";
+	public static final String BUTTON_WIDTH = "80px";
+	public static final String ROW_HEIGHT = "40px";
+	public static final String LISTBOX_WIDTH = "135px";
 
 	public static String formatChildName(GwtChild child) {
 		final String firstName = child.getFirstName();
@@ -86,9 +90,6 @@ public class Utils {
 		panel.setCellWidth(widget, width + "px");
 	}
 
-	public static final String FIELD_HEIGHT = "20px";
-	public static final String BUTTON_WIDTH = "80px";
-	public static final String ROW_HEIGHT = "40px";
 
 	
 
