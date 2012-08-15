@@ -4,9 +4,14 @@ import java.util.Date;
 
 import at.lws.wnm.client.service.WahrnehmungsService;
 import at.lws.wnm.client.service.WahrnehmungsServiceAsync;
+import at.lws.wnm.client.utils.NameSelection;
+import at.lws.wnm.client.utils.PopUp;
 import at.lws.wnm.client.utils.SaveSuccess;
+import at.lws.wnm.client.utils.SectionSelection;
 import at.lws.wnm.client.utils.Utils;
 import at.lws.wnm.shared.model.GwtBeobachtung;
+import at.lws.wnm.shared.model.GwtBeobachtung.DurationEnum;
+import at.lws.wnm.shared.model.GwtBeobachtung.SocialEnum;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -14,21 +19,119 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.TextArea;
+import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.datepicker.client.DateBox;
 
-public class EditContent extends AbstractTextContent {
+public class EditContent  extends VerticalPanel{
 
 	private final WahrnehmungsServiceAsync wahrnehmungService = GWT
 			.create(WahrnehmungsService.class);
 
-	private final SaveSuccess saveSuccess;
+	private final TextArea textArea = new TextArea();
+	private final DateBox dateBox = new DateBox();
+	private final ListBox durationSelection = new ListBox();
+	private final ListBox socialSelection = new ListBox();
+
+	private NameSelection nameSelection;
+	private SectionSelection sectionSelection;
+
 	private Button sendButton;
+	
+	private SaveSuccess saveSuccess;
+	private final PopUp dialogBox = new PopUp();
 
 	public EditContent() {
-		super("850px");
+		init();
+		layout("850px");
+	}
+
+	private void init() {
+		nameSelection = new NameSelection(dialogBox);
+		dateBox.setValue(new Date());
+
+		sectionSelection = new SectionSelection(dialogBox);
+
+		socialSelection.addItem("- Sozialform -", "");
+		for (SocialEnum socialForm : SocialEnum.values()) {
+			socialSelection.addItem(socialForm.getText(), socialForm.name());
+		}
+
+		durationSelection.addItem("- Dauer -", "");
+		for (DurationEnum duration : DurationEnum.values()) {
+			durationSelection.addItem(duration.getText(), duration.name());
+		}
 		saveSuccess = new SaveSuccess();
 	}
 
-	protected HorizontalPanel createButtonContainer() {
+	private void layout(String width) {
+
+		dateBox.setFormat(Utils.DATEBOX_FORMAT);
+
+		final HorizontalPanel childAndDateContainer = new HorizontalPanel();
+		Utils.formatLeftCenter(this, childAndDateContainer, width,
+				Utils.ROW_HEIGHT);
+		Utils.formatLeftCenter(childAndDateContainer, nameSelection,
+				NameSelection.WIDTH, Utils.FIELD_HEIGHT);
+		Utils.formatLeftCenter(childAndDateContainer, dateBox, "50px",
+				Utils.FIELD_HEIGHT);
+
+		final HorizontalPanel selectionContainer = new HorizontalPanel();
+		Utils.formatLeftCenter(this, selectionContainer, width,
+				Utils.ROW_HEIGHT);
+		for (ListBox sectionSelectionBox : sectionSelection
+				.getSectionSelectionBoxes()) {
+			Utils.formatLeftCenter(selectionContainer, sectionSelectionBox,
+					Utils.LISTBOX_WIDTH, Utils.FIELD_HEIGHT);
+		}
+		Utils.formatLeftCenter(selectionContainer, durationSelection,
+				Utils.LISTBOX_WIDTH, Utils.FIELD_HEIGHT);
+		Utils.formatLeftCenter(selectionContainer, socialSelection,
+				Utils.LISTBOX_WIDTH, Utils.FIELD_HEIGHT);
+
+		textArea.setSize(width, "400px");
+		add(textArea);
+
+		Utils.formatLeftCenter(this, createButtonContainer(), width,
+				Utils.ROW_HEIGHT);
+
+		setSize(width, "550px");
+
+	}
+
+	private void resetForm() {
+		nameSelection.reset();
+		sectionSelection.reset();
+		durationSelection.setSelectedIndex(0);
+		socialSelection.setSelectedIndex(0);
+		textArea.setValue("");
+	}
+
+	private SocialEnum getSocialForm() {
+		final int selectedIndex = socialSelection.getSelectedIndex();
+		if (selectedIndex != -1) {
+			final String socialText = socialSelection.getValue(selectedIndex);
+			if (!socialText.isEmpty()) {
+				return SocialEnum.valueOf(socialText);
+			}
+		}
+		return null;
+	}
+
+	private DurationEnum getDuration() {
+		final int selectedIndex = durationSelection.getSelectedIndex();
+		if (selectedIndex != -1) {
+			final String durationText = durationSelection
+					.getValue(selectedIndex);
+			if (!durationText.isEmpty()) {
+				return DurationEnum.valueOf(durationText);
+			}
+		}
+		return null;
+	}
+
+	private HorizontalPanel createButtonContainer() {
 		final HorizontalPanel buttonContainer = new HorizontalPanel();
 		sendButton = new Button(Utils.SAVE);
 		sendButton.addClickHandler(new SendbuttonHandler());
@@ -46,17 +149,17 @@ public class EditContent extends AbstractTextContent {
 
 		private void sendNameToServer() {
 
-			final String text = getTextArea().getValue();
-			final Long childKey = getNameSelection().getSelectedChildKey();
-			final Long sectionKey = getSelectedSectionKey();
-			final Date date = getDateBox().getValue();
+			final String text = textArea.getValue();
+			final Long childKey = nameSelection.getSelectedChildKey();
+			final Long sectionKey = sectionSelection.getSelectedSectionKey();
+			final Date date = dateBox.getValue();
 
 			String errorMessage = new String();
-			if (Utils.isEmpty(getNameSelection().getValue())) {
+			if (Utils.isEmpty(nameSelection.getValue())) {
 				errorMessage = errorMessage + "W&auml;hle einen Namen!<br/>";
 			} else if (childKey == null) {
 				errorMessage = errorMessage + "Kein Kind mit Name "
-						+ getNameSelection().getValue() + "!<br/>";
+						+ nameSelection.getValue() + "!<br/>";
 			}
 			if (sectionKey== null) {
 				errorMessage = errorMessage + "W&auml;hle einen Bereich!<br/>";
@@ -69,9 +172,9 @@ public class EditContent extends AbstractTextContent {
 						+ "Trage eine Wahrnehmung ein!<br/>";
 			}
 			if (!errorMessage.isEmpty()) {
-				getDialogBox().setErrorMessage(errorMessage);
-				getDialogBox().setDisableWhileShown(sendButton);
-				getDialogBox().center();
+				dialogBox.setErrorMessage(errorMessage);
+				dialogBox.setDisableWhileShown(sendButton);
+				dialogBox.center();
 				return;
 			}
 
@@ -86,9 +189,9 @@ public class EditContent extends AbstractTextContent {
 					new AsyncCallback<Void>() {
 
 						public void onFailure(Throwable caught) {
-							getDialogBox().setErrorMessage();
-							getDialogBox().setDisableWhileShown(sendButton);
-							getDialogBox().center();
+							dialogBox.setErrorMessage();
+							dialogBox.setDisableWhileShown(sendButton);
+							dialogBox.center();
 						}
 
 						public void onSuccess(Void result) {
