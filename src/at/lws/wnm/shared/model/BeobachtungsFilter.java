@@ -8,12 +8,22 @@ public class BeobachtungsFilter implements Serializable {
 	
 	private Long childKey;
 
+	private Long sectionKey;
+
 	public Long getChildKey() {
 		return childKey;
 	}
 
 	public void setChildKey(Long childKey) {
 		this.childKey = childKey;
+	}
+
+	public void setSectionKey(Long sectionKey) {
+		this.sectionKey = sectionKey;
+	}
+
+	public Long getSectionKey() {
+		return sectionKey;
 	}
 
 }

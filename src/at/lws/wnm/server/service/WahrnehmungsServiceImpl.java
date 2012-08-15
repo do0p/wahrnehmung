@@ -4,6 +4,7 @@ import java.util.List;
 
 import at.lws.wnm.client.service.WahrnehmungsService;
 import at.lws.wnm.server.dao.BeobachtungDao;
+import at.lws.wnm.server.dao.DaoRegistry;
 import at.lws.wnm.shared.model.BeobachtungsFilter;
 import at.lws.wnm.shared.model.GwtBeobachtung;
 
@@ -24,7 +25,7 @@ public class WahrnehmungsServiceImpl extends RemoteServiceServlet implements
 	private final UserService userService;
 
 	public WahrnehmungsServiceImpl() {
-		beobachtungsDao = new BeobachtungDao();
+		beobachtungsDao = DaoRegistry.get(BeobachtungDao.class);
 		userService = UserServiceFactory.getUserService();
 	}
 

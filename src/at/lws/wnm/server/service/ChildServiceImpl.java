@@ -5,6 +5,7 @@ import java.util.List;
 import at.lws.wnm.client.service.ChildService;
 import at.lws.wnm.server.dao.BeobachtungDao;
 import at.lws.wnm.server.dao.ChildDao;
+import at.lws.wnm.server.dao.DaoRegistry;
 import at.lws.wnm.shared.model.GwtChild;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
@@ -17,8 +18,8 @@ public class ChildServiceImpl extends RemoteServiceServlet implements
 	private final BeobachtungDao beobachtungsDao;
 
 	public ChildServiceImpl() {
-		childDao = new ChildDao();
-		beobachtungsDao = new BeobachtungDao();
+		childDao = DaoRegistry.get(ChildDao.class);
+		beobachtungsDao = DaoRegistry.get(BeobachtungDao.class);
 	}
 
 	@Override

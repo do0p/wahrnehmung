@@ -11,34 +11,28 @@ import javax.persistence.Query;
 import at.lws.wnm.server.model.Section;
 import at.lws.wnm.shared.model.GwtSection;
 
-public class SectionDao {
+public class SectionDao extends AbstractDao {
 
-	private final BeobachtungDao beobachtungDao;
 
-	public SectionDao() {
-		beobachtungDao = new BeobachtungDao();
+	private Map<Long, List<Long>> childMap;
+	private volatile boolean childMapUpdateNeeded = true;
+
+	SectionDao() {
+
 	}
 
-	private Map<Long, List<Long>> buildChildKeys() {
-		final Map<Long, List<Long>> result = new HashMap<Long, List<Long>>();
+	public String getSectionName(Long sectionKey) {
 		final EntityManager em = EMF.get().createEntityManager();
 		try {
-			addChildKeys(null, result, em);
+			return getSectionName(sectionKey, em);
 		} finally {
 			em.close();
 		}
-		return result;
 	}
 
-	private List<Long> addChildKeys(Long parentKey,
-			Map<Long, List<Long>> result, EntityManager em) {
-		final List<Long> childKeys = new ArrayList<Long>();
-		result.put(parentKey, childKeys);
-		for (Section section : getAllSectionsInternal(parentKey, em)) {
-			childKeys.add(section.getKey());
-			childKeys.addAll(addChildKeys(section.getKey(), result, em));
-		}
-		return childKeys;
+	public String getSectionName(Long sectionKey, final EntityManager em) {
+		final Section section = em.find(Section.class, sectionKey);
+		return section.getSectionName();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -53,25 +47,13 @@ public class SectionDao {
 		}
 	}
 
-	public List<GwtSection> getAllSections(Long parentKey) {
-		final EntityManager em = EMF.get().createEntityManager();
-		try {
-			return mapToGwtSections(getAllSectionsInternal(parentKey, em));
-		} finally {
-			em.close();
+	public List<Long> getAllChildKeys(Long key) {
+		updateChildKeys();
+		final List<Long> children = childMap.get(key);
+		if (children == null) {
+			return new ArrayList<Long>();
 		}
-	}
-
-	@SuppressWarnings("unchecked")
-	private List<Section> getAllSectionsInternal(Long parentKey,
-			EntityManager em) {
-
-		final Query query = em
-				.createQuery("select from " + Section.class.getName()
-						+ " s where s.parentKey = :parentKey");
-		query.setParameter("parentKey", parentKey);
-		return query.getResultList();
-
+		return new ArrayList<Long>(children);
 	}
 
 	public void storeSection(GwtSection gwtSection) {
@@ -87,10 +69,87 @@ public class SectionDao {
 							gwtSection.getSectionName() + " existiert bereits!");
 				}
 			}
-			em.persist(Section.valueOf(gwtSection));
+			synchronized (this) {
+				em.persist(Section.valueOf(gwtSection));
+				childMapUpdateNeeded = true;
+			}
 		} finally {
 			em.close();
 		}
+	}
+
+	public void deleteSections(List<Long> sectionNos) {
+		if (sectionNos == null || sectionNos.isEmpty()) {
+			return;
+		}
+		final EntityManager em = EMF.get().createEntityManager();
+		try {
+			if (!getBeobachtungDao().getBeobachtungen(sectionNos, em).isEmpty()) {
+				throw new IllegalStateException(
+						"Es noch Wahrnehmungen in den Bereichen.");
+			}
+
+			final StringBuilder queryBuilder = new StringBuilder();
+			queryBuilder.append("delete from Section s where s.key in ( ?");
+			for (int i = 1; i < sectionNos.size(); i++) {
+				queryBuilder.append(i);
+				queryBuilder.append(", ?");
+			}
+			queryBuilder.append(sectionNos.size());
+			queryBuilder.append(")");
+
+			final Query query = em.createQuery(queryBuilder.toString());
+			for (int i = 0; i < sectionNos.size(); i++) {
+				query.setParameter(i + 1, sectionNos.get(i));
+			}
+			synchronized (this) {
+				query.executeUpdate();
+				childMapUpdateNeeded = true;
+			}
+		} finally {
+			em.close();
+		}
+	}
+
+	private void updateChildKeys() {
+		if (childMapUpdateNeeded) {
+			synchronized (this) {
+				if (childMapUpdateNeeded) {
+					final Map<Long, List<Long>> tmpChildMap = new HashMap<Long, List<Long>>();
+					final EntityManager em = EMF.get().createEntityManager();
+					try {
+						addChildKeys(null, tmpChildMap, em);
+					} finally {
+						em.close();
+					}
+					childMap = tmpChildMap;
+					childMapUpdateNeeded = false;
+				}
+			}
+		}
+	}
+
+	private List<Long> addChildKeys(Long parentKey,
+			Map<Long, List<Long>> result, EntityManager em) {
+		final List<Long> childKeys = new ArrayList<Long>();
+		result.put(parentKey, childKeys);
+		for (Section section : getAllSectionsInternal(parentKey, em)) {
+			childKeys.add(section.getKey());
+			childKeys.addAll(addChildKeys(section.getKey(), result, em));
+		}
+		return childKeys;
+	}
+
+	@SuppressWarnings("unchecked")
+	private List<Section> getAllSectionsInternal(Long parentKey,
+			EntityManager em) {
+
+		final Query query = em
+				.createQuery("select from " + Section.class.getName()
+						+ " s where s.parentKey = :parentKey");
+		query.setParameter("parentKey", parentKey);
+		return query.getResultList();
+
 	}
 
 	private List<GwtSection> mapToGwtSections(List<Section> resultList) {
@@ -103,41 +162,8 @@ public class SectionDao {
 		return result;
 	}
 
-	public List<Long> getAllChildKeys(Long key) {
-		final List<Long> children = buildChildKeys().get(key);
-		if (children == null) {
-			return new ArrayList<Long>();
-		}
-		return new ArrayList<Long>(children);
+	private BeobachtungDao getBeobachtungDao() {
+		return DaoRegistry.get(BeobachtungDao.class);
 	}
 
-	public void deleteSections(List<Long> sectionNos) {
-		if (sectionNos == null || sectionNos.isEmpty()) {
-			return;
-		}
-		if (!beobachtungDao.getBeobachtungen(sectionNos).isEmpty()) {
-			throw new IllegalStateException(
-					"Es noch Wahrnehmungen in den Bereichen.");
-		}
-		
-		final StringBuilder queryBuilder = new StringBuilder();
-		queryBuilder.append("delete from Section s where s.key in ( ?");
-		for (int i = 1; i < sectionNos.size(); i++) {
-			queryBuilder.append(i);
-			queryBuilder.append(", ?");
-		}
-		queryBuilder.append(sectionNos.size());
-		queryBuilder.append(")");
-
-		final EntityManager em = EMF.get().createEntityManager();
-		try {
-			final Query query = em.createQuery(queryBuilder.toString());
-			for (int i = 0; i < sectionNos.size(); i++) {
-				query.setParameter(i + 1, sectionNos.get(i));
-			}
-			query.executeUpdate();
-		} finally {
-			em.close();
-		}
-	}
 }

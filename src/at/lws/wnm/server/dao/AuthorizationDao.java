@@ -8,8 +8,13 @@ import javax.persistence.Query;
 
 import at.lws.wnm.shared.model.Authorization;
 
-public class AuthorizationDao {
+public class AuthorizationDao extends AbstractDao{
 
+	AuthorizationDao()
+	{
+		
+	}
+	
 	public boolean isAuthorized(String user) {
 		final EntityManager em = EMF.get().createEntityManager();
 		try {

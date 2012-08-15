@@ -9,8 +9,11 @@ import javax.persistence.Query;
 import at.lws.wnm.server.model.Child;
 import at.lws.wnm.shared.model.GwtChild;
 
-public class ChildDao {
+public class ChildDao extends AbstractDao{
 
+	ChildDao() {
+	}
+	
 	@SuppressWarnings("unchecked")
 	public List<GwtChild> getAllChildren() {
 		final EntityManager em = EMF.get().createEntityManager();

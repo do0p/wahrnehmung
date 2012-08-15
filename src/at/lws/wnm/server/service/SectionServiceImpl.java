@@ -3,6 +3,7 @@ package at.lws.wnm.server.service;
 import java.util.List;
 
 import at.lws.wnm.client.service.SectionService;
+import at.lws.wnm.server.dao.DaoRegistry;
 import at.lws.wnm.server.dao.SectionDao;
 import at.lws.wnm.shared.model.GwtSection;
 
@@ -16,7 +17,7 @@ public class SectionServiceImpl extends RemoteServiceServlet implements
 
 
 	public SectionServiceImpl() {
-		sectionDao = new SectionDao();
+		sectionDao = DaoRegistry.get(SectionDao.class);
 	
 	}
 

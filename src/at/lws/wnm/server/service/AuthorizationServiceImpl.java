@@ -4,6 +4,7 @@ import java.util.List;
 
 import at.lws.wnm.client.service.AuthorizationService;
 import at.lws.wnm.server.dao.AuthorizationDao;
+import at.lws.wnm.server.dao.DaoRegistry;
 import at.lws.wnm.shared.model.Authorization;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
@@ -16,7 +17,7 @@ public class AuthorizationServiceImpl extends RemoteServiceServlet implements
 
 	public AuthorizationServiceImpl()
 	{
-		authorizationDao = new AuthorizationDao();
+		authorizationDao = DaoRegistry.get(AuthorizationDao.class);
 	}
 	
 	@Override

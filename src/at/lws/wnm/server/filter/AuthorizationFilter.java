@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import at.lws.wnm.server.dao.AuthorizationDao;
+import at.lws.wnm.server.dao.DaoRegistry;
 
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
@@ -74,7 +75,7 @@ public class AuthorizationFilter implements Filter {
 
 	@Override
 	public void init(FilterConfig arg0) throws ServletException {
-		authorizationDao = new AuthorizationDao();
+		authorizationDao = DaoRegistry.get(AuthorizationDao.class);
 	}
 
 }

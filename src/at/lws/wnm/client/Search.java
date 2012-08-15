@@ -6,6 +6,7 @@ import at.lws.wnm.client.service.WahrnehmungsService;
 import at.lws.wnm.client.service.WahrnehmungsServiceAsync;
 import at.lws.wnm.client.utils.NameSelection;
 import at.lws.wnm.client.utils.PopUp;
+import at.lws.wnm.client.utils.SectionSelection;
 import at.lws.wnm.client.utils.Utils;
 import at.lws.wnm.shared.model.BeobachtungsFilter;
 import at.lws.wnm.shared.model.GwtBeobachtung;
@@ -22,6 +23,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CellPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.AsyncDataProvider;
@@ -32,15 +34,7 @@ import com.google.gwt.view.client.SingleSelectionModel;
 
 public class Search extends VerticalPanel {
 
-	public class FilterButtonHandler implements ClickHandler {
 
-		@Override
-		public void onClick(ClickEvent event) {
-			filter.setChildKey(nameSelection.getSelectedChildKey());
-			updateTable();
-		}
-
-	}
 
 	private final CellTable<GwtBeobachtung> table;
 
@@ -51,6 +45,7 @@ public class Search extends VerticalPanel {
 	private final BeobachtungsFilter filter = new BeobachtungsFilter();
 
 	private NameSelection nameSelection;
+	private SectionSelection sectionSelection;
 
 	private Button sendButton;
 
@@ -59,13 +54,16 @@ public class Search extends VerticalPanel {
 	public Search(String width) {
 
 		final CellPanel filterBox = new HorizontalPanel();
+		filterBox.setSpacing(Utils.BUTTON_SPACING);
 		add(filterBox);
 
 		nameSelection = new NameSelection(dialogBox);
-		filterBox.add(nameSelection);
-
-		Utils.formatLeftCenter(filterBox, nameSelection, NameSelection.WIDTH,
-				Utils.FIELD_HEIGHT);
+		Utils.formatLeftCenter(filterBox, nameSelection, NameSelection.WIDTH, Utils.FIELD_HEIGHT);
+		
+		sectionSelection = new SectionSelection(dialogBox);
+		for (ListBox selectionBox : sectionSelection.getSectionSelectionBoxes()) {
+			Utils.formatLeftCenter(filterBox, selectionBox, Utils.LISTBOX_WIDTH, Utils.FIELD_HEIGHT);
+		}
 
 		sendButton = new Button(Utils.FILTER);
 		sendButton.addClickHandler(new FilterButtonHandler());
@@ -199,5 +197,16 @@ public class Search extends VerticalPanel {
 						dialogBox.center();
 					}
 				});
+	}
+	
+	public class FilterButtonHandler implements ClickHandler {
+
+		@Override
+		public void onClick(ClickEvent event) {
+			filter.setChildKey(nameSelection.getSelectedChildKey());
+			filter.setSectionKey(sectionSelection.getSelectedSectionKey());
+			updateTable();
+		}
+
 	}
 }
