@@ -6,8 +6,6 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
-import org.apache.commons.lang.StringUtils;
-
 import at.lws.wnm.server.model.Beobachtung;
 import at.lws.wnm.server.model.Child;
 import at.lws.wnm.shared.model.BeobachtungsFilter;
