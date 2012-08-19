@@ -23,6 +23,7 @@ public class BeobachtungDao extends AbstractDao {
 	@SuppressWarnings("unchecked")
 	public List<GwtBeobachtung> getBeobachtungen(BeobachtungsFilter filter,
 			Range range, User user) {
+
 		final List<Long> childKeys = getSectionDao().getAllChildKeys(filter.getSectionKey());
 		final StringBuilder queryBuilder = new StringBuilder();
 		queryBuilder.append("select b from Beobachtung b");
@@ -43,6 +44,7 @@ public class BeobachtungDao extends AbstractDao {
 	}
 
 	public int getRowCount(BeobachtungsFilter filter, User user) {
+
 		final List<Long> childKeys = getSectionDao().getAllChildKeys(filter.getSectionKey());
 		final StringBuilder queryBuilder = new StringBuilder();
 		queryBuilder.append("select count(b) from Beobachtung b");
