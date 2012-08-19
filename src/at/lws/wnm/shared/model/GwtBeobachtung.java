@@ -17,6 +17,7 @@ public class GwtBeobachtung implements Serializable {
 	private String sectionName;
 	private SocialEnum social;
 	private DurationEnum duration;
+	private String user;
 //
 //	private User user;
 //	public User getUser() {
@@ -147,6 +148,14 @@ public class GwtBeobachtung implements Serializable {
 		public static DurationEnum valueOfText(String text) {
 			return DURATIONS.get(text);
 		}
+	}
+
+	public String getUser() {
+		return user;
+	}
+
+	public void setUser(String user) {
+		this.user = user;
 	}
 
 }

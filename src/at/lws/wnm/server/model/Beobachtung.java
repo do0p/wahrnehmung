@@ -112,7 +112,7 @@ public class Beobachtung implements Serializable {
 		if (social != null) {
 			beobachtung.setSocial(SocialEnum.valueOf(social));
 		}
-		//beobachtung.setUser(user);
+		beobachtung.setUser(user.getEmail());
 		return beobachtung;
 	}
 

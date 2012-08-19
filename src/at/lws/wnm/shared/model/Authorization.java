@@ -16,6 +16,16 @@ public class Authorization implements Serializable {
 	private String email;
 
 	private boolean admin;
+	
+	private boolean seeAll;
+
+	public boolean isSeeAll() {
+		return seeAll;
+	}
+
+	public void setSeeAll(boolean seeAll) {
+		this.seeAll = seeAll;
+	}
 
 	public String getEmail() {
 		return email;

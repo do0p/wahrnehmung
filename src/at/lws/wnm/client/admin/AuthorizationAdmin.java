@@ -1,6 +1,8 @@
 package at.lws.wnm.client.admin;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import at.lws.wnm.client.service.AuthorizationService;
 import at.lws.wnm.client.service.AuthorizationServiceAsync;
@@ -14,10 +16,12 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
@@ -27,6 +31,8 @@ public class AuthorizationAdmin extends VerticalPanel {
 			.create(AuthorizationService.class);
 
 	private final TextBox userBox;
+	private final CheckBox adminCheckBox;
+	private final CheckBox seeAllCheckBox;
 	private final Button saveButton;
 	private final Button cancelButton;
 	private final Button deleteButton;
@@ -34,10 +40,13 @@ public class AuthorizationAdmin extends VerticalPanel {
 	private final SaveSuccess saveSuccess;
 
 	private final ListBox users;
+	private final Map<String, Authorization> authorizations = new HashMap<String, Authorization>();
 
 	public AuthorizationAdmin() {
 
 		userBox = new TextBox();
+		adminCheckBox = new CheckBox("Admin");
+		seeAllCheckBox = new CheckBox("Betreuer");
 		saveButton = new Button(Utils.ADD);
 		deleteButton = new Button(Utils.DEL);
 		deleteButton.setEnabled(false);
@@ -45,9 +54,14 @@ public class AuthorizationAdmin extends VerticalPanel {
 		dialogBox = new PopUp();
 		saveSuccess = new SaveSuccess();
 
-		final Grid grid = new Grid(3, 2);
+		final Panel rights = new VerticalPanel();
+		rights.add(adminCheckBox);
+		rights.add(seeAllCheckBox);
+		final Grid grid = new Grid(2, 2);
 		grid.setWidget(0, 0, new Label("User"));
 		grid.setWidget(0, 1, userBox);
+		grid.setWidget(1, 0, new Label("Rechte"));
+		grid.setWidget(1, 1, rights);
 
 		final VerticalPanel data = new VerticalPanel();
 		data.add(grid);
@@ -76,6 +90,7 @@ public class AuthorizationAdmin extends VerticalPanel {
 
 	private void rebuildUsersList() {
 		users.clear();
+		authorizations.clear();
 		authorizationService
 				.queryAuthorizations(new AsyncCallback<List<Authorization>>() {
 
@@ -91,6 +106,8 @@ public class AuthorizationAdmin extends VerticalPanel {
 						for (Authorization authorization : result) {
 							users.addItem(authorization.getEmail(),
 									authorization.getUserId());
+							authorizations.put(authorization.getUserId(),
+									authorization);
 						}
 					}
 				});
@@ -98,12 +115,12 @@ public class AuthorizationAdmin extends VerticalPanel {
 
 	private void resetForm() {
 		userBox.setText("");
+		adminCheckBox.setValue(Boolean.valueOf(false));
+		seeAllCheckBox.setValue(Boolean.valueOf(false));
 		if (deleteButton.isEnabled()) {
 			deleteButton.setEnabled(false);
 		}
-		if (!saveButton.isEnabled()) {
-			saveButton.setEnabled(true);
-		}
+		saveButton.setHTML(Utils.ADD);
 	}
 
 	public class SaveClickHandler implements ClickHandler {
@@ -117,6 +134,8 @@ public class AuthorizationAdmin extends VerticalPanel {
 				return;
 			}
 			aut.setEmail(email);
+			aut.setAdmin(adminCheckBox.getValue().booleanValue());
+			aut.setSeeAll(seeAllCheckBox.getValue().booleanValue());
 
 			authorizationService.storeAuthorization(aut,
 					new AsyncCallback<Void>() {
@@ -150,8 +169,13 @@ public class AuthorizationAdmin extends VerticalPanel {
 			if (selectedIndex < 0) {
 				return;
 			}
+			final Authorization authorization = authorizations.get(users
+					.getValue(selectedIndex));
 			userBox.setText(users.getItemText(selectedIndex));
-			saveButton.setEnabled(false);
+			adminCheckBox.setValue(Boolean.valueOf(authorization.isAdmin()));
+			seeAllCheckBox.setValue(Boolean.valueOf(authorization.isSeeAll()));
+
+			saveButton.setHTML(Utils.CHANGE);
 			deleteButton.setEnabled(true);
 		}
 

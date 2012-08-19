@@ -9,6 +9,7 @@ public class GwtUserInfo implements Serializable {
 	private String logoutUrl;
 	private String loginUrl;
 	private boolean loggedIn;
+	
 
 	public String getLogoutUrl() {
 		return logoutUrl;

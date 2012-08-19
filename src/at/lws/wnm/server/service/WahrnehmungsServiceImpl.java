@@ -1,13 +1,15 @@
 package at.lws.wnm.server.service;
 
-import java.util.List;
-
 import at.lws.wnm.client.service.WahrnehmungsService;
+import at.lws.wnm.server.dao.AuthorizationDao;
 import at.lws.wnm.server.dao.BeobachtungDao;
 import at.lws.wnm.server.dao.DaoRegistry;
+import at.lws.wnm.shared.model.Authorization;
 import at.lws.wnm.shared.model.BeobachtungsFilter;
+import at.lws.wnm.shared.model.BeobachtungsResult;
 import at.lws.wnm.shared.model.GwtBeobachtung;
 
+import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
@@ -24,17 +26,19 @@ public class WahrnehmungsServiceImpl extends RemoteServiceServlet implements
 
 	private final UserService userService;
 
+	private AuthorizationDao authorizationDao;
+
 	public WahrnehmungsServiceImpl() {
 		beobachtungsDao = DaoRegistry.get(BeobachtungDao.class);
+		authorizationDao = DaoRegistry.get(AuthorizationDao.class);
 		userService = UserServiceFactory.getUserService();
 	}
 
 	@Override
 	public void storeBeobachtung(GwtBeobachtung beobachtung) {
-		beobachtungsDao.storeBeobachtung(beobachtung, userService.getCurrentUser());
+		beobachtungsDao.storeBeobachtung(beobachtung,
+				userService.getCurrentUser());
 	}
-
-
 
 	@Override
 	public GwtBeobachtung getBeobachtung(Long beobachtungsKey) {
@@ -42,14 +46,22 @@ public class WahrnehmungsServiceImpl extends RemoteServiceServlet implements
 	}
 
 	@Override
-	public List<GwtBeobachtung> getBeobachtungen(BeobachtungsFilter filter,
+	public BeobachtungsResult getBeobachtungen(BeobachtungsFilter filter,
 			Range range) {
-		return beobachtungsDao.getBeobachtungen(filter, range);
+		final User user = getUserForQuery();
+		final BeobachtungsResult result = new BeobachtungsResult();
+		result.setBeobachtungen(beobachtungsDao.getBeobachtungen(filter, range,
+				user));
+		result.setRowCount(beobachtungsDao.getRowCount(filter, user));
+		return result;
 	}
 
-	@Override
-	public int getRowCount(BeobachtungsFilter filter) {
-		return beobachtungsDao.getRowCount(filter);
+	private User getUserForQuery() {
+		final User currentUser = userService.getCurrentUser();
+		final Authorization authorization = authorizationDao
+				.getAuthorization(currentUser);
+		final User user = authorization.isSeeAll() ? null : currentUser;
+		return user;
 	}
 
 }

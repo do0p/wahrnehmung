@@ -22,15 +22,17 @@ public class BeobachtungDao extends AbstractDao {
 
 	@SuppressWarnings("unchecked")
 	public List<GwtBeobachtung> getBeobachtungen(BeobachtungsFilter filter,
-			Range range) {
+			Range range, User user) {
+		final List<Long> childKeys = getSectionDao().getAllChildKeys(filter.getSectionKey());
 		final StringBuilder queryBuilder = new StringBuilder();
 		queryBuilder.append("select b from Beobachtung b");
-		queryBuilder.append(createWhereQuery(filter));
+		queryBuilder.append(createWhereQuery(filter, user, childKeys));
 		queryBuilder.append(" order by b.date desc");
 
 		final EntityManager em = EMF.get().createEntityManager();
 		try {
 			final Query query = em.createQuery(queryBuilder.toString());
+			addParameter(query, filter, user, childKeys);
 			query.setFirstResult(range.getStart());
 			query.setMaxResults(range.getLength());
 
@@ -40,73 +42,17 @@ public class BeobachtungDao extends AbstractDao {
 		}
 	}
 
-	public int getRowCount(BeobachtungsFilter filter) {
+	public int getRowCount(BeobachtungsFilter filter, User user) {
+		final List<Long> childKeys = getSectionDao().getAllChildKeys(filter.getSectionKey());
 		final StringBuilder queryBuilder = new StringBuilder();
 		queryBuilder.append("select count(b) from Beobachtung b");
-		queryBuilder.append(createWhereQuery(filter));
+		queryBuilder.append(createWhereQuery(filter, user, childKeys));
 
 		final EntityManager em = EMF.get().createEntityManager();
 		try {
 			final Query query = em.createQuery(queryBuilder.toString());
-
+			addParameter(query, filter, user, childKeys);
 			return ((Integer) query.getSingleResult()).intValue();
-		} finally {
-			em.close();
-		}
-	}
-
-	private String createWhereQuery(BeobachtungsFilter filter) {
-		final List<String> subQueries = new ArrayList<String>();
-
-		if (filter.getChildKey() != null) {
-			subQueries.add("b.childKey = " + filter.getChildKey());
-		}
-
-		final Long sectionKey = filter.getSectionKey();
-		if (sectionKey != null) {
-			final StringBuilder query = new StringBuilder();
-			query.append(" b.sectionKey in ( ").append(sectionKey);
-			for (Long subSectionKey : getSectionDao().getAllChildKeys(
-					sectionKey)) {
-				query.append(", ").append(subSectionKey);
-			}
-			query.append(" )");
-			subQueries.add(query.toString());
-		}
-
-		if (subQueries.size() > 0) {
-			return " where " + AbstractDao.join(subQueries, " and ");
-		}
-		return "";
-	}
-
-	private List<GwtBeobachtung> mapToGwtBeobachtung(
-			List<Beobachtung> resultList, EntityManager em) {
-		final List<GwtBeobachtung> result = new ArrayList<GwtBeobachtung>();
-		for (Beobachtung beobachtung : resultList) {
-			final GwtBeobachtung gwtBeobachtung = beobachtung.toGwt();
-			// gwtBeobachtung.setText("");
-			gwtBeobachtung.setChildName(getChildName(beobachtung.getChildKey(),
-					em));
-			gwtBeobachtung.setSectionName(getSectionDao().getSectionName(
-					beobachtung.getSectionKey(), em));
-			result.add(gwtBeobachtung);
-		}
-		return result;
-	}
-
-	private String getChildName(Long childKey, EntityManager em) {
-		final Child child = em.find(Child.class, childKey);
-		return child.getFirstName() + " " + child.getLastName();
-	}
-
-	public void storeBeobachtung(GwtBeobachtung gwtBeobachtung, User user) {
-		final EntityManager em = EMF.get().createEntityManager();
-		try {
-
-			final Beobachtung beobachtung = Beobachtung.valueOf(gwtBeobachtung);
-			beobachtung.setUser(user);
-			em.persist(beobachtung);
 		} finally {
 			em.close();
 		}
@@ -117,15 +63,6 @@ public class BeobachtungDao extends AbstractDao {
 		try {
 
 			return em.find(Beobachtung.class, beobachtungsKey).toGwt();
-		} finally {
-			em.close();
-		}
-	}
-
-	public List<GwtBeobachtung> getBeobachtungen(List<Long> sectionNos) {
-		final EntityManager em = EMF.get().createEntityManager();
-		try {
-			return getBeobachtungen(sectionNos, em);
 		} finally {
 			em.close();
 		}
@@ -156,6 +93,18 @@ public class BeobachtungDao extends AbstractDao {
 		return mapToGwtBeobachtung(query.getResultList(), em);
 	}
 
+	public void storeBeobachtung(GwtBeobachtung gwtBeobachtung, User user) {
+		final EntityManager em = EMF.get().createEntityManager();
+		try {
+
+			final Beobachtung beobachtung = Beobachtung.valueOf(gwtBeobachtung);
+			beobachtung.setUser(user);
+			em.persist(beobachtung);
+		} finally {
+			em.close();
+		}
+	}
+
 	public void deleteAllFromChild(Long key) {
 		final EntityManager em = EMF.get().createEntityManager();
 		try {
@@ -167,6 +116,84 @@ public class BeobachtungDao extends AbstractDao {
 			em.close();
 		}
 	}
+
+	private String createWhereQuery(BeobachtungsFilter filter, User user, List<Long> childKeys) {
+		final List<String> subQueries = new ArrayList<String>();
+
+		if (filter.getChildKey() != null) {
+			subQueries.add(" b.childKey = :childKey");
+		}
+
+		final Long sectionKey = filter.getSectionKey();
+		if (sectionKey != null) {
+			final StringBuilder query = new StringBuilder();
+			query.append(" b.sectionKey in ( :sectionKey0");
+			for (int i = 1; i <= childKeys.size(); i++) {
+				query.append(", :sectionKey" + i);
+			}
+			query.append(" )");
+			subQueries.add(query.toString());
+		}
+
+		if (user != null) {
+			subQueries.add(" b.user = :user");
+		}
+		
+		if (subQueries.size() > 0) {
+			return " where" + AbstractDao.join(subQueries, " and");
+		}
+		return "";
+	}
+	
+
+	private void addParameter(Query query, BeobachtungsFilter filter,
+			User user, List<Long> childKeys) {
+		if (filter.getChildKey() != null) {
+			query.setParameter("childKey", filter.getChildKey());
+		}
+
+		final Long sectionKey = filter.getSectionKey();
+		if (sectionKey != null) {
+			query.setParameter("sectionKey0", filter.getSectionKey());
+			for (int i = 1; i <= childKeys.size(); i++) {
+				query.setParameter("sectionKey" + i, childKeys.get(i- 1));
+			}
+		}
+
+		if (user != null) {
+			query.setParameter("user", user);
+		}		
+	}
+
+
+	private List<GwtBeobachtung> mapToGwtBeobachtung(
+			List<Beobachtung> resultList, EntityManager em) {
+		final List<GwtBeobachtung> result = new ArrayList<GwtBeobachtung>();
+		for (Beobachtung beobachtung : resultList) {
+			final GwtBeobachtung gwtBeobachtung = beobachtung.toGwt();
+			// gwtBeobachtung.setText("");
+			gwtBeobachtung.setChildName(getChildName(beobachtung.getChildKey(),
+					em));
+			gwtBeobachtung.setSectionName(getSectionDao().getSectionName(
+					beobachtung.getSectionKey(), em));
+			result.add(gwtBeobachtung);
+		}
+		return result;
+	}
+
+	private String getChildName(Long childKey, EntityManager em) {
+		final Child child = em.find(Child.class, childKey);
+		return child.getFirstName() + " " + child.getLastName();
+	}
+
+	// public List<GwtBeobachtung> getBeobachtungen(List<Long> sectionNos) {
+	// final EntityManager em = EMF.get().createEntityManager();
+	// try {
+	// return getBeobachtungen(sectionNos, em);
+	// } finally {
+	// em.close();
+	// }
+	// }
 
 	private SectionDao getSectionDao() {
 		return DaoRegistry.get(SectionDao.class);
