@@ -1,7 +1,5 @@
 package at.lws.wnm.client;
 
-import java.util.List;
-
 import at.lws.wnm.client.service.WahrnehmungsService;
 import at.lws.wnm.client.service.WahrnehmungsServiceAsync;
 import at.lws.wnm.client.utils.NameSelection;
@@ -9,6 +7,7 @@ import at.lws.wnm.client.utils.PopUp;
 import at.lws.wnm.client.utils.SectionSelection;
 import at.lws.wnm.client.utils.Utils;
 import at.lws.wnm.shared.model.BeobachtungsFilter;
+import at.lws.wnm.shared.model.BeobachtungsResult;
 import at.lws.wnm.shared.model.GwtBeobachtung;
 
 import com.google.gwt.core.client.GWT;
@@ -166,28 +165,14 @@ public class Search extends VerticalPanel {
 	private void updateTable() {
 		final Range visibleRange = table.getVisibleRange();
 
-		wahrnehmungsService.getRowCount(filter, new AsyncCallback<Integer>() {
-
-			@Override
-			public void onFailure(Throwable caught) {
-				dialogBox.setErrorMessage();
-				dialogBox.center();
-			}
-
-			@Override
-			public void onSuccess(Integer result) {
-				table.setRowCount(result.intValue());
-				table.redraw();
-			}
-		});
-
 		wahrnehmungsService.getBeobachtungen(filter, visibleRange,
-				new AsyncCallback<List<GwtBeobachtung>>() {
+				new AsyncCallback<BeobachtungsResult>() {
 
 					@Override
-					public void onSuccess(List<GwtBeobachtung> result) {
+					public void onSuccess(BeobachtungsResult result) {
 						asyncDataProvider.updateRowData(
-								visibleRange.getStart(), result);
+								visibleRange.getStart(), result.getBeobachtungen());
+						table.setRowCount(result.getRowCount());
 						table.redraw();
 					}
 

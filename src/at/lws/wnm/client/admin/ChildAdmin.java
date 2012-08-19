@@ -122,7 +122,7 @@ public class ChildAdmin extends VerticalPanel {
 		if (deleteButton.isEnabled()) {
 			deleteButton.setEnabled(false);
 		}
-			saveButton.setHTML(Utils.ADD);
+		saveButton.setHTML(Utils.ADD);
 	}
 
 	public class SaveClickHandler implements ClickHandler {
@@ -162,23 +162,19 @@ public class ChildAdmin extends VerticalPanel {
 		@Override
 		public void onClick(ClickEvent event) {
 			final int selectedIndex = children.getSelectedIndex();
-			if(selectedIndex < 0 )
-			{
+			if (selectedIndex < 0) {
 				return;
 			}
-			final Long childKey = Long.valueOf(children.getValue(selectedIndex));
+			final Long childKey = Long
+					.valueOf(children.getValue(selectedIndex));
 			childService.getChild(childKey, new AsyncCallback<GwtChild>() {
 
 				@Override
 				public void onFailure(Throwable caught) {
-					dialogBox.setErrorMessage(caught
-							.getLocalizedMessage());
-					dialogBox
-							.setDisableWhileShown(deleteButton);
+					dialogBox.setErrorMessage(caught.getLocalizedMessage());
+					dialogBox.setDisableWhileShown(deleteButton);
 					dialogBox.center();
 				}
-
-	
 
 				@Override
 				public void onSuccess(GwtChild child) {
@@ -188,7 +184,7 @@ public class ChildAdmin extends VerticalPanel {
 					bdBox.setValue(child.getBirthDay());
 					saveButton.setHTML(Utils.CHANGE);
 					deleteButton.setEnabled(true);
-					
+
 				}
 			});
 		}

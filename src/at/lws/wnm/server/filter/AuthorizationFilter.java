@@ -1,8 +1,6 @@
 package at.lws.wnm.server.filter;
 
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.servlet.Filter;
@@ -23,14 +21,11 @@ import com.google.appengine.api.users.UserServiceFactory;
 
 public class AuthorizationFilter implements Filter {
 
-	private static final Set<String> ALLOWED_USERIDS = new HashSet<String>();
 	private static final Logger LOGGER = Logger
 			.getLogger(AuthorizationFilter.class.getName());
 	private AuthorizationDao authorizationDao;
 
-	static {
-		ALLOWED_USERIDS.add("dbrandl72@gmail.com");
-	}
+
 
 	@Override
 	public void destroy() {
@@ -49,13 +44,12 @@ public class AuthorizationFilter implements Filter {
 			return;
 		}
 
-		final String email = currentUser.getEmail();
-		if (ALLOWED_USERIDS.contains(email) || authorizationDao.isAuthorized(email)) {
+		if (authorizationDao.isAuthorized(currentUser)) {
 			chain.doFilter(request, response);
 			return;
 		}
 
-		LOGGER.warning("unknown user " + email
+		LOGGER.warning("unknown user " + currentUser.getEmail()
 				+ " tried to log in");
 		redirect(response,
 				userService.createLogoutURL(((HttpServletRequest) request)

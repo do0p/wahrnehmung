@@ -1,8 +1,7 @@
 package at.lws.wnm.client.service;
 
-import java.util.List;
-
 import at.lws.wnm.shared.model.BeobachtungsFilter;
+import at.lws.wnm.shared.model.BeobachtungsResult;
 import at.lws.wnm.shared.model.GwtBeobachtung;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -17,11 +16,9 @@ public interface WahrnehmungsServiceAsync {
 			AsyncCallback<Void> callback);
 
 	void getBeobachtungen(BeobachtungsFilter filter, Range range,
-			AsyncCallback<List<GwtBeobachtung>> callback);
+			AsyncCallback<BeobachtungsResult> callback);
 
 	void getBeobachtung(Long beobachtungsKey,
 			AsyncCallback<GwtBeobachtung> callback);
-
-	void getRowCount(BeobachtungsFilter filter, AsyncCallback<Integer> callback);
 
 }

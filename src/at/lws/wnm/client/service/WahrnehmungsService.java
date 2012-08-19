@@ -1,8 +1,7 @@
 package at.lws.wnm.client.service;
 
-import java.util.List;
-
 import at.lws.wnm.shared.model.BeobachtungsFilter;
+import at.lws.wnm.shared.model.BeobachtungsResult;
 import at.lws.wnm.shared.model.GwtBeobachtung;
 
 import com.google.gwt.user.client.rpc.RemoteService;
@@ -14,11 +13,11 @@ import com.google.gwt.view.client.Range;
  */
 @RemoteServiceRelativePath("store")
 public interface WahrnehmungsService extends RemoteService {
+	
 	void storeBeobachtung(GwtBeobachtung beobachtung);
 
-	List<GwtBeobachtung> getBeobachtungen(BeobachtungsFilter filter, Range range);
+	BeobachtungsResult getBeobachtungen(BeobachtungsFilter filter, Range range);
 	
 	GwtBeobachtung getBeobachtung(Long beobachtungsKey);
 	
-	int getRowCount(BeobachtungsFilter filter);
 }
