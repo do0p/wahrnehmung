@@ -26,6 +26,10 @@ public class Section implements Serializable {
 		return key;
 	}
 
+	public void setKey(Long key) {
+		this.key = key;
+	}
+
 	public String getSectionName() {
 		return sectionName;
 	}

@@ -18,15 +18,6 @@ public class GwtBeobachtung implements Serializable {
 	private SocialEnum social;
 	private DurationEnum duration;
 	private String user;
-//
-//	private User user;
-//	public User getUser() {
-//		return user;
-//	}
-//
-//	public void setUser(User user) {
-//		this.user = user;
-//	}
 
 	public void setText(String text) {
 		this.text = text;
@@ -156,6 +147,33 @@ public class GwtBeobachtung implements Serializable {
 
 	public void setUser(String user) {
 		this.user = user;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (!(obj instanceof GwtBeobachtung)) {
+			return false;
+		}
+		final GwtBeobachtung other = (GwtBeobachtung) obj;
+		return childKey.equals(other.childKey)
+				&& sectionKey.equals(other.sectionKey)
+				&& text.equals(other.text)
+				&& ObjectUtils.equals(social, other.social)
+				&& ObjectUtils.equals(duration, other.duration)
+				&& date.equals(other.date) 
+				&& user.equals(other.user);
+	}
+	
+	@Override
+	public int hashCode() {
+		int result = 37;
+		result = result * 17 + childKey.hashCode();
+		result = result * 17 + sectionKey.hashCode();
+		result = result * 17 + text.hashCode();
+		result = result * 17 + ObjectUtils.hashCode(social);
+		result = result * 17 + ObjectUtils.hashCode(duration);
+		result = result * 17 + date.hashCode();
+		return result * 17 + user.hashCode();
 	}
 
 }
