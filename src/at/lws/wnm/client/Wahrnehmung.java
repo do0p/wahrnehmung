@@ -1,6 +1,8 @@
 package at.lws.wnm.client;
 
 import at.lws.wnm.client.admin.AdminContent;
+import at.lws.wnm.client.service.AuthorizationService;
+import at.lws.wnm.client.service.AuthorizationServiceAsync;
 import at.lws.wnm.client.service.UserService;
 import at.lws.wnm.client.service.UserServiceAsync;
 import at.lws.wnm.shared.model.GwtUserInfo;
@@ -13,10 +15,10 @@ import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.Widget;
 
 public class Wahrnehmung implements EntryPoint, ValueChangeHandler<String> {
 
@@ -25,9 +27,12 @@ public class Wahrnehmung implements EntryPoint, ValueChangeHandler<String> {
 	private static final String LIST_ENTRY = "list";
 
 	private final UserServiceAsync userService = GWT.create(UserService.class);
+	private final AuthorizationServiceAsync authService = GWT
+			.create(AuthorizationService.class);
 
 	public void onModuleLoad() {
-		userService.getUserInfo(Window.Location.createUrlBuilder().buildString(), new AsyncCallback<GwtUserInfo>() {
+		userService.getUserInfo(Window.Location.createUrlBuilder()
+				.buildString(), new AsyncCallback<GwtUserInfo>() {
 			@Override
 			public void onSuccess(GwtUserInfo userInfo) {
 				if (userInfo.isLoggedIn()) {
@@ -59,7 +64,19 @@ public class Wahrnehmung implements EntryPoint, ValueChangeHandler<String> {
 		navigation.setSpacing(10);
 		navigation.add(new Hyperlink("erfassen", NEW_ENTRY));
 		navigation.add(new Hyperlink("anzeigen", LIST_ENTRY));
-		navigation.add(new Hyperlink("administrieren", ADMIN));
+		authService.currentUserIsAdmin(new AsyncCallback<Boolean>() {
+
+			@Override
+			public void onFailure(Throwable caught) {
+			}
+
+			@Override
+			public void onSuccess(Boolean result) {
+				if (result != null && result.booleanValue()) {
+					navigation.add(new Hyperlink("administrieren", ADMIN));
+				}
+			}
+		});
 		return navigation;
 	}
 
@@ -69,16 +86,35 @@ public class Wahrnehmung implements EntryPoint, ValueChangeHandler<String> {
 	}
 
 	private void changePage(String token) {
-		final RootPanel rootPanel = RootPanel.get("content");
-		rootPanel.clear();
+		Widget content = null;
 		if (token.equals(NEW_ENTRY)) {
-			rootPanel.add(new EditContent());
+			content = new EditContent();
 		} else if (token.equals(LIST_ENTRY)) {
-			rootPanel.add(new Search("850px"));
-		} else if (token.equals(ADMIN)) {
-			rootPanel.add(new AdminContent());
-		} else {
-			rootPanel.add(new HTML("Hello"));
+			content = new Search("850px");
+		} else if (token.equals(ADMIN) ) {
+			
+			authService.currentUserIsAdmin(new AsyncCallback<Boolean>() {
+
+				@Override
+				public void onFailure(Throwable caught) {
+				}
+
+				@Override
+				public void onSuccess(Boolean result) {
+					if (result != null && result.booleanValue()) {
+						final RootPanel rootPanel = RootPanel.get("content");
+						rootPanel.clear();
+						rootPanel.add(new AdminContent());
+					}
+				}
+			});
+		}
+		
+
+		if (content != null) {
+			final RootPanel rootPanel = RootPanel.get("content");
+			rootPanel.clear();
+			rootPanel.add(content);
 		}
 	}
 }

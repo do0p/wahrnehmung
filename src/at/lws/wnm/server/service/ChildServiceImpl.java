@@ -16,10 +16,12 @@ public class ChildServiceImpl extends RemoteServiceServlet implements
 
 	private final ChildDao childDao;
 	private final BeobachtungDao beobachtungsDao;
+	private final AuthorizationServiceImpl authorizationService;
 
 	public ChildServiceImpl() {
 		childDao = DaoRegistry.get(ChildDao.class);
 		beobachtungsDao = DaoRegistry.get(BeobachtungDao.class);
+		authorizationService = new AuthorizationServiceImpl();
 	}
 
 	@Override
@@ -31,11 +33,13 @@ public class ChildServiceImpl extends RemoteServiceServlet implements
 
 	@Override
 	public void storeChild(GwtChild child) {
+		authorizationService.assertCurrentUserIsAdmin();
 		childDao.storeChild(child);
 	}
 
 	@Override
 	public void deleteChild(GwtChild child) throws IllegalArgumentException {
+		authorizationService.assertCurrentUserIsAdmin();
 		beobachtungsDao.deleteAllFromChild(child.getKey());
 		childDao.deleteChild(child);
 	}
