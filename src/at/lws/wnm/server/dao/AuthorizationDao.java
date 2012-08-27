@@ -1,8 +1,11 @@
 package at.lws.wnm.server.dao;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.EntityManager;
@@ -12,56 +15,34 @@ import at.lws.wnm.shared.model.Authorization;
 
 import com.google.appengine.api.users.User;
 
-public class AuthorizationDao extends AbstractDao{
+public class AuthorizationDao extends AbstractDao {
 
 	private static final Set<String> SUPER_USER_IDS = new HashSet<String>();
 	static {
 		SUPER_USER_IDS.add("dbrandl72@gmail.com");
 	}
-	
-	AuthorizationDao()
-	{
-		
-	}
-	
-	public Authorization getAuthorization(User user)
-	{
-		final String lowerUserEmail = user.getEmail().toLowerCase();
-		if(SUPER_USER_IDS.contains(lowerUserEmail))
-		{
-			return createSuperUser(lowerUserEmail);
-		}
-		final EntityManager em = EMF.get().createEntityManager();
-		try {
-			return em.find(Authorization.class, lowerUserEmail);
-		} finally {
-			em.close();
-		}
-	}
-	
-	public boolean isAuthorized(User user) {
-		final String lowerUserEmail = user.getEmail().toLowerCase();
-		if(SUPER_USER_IDS.contains(lowerUserEmail))
-		{
-			return true;
-		}
-		final EntityManager em = EMF.get().createEntityManager();
-		try {
-			return em.find(Authorization.class, lowerUserEmail) != null;
-		} finally {
-			em.close();
-		}
+
+	private volatile boolean needCacheUpdate = true;
+	private Map<String, Authorization> cache = new HashMap<String, Authorization>();
+
+	AuthorizationDao() {
+		initCache();
 	}
 
-	@SuppressWarnings("unchecked")
-	public List<Authorization> queryAuthorizations() {
-		final EntityManager em = EMF.get().createEntityManager();
-		try {
-			final Query query = em.createQuery("select from Authorization");
-			return new ArrayList<Authorization>(query.getResultList());
-		} finally {
-			em.close();
-		}
+	public Authorization getAuthorization(User user) {
+		refreshCache();
+		return cache.get(createUserId(user));
+	}
+
+
+	public boolean isAuthorized(User user) {
+		refreshCache();
+		return cache.containsKey(createUserId(user));
+	}
+
+	public Collection<Authorization> queryAuthorizations() {
+		refreshCache();
+		return new ArrayList<Authorization>(cache.values());
 	}
 
 	public void storeAuthorization(Authorization aut) {
@@ -69,6 +50,7 @@ public class AuthorizationDao extends AbstractDao{
 		final EntityManager em = EMF.get().createEntityManager();
 		try {
 			em.persist(aut);
+			needCacheUpdate = true;
 		} finally {
 			em.close();
 		}
@@ -77,14 +59,15 @@ public class AuthorizationDao extends AbstractDao{
 	public void deleteAuthorization(String email) {
 		final EntityManager em = EMF.get().createEntityManager();
 		try {
-			final Query query = em.createQuery("delete from Authorization a where a.userId = :userId");
+			final Query query = em
+					.createQuery("delete from Authorization a where a.userId = :userId");
 			query.setParameter("userId", email.toLowerCase());
 			query.executeUpdate();
+			needCacheUpdate = true;
 		} finally {
 			em.close();
 		}
 	}
-
 
 	private Authorization createSuperUser(String email) {
 		final Authorization superUser = new Authorization();
@@ -95,5 +78,41 @@ public class AuthorizationDao extends AbstractDao{
 		return superUser;
 	}
 
+	private void initCache() {
+		updateCache();
+	}
+
+	private void refreshCache() {
+		if (needCacheUpdate) {
+			synchronized (this) {
+				if (needCacheUpdate) {
+					updateCache();
+				}
+			}
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private void updateCache() {
+		final Map<String, Authorization> tmpCache = new HashMap<String, Authorization>();
+		for (String superUserId : SUPER_USER_IDS) {
+			tmpCache.put(superUserId, createSuperUser(superUserId));
+		}
+		final EntityManager em = EMF.get().createEntityManager();
+		try {
+			final Query query = em.createQuery("select from Authorization");
+			for (Authorization auth : (List<Authorization>)query.getResultList()) {
+				tmpCache.put(auth.getUserId(), auth);
+			}
+		} finally {
+			em.close();
+		}
+		cache = tmpCache;
+		needCacheUpdate = false;
+	}
 	
+	private String createUserId(User user) {
+		return user.getEmail().toLowerCase();
+	}
+
 }

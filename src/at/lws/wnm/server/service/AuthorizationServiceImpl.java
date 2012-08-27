@@ -1,6 +1,6 @@
 package at.lws.wnm.server.service;
 
-import java.util.List;
+import java.util.Collection;
 
 import at.lws.wnm.client.service.AuthorizationService;
 import at.lws.wnm.server.dao.AuthorizationDao;
@@ -21,7 +21,7 @@ public class AuthorizationServiceImpl extends RemoteServiceServlet implements
 	}
 	
 	@Override
-	public List<Authorization> queryAuthorizations() {
+	public Collection<Authorization> queryAuthorizations() {
 
 		return authorizationDao.queryAuthorizations();
 	}

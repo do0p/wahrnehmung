@@ -1,6 +1,6 @@
 package at.lws.wnm.client.service;
 
-import java.util.List;
+import java.util.Collection;
 
 import at.lws.wnm.shared.model.Authorization;
 
@@ -8,7 +8,8 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public interface AuthorizationServiceAsync {
 
-	void queryAuthorizations(AsyncCallback<List<Authorization>> asyncCallback);
+	void queryAuthorizations(
+			AsyncCallback<Collection<Authorization>> asyncCallback);
 
 	void storeAuthorization(Authorization aut, AsyncCallback<Void> asyncCallback);
 

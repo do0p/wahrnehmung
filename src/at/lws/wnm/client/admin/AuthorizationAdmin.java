@@ -1,7 +1,7 @@
 package at.lws.wnm.client.admin;
 
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import at.lws.wnm.client.service.AuthorizationService;
@@ -92,7 +92,7 @@ public class AuthorizationAdmin extends VerticalPanel {
 		users.clear();
 		authorizations.clear();
 		authorizationService
-				.queryAuthorizations(new AsyncCallback<List<Authorization>>() {
+				.queryAuthorizations(new AsyncCallback<Collection<Authorization>>() {
 
 					@Override
 					public void onFailure(Throwable caught) {
@@ -102,7 +102,7 @@ public class AuthorizationAdmin extends VerticalPanel {
 					}
 
 					@Override
-					public void onSuccess(List<Authorization> result) {
+					public void onSuccess(Collection<Authorization> result) {
 						for (Authorization authorization : result) {
 							users.addItem(authorization.getEmail(),
 									authorization.getUserId());

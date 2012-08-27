@@ -14,8 +14,8 @@ import at.lws.wnm.shared.model.GwtSection;
 public class SectionDao extends AbstractDao {
 
 
-	private Map<Long, List<Long>> childMap;
-	private volatile boolean childMapUpdateNeeded = true;
+	private Map<Long, List<Long>> sectionChildCache;
+	private volatile boolean sectionChildCacheUpdateNeeded = true;
 
 	SectionDao() {
 
@@ -49,7 +49,7 @@ public class SectionDao extends AbstractDao {
 
 	public List<Long> getAllChildKeys(Long key) {
 		updateChildKeys();
-		final List<Long> children = childMap.get(key);
+		final List<Long> children = sectionChildCache.get(key);
 		if (children == null) {
 			return new ArrayList<Long>();
 		}
@@ -71,7 +71,7 @@ public class SectionDao extends AbstractDao {
 			}
 			synchronized (this) {
 				em.persist(Section.valueOf(gwtSection));
-				childMapUpdateNeeded = true;
+				sectionChildCacheUpdateNeeded = true;
 			}
 		} finally {
 			em.close();
@@ -104,7 +104,7 @@ public class SectionDao extends AbstractDao {
 			}
 			synchronized (this) {
 				query.executeUpdate();
-				childMapUpdateNeeded = true;
+				sectionChildCacheUpdateNeeded = true;
 			}
 		} finally {
 			em.close();
@@ -112,9 +112,9 @@ public class SectionDao extends AbstractDao {
 	}
 
 	private void updateChildKeys() {
-		if (childMapUpdateNeeded) {
+		if (sectionChildCacheUpdateNeeded) {
 			synchronized (this) {
-				if (childMapUpdateNeeded) {
+				if (sectionChildCacheUpdateNeeded) {
 					final Map<Long, List<Long>> tmpChildMap = new HashMap<Long, List<Long>>();
 					final EntityManager em = EMF.get().createEntityManager();
 					try {
@@ -122,8 +122,8 @@ public class SectionDao extends AbstractDao {
 					} finally {
 						em.close();
 					}
-					childMap = tmpChildMap;
-					childMapUpdateNeeded = false;
+					sectionChildCache = tmpChildMap;
+					sectionChildCacheUpdateNeeded = false;
 				}
 			}
 		}
