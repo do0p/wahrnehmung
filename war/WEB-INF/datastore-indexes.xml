@@ -1,4 +1,4 @@
-<datastore-indexes autoGenerate="true">
+<datastore-indexes autoGenerate="false">
 
     <datastore-index kind="Beobachtung" ancestor="false" source="auto">
         <property name="user" direction="asc"/>
@@ -38,6 +38,6 @@
     <datastore-index kind="Beobachtung" ancestor="false" source="auto">
         <property name="childKey" direction="asc"/>
         <property name="date" direction="desc"/>
-    </datastore-index>
+    </datastore-index> 
 
 </datastore-indexes>
