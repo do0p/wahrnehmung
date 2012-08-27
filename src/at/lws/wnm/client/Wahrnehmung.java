@@ -3,9 +3,7 @@ package at.lws.wnm.client;
 import at.lws.wnm.client.admin.AdminContent;
 import at.lws.wnm.client.service.AuthorizationService;
 import at.lws.wnm.client.service.AuthorizationServiceAsync;
-import at.lws.wnm.client.service.UserService;
-import at.lws.wnm.client.service.UserServiceAsync;
-import at.lws.wnm.shared.model.GwtUserInfo;
+import at.lws.wnm.shared.model.Authorization;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -26,36 +24,41 @@ public class Wahrnehmung implements EntryPoint, ValueChangeHandler<String> {
 	private static final String NEW_ENTRY = "new";
 	private static final String LIST_ENTRY = "list";
 
-	private final UserServiceAsync userService = GWT.create(UserService.class);
 	private final AuthorizationServiceAsync authService = GWT
 			.create(AuthorizationService.class);
 
-	public void onModuleLoad() {
-		userService.getUserInfo(Window.Location.createUrlBuilder()
-				.buildString(), new AsyncCallback<GwtUserInfo>() {
-			@Override
-			public void onSuccess(GwtUserInfo userInfo) {
-				if (userInfo.isLoggedIn()) {
-					RootPanel.get("logout").add(
-							new Anchor("logout", userInfo.getLogoutUrl()));
-				} else {
-					RootPanel.get("logout").add(
-							new Anchor("login", userInfo.getLoginUrl()));
-				}
-			}
+	private Authorization authorization;
 
-			@Override
-			public void onFailure(Throwable caught) {
-			}
-		});
-		final HorizontalPanel navigation = createNavigation();
-		RootPanel.get("navigation").add(navigation);
-		History.addValueChangeHandler(this);
-		if (History.getToken().isEmpty()) {
-			History.newItem(NEW_ENTRY);
-		} else {
-			changePage(History.getToken());
-		}
+	public void onModuleLoad() {
+		authService.getAuthorizationForCurrentUser(Window.Location
+				.createUrlBuilder().buildString(),
+				new AsyncCallback<Authorization>() {
+
+					@Override
+					public void onFailure(Throwable caught) {
+
+					}
+
+					@Override
+					public void onSuccess(Authorization authorization) {
+						Wahrnehmung.this.authorization = authorization;
+						if (authorization.isLoggedIn()) {
+							final HorizontalPanel navigation = createNavigation();
+							RootPanel.get("navigation").add(navigation);
+							History.addValueChangeHandler(Wahrnehmung.this);
+							if (History.getToken().isEmpty()) {
+								History.newItem(NEW_ENTRY);
+							} else {
+								changePage(History.getToken());
+							}
+							RootPanel.get("logout").add(
+									new Anchor("logout", authorization
+											.getLogoutUrl()));
+						} else {
+							Window.Location.replace(authorization.getLoginUrl());
+						}
+					}
+				});
 
 	}
 
@@ -64,19 +67,10 @@ public class Wahrnehmung implements EntryPoint, ValueChangeHandler<String> {
 		navigation.setSpacing(10);
 		navigation.add(new Hyperlink("erfassen", NEW_ENTRY));
 		navigation.add(new Hyperlink("anzeigen", LIST_ENTRY));
-		authService.currentUserIsAdmin(new AsyncCallback<Boolean>() {
+		if (authorization.isAdmin()) {
+			navigation.add(new Hyperlink("administrieren", ADMIN));
+		}
 
-			@Override
-			public void onFailure(Throwable caught) {
-			}
-
-			@Override
-			public void onSuccess(Boolean result) {
-				if (result != null && result.booleanValue()) {
-					navigation.add(new Hyperlink("administrieren", ADMIN));
-				}
-			}
-		});
 		return navigation;
 	}
 
@@ -86,30 +80,16 @@ public class Wahrnehmung implements EntryPoint, ValueChangeHandler<String> {
 	}
 
 	private void changePage(String token) {
-		Widget content = null;
+		final Widget content;
 		if (token.equals(NEW_ENTRY)) {
-			content = new EditContent();
+			content = new EditContent(authorization, "850px");
 		} else if (token.equals(LIST_ENTRY)) {
-			content = new Search("850px");
-		} else if (token.equals(ADMIN) ) {
-			
-			authService.currentUserIsAdmin(new AsyncCallback<Boolean>() {
-
-				@Override
-				public void onFailure(Throwable caught) {
-				}
-
-				@Override
-				public void onSuccess(Boolean result) {
-					if (result != null && result.booleanValue()) {
-						final RootPanel rootPanel = RootPanel.get("content");
-						rootPanel.clear();
-						rootPanel.add(new AdminContent());
-					}
-				}
-			});
+			content = new Search(authorization, "850px");
+		} else if (token.equals(ADMIN) && authorization.isAdmin()) {
+			content = new AdminContent(authorization, "550px");
+		} else {
+			content = null;
 		}
-		
 
 		if (content != null) {
 			final RootPanel rootPanel = RootPanel.get("content");

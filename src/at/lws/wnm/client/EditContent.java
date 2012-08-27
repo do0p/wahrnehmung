@@ -9,6 +9,7 @@ import at.lws.wnm.client.utils.PopUp;
 import at.lws.wnm.client.utils.SaveSuccess;
 import at.lws.wnm.client.utils.SectionSelection;
 import at.lws.wnm.client.utils.Utils;
+import at.lws.wnm.shared.model.Authorization;
 import at.lws.wnm.shared.model.GwtBeobachtung;
 import at.lws.wnm.shared.model.GwtBeobachtung.DurationEnum;
 import at.lws.wnm.shared.model.GwtBeobachtung.SocialEnum;
@@ -42,9 +43,9 @@ public class EditContent  extends VerticalPanel{
 	private SaveSuccess saveSuccess;
 	private final PopUp dialogBox = new PopUp();
 
-	public EditContent() {
+	public EditContent(Authorization authorization, String width) {
 		init();
-		layout("850px");
+		layout(width);
 	}
 
 	private void init() {

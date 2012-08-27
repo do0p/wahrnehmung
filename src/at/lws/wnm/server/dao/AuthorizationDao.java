@@ -34,7 +34,6 @@ public class AuthorizationDao extends AbstractDao {
 		return cache.get(createUserId(user));
 	}
 
-
 	public boolean isAuthorized(User user) {
 		refreshCache();
 		return cache.containsKey(createUserId(user));
@@ -101,7 +100,8 @@ public class AuthorizationDao extends AbstractDao {
 		final EntityManager em = EMF.get().createEntityManager();
 		try {
 			final Query query = em.createQuery("select from Authorization");
-			for (Authorization auth : (List<Authorization>)query.getResultList()) {
+			for (Authorization auth : (List<Authorization>) query
+					.getResultList()) {
 				tmpCache.put(auth.getUserId(), auth);
 			}
 		} finally {
@@ -110,9 +110,9 @@ public class AuthorizationDao extends AbstractDao {
 		cache = tmpCache;
 		needCacheUpdate = false;
 	}
-	
+
 	private String createUserId(User user) {
-		return user.getEmail().toLowerCase();
+		return user == null ? null : user.getEmail().toLowerCase();
 	}
 
 }

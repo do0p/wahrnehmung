@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Transient;
 
 @Entity
 public class Authorization implements Serializable {
@@ -18,6 +19,40 @@ public class Authorization implements Serializable {
 	private boolean admin;
 	
 	private boolean seeAll;
+	
+	@Transient
+	private String loginUrl;
+	
+	@Transient
+	private String logoutUrl;
+
+	@Transient
+	private boolean loggedIn;
+	
+	
+	public boolean isLoggedIn() {
+		return loggedIn;
+	}
+
+	public void setLoggedIn(boolean loggedIn) {
+		this.loggedIn = loggedIn;
+	}
+
+	public String getLoginUrl() {
+		return loginUrl;
+	}
+
+	public void setLoginUrl(String loginUrl) {
+		this.loginUrl = loginUrl;
+	}
+
+	public String getLogoutUrl() {
+		return logoutUrl;
+	}
+
+	public void setLogoutUrl(String logoutUrl) {
+		this.logoutUrl = logoutUrl;
+	}
 
 	public boolean isSeeAll() {
 		return seeAll;

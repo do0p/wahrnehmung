@@ -16,6 +16,9 @@ public interface AuthorizationServiceAsync {
 	void deleteAuthorization(String email, AsyncCallback<Void> asyncCallback);
 
 	void currentUserIsAdmin(AsyncCallback<Boolean> callback);
+
+	void getAuthorizationForCurrentUser(String followUpUrl,
+			AsyncCallback<Authorization> callback);
 	
 
 }

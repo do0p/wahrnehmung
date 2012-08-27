@@ -18,4 +18,6 @@ public interface AuthorizationService extends RemoteService {
 
 	boolean currentUserIsAdmin();
 
+	Authorization getAuthorizationForCurrentUser(String followUpUrl);
+
 }

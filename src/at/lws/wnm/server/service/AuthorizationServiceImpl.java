@@ -50,9 +50,26 @@ public class AuthorizationServiceImpl extends RemoteServiceServlet implements
 
 	@Override
 	public boolean currentUserIsAdmin() {
-		final Authorization authorization = authorizationDao
-				.getAuthorization(userService.getCurrentUser());
+		final Authorization authorization = getAuthorizationForCurrentUserInternal();
 		return authorization != null && authorization.isAdmin();
 	}
 
+	@Override
+	public Authorization getAuthorizationForCurrentUser(String followUpUrl) {
+		Authorization authorization = getAuthorizationForCurrentUserInternal();
+		if (authorization == null) {
+			authorization = new Authorization();
+			authorization.setLoginUrl(userService.createLoginURL(followUpUrl));
+			authorization.setLoggedIn(false);
+		} else {
+			authorization
+					.setLogoutUrl(userService.createLogoutURL(followUpUrl));
+			authorization.setLoggedIn(true);
+		}
+		return authorization;
+	}
+
+	private Authorization getAuthorizationForCurrentUserInternal() {
+		return authorizationDao.getAuthorization(userService.getCurrentUser());
+	}
 }

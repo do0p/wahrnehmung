@@ -6,6 +6,7 @@ import at.lws.wnm.client.utils.NameSelection;
 import at.lws.wnm.client.utils.PopUp;
 import at.lws.wnm.client.utils.SectionSelection;
 import at.lws.wnm.client.utils.Utils;
+import at.lws.wnm.shared.model.Authorization;
 import at.lws.wnm.shared.model.BeobachtungsFilter;
 import at.lws.wnm.shared.model.BeobachtungsResult;
 import at.lws.wnm.shared.model.GwtBeobachtung;
@@ -50,7 +51,7 @@ public class Search extends VerticalPanel {
 
 	private AsyncDataProvider<GwtBeobachtung> asyncDataProvider;
 
-	public Search(String width) {
+	public Search(Authorization authorization, String width) {
 
 		final CellPanel filterBox = new HorizontalPanel();
 		filterBox.setSpacing(Utils.BUTTON_SPACING);
