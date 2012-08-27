@@ -34,11 +34,6 @@ public class AuthorizationDao extends AbstractDao {
 		return cache.get(createUserId(user));
 	}
 
-	public boolean isAuthorized(User user) {
-		refreshCache();
-		return cache.containsKey(createUserId(user));
-	}
-
 	public Collection<Authorization> queryAuthorizations() {
 		refreshCache();
 		return new ArrayList<Authorization>(cache.values());
