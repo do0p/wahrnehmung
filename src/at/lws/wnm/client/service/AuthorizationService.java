@@ -16,4 +16,6 @@ public interface AuthorizationService extends RemoteService {
 
 	void deleteAuthorization(String email);
 
+	boolean currentUserIsAdmin();
+
 }
