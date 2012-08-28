@@ -5,6 +5,7 @@ import java.util.List;
 import at.lws.wnm.client.service.ChildService;
 import at.lws.wnm.client.service.ChildServiceAsync;
 import at.lws.wnm.client.utils.DecisionBox;
+import at.lws.wnm.client.utils.FileUploadForm;
 import at.lws.wnm.client.utils.PopUp;
 import at.lws.wnm.client.utils.SaveSuccess;
 import at.lws.wnm.client.utils.Utils;
@@ -16,6 +17,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
@@ -75,6 +77,11 @@ public class ChildAdmin extends VerticalPanel {
 		buttonPanel.add(cancelButton);
 		data.add(buttonPanel);
 
+		data.add(new HTML("<br/><br/>"));
+		
+		final FileUploadForm fileUpload = new FileUploadForm(GWT.getModuleBaseURL()+"csvUpload");
+		data.add(fileUpload);
+		
 		children = new ListBox(false);
 		children.setVisibleItemCount(20);
 		children.addClickHandler(new ChildClichHandler());
@@ -82,6 +89,7 @@ public class ChildAdmin extends VerticalPanel {
 
 		final HorizontalPanel root = new HorizontalPanel();
 		root.add(data);
+
 		root.add(children);
 
 		add(root);

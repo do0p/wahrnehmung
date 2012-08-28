@@ -13,6 +13,7 @@ import com.google.gwt.user.datepicker.client.DateBox;
 import com.google.gwt.user.datepicker.client.DateBox.Format;
 
 public class Utils {
+	public static final String DATE_FORMAT_STRING = "d.M.yy";
 	public static final String SHORTEN_POSTFIX = "...";
 	public static final String DEL = "entf";
 	public static final String EDIT = "edit";
@@ -24,7 +25,7 @@ public class Utils {
 	public static final String ADD = "anlegen";
 	public static final String CHANGE = "&auml;ndern";
 	public static final DateTimeFormat DATE_FORMAT = DateTimeFormat
-			.getFormat("d.M.yy");
+			.getFormat(DATE_FORMAT_STRING);
 	public static final Format DATEBOX_FORMAT = new DateBox.DefaultFormat(
 			DATE_FORMAT);
 	public static final int BUTTON_SPACING = 5;

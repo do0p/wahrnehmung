@@ -6,6 +6,15 @@
 
 	<!-- Servlets -->
 	<servlet>
+		<servlet-name>csvUploadServlet</servlet-name>
+		<servlet-class>at.lws.wnm.server.service.CsvUploadService</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>csvUploadServlet</servlet-name>
+		<url-pattern>/wahrnehmung/csvUpload</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
 		<servlet-name>wahrnehmungServlet</servlet-name>
 		<servlet-class>at.lws.wnm.server.service.WahrnehmungsServiceImpl</servlet-class>
 	</servlet>
