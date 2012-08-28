@@ -3,7 +3,6 @@ package at.lws.wnm.server.service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
 import javax.servlet.ServletException;
@@ -13,7 +12,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.fileupload.FileItemIterator;
 import org.apache.commons.fileupload.FileItemStream;
-import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
 import at.lws.wnm.client.utils.Utils;
@@ -65,6 +63,8 @@ public class CsvUploadService extends HttpServlet {
 				final ChildDao childDao = DaoRegistry.get(ChildDao.class);
 				final SimpleDateFormat dateFormat = new SimpleDateFormat(
 						Utils.DATE_FORMAT_STRING);
+				int inserted = 0;
+				int duplicate = 0;
 				while (line != null) {
 					final GwtChild child = new GwtChild();
 					child.setFirstName(line[fnPos]);
@@ -72,16 +72,17 @@ public class CsvUploadService extends HttpServlet {
 					child.setBirthDay(dateFormat.parse(line[bdPos]));
 					try {
 						childDao.storeChild(child);
+						inserted++;
 					} catch (IllegalArgumentException e) {
-
+						duplicate++;
 					}
 					line = csvReader.readNext();
 				}
+				resp.getOutputStream().print("" + inserted + " Kinder hinzugefügt, " + duplicate + " waren schon angelegt.");
 			}
-		} catch (FileUploadException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
+		} 
+		
 	}
 }

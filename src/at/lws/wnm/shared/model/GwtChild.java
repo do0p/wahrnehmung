@@ -3,7 +3,7 @@ package at.lws.wnm.shared.model;
 import java.io.Serializable;
 import java.util.Date;
 
-public class GwtChild implements Serializable{
+public class GwtChild implements Serializable, Comparable<GwtChild>{
 
 	private static final long serialVersionUID = 5870082887319396186L;
 	private String firstName;
@@ -43,4 +43,17 @@ public class GwtChild implements Serializable{
 		this.key = key;
 	}
 
+	@Override
+	public int compareTo(GwtChild other) {
+		int result = lastName.compareTo(other.lastName);
+		if(result == 0)
+		{
+			result = firstName.compareTo(other.firstName);
+			if(result == 0)
+			{
+				result = birthDay.compareTo(other.birthDay);
+			}
+		}
+		return result;
+	}
 }

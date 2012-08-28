@@ -12,7 +12,7 @@ import at.lws.wnm.shared.model.GwtChild;
 
 
 @Entity
-public class Child implements Serializable{
+public class Child implements Serializable, Comparable<Child>{
 
 	private static final long serialVersionUID = -112994610784102648L;
 
@@ -74,5 +74,19 @@ public class Child implements Serializable{
 		child.setLastName(lastName);
 		child.setBirthDay(birthDay);
 		return child;
+	}
+
+	@Override
+	public int compareTo(Child other) {
+		int result = lastName.compareTo(other.lastName);
+		if(result == 0)
+		{
+			result = firstName.compareTo(other.firstName);
+			if(result == 0)
+			{
+				result = birthDay.compareTo(other.birthDay);
+			}
+		}
+		return result;
 	}
 }

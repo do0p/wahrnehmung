@@ -1,6 +1,7 @@
 package at.lws.wnm.server.dao;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -31,6 +32,7 @@ public class ChildDao extends AbstractDao{
 		for (Child child : resultList) {
 			result.add(child.toGwt());
 		}
+		Collections.sort(result);
 		return result;
 	}
 

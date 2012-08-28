@@ -84,7 +84,7 @@ public class ChildAdmin extends VerticalPanel {
 		
 		children = new ListBox(false);
 		children.setVisibleItemCount(20);
-		children.addClickHandler(new ChildClichHandler());
+		children.addClickHandler(new ChildClickHandler());
 		rebuildChildList();
 
 		final HorizontalPanel root = new HorizontalPanel();
@@ -165,7 +165,7 @@ public class ChildAdmin extends VerticalPanel {
 
 	}
 
-	public class ChildClichHandler implements ClickHandler {
+	public class ChildClickHandler implements ClickHandler {
 
 		@Override
 		public void onClick(ClickEvent event) {
