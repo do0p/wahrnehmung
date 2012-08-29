@@ -7,7 +7,6 @@ import java.util.Map;
 import at.lws.wnm.client.service.AuthorizationService;
 import at.lws.wnm.client.service.AuthorizationServiceAsync;
 import at.lws.wnm.client.utils.PopUp;
-import at.lws.wnm.client.utils.SaveSuccess;
 import at.lws.wnm.client.utils.Utils;
 import at.lws.wnm.shared.model.Authorization;
 
@@ -37,7 +36,7 @@ public class AuthorizationAdmin extends VerticalPanel {
 	private final Button cancelButton;
 	private final Button deleteButton;
 	private final PopUp dialogBox;
-	private final SaveSuccess saveSuccess;
+	//private final SaveSuccess saveSuccess;
 
 	private final ListBox users;
 	private final Map<String, Authorization> authorizations = new HashMap<String, Authorization>();
@@ -52,7 +51,7 @@ public class AuthorizationAdmin extends VerticalPanel {
 		deleteButton.setEnabled(false);
 		cancelButton = new Button(Utils.CANCEL);
 		dialogBox = new PopUp();
-		saveSuccess = new SaveSuccess();
+	//	saveSuccess = new SaveSuccess();
 
 		final Panel rights = new VerticalPanel();
 		rights.add(adminCheckBox);
@@ -150,8 +149,8 @@ public class AuthorizationAdmin extends VerticalPanel {
 
 						@Override
 						public void onSuccess(Void result) {
-							saveSuccess.center();
-							saveSuccess.show();
+//							saveSuccess.center();
+//							saveSuccess.show();
 							rebuildUsersList();
 							resetForm();
 						}

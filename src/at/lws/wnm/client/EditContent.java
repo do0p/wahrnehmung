@@ -40,7 +40,7 @@ public class EditContent  extends VerticalPanel{
 
 	private Button sendButton;
 	
-	private SaveSuccess saveSuccess;
+//	private SaveSuccess saveSuccess;
 	private final PopUp dialogBox = new PopUp();
 
 	public EditContent(Authorization authorization, String width) {
@@ -63,7 +63,7 @@ public class EditContent  extends VerticalPanel{
 		for (DurationEnum duration : DurationEnum.values()) {
 			durationSelection.addItem(duration.getText(), duration.name());
 		}
-		saveSuccess = new SaveSuccess();
+		//saveSuccess = new SaveSuccess();
 	}
 
 	private void layout(String width) {
@@ -196,8 +196,8 @@ public class EditContent  extends VerticalPanel{
 						}
 
 						public void onSuccess(Void result) {
-							saveSuccess.center();
-							saveSuccess.show();
+//							saveSuccess.center();
+//							saveSuccess.show();
 							resetForm();
 						}
 

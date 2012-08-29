@@ -9,7 +9,6 @@ import at.lws.wnm.client.service.SectionService;
 import at.lws.wnm.client.service.SectionServiceAsync;
 import at.lws.wnm.client.utils.DecisionBox;
 import at.lws.wnm.client.utils.PopUp;
-import at.lws.wnm.client.utils.SaveSuccess;
 import at.lws.wnm.client.utils.Utils;
 import at.lws.wnm.shared.model.GwtSection;
 
@@ -37,7 +36,7 @@ public class SectionAdmin extends VerticalPanel {
 
 	private final Button saveButton;
 	private final PopUp dialogBox;
-	private final SaveSuccess saveSuccess;
+//	private final SaveSuccess saveSuccess;
 	private Tree tree;
 
 	private Button cancelButton;
@@ -51,7 +50,7 @@ public class SectionAdmin extends VerticalPanel {
 		saveButton = new Button(Utils.SAVE);
 		cancelButton = new Button(Utils.CANCEL);
 		dialogBox = new PopUp();
-		saveSuccess = new SaveSuccess();
+//		saveSuccess = new SaveSuccess();
 
 		tree = new Tree();
 		add(tree);
@@ -311,17 +310,17 @@ public class SectionAdmin extends VerticalPanel {
 
 		@Override
 		public void onSuccess(Void result) {
-			if (!dialogBox.isShowing()) {
-				saveSuccess.center();
-				saveSuccess.show();
-			}
+//			if (!dialogBox.isShowing()) {
+//				saveSuccess.center();
+//				saveSuccess.show();
+//			}
 			resetFormAtTheEnd();
 		}
 
 		private void showError(final String errorMessage) {
-			if (saveSuccess.isShowing()) {
-				saveSuccess.hide();
-			}
+//			if (saveSuccess.isShowing()) {
+//				saveSuccess.hide();
+//			}
 			dialogBox.setErrorMessage(errorMessage);
 			dialogBox.setDisableWhileShown(saveButton);
 			dialogBox.center();

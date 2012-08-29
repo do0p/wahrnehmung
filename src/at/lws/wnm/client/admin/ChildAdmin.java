@@ -6,7 +6,6 @@ import at.lws.wnm.client.service.ChildService;
 import at.lws.wnm.client.service.ChildServiceAsync;
 import at.lws.wnm.client.utils.DecisionBox;
 import at.lws.wnm.client.utils.PopUp;
-import at.lws.wnm.client.utils.SaveSuccess;
 import at.lws.wnm.client.utils.Utils;
 import at.lws.wnm.shared.model.GwtChild;
 
@@ -38,7 +37,7 @@ public class ChildAdmin extends VerticalPanel {
 	private final Button cancelButton;
 	private final Button deleteButton;
 	private final PopUp dialogBox;
-	private final SaveSuccess saveSuccess;
+//	private final SaveSuccess saveSuccess;
 
 	private final ListBox children;
 
@@ -57,7 +56,7 @@ public class ChildAdmin extends VerticalPanel {
 		deleteButton.setEnabled(false);
 		cancelButton = new Button(Utils.CANCEL);
 		dialogBox = new PopUp();
-		saveSuccess = new SaveSuccess();
+//		saveSuccess = new SaveSuccess();
 
 		final Grid grid = new Grid(3, 2);
 		grid.setWidget(0, 0, new Label("Vorname"));
@@ -153,8 +152,8 @@ public class ChildAdmin extends VerticalPanel {
 
 				@Override
 				public void onSuccess(Void result) {
-					saveSuccess.center();
-					saveSuccess.show();
+//					saveSuccess.center();
+//					saveSuccess.show();
 					rebuildChildList();
 					resetForm();
 				}
