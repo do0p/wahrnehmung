@@ -6,7 +6,6 @@ import at.lws.wnm.client.service.WahrnehmungsService;
 import at.lws.wnm.client.service.WahrnehmungsServiceAsync;
 import at.lws.wnm.client.utils.NameSelection;
 import at.lws.wnm.client.utils.PopUp;
-import at.lws.wnm.client.utils.SaveSuccess;
 import at.lws.wnm.client.utils.SectionSelection;
 import at.lws.wnm.client.utils.Utils;
 import at.lws.wnm.shared.model.Authorization;
