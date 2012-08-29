@@ -13,7 +13,7 @@ import com.google.gwt.view.client.Range;
 public interface WahrnehmungsServiceAsync {
 
 	void storeBeobachtung(GwtBeobachtung beobachtung,
-			AsyncCallback<Void> callback);
+			AsyncCallback<Long> callback);
 
 	void getBeobachtungen(BeobachtungsFilter filter, Range range,
 			AsyncCallback<BeobachtungsResult> callback);

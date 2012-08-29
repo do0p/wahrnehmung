@@ -14,7 +14,7 @@ import com.google.gwt.view.client.Range;
 @RemoteServiceRelativePath("store")
 public interface WahrnehmungsService extends RemoteService {
 	
-	void storeBeobachtung(GwtBeobachtung beobachtung);
+	Long storeBeobachtung(GwtBeobachtung beobachtung);
 
 	BeobachtungsResult getBeobachtungen(BeobachtungsFilter filter, Range range);
 	

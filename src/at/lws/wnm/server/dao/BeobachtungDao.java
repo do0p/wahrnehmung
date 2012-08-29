@@ -101,18 +101,20 @@ public class BeobachtungDao extends AbstractDao {
 		return mapToGwtBeobachtung(query.getResultList(), em);
 	}
 
-	public void storeBeobachtung(GwtBeobachtung gwtBeobachtung, User user) {
+	public Long storeBeobachtung(GwtBeobachtung gwtBeobachtung, User user) {
 		final EntityManager em = EMF.get().createEntityManager();
+		final Beobachtung beobachtung = Beobachtung.valueOf(gwtBeobachtung);
 		try {
-			storeBeobachtung(gwtBeobachtung, user, em);
+			storeBeobachtung(beobachtung, user, em);
 		} finally {
 			em.close();
 		}
+		return beobachtung.getKey();
 	}
 
-	void storeBeobachtung(GwtBeobachtung gwtBeobachtung, User user,
+	void storeBeobachtung(Beobachtung beobachtung, User user,
 			EntityManager em) {
-		final Beobachtung beobachtung = Beobachtung.valueOf(gwtBeobachtung);
+		
 		beobachtung.setUser(user);
 		em.persist(beobachtung);
 	}

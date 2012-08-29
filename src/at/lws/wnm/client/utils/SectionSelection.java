@@ -25,13 +25,13 @@ public class SectionSelection {
 	private final PopUp dialogBox;
 	private final List<SectionSelectionBox> selectionBoxes;
 
-	public SectionSelection(PopUp dialogBox) {
+	public SectionSelection(PopUp dialogBox, ChangeHandler changeHandler) {
 		this.dialogBox = dialogBox;
 
 		selectionBoxes = new ArrayList<SectionSelectionBox>();
-		selectionBoxes.add(new SectionSelectionBox("- Kategorie -"));
-		selectionBoxes.add(new SectionSelectionBox("- Bereich -"));
-		selectionBoxes.add(new SectionSelectionBox("- Subbereich -"));
+		selectionBoxes.add(createSelection("- Kategorie -", changeHandler));
+		selectionBoxes.add(createSelection("- Bereich -", changeHandler));
+		selectionBoxes.add(createSelection("- Subbereich -", changeHandler));
 
 		final Iterator<SectionSelectionBox> iterator = selectionBoxes
 				.iterator();
@@ -45,6 +45,16 @@ public class SectionSelection {
 		}
 
 		createSectionSelections();
+	}
+
+	private SectionSelectionBox createSelection(String defaultText,
+			ChangeHandler changeHandler) {
+		final SectionSelectionBox sectionSelectionBox = new SectionSelectionBox(
+				defaultText);
+		if (changeHandler != null) {
+			sectionSelectionBox.addChangeHandler(changeHandler);
+		}
+		return sectionSelectionBox;
 	}
 
 	public Long getSelectedSectionKey() {

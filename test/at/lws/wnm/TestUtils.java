@@ -2,33 +2,33 @@ package at.lws.wnm;
 
 import java.util.Date;
 
+import at.lws.wnm.server.model.Beobachtung;
 import at.lws.wnm.server.model.Child;
 import at.lws.wnm.server.model.Section;
 import at.lws.wnm.shared.model.BeobachtungsFilter;
-import at.lws.wnm.shared.model.GwtBeobachtung;
 import at.lws.wnm.shared.model.GwtBeobachtung.DurationEnum;
 import at.lws.wnm.shared.model.GwtBeobachtung.SocialEnum;
 
+import com.google.appengine.api.datastore.Text;
 import com.google.appengine.api.users.User;
 
 public class TestUtils {
 
-	public static GwtBeobachtung createBeobachtung(Long key, Long childKey,
+	public static Beobachtung createBeobachtung(Long key, Long childKey,
 			Long sectionKey, Date date, DurationEnum duration,
 			SocialEnum social, String text, String userName) {
-		final GwtBeobachtung beobachtung = new GwtBeobachtung();
+		final Beobachtung beobachtung = new Beobachtung();
 		beobachtung.setKey(key);
 		beobachtung.setChildKey(childKey);
 		beobachtung.setSectionKey(sectionKey);
 		beobachtung.setDate(date);
-		beobachtung.setDuration(duration);
-		beobachtung.setSocial(social);
-		beobachtung.setText(text);
-		beobachtung.setUser(userName);
+		beobachtung.setDuration(duration.name());
+		beobachtung.setSocial(social.name());
+		beobachtung.setText(new Text(text));
 		return beobachtung;
 	}
 
-	public static GwtBeobachtung createBeobachtung(Long childKey, Long sectionkey, User user, Date date) {
+	public static Beobachtung createBeobachtung(Long childKey, Long sectionkey, User user, Date date) {
 		return createBeobachtung(null, childKey, sectionkey, date,
 				DurationEnum.LONG, SocialEnum.ALONE, TestUtils.TEXT, user.getEmail().toLowerCase());
 		

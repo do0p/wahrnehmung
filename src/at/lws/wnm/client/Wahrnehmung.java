@@ -13,6 +13,7 @@ import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.RootPanel;
@@ -54,6 +55,7 @@ public class Wahrnehmung implements EntryPoint, ValueChangeHandler<String> {
 							RootPanel.get("logout").add(
 									new Anchor("logout", authorization
 											.getLogoutUrl()));
+							RootPanel.get("title").add(new HTML("Wahrnehmung"));
 						} else {
 							Window.Location.replace(authorization.getLoginUrl());
 						}

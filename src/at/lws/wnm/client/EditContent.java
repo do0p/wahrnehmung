@@ -4,6 +4,7 @@ import java.util.Date;
 
 import at.lws.wnm.client.service.WahrnehmungsService;
 import at.lws.wnm.client.service.WahrnehmungsServiceAsync;
+import at.lws.wnm.client.utils.DecisionBox;
 import at.lws.wnm.client.utils.NameSelection;
 import at.lws.wnm.client.utils.PopUp;
 import at.lws.wnm.client.utils.SectionSelection;
@@ -14,8 +15,12 @@ import at.lws.wnm.shared.model.GwtBeobachtung.DurationEnum;
 import at.lws.wnm.shared.model.GwtBeobachtung.SocialEnum;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -24,7 +29,7 @@ import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.datepicker.client.DateBox;
 
-public class EditContent  extends VerticalPanel{
+public class EditContent extends VerticalPanel {
 
 	private final WahrnehmungsServiceAsync wahrnehmungService = GWT
 			.create(WahrnehmungsService.class);
@@ -33,14 +38,19 @@ public class EditContent  extends VerticalPanel{
 	private final DateBox dateBox = new DateBox();
 	private final ListBox durationSelection = new ListBox();
 	private final ListBox socialSelection = new ListBox();
+	private final PopUp dialogBox = new PopUp();
 
 	private NameSelection nameSelection;
 	private SectionSelection sectionSelection;
 
 	private Button sendButton;
-	
-//	private SaveSuccess saveSuccess;
-	private final PopUp dialogBox = new PopUp();
+	private Button newButton;
+
+	private boolean changes;
+
+	private Long key;
+
+	private DecisionBox decisionBox;
 
 	public EditContent(Authorization authorization, String width) {
 		init();
@@ -48,21 +58,52 @@ public class EditContent  extends VerticalPanel{
 	}
 
 	private void init() {
-		nameSelection = new NameSelection(dialogBox);
-		dateBox.setValue(new Date());
 
-		sectionSelection = new SectionSelection(dialogBox);
+		final ChangeHandler changeHandler = new ChangeHandler() {
+			@Override
+			public void onChange(ChangeEvent event) {
+				markChanged();
+			}
+		};
+
+		nameSelection = new NameSelection(dialogBox);
+		nameSelection.getTextBox().addChangeHandler(changeHandler);
+
+		dateBox.setValue(new Date());
+		dateBox.addValueChangeHandler(new ValueChangeHandler<Date>() {
+
+			@Override
+			public void onValueChange(ValueChangeEvent<Date> event) {
+				markChanged();
+			}
+		});
+
+		sectionSelection = new SectionSelection(dialogBox, changeHandler);
 
 		socialSelection.addItem("- Sozialform -", "");
 		for (SocialEnum socialForm : SocialEnum.values()) {
 			socialSelection.addItem(socialForm.getText(), socialForm.name());
 		}
+		socialSelection.addChangeHandler(changeHandler);
 
 		durationSelection.addItem("- Dauer -", "");
 		for (DurationEnum duration : DurationEnum.values()) {
 			durationSelection.addItem(duration.getText(), duration.name());
 		}
-		//saveSuccess = new SaveSuccess();
+		durationSelection.addChangeHandler(changeHandler);
+
+		textArea.addChangeHandler(changeHandler);
+
+		decisionBox = new DecisionBox();
+		decisionBox
+				.setText("Es gibt nicht gespeicherte Eingaben. Fortfahren (Eingaben verlieren)?");
+		decisionBox.addOkClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent event) {
+				resetForm();
+			}
+		});
 	}
 
 	private void layout(String width) {
@@ -133,17 +174,44 @@ public class EditContent  extends VerticalPanel{
 
 	private HorizontalPanel createButtonContainer() {
 		final HorizontalPanel buttonContainer = new HorizontalPanel();
+		buttonContainer.setWidth("170px");
+
 		sendButton = new Button(Utils.SAVE);
 		sendButton.addClickHandler(new SendbuttonHandler());
 		sendButton.addStyleName("sendButton");
-		
-		Utils.formatLeftCenter(buttonContainer, sendButton, Utils.BUTTON_WIDTH, Utils.ROW_HEIGHT);
+
+		newButton = new Button(Utils.NEW);
+		newButton.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				if (changes) {
+					decisionBox.center();
+				} else {
+					resetForm();
+				}
+			}
+		});
+		newButton.addStyleName("sendButton");
+
+		Utils.formatLeftCenter(buttonContainer, sendButton, Utils.BUTTON_WIDTH,
+				Utils.ROW_HEIGHT);
+		Utils.formatLeftCenter(buttonContainer, newButton, Utils.BUTTON_WIDTH,
+				Utils.ROW_HEIGHT);
+
 		return buttonContainer;
+	}
+
+	private void markChanged() {
+		if (!changes) {
+			changes = true;
+			sendButton.setEnabled(true);
+		}
 	}
 
 	private class SendbuttonHandler implements ClickHandler {
 
 		public void onClick(ClickEvent event) {
+			sendButton.setEnabled(false);
 			sendNameToServer();
 		}
 
@@ -161,7 +229,7 @@ public class EditContent  extends VerticalPanel{
 				errorMessage = errorMessage + "Kein Kind mit Name "
 						+ nameSelection.getValue() + "!<br/>";
 			}
-			if (sectionKey== null) {
+			if (sectionKey == null) {
 				errorMessage = errorMessage + "W&auml;hle einen Bereich!<br/>";
 			}
 			if (date == null) {
@@ -179,6 +247,7 @@ public class EditContent  extends VerticalPanel{
 			}
 
 			final GwtBeobachtung beobachtung = new GwtBeobachtung();
+			beobachtung.setKey(key);
 			beobachtung.setText(text);
 			beobachtung.setChildKey(childKey);
 			beobachtung.setSectionKey(sectionKey);
@@ -186,18 +255,18 @@ public class EditContent  extends VerticalPanel{
 			beobachtung.setDuration(getDuration());
 			beobachtung.setSocial(getSocialForm());
 			wahrnehmungService.storeBeobachtung(beobachtung,
-					new AsyncCallback<Void>() {
+					new AsyncCallback<Long>() {
 
 						public void onFailure(Throwable caught) {
 							dialogBox.setErrorMessage();
 							dialogBox.setDisableWhileShown(sendButton);
 							dialogBox.center();
+							sendButton.setEnabled(true);
 						}
 
-						public void onSuccess(Void result) {
-//							saveSuccess.center();
-//							saveSuccess.show();
-							resetForm();
+						public void onSuccess(Long result) {
+							EditContent.this.key = result;
+							changes = false;
 						}
 
 					});

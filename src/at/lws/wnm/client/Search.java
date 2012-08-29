@@ -60,7 +60,7 @@ public class Search extends VerticalPanel {
 		nameSelection = new NameSelection(dialogBox);
 		Utils.formatLeftCenter(filterBox, nameSelection, NameSelection.WIDTH, Utils.FIELD_HEIGHT);
 		
-		sectionSelection = new SectionSelection(dialogBox);
+		sectionSelection = new SectionSelection(dialogBox, null);
 		for (ListBox selectionBox : sectionSelection.getSectionSelectionBoxes()) {
 			Utils.formatLeftCenter(filterBox, selectionBox, Utils.LISTBOX_WIDTH, Utils.FIELD_HEIGHT);
 		}

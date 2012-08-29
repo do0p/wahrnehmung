@@ -1,5 +1,6 @@
 package at.lws.wnm.server.dao;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -50,10 +51,10 @@ public class BeobachtungDaoTest {
 	private Range range;
 	private EntityManager em;
 	private EntityTransaction transaction;
-	private GwtBeobachtung beobachtung1;
-	private GwtBeobachtung beobachtung2;
-	private GwtBeobachtung beobachtung3;
-	private GwtBeobachtung beobachtung4;
+	private Beobachtung beobachtung1;
+	private Beobachtung beobachtung2;
+	private Beobachtung beobachtung3;
+	private Beobachtung beobachtung4;
 
 	@Before
 	public void setUp() {
@@ -198,7 +199,7 @@ public class BeobachtungDaoTest {
 
 	@Test
 	public void testStoreBeobachtung() {
-		final GwtBeobachtung beobachtung = TestUtils.createBeobachtung(
+		final Beobachtung beobachtung = TestUtils.createBeobachtung(
 				CHILD_KEY1, SECTION_KEY1, user1, new Date());
 
 		transaction.begin();
@@ -210,19 +211,21 @@ public class BeobachtungDaoTest {
 		final List<GwtBeobachtung> beobachtungen = beobachtungsDao
 				.getBeobachtungen(filter, range, user1, em);
 		Assert.assertEquals(1, beobachtungen.size());
-		Assert.assertEquals(beobachtung, beobachtungen.get(0));
+		Assert.assertEquals(beobachtung.toGwt(), beobachtungen.get(0));
 	}
 
 	@Test
 	public void testStoreBeobachtungTwoTimes() {
-		final GwtBeobachtung beobachtung = TestUtils.createBeobachtung(
-				CHILD_KEY1, SECTION_KEY1, user1, new Date());
+		final Beobachtung beobachtung1 = TestUtils.createBeobachtung(
+				CHILD_KEY1, SECTION_KEY1, user1, new Date(NOW));
+		final Beobachtung beobachtung2 = TestUtils.createBeobachtung(
+				CHILD_KEY1, SECTION_KEY1, user1, new Date(NOW));
 
 		transaction.begin();
-		beobachtungsDao.storeBeobachtung(beobachtung, user1, em);
+		beobachtungsDao.storeBeobachtung(beobachtung1, user1, em);
 		transaction.commit();
 		transaction.begin();
-		beobachtungsDao.storeBeobachtung(beobachtung, user1, em);
+		beobachtungsDao.storeBeobachtung(beobachtung2, user1, em);
 		transaction.commit();
 
 		final BeobachtungsFilter filter = TestUtils.createFilter(CHILD_KEY1,
@@ -230,8 +233,8 @@ public class BeobachtungDaoTest {
 		final List<GwtBeobachtung> beobachtungen = beobachtungsDao
 				.getBeobachtungen(filter, range, user1, em);
 		Assert.assertEquals(2, beobachtungen.size());
-		Assert.assertEquals(beobachtung, beobachtungen.get(0));
-		Assert.assertEquals(beobachtung, beobachtungen.get(1));
+		Assert.assertEquals(beobachtung1.toGwt(), beobachtungen.get(0));
+		Assert.assertEquals(beobachtung2.toGwt(), beobachtungen.get(1));
 	}
 
 	private void persist(Object object) {
@@ -240,22 +243,30 @@ public class BeobachtungDaoTest {
 		transaction.commit();
 	}
 
-	private Beobachtung createBeobachtung(GwtBeobachtung gwtBeobachtung,
+	private Beobachtung createBeobachtung(Beobachtung beobachtung,
 			User user) {
-		final Beobachtung beobachtung = Beobachtung.valueOf(gwtBeobachtung);
 		beobachtung.setUser(user);
 		return beobachtung;
 	}
 
 	private void assertEquals(List<GwtBeobachtung> beobachtungen,
-			GwtBeobachtung... beobachtung) {
-		Assert.assertEquals(Arrays.asList(beobachtung), beobachtungen);
+			Beobachtung... beobachtung) {
+		Assert.assertEquals(convertToGwtList(beobachtung), beobachtungen);
+	}
+
+	private List<GwtBeobachtung> convertToGwtList(Beobachtung[] beobachtungen) {
+		final List<GwtBeobachtung> list = new ArrayList<GwtBeobachtung>();
+		for(Beobachtung beobachtung : beobachtungen)
+		{
+			list.add(beobachtung.toGwt());
+		}
+		return list;
 	}
 
 	private void assertContains(List<GwtBeobachtung> beobachtungen,
-			GwtBeobachtung... beobachtung) {
+			Beobachtung... beobachtung) {
 		Assert.assertEquals(beobachtung.length, beobachtungen.size());
-		Assert.assertTrue(beobachtungen.containsAll(Arrays.asList(beobachtung)));
+		Assert.assertTrue(beobachtungen.containsAll(convertToGwtList(beobachtung)));
 	}
 
 }

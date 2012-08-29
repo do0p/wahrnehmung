@@ -35,8 +35,8 @@ public class WahrnehmungsServiceImpl extends RemoteServiceServlet implements
 	}
 
 	@Override
-	public void storeBeobachtung(GwtBeobachtung beobachtung) {
-		beobachtungsDao.storeBeobachtung(beobachtung,
+	public Long storeBeobachtung(GwtBeobachtung beobachtung) {
+		return beobachtungsDao.storeBeobachtung(beobachtung,
 				userService.getCurrentUser());
 	}
 
