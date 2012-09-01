@@ -52,13 +52,42 @@ public class EditContent extends VerticalPanel {
 
 	private DecisionBox decisionBox;
 
-	public EditContent(Authorization authorization, String width) {
+	public EditContent(Authorization authorization, String width, Long key) {
+		this.key = key;
 		init();
 		layout(width);
+		if(key != null)
+		{
+			loadData(key);
+		}
+	}
+
+	private void loadData(Long key) {
+		wahrnehmungService.getBeobachtung(key, new AsyncCallback<GwtBeobachtung>() {
+
+			@Override
+			public void onFailure(Throwable caught) {
+				dialogBox.setErrorMessage();
+				dialogBox.setDisableWhileShown(sendButton);
+				dialogBox.center();
+			}
+
+			@Override
+			public void onSuccess(GwtBeobachtung result) {
+				nameSelection.setSelected(result.getChildKey());
+				dateBox.setValue(result.getDate());
+				sectionSelection.setSelected(result.getSectionKey());
+				durationSelection.setSelectedIndex(result.getDuration().ordinal() + 1);
+				socialSelection.setSelectedIndex(result.getSocial().ordinal() + 1);
+				textArea.setText(result.getText());
+			}
+		});
+		
 	}
 
 	private void init() {
 
+		
 		final ChangeHandler changeHandler = new ChangeHandler() {
 			@Override
 			public void onChange(ChangeEvent event) {
@@ -104,6 +133,7 @@ public class EditContent extends VerticalPanel {
 				resetForm();
 			}
 		});
+		
 	}
 
 	private void layout(String width) {
@@ -147,6 +177,7 @@ public class EditContent extends VerticalPanel {
 		durationSelection.setSelectedIndex(0);
 		socialSelection.setSelectedIndex(0);
 		textArea.setValue("");
+		key = null;
 	}
 
 	private SocialEnum getSocialForm() {

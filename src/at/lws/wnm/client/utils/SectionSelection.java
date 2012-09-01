@@ -1,6 +1,7 @@
 package at.lws.wnm.client.utils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -24,6 +25,7 @@ public class SectionSelection {
 	private final Map<Long, List<String[]>> subSectionSelections = new HashMap<Long, List<String[]>>();
 	private final PopUp dialogBox;
 	private final List<SectionSelectionBox> selectionBoxes;
+	private final Map<Long, List<Integer>> sectionSelectionMap = new HashMap<Long, List<Integer>>();
 
 	public SectionSelection(PopUp dialogBox, ChangeHandler changeHandler) {
 		this.dialogBox = dialogBox;
@@ -103,6 +105,34 @@ public class SectionSelection {
 					subSectionSelections.put(parentKey, subSelectionItems);
 					addChildren(children, parentKey, 0, subSelectionItems);
 				}
+
+				for (int i = 1; i < parentBox.getItemCount(); i++) {
+					final ArrayList<Integer> indexList = new ArrayList<Integer>(
+							Arrays.asList(Integer.valueOf(i)));
+					final Long parentKey = parentBox.getLongValue(i);
+					sectionSelectionMap.put(parentKey, indexList);
+					addChildSectionIndices(parentKey, children, indexList);
+				}
+			}
+
+			private void addChildSectionIndices(Long parentKey,
+					Map<Long, List<GwtSection>> children,
+					List<Integer> indexList) {
+				final List<GwtSection> list = children.get(parentKey);
+				if (list == null) {
+					return;
+				}
+				for (int i = 0; i < list.size(); i++) {
+					final List<Integer> childIndexList;
+					childIndexList = new ArrayList<Integer>(indexList.subList(
+							0, Utils.min(selectionBoxes.size() - 1, indexList.size())));
+					childIndexList.add(Integer.valueOf(i+1));
+					final Long newParentKey = list.get(i).getKey();
+					sectionSelectionMap.put(newParentKey,
+							childIndexList);
+					addChildSectionIndices(newParentKey, children, childIndexList);
+				}
+
 			}
 
 			private void addChildren(Map<Long, List<GwtSection>> children,
@@ -183,6 +213,13 @@ public class SectionSelection {
 
 	public List<SectionSelectionBox> getSectionSelectionBoxes() {
 		return Collections.unmodifiableList(selectionBoxes);
+	}
+
+	public void setSelected(Long sectionKey) {
+		final List<Integer> indices = sectionSelectionMap.get(sectionKey);
+		for (int i = 0; i < indices.size(); i++) {
+			selectionBoxes.get(0).setSelectedIndex(indices.get(i));
+		}
 	}
 
 }

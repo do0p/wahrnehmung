@@ -11,12 +11,15 @@ import at.lws.wnm.shared.model.BeobachtungsFilter;
 import at.lws.wnm.shared.model.BeobachtungsResult;
 import at.lws.wnm.shared.model.GwtBeobachtung;
 
+import com.google.gwt.cell.client.ActionCell;
+import com.google.gwt.cell.client.ActionCell.Delegate;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy.KeyboardSelectionPolicy;
+import com.google.gwt.user.cellview.client.IdentityColumn;
 import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -24,6 +27,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CellPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.AsyncDataProvider;
@@ -51,7 +55,7 @@ public class Search extends VerticalPanel {
 
 	private AsyncDataProvider<GwtBeobachtung> asyncDataProvider;
 
-	public Search(Authorization authorization, String width) {
+	public Search(final Authorization authorization, String width) {
 
 		final CellPanel filterBox = new HorizontalPanel();
 		filterBox.setSpacing(Utils.BUTTON_SPACING);
@@ -127,6 +131,15 @@ public class Search extends VerticalPanel {
 			}
 		};
 		
+		final Column<GwtBeobachtung, GwtBeobachtung> editColumn = new IdentityColumn<GwtBeobachtung>(new ActionCell<GwtBeobachtung>(Utils.EDIT, new Delegate<GwtBeobachtung>() {
+			@Override
+			public void execute(GwtBeobachtung object) {
+				final RootPanel rootPanel = RootPanel.get("content");
+				rootPanel.clear();
+				rootPanel.add(new EditContent(authorization, "850px", object.getKey()));
+			}
+		}));
+		
 		table = new CellTable<GwtBeobachtung>();
 		table.setKeyboardSelectionPolicy(KeyboardSelectionPolicy.ENABLED);
 		table.setPageSize(7);
@@ -137,6 +150,7 @@ public class Search extends VerticalPanel {
 		table.addColumn(socialColumn, "Sozialform");
 		table.addColumn(textColumn, "Beobachtung");
 		table.addColumn(userColumn, "von");
+		table.addColumn(editColumn);
 		add(table);
 
 		final SingleSelectionModel<GwtBeobachtung> selectionModel = new SingleSelectionModel<GwtBeobachtung>();

@@ -91,6 +91,14 @@ public class Utils {
 		panel.setCellWidth(widget, width + "px");
 	}
 
+	public static int min(int int1, int int2) {
+		if(int1 < int2)
+		{
+			return int1;
+		}
+		return int2;
+	}
+
 
 	
 
