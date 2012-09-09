@@ -218,7 +218,7 @@ public class SectionSelection {
 	public void setSelected(Long sectionKey) {
 		final List<Integer> indices = sectionSelectionMap.get(sectionKey);
 		for (int i = 0; i < indices.size(); i++) {
-			selectionBoxes.get(0).setSelectedIndex(indices.get(i));
+			selectionBoxes.get(0).setSelectedIndex(indices.get(i).intValue());
 		}
 	}
 
