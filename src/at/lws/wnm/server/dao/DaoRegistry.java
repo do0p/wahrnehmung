@@ -6,14 +6,6 @@ import java.util.Map;
 public class DaoRegistry {
 
 	private static final Map<Class<? extends AbstractDao>, AbstractDao> REGISTER = new HashMap<Class<? extends AbstractDao>, AbstractDao>();
-
-	static
-	{
-		new AuthorizationDao();
-		new BeobachtungDao();
-		new ChildDao();
-		new SectionDao();
-	}
 	
 	public static void register(AbstractDao dao) {
 		if (REGISTER.containsKey(dao.getClass())) {
@@ -26,8 +18,18 @@ public class DaoRegistry {
 	@SuppressWarnings("unchecked")
 	public static <T extends AbstractDao> T get(Class<T> clazz) {
 		if (!REGISTER.containsKey(clazz)) {
-			throw new IllegalStateException("dao " + clazz.getCanonicalName()
-					+ " not registered");
+			synchronized(DaoRegistry.class)
+			{
+				if (!REGISTER.containsKey(clazz)) {
+					{
+						try {
+							 clazz.newInstance();
+						} catch (Exception e) {
+							throw new IllegalArgumentException("could not instantiate class " + clazz, e);
+						} 
+					}
+				}
+			}
 		}
 		return (T) REGISTER.get(clazz);
 	}

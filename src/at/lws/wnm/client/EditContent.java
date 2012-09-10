@@ -56,38 +56,47 @@ public class EditContent extends VerticalPanel {
 		this.key = key;
 		init();
 		layout(width);
-		if(key != null)
-		{
+		if (key != null) {
 			loadData(key);
 		}
 	}
 
 	private void loadData(Long key) {
-		wahrnehmungService.getBeobachtung(key, new AsyncCallback<GwtBeobachtung>() {
+		wahrnehmungService.getBeobachtung(key,
+				new AsyncCallback<GwtBeobachtung>() {
 
-			@Override
-			public void onFailure(Throwable caught) {
-				dialogBox.setErrorMessage();
-				dialogBox.setDisableWhileShown(sendButton);
-				dialogBox.center();
-			}
+					@Override
+					public void onFailure(Throwable caught) {
+						dialogBox.setErrorMessage();
+						dialogBox.setDisableWhileShown(sendButton);
+						dialogBox.center();
+					}
 
-			@Override
-			public void onSuccess(GwtBeobachtung result) {
-				nameSelection.setSelected(result.getChildKey());
-				dateBox.setValue(result.getDate());
-				sectionSelection.setSelected(result.getSectionKey());
-				durationSelection.setSelectedIndex(result.getDuration().ordinal() + 1);
-				socialSelection.setSelectedIndex(result.getSocial().ordinal() + 1);
-				textArea.setText(result.getText());
-			}
-		});
-		
+					@Override
+					public void onSuccess(GwtBeobachtung result) {
+						nameSelection.setSelected(result.getChildKey());
+						dateBox.setValue(result.getDate());
+						sectionSelection.setSelected(result.getSectionKey());
+						final DurationEnum duration = result.getDuration();
+						if (duration != null) {
+							durationSelection.setSelectedIndex(duration
+									.ordinal() + 1);
+						}
+						
+						final SocialEnum social = result.getSocial();
+						if (social != null)
+						{
+						socialSelection.setSelectedIndex(social
+								.ordinal() + 1);
+						}
+						textArea.setText(result.getText());
+					}
+				});
+
 	}
 
 	private void init() {
 
-		
 		final ChangeHandler changeHandler = new ChangeHandler() {
 			@Override
 			public void onChange(ChangeEvent event) {
@@ -133,7 +142,7 @@ public class EditContent extends VerticalPanel {
 				resetForm();
 			}
 		});
-		
+
 	}
 
 	private void layout(String width) {
