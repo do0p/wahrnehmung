@@ -64,4 +64,10 @@ public class WahrnehmungsServiceImpl extends RemoteServiceServlet implements
 		return user;
 	}
 
+	@Override
+	public void deleteBeobachtung(Long beobachtungsKey) {
+		beobachtungsDao.deleteBeobachtung(beobachtungsKey);
+		
+	}
+
 }

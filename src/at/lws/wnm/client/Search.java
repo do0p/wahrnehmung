@@ -2,6 +2,7 @@ package at.lws.wnm.client;
 
 import at.lws.wnm.client.service.WahrnehmungsService;
 import at.lws.wnm.client.service.WahrnehmungsServiceAsync;
+import at.lws.wnm.client.utils.DecisionBox;
 import at.lws.wnm.client.utils.NameSelection;
 import at.lws.wnm.client.utils.PopUp;
 import at.lws.wnm.client.utils.SectionSelection;
@@ -41,6 +42,8 @@ public class Search extends VerticalPanel {
 
 
 
+	private static final String BEOBACHTUNG_DEL_WARNING = "Achtung, diese Beobachtung wird gel&ouml;scht. Der Vorgang nicht mehr r&uuml;ckg&auml;nig gemacht werden!";
+
 	private final CellTable<GwtBeobachtung> table;
 
 	private final PopUp dialogBox = new PopUp();
@@ -56,7 +59,13 @@ public class Search extends VerticalPanel {
 
 	private AsyncDataProvider<GwtBeobachtung> asyncDataProvider;
 
+	private DecisionBox decisionBox;
+
 	public Search(final Authorization authorization, String width) {
+		
+
+		decisionBox = new DecisionBox();
+		decisionBox.setText(BEOBACHTUNG_DEL_WARNING);
 
 		final CellPanel filterBox = new HorizontalPanel();
 		filterBox.setSpacing(Utils.BUTTON_SPACING);
@@ -142,6 +151,33 @@ public class Search extends VerticalPanel {
 			}
 		}));
 		
+		final Column<GwtBeobachtung, GwtBeobachtung> deleteColumn = new IdentityColumn<GwtBeobachtung>(new ActionCell<GwtBeobachtung>(Utils.DEL, new Delegate<GwtBeobachtung>() {
+			@Override
+			public void execute(final GwtBeobachtung object) {
+				decisionBox.addOkClickHandler(new ClickHandler() {
+					
+					@Override
+					public void onClick(ClickEvent arg0) {
+						wahrnehmungsService.deleteBeobachtung(object.getKey(), new AsyncCallback<Void>() {
+
+							@Override
+							public void onFailure(Throwable caught) {
+								dialogBox.setErrorMessage(caught
+										.getLocalizedMessage());
+								dialogBox.center();
+							}
+
+							@Override
+							public void onSuccess(Void arg0) {
+								updateTable();
+							}
+						});
+					}
+				});
+				decisionBox.center();
+			}
+		}));
+		
 		table = new CellTable<GwtBeobachtung>();
 		table.setKeyboardSelectionPolicy(KeyboardSelectionPolicy.ENABLED);
 		table.setPageSize(7);
@@ -153,6 +189,7 @@ public class Search extends VerticalPanel {
 		table.addColumn(textColumn, "Beobachtung");
 		table.addColumn(userColumn, "von");
 		table.addColumn(editColumn);
+		table.addColumn(deleteColumn);
 		add(table);
 
 		final SingleSelectionModel<GwtBeobachtung> selectionModel = new SingleSelectionModel<GwtBeobachtung>();

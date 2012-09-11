@@ -112,9 +112,8 @@ public class BeobachtungDao extends AbstractDao {
 		return beobachtung.getKey();
 	}
 
-	void storeBeobachtung(Beobachtung beobachtung, User user,
-			EntityManager em) {
-		
+	void storeBeobachtung(Beobachtung beobachtung, User user, EntityManager em) {
+
 		beobachtung.setUser(user);
 		em.persist(beobachtung);
 	}
@@ -201,6 +200,19 @@ public class BeobachtungDao extends AbstractDao {
 
 	private SectionDao getSectionDao() {
 		return DaoRegistry.get(SectionDao.class);
+	}
+
+	public void deleteBeobachtung(Long beobachtungsKey) {
+		final EntityManager em = EMF.get().createEntityManager();
+		try {
+			final Beobachtung beobachtung = em.find(Beobachtung.class,
+					beobachtungsKey);
+			if (beobachtung != null) {
+				em.remove(beobachtung);
+			}
+		} finally {
+			em.close();
+		}
 	}
 
 }

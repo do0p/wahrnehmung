@@ -21,4 +21,6 @@ public interface WahrnehmungsServiceAsync {
 	void getBeobachtung(Long beobachtungsKey,
 			AsyncCallback<GwtBeobachtung> callback);
 
+	void deleteBeobachtung(Long beobachtungsKey, AsyncCallback<Void> callback);
+
 }

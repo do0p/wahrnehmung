@@ -20,4 +20,6 @@ public interface WahrnehmungsService extends RemoteService {
 	
 	GwtBeobachtung getBeobachtung(Long beobachtungsKey);
 	
+	void deleteBeobachtung(Long beobachtungsKey);
+	
 }
