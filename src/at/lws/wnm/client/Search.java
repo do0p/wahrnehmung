@@ -22,6 +22,7 @@ import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy.KeyboardSe
 import com.google.gwt.user.cellview.client.IdentityColumn;
 import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CellPanel;
@@ -137,6 +138,7 @@ public class Search extends VerticalPanel {
 				final RootPanel rootPanel = RootPanel.get("content");
 				rootPanel.clear();
 				rootPanel.add(new EditContent(authorization, "850px", object.getKey()));
+				History.newItem(Wahrnehmung.NEW_ENTRY, false);
 			}
 		}));
 		

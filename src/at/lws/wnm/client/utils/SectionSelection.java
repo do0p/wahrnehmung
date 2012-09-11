@@ -13,6 +13,7 @@ import at.lws.wnm.client.service.SectionServiceAsync;
 import at.lws.wnm.shared.model.GwtSection;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -111,13 +112,13 @@ public class SectionSelection {
 							Arrays.asList(Integer.valueOf(i)));
 					final Long parentKey = parentBox.getLongValue(i);
 					sectionSelectionMap.put(parentKey, indexList);
-					addChildSectionIndices(parentKey, children, indexList);
+					addChildSectionIndices(parentKey, children, indexList, 0);
 				}
 			}
 
 			private void addChildSectionIndices(Long parentKey,
 					Map<Long, List<GwtSection>> children,
-					List<Integer> indexList) {
+					List<Integer> indexList, int preset) {
 				final List<GwtSection> list = children.get(parentKey);
 				if (list == null) {
 					return;
@@ -125,12 +126,15 @@ public class SectionSelection {
 				for (int i = 0; i < list.size(); i++) {
 					final List<Integer> childIndexList;
 					childIndexList = new ArrayList<Integer>(indexList.subList(
-							0, Utils.min(selectionBoxes.size() - 1, indexList.size())));
-					childIndexList.add(Integer.valueOf(i+1));
+							0,
+							Utils.min(selectionBoxes.size() - 1,
+									indexList.size())));
+					final int pos = i + 1 + preset;
+					childIndexList.add(Integer.valueOf(pos));
 					final Long newParentKey = list.get(i).getKey();
-					sectionSelectionMap.put(newParentKey,
-							childIndexList);
-					addChildSectionIndices(newParentKey, children, childIndexList);
+					sectionSelectionMap.put(newParentKey, childIndexList);
+					addChildSectionIndices(newParentKey, children,
+							childIndexList, childIndexList.size() == selectionBoxes.size() ? pos : 0);
 				}
 
 			}
@@ -218,7 +222,11 @@ public class SectionSelection {
 	public void setSelected(Long sectionKey) {
 		final List<Integer> indices = sectionSelectionMap.get(sectionKey);
 		for (int i = 0; i < indices.size(); i++) {
-			selectionBoxes.get(0).setSelectedIndex(indices.get(i).intValue());
+			final SectionSelectionBox sectionSelectionBox = selectionBoxes.get(i);
+			sectionSelectionBox.setEnabled(true);
+			sectionSelectionBox.setSelectedIndex(indices.get(i).intValue());
+			ChangeEvent.fireNativeEvent(Document.get().createChangeEvent(), sectionSelectionBox);
+			
 		}
 	}
 

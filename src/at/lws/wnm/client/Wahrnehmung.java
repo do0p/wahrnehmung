@@ -22,7 +22,7 @@ import com.google.gwt.user.client.ui.Widget;
 public class Wahrnehmung implements EntryPoint, ValueChangeHandler<String> {
 
 	private static final String ADMIN = "admin";
-	private static final String NEW_ENTRY = "new";
+	static final String NEW_ENTRY = "new";
 	private static final String LIST_ENTRY = "list";
 
 	private final AuthorizationServiceAsync authService = GWT

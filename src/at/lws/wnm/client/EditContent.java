@@ -90,6 +90,8 @@ public class EditContent extends VerticalPanel {
 								.ordinal() + 1);
 						}
 						textArea.setText(result.getText());
+						changes = false;
+						sendButton.setEnabled(false);
 					}
 				});
 
