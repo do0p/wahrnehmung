@@ -1,5 +1,7 @@
 package at.lws.wnm.client;
 
+import java.util.Set;
+
 import at.lws.wnm.client.service.WahrnehmungsService;
 import at.lws.wnm.client.service.WahrnehmungsServiceAsync;
 import at.lws.wnm.client.utils.DecisionBox;
@@ -14,6 +16,7 @@ import at.lws.wnm.shared.model.GwtBeobachtung;
 
 import com.google.gwt.cell.client.ActionCell;
 import com.google.gwt.cell.client.ActionCell.Delegate;
+import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -33,14 +36,13 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.AsyncDataProvider;
+import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.HasData;
+import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.Range;
 import com.google.gwt.view.client.SelectionChangeEvent;
-import com.google.gwt.view.client.SingleSelectionModel;
 
 public class Search extends VerticalPanel {
-
-
 
 	private static final String BEOBACHTUNG_DEL_WARNING = "Achtung, diese Beobachtung wird gel&ouml;scht. Der Vorgang nicht mehr r&uuml;ckg&auml;nig gemacht werden!";
 
@@ -61,8 +63,9 @@ public class Search extends VerticalPanel {
 
 	private DecisionBox decisionBox;
 
+	private MultiSelectionModel<GwtBeobachtung> selectionModel;
+
 	public Search(final Authorization authorization, String width) {
-		
 
 		decisionBox = new DecisionBox();
 		decisionBox.setText(BEOBACHTUNG_DEL_WARNING);
@@ -72,11 +75,13 @@ public class Search extends VerticalPanel {
 		add(filterBox);
 
 		nameSelection = new NameSelection(dialogBox);
-		Utils.formatLeftCenter(filterBox, nameSelection, NameSelection.WIDTH, Utils.FIELD_HEIGHT);
-		
+		Utils.formatLeftCenter(filterBox, nameSelection, NameSelection.WIDTH,
+				Utils.FIELD_HEIGHT);
+
 		sectionSelection = new SectionSelection(dialogBox, null);
 		for (ListBox selectionBox : sectionSelection.getSectionSelectionBoxes()) {
-			Utils.formatLeftCenter(filterBox, selectionBox, Utils.LISTBOX_WIDTH, Utils.FIELD_HEIGHT);
+			Utils.formatLeftCenter(filterBox, selectionBox,
+					Utils.LISTBOX_WIDTH, Utils.FIELD_HEIGHT);
 		}
 
 		sendButton = new Button(Utils.FILTER);
@@ -85,6 +90,31 @@ public class Search extends VerticalPanel {
 
 		Utils.formatLeftCenter(filterBox, sendButton, Utils.BUTTON_WIDTH,
 				Utils.ROW_HEIGHT);
+		
+		selectionModel = new MultiSelectionModel<GwtBeobachtung>();
+		selectionModel
+				.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+
+					@Override
+					public void onSelectionChange(SelectionChangeEvent event) {
+						final Set<GwtBeobachtung> selectedObjects = selectionModel
+								.getSelectedSet();
+						if (!selectedObjects.isEmpty()) {
+							textArea.setText(selectedObjects.iterator().next()
+									.getText());
+						}
+					}
+				});
+
+
+		final Column<GwtBeobachtung, Boolean> markColumn = new Column<GwtBeobachtung, Boolean>(
+				new CheckboxCell(true, false)) {
+
+			@Override
+			public Boolean getValue(GwtBeobachtung object) {
+				return Boolean.valueOf(selectionModel.isSelected(object));
+			}
+		};
 
 		final Column<GwtBeobachtung, String> nameColumn = new TextColumn<GwtBeobachtung>() {
 			@Override
@@ -140,47 +170,62 @@ public class Search extends VerticalPanel {
 				return object.getUser();
 			}
 		};
-		
-		final Column<GwtBeobachtung, GwtBeobachtung> editColumn = new IdentityColumn<GwtBeobachtung>(new ActionCell<GwtBeobachtung>(Utils.EDIT, new Delegate<GwtBeobachtung>() {
-			@Override
-			public void execute(GwtBeobachtung object) {
-				final RootPanel rootPanel = RootPanel.get("content");
-				rootPanel.clear();
-				rootPanel.add(new EditContent(authorization, "850px", object.getKey()));
-				History.newItem(Wahrnehmung.NEW_ENTRY, false);
-			}
-		}));
-		
-		final Column<GwtBeobachtung, GwtBeobachtung> deleteColumn = new IdentityColumn<GwtBeobachtung>(new ActionCell<GwtBeobachtung>(Utils.DEL, new Delegate<GwtBeobachtung>() {
-			@Override
-			public void execute(final GwtBeobachtung object) {
-				decisionBox.addOkClickHandler(new ClickHandler() {
-					
-					@Override
-					public void onClick(ClickEvent arg0) {
-						wahrnehmungsService.deleteBeobachtung(object.getKey(), new AsyncCallback<Void>() {
 
+		final Column<GwtBeobachtung, GwtBeobachtung> editColumn = new IdentityColumn<GwtBeobachtung>(
+				new ActionCell<GwtBeobachtung>(Utils.EDIT,
+						new Delegate<GwtBeobachtung>() {
 							@Override
-							public void onFailure(Throwable caught) {
-								dialogBox.setErrorMessage(caught
-										.getLocalizedMessage());
-								dialogBox.center();
+							public void execute(GwtBeobachtung object) {
+								final RootPanel rootPanel = RootPanel
+										.get("content");
+								rootPanel.clear();
+								rootPanel.add(new EditContent(authorization,
+										"850px", object.getKey()));
+								History.newItem(Wahrnehmung.NEW_ENTRY, false);
 							}
+						}));
 
+		final Column<GwtBeobachtung, GwtBeobachtung> deleteColumn = new IdentityColumn<GwtBeobachtung>(
+				new ActionCell<GwtBeobachtung>(Utils.DEL,
+						new Delegate<GwtBeobachtung>() {
 							@Override
-							public void onSuccess(Void arg0) {
-								updateTable();
+							public void execute(
+									final GwtBeobachtung object) {
+								decisionBox
+										.addOkClickHandler(new ClickHandler() {
+
+											@Override
+											public void onClick(ClickEvent arg0) {
+												wahrnehmungsService.deleteBeobachtung(
+														object.getKey(),
+														new AsyncCallback<Void>() {
+
+															@Override
+															public void onFailure(
+																	Throwable caught) {
+																dialogBox
+																		.setErrorMessage(caught
+																				.getLocalizedMessage());
+																dialogBox
+																		.center();
+															}
+
+															@Override
+															public void onSuccess(
+																	Void arg0) {
+																updateTable();
+															}
+														});
+											}
+										});
+								decisionBox.center();
 							}
-						});
-					}
-				});
-				decisionBox.center();
-			}
-		}));
-		
+						}));
+
 		table = new CellTable<GwtBeobachtung>();
 		table.setKeyboardSelectionPolicy(KeyboardSelectionPolicy.ENABLED);
-		table.setPageSize(7);
+		table.setPageSize(10);
+		table.addColumn(markColumn);
 		table.addColumn(dateColumn, "Datum");
 		table.addColumn(nameColumn, "Name");
 		table.addColumn(sectionColumn, "Bereich");
@@ -192,18 +237,7 @@ public class Search extends VerticalPanel {
 		table.addColumn(deleteColumn);
 		add(table);
 
-		final SingleSelectionModel<GwtBeobachtung> selectionModel = new SingleSelectionModel<GwtBeobachtung>();
-		table.setSelectionModel(selectionModel);
-		selectionModel
-				.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-
-					@Override
-					public void onSelectionChange(SelectionChangeEvent event) {
-						final GwtBeobachtung selectedObject = selectionModel
-								.getSelectedObject();
-						textArea.setText(selectedObject.getText());
-					}
-				});
+		table.setSelectionModel(selectionModel, DefaultSelectionEventManager.<GwtBeobachtung> createCheckboxManager());
 
 		asyncDataProvider = new AsyncDataProvider<GwtBeobachtung>() {
 			@Override
@@ -233,10 +267,13 @@ public class Search extends VerticalPanel {
 					@Override
 					public void onSuccess(BeobachtungsResult result) {
 						asyncDataProvider.updateRowData(
-								visibleRange.getStart(), result.getBeobachtungen());
+								visibleRange.getStart(),
+								result.getBeobachtungen());
 						table.setRowCount(result.getRowCount());
 						table.redraw();
 					}
+
+					
 
 					@Override
 					public void onFailure(Throwable caught) {
@@ -245,7 +282,7 @@ public class Search extends VerticalPanel {
 					}
 				});
 	}
-	
+
 	public class FilterButtonHandler implements ClickHandler {
 
 		@Override
@@ -256,4 +293,5 @@ public class Search extends VerticalPanel {
 		}
 
 	}
+
 }
