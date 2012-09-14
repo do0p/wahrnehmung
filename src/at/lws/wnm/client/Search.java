@@ -36,6 +36,8 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.AsyncDataProvider;
+import com.google.gwt.view.client.CellPreviewEvent;
+import com.google.gwt.view.client.CellPreviewEvent.Handler;
 import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.MultiSelectionModel;
@@ -237,6 +239,13 @@ public class Search extends VerticalPanel {
 		table.addColumn(deleteColumn);
 		add(table);
 
+		table.addCellPreviewHandler(new Handler<GwtBeobachtung>() {
+			
+			@Override
+			public void onCellPreview(CellPreviewEvent<GwtBeobachtung> event) {
+				textArea.setText(event.getValue().getText());
+			}
+		});
 		table.setSelectionModel(selectionModel, DefaultSelectionEventManager.<GwtBeobachtung> createCheckboxManager());
 
 		asyncDataProvider = new AsyncDataProvider<GwtBeobachtung>() {
