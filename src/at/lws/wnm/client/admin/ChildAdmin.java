@@ -37,7 +37,7 @@ public class ChildAdmin extends VerticalPanel {
 	private final Button cancelButton;
 	private final Button deleteButton;
 	private final PopUp dialogBox;
-//	private final SaveSuccess saveSuccess;
+	// private final SaveSuccess saveSuccess;
 
 	private final ListBox children;
 
@@ -56,7 +56,7 @@ public class ChildAdmin extends VerticalPanel {
 		deleteButton.setEnabled(false);
 		cancelButton = new Button(Utils.CANCEL);
 		dialogBox = new PopUp();
-//		saveSuccess = new SaveSuccess();
+		// saveSuccess = new SaveSuccess();
 
 		final Grid grid = new Grid(3, 2);
 		grid.setWidget(0, 0, new Label("Vorname"));
@@ -76,10 +76,12 @@ public class ChildAdmin extends VerticalPanel {
 		data.add(buttonPanel);
 
 		data.add(new HTML("<br/><br/>"));
-		
-//		final FileUploadForm fileUpload = new FileUploadForm(GWT.getModuleBaseURL()+"csvUpload");
-//		data.add(fileUpload);
-		
+
+		// remove comments to enable fileupload
+		// final FileUploadForm fileUpload = new
+		// FileUploadForm(GWT.getModuleBaseURL()+"csvUpload");
+		// data.add(fileUpload);
+
 		children = new ListBox(false);
 		children.setVisibleItemCount(20);
 		children.addClickHandler(new ChildClickHandler());
@@ -152,8 +154,8 @@ public class ChildAdmin extends VerticalPanel {
 
 				@Override
 				public void onSuccess(Void result) {
-//					saveSuccess.center();
-//					saveSuccess.show();
+					// saveSuccess.center();
+					// saveSuccess.show();
 					rebuildChildList();
 					resetForm();
 				}
