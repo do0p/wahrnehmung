@@ -370,7 +370,7 @@ public class Search extends VerticalPanel {
 						}));
 
 		table.setKeyboardSelectionPolicy(KeyboardSelectionPolicy.ENABLED);
-		table.setPageSize(2);
+		table.setPageSize(10);
 		table.addColumn(markColumn, selectAllHeader);
 		table.addColumn(dateColumn, "Datum");
 		table.addColumn(nameColumn, "Name");
