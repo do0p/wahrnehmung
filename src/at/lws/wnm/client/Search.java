@@ -126,11 +126,11 @@ public class Search extends VerticalPanel {
 
 		add(pager);
 
-		Utils.formatLeftCenter(this, createButtonContainer(), width,
-				Utils.ROW_HEIGHT);
-
 		textArea.setSize(width, "400px");
 		add(textArea);
+		
+		Utils.formatLeftCenter(this, createButtonContainer(), width,
+				Utils.ROW_HEIGHT);
 	}
 
 	private HorizontalPanel createButtonContainer() {
