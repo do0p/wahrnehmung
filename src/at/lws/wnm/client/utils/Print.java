@@ -61,12 +61,12 @@ public class Print {
     /**
      * If true, use a Timer instead of DeferredCommand to print the internal fram
      */
-    public static boolean USE_TIMER     = false;
+    public static boolean USE_TIMER     = true;
 
     /**
      * Time in seconds to wait before printing the internal frame when using Timer
      */
-    public static int TIMER_DELAY       = 2;
+    public static int TIMER_DELAY       = 3;
 
 
     public static native void it() /*-{

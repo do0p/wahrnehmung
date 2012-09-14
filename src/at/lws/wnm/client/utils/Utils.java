@@ -24,6 +24,7 @@ public class Utils {
 	public static final String CANCEL = "abbrechen";
 	public static final String ADD = "anlegen";
 	public static final String CHANGE = "&auml;ndern";
+	public static final String PRINT = "drucken";
 	public static final DateTimeFormat DATE_FORMAT = DateTimeFormat
 			.getFormat(DATE_FORMAT_STRING);
 	public static final Format DATEBOX_FORMAT = new DateBox.DefaultFormat(

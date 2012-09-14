@@ -7,6 +7,7 @@ import at.lws.wnm.client.service.WahrnehmungsServiceAsync;
 import at.lws.wnm.client.utils.DecisionBox;
 import at.lws.wnm.client.utils.NameSelection;
 import at.lws.wnm.client.utils.PopUp;
+import at.lws.wnm.client.utils.Print;
 import at.lws.wnm.client.utils.SectionSelection;
 import at.lws.wnm.client.utils.Utils;
 import at.lws.wnm.shared.model.Authorization;
@@ -67,6 +68,8 @@ public class Search extends VerticalPanel {
 
 	private MultiSelectionModel<GwtBeobachtung> selectionModel;
 
+	private Button printButton;
+
 	public Search(final Authorization authorization, String width) {
 
 		decisionBox = new DecisionBox();
@@ -92,6 +95,58 @@ public class Search extends VerticalPanel {
 
 		Utils.formatLeftCenter(filterBox, sendButton, Utils.BUTTON_WIDTH,
 				Utils.ROW_HEIGHT);
+
+		table = createTable(authorization);
+		add(table);
+
+		
+
+		final SimplePager pager = new SimplePager();
+		pager.setDisplay(table);
+
+		add(pager);
+
+		Utils.formatLeftCenter(this, createButtonContainer(), width,
+				Utils.ROW_HEIGHT);
+
+		textArea.setSize(width, "400px");
+		add(textArea);
+	}
+
+	private HorizontalPanel createButtonContainer() {
+		final HorizontalPanel buttonContainer = new HorizontalPanel();
+		buttonContainer.setWidth("170px");
+
+		printButton = new Button(Utils.PRINT);
+		printButton.addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent event) {
+				final Set<GwtBeobachtung> selectedSet = selectionModel
+						.getSelectedSet();
+				if (selectedSet.isEmpty()) {
+					// message
+				} else {
+					Print.it(createPrintHtml(selectedSet));
+				}
+			}
+
+			private String createPrintHtml(Set<GwtBeobachtung> selectedSet) {
+				
+				return "printing " + selectedSet.size() + " documents";
+			}
+		});
+		printButton.addStyleName("sendButton");
+
+		Utils.formatLeftCenter(buttonContainer, printButton,
+				Utils.BUTTON_WIDTH, Utils.ROW_HEIGHT);
+
+		return buttonContainer;
+	}
+
+	private CellTable<GwtBeobachtung> createTable(
+			final Authorization authorization) {
+		final CellTable<GwtBeobachtung> table = new CellTable<GwtBeobachtung>();
 		
 		selectionModel = new MultiSelectionModel<GwtBeobachtung>();
 		selectionModel
@@ -107,7 +162,6 @@ public class Search extends VerticalPanel {
 						}
 					}
 				});
-
 
 		final Column<GwtBeobachtung, Boolean> markColumn = new Column<GwtBeobachtung, Boolean>(
 				new CheckboxCell(true, false)) {
@@ -191,8 +245,7 @@ public class Search extends VerticalPanel {
 				new ActionCell<GwtBeobachtung>(Utils.DEL,
 						new Delegate<GwtBeobachtung>() {
 							@Override
-							public void execute(
-									final GwtBeobachtung object) {
+							public void execute(final GwtBeobachtung object) {
 								decisionBox
 										.addOkClickHandler(new ClickHandler() {
 
@@ -215,7 +268,7 @@ public class Search extends VerticalPanel {
 															@Override
 															public void onSuccess(
 																	Void arg0) {
-																updateTable();
+																updateTable(table);
 															}
 														});
 											}
@@ -224,7 +277,6 @@ public class Search extends VerticalPanel {
 							}
 						}));
 
-		table = new CellTable<GwtBeobachtung>();
 		table.setKeyboardSelectionPolicy(KeyboardSelectionPolicy.ENABLED);
 		table.setPageSize(10);
 		table.addColumn(markColumn);
@@ -237,37 +289,31 @@ public class Search extends VerticalPanel {
 		table.addColumn(userColumn, "von");
 		table.addColumn(editColumn);
 		table.addColumn(deleteColumn);
-		add(table);
 
 		table.addCellPreviewHandler(new Handler<GwtBeobachtung>() {
-			
+
 			@Override
 			public void onCellPreview(CellPreviewEvent<GwtBeobachtung> event) {
 				textArea.setText(event.getValue().getText());
 			}
 		});
-		table.setSelectionModel(selectionModel, DefaultSelectionEventManager.<GwtBeobachtung> createCheckboxManager());
+		table.setSelectionModel(selectionModel, DefaultSelectionEventManager
+				.<GwtBeobachtung> createCheckboxManager());
 
 		asyncDataProvider = new AsyncDataProvider<GwtBeobachtung>() {
 			@Override
 			protected void onRangeChanged(HasData<GwtBeobachtung> display) {
-				updateTable();
+				updateTable(table);
 			}
 		};
 		asyncDataProvider.addDataDisplay(table);
 
-		updateTable();
-
-		final SimplePager pager = new SimplePager();
-		pager.setDisplay(table);
-
-		add(pager);
-
-		textArea.setSize(width, "400px");
-		add(textArea);
+		updateTable(table);
+		
+		return table;
 	}
 
-	private void updateTable() {
+	private void updateTable(final CellTable<GwtBeobachtung> table) {
 		final Range visibleRange = table.getVisibleRange();
 
 		wahrnehmungsService.getBeobachtungen(filter, visibleRange,
@@ -281,8 +327,6 @@ public class Search extends VerticalPanel {
 						table.setRowCount(result.getRowCount());
 						table.redraw();
 					}
-
-					
 
 					@Override
 					public void onFailure(Throwable caught) {
@@ -298,7 +342,7 @@ public class Search extends VerticalPanel {
 		public void onClick(ClickEvent event) {
 			filter.setChildKey(nameSelection.getSelectedChildKey());
 			filter.setSectionKey(sectionSelection.getSelectedSectionKey());
-			updateTable();
+			updateTable(table);
 		}
 
 	}
