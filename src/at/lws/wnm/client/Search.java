@@ -18,12 +18,14 @@ import at.lws.wnm.shared.model.GwtBeobachtung;
 import com.google.gwt.cell.client.ActionCell;
 import com.google.gwt.cell.client.ActionCell.Delegate;
 import com.google.gwt.cell.client.CheckboxCell;
+import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy.KeyboardSelectionPolicy;
+import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.IdentityColumn;
 import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -73,6 +75,7 @@ public class Search extends VerticalPanel {
 	private MultiSelectionModel<GwtBeobachtung> selectionModel;
 
 	private Button printButton;
+	private boolean allSelected;
 
 	public Search(final Authorization authorization, String width) {
 
@@ -100,10 +103,23 @@ public class Search extends VerticalPanel {
 		Utils.formatLeftCenter(filterBox, sendButton, Utils.BUTTON_WIDTH,
 				Utils.ROW_HEIGHT);
 
+		selectionModel = new MultiSelectionModel<GwtBeobachtung>();
+		selectionModel
+				.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+
+					@Override
+					public void onSelectionChange(SelectionChangeEvent event) {
+						final Set<GwtBeobachtung> selectedObjects = selectionModel
+								.getSelectedSet();
+						if (!selectedObjects.isEmpty()) {
+							textArea.setText(selectedObjects.iterator().next()
+									.getText());
+						}
+					}
+				});
+
 		table = createTable(authorization);
 		add(table);
-
-		
 
 		final SimplePager pager = new SimplePager();
 		pager.setDisplay(table);
@@ -136,11 +152,10 @@ public class Search extends VerticalPanel {
 			}
 
 			private UIObject createPrintHtml(Set<GwtBeobachtung> selectedSet) {
-				
+
 				final VerticalPanel all = new VerticalPanel();
-				
-				for(GwtBeobachtung beobachtung : selectedSet)
-				{
+
+				for (GwtBeobachtung beobachtung : selectedSet) {
 					final DateLabel dateLabel = new DateLabel(Utils.DATE_FORMAT);
 					dateLabel.setValue(beobachtung.getDate());
 					final HorizontalPanel header = new HorizontalPanel();
@@ -148,19 +163,24 @@ public class Search extends VerticalPanel {
 					header.add(new Label(beobachtung.getChildName()));
 					header.add(new Label("am"));
 					header.add(dateLabel);
-					
-					final Label sectionName = new Label(beobachtung.getSectionName());
-					final Label duration = new Label(beobachtung.getDuration() == null ? "" : beobachtung.getDuration().getText());
-					final Label socialForm = new Label(beobachtung.getSocial() == null ? "" : beobachtung.getSocial().getText());
+
+					final Label sectionName = new Label(beobachtung
+							.getSectionName());
+					final Label duration = new Label(
+							beobachtung.getDuration() == null ? ""
+									: beobachtung.getDuration().getText());
+					final Label socialForm = new Label(
+							beobachtung.getSocial() == null ? "" : beobachtung
+									.getSocial().getText());
 					final HorizontalPanel section = new HorizontalPanel();
 					section.setSpacing(10);
 					section.add(sectionName);
 					section.add(duration);
 					section.add(socialForm);
-					
+
 					final Label text = new Label(beobachtung.getText(), true);
 					final Label author = new Label(beobachtung.getUser());
-					
+
 					final VerticalPanel one = new VerticalPanel();
 					one.add(header);
 					one.add(section);
@@ -171,7 +191,7 @@ public class Search extends VerticalPanel {
 					all.add(one);
 					all.add(new HTML("<HR/>"));
 				}
-				
+
 				return all;
 			}
 		});
@@ -186,21 +206,54 @@ public class Search extends VerticalPanel {
 	private CellTable<GwtBeobachtung> createTable(
 			final Authorization authorization) {
 		final CellTable<GwtBeobachtung> table = new CellTable<GwtBeobachtung>();
-		
-		selectionModel = new MultiSelectionModel<GwtBeobachtung>();
-		selectionModel
-				.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
 
-					@Override
-					public void onSelectionChange(SelectionChangeEvent event) {
-						final Set<GwtBeobachtung> selectedObjects = selectionModel
-								.getSelectedSet();
-						if (!selectedObjects.isEmpty()) {
-							textArea.setText(selectedObjects.iterator().next()
-									.getText());
-						}
+		final Header<Boolean> selectAllHeader = new Header<Boolean>(
+				new CheckboxCell(true, false)) {
+			
+			
+			@Override
+			public Boolean getValue() {
+				return Boolean.valueOf(allSelected);
+			}
+			
+			
+			
+		};
+
+		selectAllHeader.setUpdater(new ValueUpdater<Boolean>() {
+			@Override
+			public void update(Boolean value) {
+				allSelected = value.booleanValue();
+				if (value.booleanValue()) {
+
+					wahrnehmungsService.getBeobachtungen(filter, new Range(0,
+							table.getRowCount()),
+							new AsyncCallback<BeobachtungsResult>() {
+
+								@Override
+								public void onFailure(Throwable arg0) {
+									// TODO Auto-generated method stub
+
+								}
+
+								@Override
+								public void onSuccess(BeobachtungsResult result) {
+
+									for (GwtBeobachtung contact : result
+											.getBeobachtungen()) {
+										selectionModel.setSelected(contact,
+												true);
+									}
+								}
+							});
+
+				} else {
+					for (GwtBeobachtung contact : selectionModel.getSelectedSet()) {
+						selectionModel.setSelected(contact, false);
 					}
-				});
+				}
+			}
+		});
 
 		final Column<GwtBeobachtung, Boolean> markColumn = new Column<GwtBeobachtung, Boolean>(
 				new CheckboxCell(true, false)) {
@@ -317,8 +370,8 @@ public class Search extends VerticalPanel {
 						}));
 
 		table.setKeyboardSelectionPolicy(KeyboardSelectionPolicy.ENABLED);
-		table.setPageSize(10);
-		table.addColumn(markColumn);
+		table.setPageSize(2);
+		table.addColumn(markColumn, selectAllHeader);
 		table.addColumn(dateColumn, "Datum");
 		table.addColumn(nameColumn, "Name");
 		table.addColumn(sectionColumn, "Bereich");
@@ -348,7 +401,7 @@ public class Search extends VerticalPanel {
 		asyncDataProvider.addDataDisplay(table);
 
 		updateTable(table);
-		
+
 		return table;
 	}
 
