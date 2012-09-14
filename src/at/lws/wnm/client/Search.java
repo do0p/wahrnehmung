@@ -31,10 +31,14 @@ import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CellPanel;
+import com.google.gwt.user.client.ui.DateLabel;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextArea;
+import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.AsyncDataProvider;
 import com.google.gwt.view.client.CellPreviewEvent;
@@ -131,9 +135,44 @@ public class Search extends VerticalPanel {
 				}
 			}
 
-			private String createPrintHtml(Set<GwtBeobachtung> selectedSet) {
+			private UIObject createPrintHtml(Set<GwtBeobachtung> selectedSet) {
 				
-				return "printing " + selectedSet.size() + " documents";
+				final VerticalPanel all = new VerticalPanel();
+				
+				for(GwtBeobachtung beobachtung : selectedSet)
+				{
+					final DateLabel dateLabel = new DateLabel(Utils.DATE_FORMAT);
+					dateLabel.setValue(beobachtung.getDate());
+					final HorizontalPanel header = new HorizontalPanel();
+					header.setSpacing(10);
+					header.add(new Label(beobachtung.getChildName()));
+					header.add(new Label("am"));
+					header.add(dateLabel);
+					
+					final Label sectionName = new Label(beobachtung.getSectionName());
+					final Label duration = new Label(beobachtung.getDuration() == null ? "" : beobachtung.getDuration().getText());
+					final Label socialForm = new Label(beobachtung.getSocial() == null ? "" : beobachtung.getSocial().getText());
+					final HorizontalPanel section = new HorizontalPanel();
+					section.setSpacing(10);
+					section.add(sectionName);
+					section.add(duration);
+					section.add(socialForm);
+					
+					final Label text = new Label(beobachtung.getText(), true);
+					final Label author = new Label(beobachtung.getUser());
+					
+					final VerticalPanel one = new VerticalPanel();
+					one.add(header);
+					one.add(section);
+					one.add(new HTML("<BR/>"));
+					one.add(text);
+					one.add(new HTML("<BR/>"));
+					one.add(author);
+					all.add(one);
+					all.add(new HTML("<HR/>"));
+				}
+				
+				return all;
 			}
 		});
 		printButton.addStyleName("sendButton");
