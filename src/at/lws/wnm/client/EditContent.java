@@ -110,6 +110,7 @@ public class EditContent extends VerticalPanel {
 		nameSelection.getTextBox().addChangeHandler(changeHandler);
 
 		dateBox.setValue(new Date());
+		dateBox.setFormat(Utils.DATEBOX_FORMAT);
 		dateBox.addValueChangeHandler(new ValueChangeHandler<Date>() {
 
 			@Override
@@ -149,14 +150,17 @@ public class EditContent extends VerticalPanel {
 
 	private void layout(String width) {
 
-		dateBox.setFormat(Utils.DATEBOX_FORMAT);
+	
 
-		final HorizontalPanel childAndDateContainer = new HorizontalPanel();
-		Utils.formatLeftCenter(this, childAndDateContainer, width,
-				Utils.ROW_HEIGHT);
-		Utils.formatLeftCenter(childAndDateContainer, nameSelection,
-				NameSelection.WIDTH, Utils.FIELD_HEIGHT);
-		Utils.formatLeftCenter(childAndDateContainer, dateBox, "50px",
+		final HorizontalPanel rootContainer = new HorizontalPanel();
+		Utils.formatLeftCenter(this, rootContainer, width,
+				"550px");
+		add(rootContainer);
+		
+		final VerticalPanel contentContainer = new VerticalPanel();
+		Utils.formatLeftCenter(rootContainer, contentContainer,
+				NameSelection.WIDTH, "550px");
+		Utils.formatRightCenter(contentContainer, nameSelection, NameSelection.WIDTH,
 				Utils.FIELD_HEIGHT);
 
 		final HorizontalPanel selectionContainer = new HorizontalPanel();
@@ -175,7 +179,7 @@ public class EditContent extends VerticalPanel {
 		textArea.setSize(width, "400px");
 		add(textArea);
 
-		Utils.formatLeftCenter(this, createButtonContainer(), width,
+		Utils.formatLeftCenter(this, createButtonContainer(), (width - NameSelection.WIDTH),
 				Utils.ROW_HEIGHT);
 
 		setSize(width, "550px");

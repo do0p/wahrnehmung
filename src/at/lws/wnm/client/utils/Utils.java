@@ -11,9 +11,12 @@ import com.google.gwt.user.client.ui.CellPanel;
 import com.google.gwt.user.client.ui.DateLabel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment.HorizontalAlignmentConstant;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HasVerticalAlignment.VerticalAlignmentConstant;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -47,25 +50,22 @@ public class Utils {
 		final String firstName = child.getFirstName();
 		final String lastName = child.getLastName();
 		final Date birthDay = child.getBirthDay();
-		
+
 		final StringBuilder builder = new StringBuilder();
-		if(Utils.isNotEmpty(firstName))
-		{
+		if (Utils.isNotEmpty(firstName)) {
 			builder.append(firstName);
 			builder.append(" ");
 		}
-		if(Utils.isNotEmpty(lastName))
-		{
+		if (Utils.isNotEmpty(lastName)) {
 			builder.append(lastName);
 			builder.append(" ");
 		}
-		if(birthDay != null)
-		{
+		if (birthDay != null) {
 			builder.append("(");
 			builder.append(DATE_FORMAT.format(birthDay));
 			builder.append(")");
 		}
-		
+
 		return builder.toString().trim();
 	}
 
@@ -73,41 +73,53 @@ public class Utils {
 		return lastName != null && lastName.matches(".*\\w.*");
 	}
 
-
 	public static boolean isEmpty(String sectionKey) {
 		return !isNotEmpty(sectionKey);
 	}
 
 	public static String shorten(String text, int length) {
-		if(text == null||text.length() <= length)
-		{
+		if (text == null || text.length() <= length) {
 			return text;
 		}
-		if(length < SHORTEN_POSTFIX.length())
-		{
+		if (length < SHORTEN_POSTFIX.length()) {
 			return text.substring(0, length);
 		}
-		return text.substring(0, length - SHORTEN_POSTFIX.length()) + SHORTEN_POSTFIX;
+		return text.substring(0, length - SHORTEN_POSTFIX.length())
+				+ SHORTEN_POSTFIX;
 	}
 
-	public static void formatLeftCenter(CellPanel panel, Widget widget, String width, String height) {
-		panel.add(widget);
-		panel.setCellVerticalAlignment(widget,
+	public static void formatLeftCenter(Panel panel, Widget widget,
+			String width, String height) {
+		format(panel, widget, width, height, HasHorizontalAlignment.ALIGN_LEFT,
 				HasVerticalAlignment.ALIGN_MIDDLE);
-		panel.setCellHorizontalAlignment(widget,
-				HasHorizontalAlignment.ALIGN_LEFT);
+	}
+
+	public static void formatRightCenter(Panel panel, Widget widget,
+			String width, String height) {
+		format(panel, widget, width, height,
+				HasHorizontalAlignment.ALIGN_RIGHT,
+				HasVerticalAlignment.ALIGN_MIDDLE);
+	}
+
+	public static void format(Panel panel, Widget widget, String width,
+			String height, final HorizontalAlignmentConstant horizontalAlign,
+			final VerticalAlignmentConstant verticalAlign) {
+		panel.add(widget);
 		widget.setSize(width, height);
-		panel.setCellWidth(widget, width + "px");
+		if (panel instanceof CellPanel) {
+			CellPanel cPanel = (CellPanel) panel;
+			cPanel.setCellVerticalAlignment(widget, verticalAlign);
+			cPanel.setCellHorizontalAlignment(widget, horizontalAlign);
+			cPanel.setCellWidth(widget, width);
+		}
 	}
 
 	public static int min(int int1, int int2) {
-		if(int1 < int2)
-		{
+		if (int1 < int2) {
 			return int1;
 		}
 		return int2;
 	}
-
 
 	public static UIObject createPrintHtml(Set<GwtBeobachtung> selectedSet) {
 
@@ -131,14 +143,11 @@ public class Utils {
 		header.add(new Label("am"));
 		header.add(dateLabel);
 
-		final Label sectionName = new Label(beobachtung
-				.getSectionName());
-		final Label duration = new Label(
-				beobachtung.getDuration() == null ? ""
-						: beobachtung.getDuration().getText());
-		final Label socialForm = new Label(
-				beobachtung.getSocial() == null ? "" : beobachtung
-						.getSocial().getText());
+		final Label sectionName = new Label(beobachtung.getSectionName());
+		final Label duration = new Label(beobachtung.getDuration() == null ? ""
+				: beobachtung.getDuration().getText());
+		final Label socialForm = new Label(beobachtung.getSocial() == null ? ""
+				: beobachtung.getSocial().getText());
 		final HorizontalPanel section = new HorizontalPanel();
 		section.setSpacing(10);
 		section.add(sectionName);

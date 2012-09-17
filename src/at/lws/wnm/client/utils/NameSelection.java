@@ -15,7 +15,7 @@ import com.google.gwt.user.client.ui.SuggestBox;
 
 public class NameSelection extends SuggestBox {
 
-	public static final String WIDTH = "300px";
+	public static final String WIDTH = "250px";
 
 	private final PopUp dialogBox;
 
