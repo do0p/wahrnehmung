@@ -184,7 +184,7 @@ public class EditContent extends VerticalPanel {
 
 	private void resetForm() {
 		nameSelection.reset();
-		sectionSelection.reset();
+		//sectionSelection.reset();
 		durationSelection.setSelectedIndex(0);
 		socialSelection.setSelectedIndex(0);
 		textArea.setValue("");
