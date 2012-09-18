@@ -52,7 +52,13 @@ public class EditContent extends VerticalPanel {
 
 	private DecisionBox decisionBox;
 
-	public EditContent(Authorization authorization, String width, Long key) {
+	private ListBox additionalNames;
+
+	private Button nameAddButton;
+
+	private Button nameRemoveButton;
+
+	public EditContent(Authorization authorization, int width, Long key) {
 		this.key = key;
 		init();
 		layout(width);
@@ -82,12 +88,10 @@ public class EditContent extends VerticalPanel {
 							durationSelection.setSelectedIndex(duration
 									.ordinal() + 1);
 						}
-						
+
 						final SocialEnum social = result.getSocial();
-						if (social != null)
-						{
-						socialSelection.setSelectedIndex(social
-								.ordinal() + 1);
+						if (social != null) {
+							socialSelection.setSelectedIndex(social.ordinal() + 1);
 						}
 						textArea.setText(result.getText());
 						changes = false;
@@ -108,6 +112,51 @@ public class EditContent extends VerticalPanel {
 
 		nameSelection = new NameSelection(dialogBox);
 		nameSelection.getTextBox().addChangeHandler(changeHandler);
+		
+		additionalNames = new ListBox(true);
+		
+		nameAddButton = new Button("+");
+		nameAddButton.addClickHandler(new ClickHandler() {
+			
+			@Override
+			public void onClick(ClickEvent arg0) {
+				final Long selectedChildKey = nameSelection.getSelectedChildKey();
+				if(selectedChildKey != null && !isInList(additionalNames, selectedChildKey.toString()))
+				{
+					additionalNames.addItem(nameSelection.getValue(), selectedChildKey.toString());
+					nameSelection.reset();
+				}
+			}
+
+			private boolean isInList(ListBox additionalNames, String value) {
+				for(int i = 0; i < additionalNames.getItemCount(); i ++)
+				{
+					if(additionalNames.getValue(i).equals(value))
+					{
+						return true;
+					}
+				}
+				return false;
+			}
+		});
+		nameRemoveButton = new Button("-");
+		nameRemoveButton.addClickHandler(new ClickHandler() {
+			
+			@Override
+			public void onClick(ClickEvent arg0) {
+				if(additionalNames.getSelectedIndex() > 0);
+				int itemCount = additionalNames.getItemCount();
+				for(int i = additionalNames.getSelectedIndex(); i < itemCount; i++)
+				{
+					if(additionalNames.isItemSelected(i))
+					{
+						additionalNames.removeItem(i);
+						i--;
+						itemCount--;
+					}
+				}
+			}
+		});
 
 		dateBox.setValue(new Date());
 		dateBox.setFormat(Utils.DATEBOX_FORMAT);
@@ -148,47 +197,59 @@ public class EditContent extends VerticalPanel {
 
 	}
 
-	private void layout(String width) {
-
-	
+	private void layout(int width) {
 
 		final HorizontalPanel rootContainer = new HorizontalPanel();
-		Utils.formatLeftCenter(this, rootContainer, width,
-				"550px");
+		Utils.formatLeftCenter(this, rootContainer, width, 550);
 		add(rootContainer);
-		
-		final VerticalPanel contentContainer = new VerticalPanel();
-		Utils.formatLeftCenter(rootContainer, contentContainer,
-				NameSelection.WIDTH, "550px");
-		Utils.formatRightCenter(contentContainer, nameSelection, NameSelection.WIDTH,
+
+		final VerticalPanel nameContainer = new VerticalPanel();
+		Utils.formatLeftCenter(rootContainer, nameContainer,
+				NameSelection.WIDTH, 550);
+		Utils.formatLeftTop(nameContainer, nameSelection, NameSelection.WIDTH,
 				Utils.FIELD_HEIGHT);
+		final HorizontalPanel nameButtoContainer = new HorizontalPanel();
+		nameButtoContainer.add(nameAddButton);
+		nameButtoContainer.add(nameRemoveButton);
+		
+		Utils.formatCenter(nameContainer, nameButtoContainer , NameSelection.WIDTH, Utils.FIELD_HEIGHT);
+		Utils.formatLeftTop(nameContainer, additionalNames, NameSelection.WIDTH, 500);
+
+		final VerticalPanel contentContainer = new VerticalPanel();
+		final int contentWidth = width - NameSelection.WIDTH - 10;
+		Utils.formatRightCenter(rootContainer, contentContainer, contentWidth,
+				550);
 
 		final HorizontalPanel selectionContainer = new HorizontalPanel();
-		Utils.formatLeftCenter(this, selectionContainer, width,
-				Utils.ROW_HEIGHT);
+		Utils.formatCenter(contentContainer, selectionContainer,
+				contentWidth, Utils.ROW_HEIGHT);
 		for (ListBox sectionSelectionBox : sectionSelection
 				.getSectionSelectionBoxes()) {
-			Utils.formatLeftCenter(selectionContainer, sectionSelectionBox,
+			Utils.formatCenter(selectionContainer, sectionSelectionBox,
 					Utils.LISTBOX_WIDTH, Utils.FIELD_HEIGHT);
 		}
-		Utils.formatLeftCenter(selectionContainer, durationSelection,
-				Utils.LISTBOX_WIDTH, Utils.FIELD_HEIGHT);
-		Utils.formatLeftCenter(selectionContainer, socialSelection,
-				Utils.LISTBOX_WIDTH, Utils.FIELD_HEIGHT);
 
-		textArea.setSize(width, "400px");
-		add(textArea);
-
-		Utils.formatLeftCenter(this, createButtonContainer(), (width - NameSelection.WIDTH),
+		final HorizontalPanel socialContainer = new HorizontalPanel();
+		Utils.formatCenter(contentContainer, socialContainer, contentWidth,
 				Utils.ROW_HEIGHT);
+		Utils.formatCenter(socialContainer, durationSelection,
+				Utils.LISTBOX_WIDTH, Utils.FIELD_HEIGHT);
+		Utils.formatCenter(socialContainer, socialSelection,
+				Utils.LISTBOX_WIDTH, Utils.FIELD_HEIGHT);
 
-		setSize(width, "550px");
+		textArea.setSize("" + contentWidth + "px", "400px");
+		contentContainer.add(textArea);
+
+		Utils.formatCenter(contentContainer, createButtonContainer(),
+				contentWidth, Utils.ROW_HEIGHT);
+
+		setSize("" + width + "px", "550px");
 
 	}
 
 	private void resetForm() {
 		nameSelection.reset();
-		//sectionSelection.reset();
+		// sectionSelection.reset();
 		durationSelection.setSelectedIndex(0);
 		socialSelection.setSelectedIndex(0);
 		textArea.setValue("");

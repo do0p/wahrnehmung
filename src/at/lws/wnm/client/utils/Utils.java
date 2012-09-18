@@ -41,10 +41,10 @@ public class Utils {
 	public static final Format DATEBOX_FORMAT = new DateBox.DefaultFormat(
 			DATE_FORMAT);
 	public static final int BUTTON_SPACING = 5;
-	public static final String FIELD_HEIGHT = "20px";
-	public static final String BUTTON_WIDTH = "80px";
-	public static final String ROW_HEIGHT = "40px";
-	public static final String LISTBOX_WIDTH = "135px";
+	public static final int FIELD_HEIGHT = 20;
+	public static final int BUTTON_WIDTH = 80;
+	public static final int ROW_HEIGHT = 40;
+	public static final int LISTBOX_WIDTH = 135;
 
 	public static String formatChildName(GwtChild child) {
 		final String firstName = child.getFirstName();
@@ -89,23 +89,39 @@ public class Utils {
 	}
 
 	public static void formatLeftCenter(Panel panel, Widget widget,
-			String width, String height) {
+			int width, int height) {
 		format(panel, widget, width, height, HasHorizontalAlignment.ALIGN_LEFT,
 				HasVerticalAlignment.ALIGN_MIDDLE);
 	}
 
 	public static void formatRightCenter(Panel panel, Widget widget,
-			String width, String height) {
+			int width, int height) {
 		format(panel, widget, width, height,
 				HasHorizontalAlignment.ALIGN_RIGHT,
 				HasVerticalAlignment.ALIGN_MIDDLE);
 	}
 
-	public static void format(Panel panel, Widget widget, String width,
-			String height, final HorizontalAlignmentConstant horizontalAlign,
+	public static void formatLeftTop(Panel panel,
+			Widget widget, int width, int height) {
+		format(panel, widget, width, height,
+				HasHorizontalAlignment.ALIGN_LEFT,
+				HasVerticalAlignment.ALIGN_TOP);
+	}
+
+	public static void formatCenter(Panel panel,
+			Widget widget, int width, int height) {
+		format(panel, widget, width, height,
+				HasHorizontalAlignment.ALIGN_CENTER,
+				HasVerticalAlignment.ALIGN_MIDDLE);
+	}
+	
+	public static void format(Panel panel, Widget widget, int widthPx,
+			int heightPx, final HorizontalAlignmentConstant horizontalAlign,
 			final VerticalAlignmentConstant verticalAlign) {
 		panel.add(widget);
-		widget.setSize(width, height);
+		final String width = "" + widthPx + "px";
+		final String height = "" + heightPx + "px";
+		widget.setSize(width , height);
 		if (panel instanceof CellPanel) {
 			CellPanel cPanel = (CellPanel) panel;
 			cPanel.setCellVerticalAlignment(widget, verticalAlign);
@@ -166,5 +182,8 @@ public class Utils {
 		one.add(author);
 		return one;
 	}
+
+	
+
 
 }

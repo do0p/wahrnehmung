@@ -34,7 +34,7 @@ public class Search extends VerticalPanel {
 	private final SectionSelection sectionSelection;
 	private final MultiSelectionModel<GwtBeobachtung> selectionModel;
 
-	public Search(final Authorization authorization, String width) {
+	public Search(final Authorization authorization, int width) {
 		
 		final PopUp dialogBox = new PopUp();
 		final TextArea textArea = new TextArea();
@@ -57,7 +57,7 @@ public class Search extends VerticalPanel {
 		layout(width, textArea, sendButton);
 	}
 
-	private void layout(String width, final TextArea textArea,
+	private void layout(int width, final TextArea textArea,
 			final Button sendButton) {
 		final CellPanel filterBox = new HorizontalPanel();
 		filterBox.setSpacing(Utils.BUTTON_SPACING);
@@ -75,7 +75,7 @@ public class Search extends VerticalPanel {
 		final SimplePager pager = new SimplePager();
 		pager.setDisplay(table);
 		add(pager);
-		textArea.setSize(width, "400px");
+		textArea.setSize("" + width + "px", "400px");
 		add(textArea);
 		Utils.formatLeftCenter(this, createButtonContainer(), width,
 				Utils.ROW_HEIGHT);

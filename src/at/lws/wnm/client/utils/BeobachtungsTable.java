@@ -177,7 +177,7 @@ public class BeobachtungsTable extends CellTable<GwtBeobachtung> {
 										.get("content");
 								rootPanel.clear();
 								rootPanel.add(new EditContent(authorization,
-										"850px", object.getKey()));
+										850, object.getKey()));
 								History.newItem(Wahrnehmung.NEW_ENTRY, false);
 							}
 						}));

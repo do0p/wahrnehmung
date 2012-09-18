@@ -84,9 +84,9 @@ public class Wahrnehmung implements EntryPoint, ValueChangeHandler<String> {
 	private void changePage(String token) {
 		final Widget content;
 		if (token.equals(NEW_ENTRY)) {
-			content = new EditContent(authorization, "850px", null);
+			content = new EditContent(authorization, 850, null);
 		} else if (token.equals(LIST_ENTRY)) {
-			content = new Search(authorization, "850px");
+			content = new Search(authorization, 850);
 		} else if (token.equals(ADMIN) && authorization.isAdmin()) {
 			content = new AdminContent(authorization, "550px");
 		} else {
