@@ -27,6 +27,9 @@ public class SectionSelection {
 	private final PopUp dialogBox;
 	private final List<SectionSelectionBox> selectionBoxes;
 	private final Map<Long, List<Integer>> sectionSelectionMap = new HashMap<Long, List<Integer>>();
+	private boolean updated;
+
+	private Long selectedSectionKey;
 
 	public SectionSelection(PopUp dialogBox, ChangeHandler changeHandler) {
 		this.dialogBox = dialogBox;
@@ -114,6 +117,13 @@ public class SectionSelection {
 					sectionSelectionMap.put(parentKey, indexList);
 					addChildSectionIndices(parentKey, children, indexList, 0);
 				}
+
+				updated = true;
+				if(selectedSectionKey != null)
+				{
+					setSelectedInternal(selectedSectionKey);
+					selectedSectionKey = null;
+				}
 			}
 
 			private void addChildSectionIndices(Long parentKey,
@@ -133,8 +143,12 @@ public class SectionSelection {
 					childIndexList.add(Integer.valueOf(pos));
 					final Long newParentKey = list.get(i).getKey();
 					sectionSelectionMap.put(newParentKey, childIndexList);
-					addChildSectionIndices(newParentKey, children,
-							childIndexList, childIndexList.size() == selectionBoxes.size() ? pos : 0);
+					addChildSectionIndices(
+							newParentKey,
+							children,
+							childIndexList,
+							childIndexList.size() == selectionBoxes.size() ? pos
+									: 0);
 				}
 
 			}
@@ -220,13 +234,24 @@ public class SectionSelection {
 	}
 
 	public void setSelected(Long sectionKey) {
+
+		if (updated) {
+			setSelectedInternal(sectionKey);
+		} else {
+			selectedSectionKey = sectionKey;
+		}
+	}
+
+	private void setSelectedInternal(Long sectionKey) {
 		final List<Integer> indices = sectionSelectionMap.get(sectionKey);
 		for (int i = 0; i < indices.size(); i++) {
-			final SectionSelectionBox sectionSelectionBox = selectionBoxes.get(i);
+			final SectionSelectionBox sectionSelectionBox = selectionBoxes
+					.get(i);
 			sectionSelectionBox.setEnabled(true);
 			sectionSelectionBox.setSelectedIndex(indices.get(i).intValue());
-			ChangeEvent.fireNativeEvent(Document.get().createChangeEvent(), sectionSelectionBox);
-			
+			ChangeEvent.fireNativeEvent(Document.get().createChangeEvent(),
+					sectionSelectionBox);
+
 		}
 	}
 

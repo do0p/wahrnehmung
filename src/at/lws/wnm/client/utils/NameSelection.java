@@ -15,7 +15,7 @@ import com.google.gwt.user.client.ui.SuggestBox;
 
 public class NameSelection extends SuggestBox {
 
-	public static int  WIDTH = 200;
+	public static int WIDTH = 200;
 
 	private final PopUp dialogBox;
 
@@ -23,6 +23,9 @@ public class NameSelection extends SuggestBox {
 			.create(ChildService.class);
 	private final Map<String, Long> childMap = new HashMap<String, Long>();
 	private final Map<Long, String> reverseChildMap = new HashMap<Long, String>();
+	private boolean updated;
+
+	private Long selectedChildKey;
 
 	public NameSelection(PopUp dialogBox) {
 		super(new MultiWordSuggestOracle());
@@ -33,12 +36,12 @@ public class NameSelection extends SuggestBox {
 	public Long getSelectedChildKey() {
 		return childMap.get(getValue());
 	}
-	
-	public void refresh()
-	{
-		updateChildList();
-	}
-	
+
+	// public void refresh()
+	// {
+	// updateChildList();
+	// }
+
 	private void updateChildList() {
 		childService.queryChildren(new AsyncCallback<List<GwtChild>>() {
 
@@ -61,6 +64,12 @@ public class NameSelection extends SuggestBox {
 					reverseChildMap.put(child.getKey(), formattedChildName);
 					oracle.add(formattedChildName);
 				}
+				updated = true;
+				if(selectedChildKey != null)
+				{
+					setSelectedInternal(selectedChildKey);
+					selectedChildKey = null;
+				}
 			}
 
 		});
@@ -72,6 +81,14 @@ public class NameSelection extends SuggestBox {
 	}
 
 	public void setSelected(Long childKey) {
+		if (updated) {
+			setSelectedInternal(childKey);
+		} else {
+			selectedChildKey = childKey;
+		}
+	}
+
+	private void setSelectedInternal(Long childKey) {
 		setText(reverseChildMap.get(childKey));
 	}
 
