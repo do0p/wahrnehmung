@@ -29,6 +29,30 @@ public class BeobachtungGroup implements Serializable {
 		this.beobachtungsKey = beobachtungsKey;
 	}
 
+	public Long getKey() {
+		return key;
+	}
+
+	public void setKey(Long key) {
+		this.key = key;
+	}
+
+	public Long getMasterBeobachtungsKey() {
+		return masterBeobachtungsKey;
+	}
+
+	public void setMasterBeobachtungsKey(Long masterBeobachtungsKey) {
+		this.masterBeobachtungsKey = masterBeobachtungsKey;
+	}
+
+	public Long getBeobachtungsKey() {
+		return beobachtungsKey;
+	}
+
+	public void setBeobachtungsKey(Long beobachtungsKey) {
+		this.beobachtungsKey = beobachtungsKey;
+	}
+
 
 
 }
