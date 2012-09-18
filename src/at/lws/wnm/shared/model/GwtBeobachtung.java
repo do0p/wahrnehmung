@@ -1,8 +1,10 @@
 package at.lws.wnm.shared.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class GwtBeobachtung implements Serializable {
@@ -18,6 +20,7 @@ public class GwtBeobachtung implements Serializable {
 	private SocialEnum social;
 	private DurationEnum duration;
 	private String user;
+	private List<Long> additionalChildKeys = new ArrayList<Long>();
 
 	public void setText(String text) {
 		this.text = text;
@@ -149,6 +152,10 @@ public class GwtBeobachtung implements Serializable {
 		this.user = user;
 	}
 
+	public List<Long> getAdditionalChildKeys() {
+		return additionalChildKeys;
+	}
+	
 	@Override
 	public boolean equals(Object obj) {
 		if (!(obj instanceof GwtBeobachtung)) {
@@ -161,7 +168,9 @@ public class GwtBeobachtung implements Serializable {
 				&& ObjectUtils.equals(social, other.social)
 				&& ObjectUtils.equals(duration, other.duration)
 				&& date.equals(other.date) 
-				&& user.equals(other.user);
+				&& user.equals(other.user)
+				&& additionalChildKeys.equals(other.additionalChildKeys);
+		
 	}
 	
 	@Override
@@ -173,7 +182,12 @@ public class GwtBeobachtung implements Serializable {
 		result = result * 17 + ObjectUtils.hashCode(social);
 		result = result * 17 + ObjectUtils.hashCode(duration);
 		result = result * 17 + date.hashCode();
+		result = result * 17 + additionalChildKeys.hashCode();
 		return result * 17 + user.hashCode();
 	}
+
+	
+
+	
 
 }

@@ -35,9 +35,15 @@ public class WahrnehmungsServiceImpl extends RemoteServiceServlet implements
 	}
 
 	@Override
-	public Long storeBeobachtung(GwtBeobachtung beobachtung) {
-		return beobachtungsDao.storeBeobachtung(beobachtung,
-				userService.getCurrentUser());
+	public void storeBeobachtung(GwtBeobachtung beobachtung) {
+		final User currentUser = userService.getCurrentUser();
+		final Long masterBeobachtungsKey = beobachtungsDao.storeBeobachtung(beobachtung,
+				currentUser, null);
+		for(Long additionalChildKey : beobachtung.getAdditionalChildKeys())
+		{
+			beobachtung.setChildKey(additionalChildKey);
+			beobachtungsDao.storeBeobachtung(beobachtung, currentUser, masterBeobachtungsKey);
+		}
 	}
 
 	@Override
@@ -67,7 +73,7 @@ public class WahrnehmungsServiceImpl extends RemoteServiceServlet implements
 	@Override
 	public void deleteBeobachtung(Long beobachtungsKey) {
 		beobachtungsDao.deleteBeobachtung(beobachtungsKey);
-		
+
 	}
 
 }

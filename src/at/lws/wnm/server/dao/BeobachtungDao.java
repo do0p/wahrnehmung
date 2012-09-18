@@ -7,6 +7,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.Query;
 
 import at.lws.wnm.server.model.Beobachtung;
+import at.lws.wnm.server.model.BeobachtungGroup;
 import at.lws.wnm.server.model.Child;
 import at.lws.wnm.shared.model.BeobachtungsFilter;
 import at.lws.wnm.shared.model.GwtBeobachtung;
@@ -101,13 +102,23 @@ public class BeobachtungDao extends AbstractDao {
 		return mapToGwtBeobachtung(query.getResultList(), em);
 	}
 
-	public Long storeBeobachtung(GwtBeobachtung gwtBeobachtung, User user) {
-		final EntityManager em = EMF.get().createEntityManager();
+	public Long storeBeobachtung(GwtBeobachtung gwtBeobachtung, User user,
+			Long masterBeobachtungsKey) {
 		final Beobachtung beobachtung = Beobachtung.valueOf(gwtBeobachtung);
+		EntityManager em = EMF.get().createEntityManager();
 		try {
 			storeBeobachtung(beobachtung, user, em);
 		} finally {
 			em.close();
+		}
+		if (masterBeobachtungsKey != null) {
+			em = EMF.get().createEntityManager();
+			try {
+				em.persist(new BeobachtungGroup(masterBeobachtungsKey,
+						beobachtung.getKey()));
+			} finally {
+				em.close();
+			}
 		}
 		return beobachtung.getKey();
 	}

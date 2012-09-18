@@ -112,44 +112,46 @@ public class EditContent extends VerticalPanel {
 
 		nameSelection = new NameSelection(dialogBox);
 		nameSelection.getTextBox().addChangeHandler(changeHandler);
-		
+
 		additionalNames = new ListBox(true);
-		
-		nameAddButton = new Button("+");
+
+		nameAddButton = new Button("\u2193");
+		nameAddButton.setEnabled(key == null);
 		nameAddButton.addClickHandler(new ClickHandler() {
-			
+
 			@Override
 			public void onClick(ClickEvent arg0) {
-				final Long selectedChildKey = nameSelection.getSelectedChildKey();
-				if(selectedChildKey != null && !isInList(additionalNames, selectedChildKey.toString()))
-				{
-					additionalNames.addItem(nameSelection.getValue(), selectedChildKey.toString());
+				final Long selectedChildKey = nameSelection
+						.getSelectedChildKey();
+				if (selectedChildKey != null
+						&& !isInList(additionalNames,
+								selectedChildKey.toString())) {
+					additionalNames.addItem(nameSelection.getValue(),
+							selectedChildKey.toString());
 					nameSelection.reset();
 				}
 			}
 
 			private boolean isInList(ListBox additionalNames, String value) {
-				for(int i = 0; i < additionalNames.getItemCount(); i ++)
-				{
-					if(additionalNames.getValue(i).equals(value))
-					{
+				for (int i = 0; i < additionalNames.getItemCount(); i++) {
+					if (additionalNames.getValue(i).equals(value)) {
 						return true;
 					}
 				}
 				return false;
 			}
 		});
-		nameRemoveButton = new Button("-");
+		nameRemoveButton = new Button("\u2191");
+		nameRemoveButton.setEnabled(key == null);
 		nameRemoveButton.addClickHandler(new ClickHandler() {
-			
+
 			@Override
 			public void onClick(ClickEvent arg0) {
-				if(additionalNames.getSelectedIndex() > 0);
+				if (additionalNames.getSelectedIndex() > 0)
+					;
 				int itemCount = additionalNames.getItemCount();
-				for(int i = additionalNames.getSelectedIndex(); i < itemCount; i++)
-				{
-					if(additionalNames.isItemSelected(i))
-					{
+				for (int i = additionalNames.getSelectedIndex(); i < itemCount; i++) {
+					if (additionalNames.isItemSelected(i)) {
 						additionalNames.removeItem(i);
 						i--;
 						itemCount--;
@@ -211,9 +213,11 @@ public class EditContent extends VerticalPanel {
 		final HorizontalPanel nameButtoContainer = new HorizontalPanel();
 		nameButtoContainer.add(nameAddButton);
 		nameButtoContainer.add(nameRemoveButton);
-		
-		Utils.formatCenter(nameContainer, nameButtoContainer , NameSelection.WIDTH, Utils.FIELD_HEIGHT);
-		Utils.formatLeftTop(nameContainer, additionalNames, NameSelection.WIDTH, 500);
+
+		Utils.formatCenter(nameContainer, nameButtoContainer,
+				NameSelection.WIDTH, Utils.FIELD_HEIGHT);
+		Utils.formatLeftTop(nameContainer, additionalNames,
+				NameSelection.WIDTH, 500);
 
 		final VerticalPanel contentContainer = new VerticalPanel();
 		final int contentWidth = width - NameSelection.WIDTH - 10;
@@ -221,8 +225,8 @@ public class EditContent extends VerticalPanel {
 				550);
 
 		final HorizontalPanel selectionContainer = new HorizontalPanel();
-		Utils.formatCenter(contentContainer, selectionContainer,
-				contentWidth, Utils.ROW_HEIGHT);
+		Utils.formatCenter(contentContainer, selectionContainer, contentWidth,
+				Utils.ROW_HEIGHT);
 		for (ListBox sectionSelectionBox : sectionSelection
 				.getSectionSelectionBoxes()) {
 			Utils.formatCenter(selectionContainer, sectionSelectionBox,
@@ -253,7 +257,10 @@ public class EditContent extends VerticalPanel {
 		durationSelection.setSelectedIndex(0);
 		socialSelection.setSelectedIndex(0);
 		textArea.setValue("");
+		additionalNames.clear();
 		key = null;
+		nameAddButton.setEnabled(true);
+		nameRemoveButton.setEnabled(true);
 	}
 
 	private SocialEnum getSocialForm() {
@@ -325,16 +332,24 @@ public class EditContent extends VerticalPanel {
 		private void sendNameToServer() {
 
 			final String text = textArea.getValue();
-			final Long childKey = nameSelection.getSelectedChildKey();
+			String name = nameSelection.getValue();
+			Long childKey = nameSelection.getSelectedChildKey();
+			if ((Utils.isEmpty(name) || childKey == null)
+					&& additionalNames.getItemCount() > 0) {
+				name = additionalNames.getItemText(0);
+				childKey = Long.valueOf(additionalNames.getValue(0));
+				additionalNames.removeItem(0);
+			}
+
 			final Long sectionKey = sectionSelection.getSelectedSectionKey();
 			final Date date = dateBox.getValue();
 
 			String errorMessage = new String();
-			if (Utils.isEmpty(nameSelection.getValue())) {
+			if (Utils.isEmpty(name)) {
 				errorMessage = errorMessage + "W&auml;hle einen Namen!<br/>";
 			} else if (childKey == null) {
-				errorMessage = errorMessage + "Kein Kind mit Name "
-						+ nameSelection.getValue() + "!<br/>";
+				errorMessage = errorMessage + "Kein Kind mit Name " + name
+						+ "!<br/>";
 			}
 			if (sectionKey == null) {
 				errorMessage = errorMessage + "W&auml;hle einen Bereich!<br/>";
@@ -361,8 +376,14 @@ public class EditContent extends VerticalPanel {
 			beobachtung.setDate(date);
 			beobachtung.setDuration(getDuration());
 			beobachtung.setSocial(getSocialForm());
+
+			for (int i = 0; i < additionalNames.getItemCount(); i++) {
+				beobachtung.getAdditionalChildKeys().add(
+						Long.valueOf(additionalNames.getValue(i)));
+			}
+
 			wahrnehmungService.storeBeobachtung(beobachtung,
-					new AsyncCallback<Long>() {
+					new AsyncCallback<Void>() {
 
 						public void onFailure(Throwable caught) {
 							dialogBox.setErrorMessage();
@@ -371,11 +392,10 @@ public class EditContent extends VerticalPanel {
 							sendButton.setEnabled(true);
 						}
 
-						public void onSuccess(Long result) {
-							EditContent.this.key = result;
+						public void onSuccess(Void result) {
 							changes = false;
+							resetForm();
 						}
-
 					});
 		}
 	}
