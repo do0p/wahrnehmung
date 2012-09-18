@@ -57,7 +57,9 @@ public class Wahrnehmung implements EntryPoint, ValueChangeHandler<String> {
 											.getLogoutUrl()));
 							RootPanel.get("title").add(new HTML("Wahrnehmung"));
 						} else {
-							Window.Location.replace(authorization.getLoginUrl());
+							final RootPanel rootPanel = RootPanel.get("content");
+							rootPanel.clear();
+							rootPanel.add(new LoginFailedContent(authorization.getLoginUrl()));
 						}
 					}
 				});
