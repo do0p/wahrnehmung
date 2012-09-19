@@ -23,13 +23,15 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.DockPanel;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.datepicker.client.DateBox;
 
-public class EditContent extends VerticalPanel {
+public class EditContent extends DockPanel {
 
 	private final WahrnehmungsServiceAsync wahrnehmungService = GWT
 			.create(WahrnehmungsService.class);
@@ -201,51 +203,48 @@ public class EditContent extends VerticalPanel {
 
 	private void layout(int width) {
 
-		final HorizontalPanel rootContainer = new HorizontalPanel();
-		Utils.formatLeftCenter(this, rootContainer, width, 550);
-		add(rootContainer);
-
 		final VerticalPanel nameContainer = new VerticalPanel();
-		Utils.formatLeftCenter(rootContainer, nameContainer,
-				NameSelection.WIDTH, 550);
+		nameContainer.setSpacing(5);
+		this.add(nameContainer, WEST);
+
 		Utils.formatLeftTop(nameContainer, nameSelection, NameSelection.WIDTH,
 				Utils.FIELD_HEIGHT);
-		final HorizontalPanel nameButtoContainer = new HorizontalPanel();
+		final Panel nameButtoContainer = new FlowPanel();
 		nameButtoContainer.add(nameAddButton);
 		nameButtoContainer.add(nameRemoveButton);
 
 		Utils.formatCenter(nameContainer, nameButtoContainer,
-				NameSelection.WIDTH, Utils.FIELD_HEIGHT);
+				NameSelection.WIDTH, Utils.ROW_HEIGHT);
 		Utils.formatLeftTop(nameContainer, additionalNames,
-				NameSelection.WIDTH, 500);
+				NameSelection.WIDTH, 450);
 
 		final VerticalPanel contentContainer = new VerticalPanel();
 		final int contentWidth = width - NameSelection.WIDTH - 10;
-		Utils.formatRightCenter(rootContainer, contentContainer, contentWidth,
-				550);
+		add(contentContainer, CENTER);
 
-		final HorizontalPanel selectionContainer = new HorizontalPanel();
-		Utils.formatCenter(contentContainer, selectionContainer, contentWidth,
+		final Panel selectionContainer = new FlowPanel();
+		
+		Utils.formatLeftCenter(contentContainer, selectionContainer, contentWidth,
 				Utils.ROW_HEIGHT);
 		for (ListBox sectionSelectionBox : sectionSelection
 				.getSectionSelectionBoxes()) {
-			Utils.formatCenter(selectionContainer, sectionSelectionBox,
+			Utils.formatLeftCenter(selectionContainer, sectionSelectionBox,
 					Utils.LISTBOX_WIDTH, Utils.FIELD_HEIGHT);
 		}
 
-		final HorizontalPanel socialContainer = new HorizontalPanel();
-		Utils.formatCenter(contentContainer, socialContainer, contentWidth,
+		final Panel socialContainer = new FlowPanel();
+		Utils.formatLeftCenter(contentContainer, socialContainer, contentWidth,
 				Utils.ROW_HEIGHT);
-		Utils.formatCenter(socialContainer, durationSelection,
+		Utils.formatLeftCenter(socialContainer, durationSelection,
 				Utils.LISTBOX_WIDTH, Utils.FIELD_HEIGHT);
-		Utils.formatCenter(socialContainer, socialSelection,
+		Utils.formatLeftCenter(socialContainer, socialSelection,
 				Utils.LISTBOX_WIDTH, Utils.FIELD_HEIGHT);
 
 		textArea.setSize("" + contentWidth + "px", "400px");
 		contentContainer.add(textArea);
 
 		Utils.formatCenter(contentContainer, createButtonContainer(),
-				contentWidth, Utils.ROW_HEIGHT);
+				contentWidth, Utils.ROW_HEIGHT + 2);
 
 		setSize("" + width + "px", "550px");
 
@@ -286,9 +285,8 @@ public class EditContent extends VerticalPanel {
 		return null;
 	}
 
-	private HorizontalPanel createButtonContainer() {
-		final HorizontalPanel buttonContainer = new HorizontalPanel();
-		buttonContainer.setWidth("170px");
+	private Panel createButtonContainer() {
+		final Panel buttonContainer = new FlowPanel();
 
 		sendButton = new Button(Utils.SAVE);
 		sendButton.addClickHandler(new SendbuttonHandler());
