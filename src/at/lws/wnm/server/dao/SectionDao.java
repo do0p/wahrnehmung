@@ -4,35 +4,47 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
+
+import com.google.appengine.api.memcache.ErrorHandlers;
+import com.google.appengine.api.memcache.Expiration;
+import com.google.appengine.api.memcache.MemcacheService;
+import com.google.appengine.api.memcache.MemcacheServiceFactory;
 
 import at.lws.wnm.server.model.Section;
 import at.lws.wnm.shared.model.GwtSection;
 
 public class SectionDao extends AbstractDao {
 
-
+	private static final int FIVE_MINUTES = 300;
 	private Map<Long, List<Long>> sectionChildCache;
 	private volatile boolean sectionChildCacheUpdateNeeded = true;
+	private final MemcacheService syncCache;
 
 	SectionDao() {
-
-	}
-
-	public String getSectionName(Long sectionKey) {
-		final EntityManager em = EMF.get().createEntityManager();
-		try {
-			return getSectionName(sectionKey, em);
-		} finally {
-			em.close();
-		}
+		syncCache = MemcacheServiceFactory.getMemcacheService();
+		syncCache.setErrorHandler(ErrorHandlers
+				.getConsistentLogAndContinue(Level.INFO));
 	}
 
 	public String getSectionName(Long sectionKey, final EntityManager em) {
-		final Section section = em.find(Section.class, sectionKey);
-		return section.getSectionName();
+
+		String name = (String) syncCache.get(sectionKey); 
+		if (name == null) {
+		
+			try {
+
+				final Section section = em.find(Section.class, sectionKey);
+				name = section.getSectionName();
+			} finally {
+				em.close();
+			}
+			syncCache.put(sectionKey, name, Expiration.byDeltaSeconds(FIVE_MINUTES)); 
+		}
+		return name;
 	}
 
 	@SuppressWarnings("unchecked")
