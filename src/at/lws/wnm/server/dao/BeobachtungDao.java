@@ -8,14 +8,20 @@ import javax.persistence.Query;
 
 import at.lws.wnm.server.model.Beobachtung;
 import at.lws.wnm.server.model.BeobachtungGroup;
-import at.lws.wnm.server.model.Child;
 import at.lws.wnm.shared.model.BeobachtungsFilter;
 import at.lws.wnm.shared.model.GwtBeobachtung;
 
+import com.google.appengine.api.memcache.Expiration;
+import com.google.appengine.api.memcache.MemcacheService;
+import com.google.appengine.api.memcache.MemcacheServiceFactory;
 import com.google.appengine.api.users.User;
 import com.google.gwt.view.client.Range;
 
 public class BeobachtungDao extends AbstractDao {
+
+	private static final int FIVE_MINUTES = 300;
+	private final MemcacheService cache = MemcacheServiceFactory
+			.getMemcacheService("beobachtungsDao");
 
 	BeobachtungDao() {
 
@@ -68,13 +74,17 @@ public class BeobachtungDao extends AbstractDao {
 	}
 
 	public GwtBeobachtung getBeobachtung(Long beobachtungsKey) {
-		final EntityManager em = EMF.get().createEntityManager();
-		try {
+		Beobachtung beobachtung = (Beobachtung) cache.get(beobachtungsKey);
+		if (beobachtung == null) {
+			final EntityManager em = EMF.get().createEntityManager();
+			try {
 
-			return em.find(Beobachtung.class, beobachtungsKey).toGwt();
-		} finally {
-			em.close();
+				beobachtung = em.find(Beobachtung.class, beobachtungsKey);
+			} finally {
+				em.close();
+			}
 		}
+		return beobachtung.toGwt();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -107,10 +117,13 @@ public class BeobachtungDao extends AbstractDao {
 		final Beobachtung beobachtung = Beobachtung.valueOf(gwtBeobachtung);
 		EntityManager em = EMF.get().createEntityManager();
 		try {
-			storeBeobachtung(beobachtung, user, em);
+			beobachtung.setUser(user);
+			em.persist(beobachtung);
 		} finally {
 			em.close();
 		}
+		cache.put(beobachtung.getKey(), beobachtung,
+				Expiration.byDeltaSeconds(FIVE_MINUTES));
 		if (masterBeobachtungsKey != null) {
 			em = EMF.get().createEntityManager();
 			try {
@@ -121,12 +134,6 @@ public class BeobachtungDao extends AbstractDao {
 			}
 		}
 		return beobachtung.getKey();
-	}
-
-	void storeBeobachtung(Beobachtung beobachtung, User user, EntityManager em) {
-
-		beobachtung.setUser(user);
-		em.persist(beobachtung);
 	}
 
 	public void deleteAllFromChild(Long key) {
@@ -195,8 +202,8 @@ public class BeobachtungDao extends AbstractDao {
 		for (Beobachtung beobachtung : resultList) {
 			final GwtBeobachtung gwtBeobachtung = beobachtung.toGwt();
 			// gwtBeobachtung.setText("");
-			gwtBeobachtung.setChildName(getChildName(beobachtung.getChildKey(),
-					em));
+			gwtBeobachtung.setChildName(getChildDao().getChildName(
+					beobachtung.getChildKey(), em));
 			gwtBeobachtung.setSectionName(getSectionDao().getSectionName(
 					beobachtung.getSectionKey(), em));
 			result.add(gwtBeobachtung);
@@ -204,9 +211,8 @@ public class BeobachtungDao extends AbstractDao {
 		return result;
 	}
 
-	private String getChildName(Long childKey, EntityManager em) {
-		final Child child = em.find(Child.class, childKey);
-		return child.getFirstName() + " " + child.getLastName();
+	private ChildDao getChildDao() {
+		return DaoRegistry.get(ChildDao.class);
 	}
 
 	private SectionDao getSectionDao() {
@@ -214,6 +220,7 @@ public class BeobachtungDao extends AbstractDao {
 	}
 
 	public void deleteBeobachtung(Long beobachtungsKey) {
+		cache.delete(beobachtungsKey);
 		final EntityManager em = EMF.get().createEntityManager();
 		try {
 			final Beobachtung beobachtung = em.find(Beobachtung.class,

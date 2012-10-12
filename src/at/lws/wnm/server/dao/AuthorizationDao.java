@@ -13,6 +13,8 @@ import javax.persistence.Query;
 
 import at.lws.wnm.shared.model.Authorization;
 
+import com.google.appengine.api.memcache.MemcacheService;
+import com.google.appengine.api.memcache.MemcacheServiceFactory;
 import com.google.appengine.api.users.User;
 
 public class AuthorizationDao extends AbstractDao {
@@ -21,46 +23,48 @@ public class AuthorizationDao extends AbstractDao {
 	static {
 		SUPER_USER_IDS.add("dbrandl72@gmail.com");
 	}
-
-	private volatile boolean needCacheUpdate = true;
-	private Map<String, Authorization> cache = new HashMap<String, Authorization>();
+	
+	private final MemcacheService cache = MemcacheServiceFactory.getMemcacheService("authDao");
 
 	AuthorizationDao() {
 		initCache();
 	}
 
 	public Authorization getAuthorization(User user) {
-		refreshCache();
-		return cache.get(createUserId(user));
+		return (Authorization) cache.get(createUserId(user));
 	}
 
 	public Collection<Authorization> queryAuthorizations() {
-		refreshCache();
-		return new ArrayList<Authorization>(cache.values());
+		return new ArrayList<Authorization>(queryAuthInternal().values());
 	}
 
 	public void storeAuthorization(Authorization aut) {
-		aut.setUserId(aut.getEmail().toLowerCase());
+		aut.setUserId(createUserId(aut.getEmail()));
+		cache.put(aut.getUserId(), aut);
 		final EntityManager em = EMF.get().createEntityManager();
 		try {
 			em.persist(aut);
-			needCacheUpdate = true;
 		} finally {
 			em.close();
 		}
 	}
 
 	public void deleteAuthorization(String email) {
+		final String userId = createUserId(email);
+		cache.delete(userId);
 		final EntityManager em = EMF.get().createEntityManager();
 		try {
 			final Query query = em
 					.createQuery("delete from Authorization a where a.userId = :userId");
-			query.setParameter("userId", email.toLowerCase());
+			query.setParameter("userId", userId);
 			query.executeUpdate();
-			needCacheUpdate = true;
 		} finally {
 			em.close();
 		}
+	}
+
+	private String createUserId(String email) {
+		return email.toLowerCase();
 	}
 
 	private Authorization createSuperUser(String email) {
@@ -73,21 +77,12 @@ public class AuthorizationDao extends AbstractDao {
 	}
 
 	private void initCache() {
-		updateCache();
+		cache.putAll(queryAuthInternal());
 	}
 
-	private void refreshCache() {
-		if (needCacheUpdate) {
-			synchronized (this) {
-				if (needCacheUpdate) {
-					updateCache();
-				}
-			}
-		}
-	}
 
 	@SuppressWarnings("unchecked")
-	private void updateCache() {
+	private Map<String, Authorization> queryAuthInternal() {
 		final Map<String, Authorization> tmpCache = new HashMap<String, Authorization>();
 		for (String superUserId : SUPER_USER_IDS) {
 			tmpCache.put(superUserId, createSuperUser(superUserId));
@@ -102,8 +97,7 @@ public class AuthorizationDao extends AbstractDao {
 		} finally {
 			em.close();
 		}
-		cache = tmpCache;
-		needCacheUpdate = false;
+		return tmpCache;
 	}
 
 	private String createUserId(User user) {

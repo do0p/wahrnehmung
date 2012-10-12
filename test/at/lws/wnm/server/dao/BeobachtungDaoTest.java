@@ -199,11 +199,11 @@ public class BeobachtungDaoTest {
 
 	@Test
 	public void testStoreBeobachtung() {
-		final Beobachtung beobachtung = TestUtils.createBeobachtung(
-				CHILD_KEY1, SECTION_KEY1, user1, new Date());
+		final GwtBeobachtung beobachtung = TestUtils.createBeobachtung(
+				CHILD_KEY1, SECTION_KEY1, user1, new Date()).toGwt();
 
 		transaction.begin();
-		beobachtungsDao.storeBeobachtung(beobachtung, user1, em);
+		beobachtungsDao.storeBeobachtung(beobachtung, user1, null);
 		transaction.commit();
 
 		final BeobachtungsFilter filter = TestUtils.createFilter(CHILD_KEY1,
@@ -211,21 +211,21 @@ public class BeobachtungDaoTest {
 		final List<GwtBeobachtung> beobachtungen = beobachtungsDao
 				.getBeobachtungen(filter, range, user1, em);
 		Assert.assertEquals(1, beobachtungen.size());
-		Assert.assertEquals(beobachtung.toGwt(), beobachtungen.get(0));
+		Assert.assertEquals(beobachtung, beobachtungen.get(0));
 	}
 
 	@Test
 	public void testStoreBeobachtungTwoTimes() {
-		final Beobachtung beobachtung1 = TestUtils.createBeobachtung(
-				CHILD_KEY1, SECTION_KEY1, user1, new Date(NOW));
-		final Beobachtung beobachtung2 = TestUtils.createBeobachtung(
-				CHILD_KEY1, SECTION_KEY1, user1, new Date(NOW));
+		final GwtBeobachtung beobachtung1 = TestUtils.createBeobachtung(
+				CHILD_KEY1, SECTION_KEY1, user1, new Date(NOW)).toGwt();
+		final GwtBeobachtung beobachtung2 = TestUtils.createBeobachtung(
+				CHILD_KEY1, SECTION_KEY1, user1, new Date(NOW)).toGwt();
 
 		transaction.begin();
-		beobachtungsDao.storeBeobachtung(beobachtung1, user1, em);
+		beobachtungsDao.storeBeobachtung(beobachtung1, user1, null);
 		transaction.commit();
 		transaction.begin();
-		beobachtungsDao.storeBeobachtung(beobachtung2, user1, em);
+		beobachtungsDao.storeBeobachtung(beobachtung2, user1, null);
 		transaction.commit();
 
 		final BeobachtungsFilter filter = TestUtils.createFilter(CHILD_KEY1,
@@ -233,8 +233,8 @@ public class BeobachtungDaoTest {
 		final List<GwtBeobachtung> beobachtungen = beobachtungsDao
 				.getBeobachtungen(filter, range, user1, em);
 		Assert.assertEquals(2, beobachtungen.size());
-		Assert.assertEquals(beobachtung1.toGwt(), beobachtungen.get(0));
-		Assert.assertEquals(beobachtung2.toGwt(), beobachtungen.get(1));
+		Assert.assertEquals(beobachtung1, beobachtungen.get(0));
+		Assert.assertEquals(beobachtung2, beobachtungen.get(1));
 	}
 
 	private void persist(Object object) {
