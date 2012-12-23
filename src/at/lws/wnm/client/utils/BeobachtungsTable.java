@@ -1,7 +1,8 @@
 package at.lws.wnm.client.utils;
 
+import java.util.Iterator;
+
 import at.lws.wnm.client.EditContent;
-import at.lws.wnm.client.Wahrnehmung;
 import at.lws.wnm.client.service.WahrnehmungsService;
 import at.lws.wnm.client.service.WahrnehmungsServiceAsync;
 import at.lws.wnm.shared.model.Authorization;
@@ -10,7 +11,6 @@ import at.lws.wnm.shared.model.BeobachtungsResult;
 import at.lws.wnm.shared.model.GwtBeobachtung;
 
 import com.google.gwt.cell.client.ActionCell;
-import com.google.gwt.cell.client.ActionCell.Delegate;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
@@ -31,111 +31,94 @@ import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.Range;
 
 public class BeobachtungsTable extends CellTable<GwtBeobachtung> {
-	
 	private static final String BEOBACHTUNG_DEL_WARNING = "Achtung, diese Beobachtung wird gel&ouml;scht. Der Vorgang nicht mehr r&uuml;ckg&auml;nig gemacht werden!";
-	private final WahrnehmungsServiceAsync wahrnehmungsService = GWT
+	private final WahrnehmungsServiceAsync wahrnehmungsService = (WahrnehmungsServiceAsync) GWT
 			.create(WahrnehmungsService.class);
-	
-
 	private final AsyncDataProvider<GwtBeobachtung> asyncDataProvider;
-	
-
 	private final DecisionBox decisionBox;
-
 	private final BeobachtungsFilter filter;
-	
 	private boolean allSelected;
 	private final PopUp dialogBox;
 
-	
-	
-	public BeobachtungsTable(final Authorization authorization, final MultiSelectionModel<GwtBeobachtung> selectionModel, final BeobachtungsFilter filter, final PopUp dialogBox) {
-		
-		
+	public BeobachtungsTable(final Authorization authorization,
+			final MultiSelectionModel<GwtBeobachtung> selectionModel,
+			final BeobachtungsFilter filter, final PopUp dialogBox) {
 		this.filter = filter;
 		this.dialogBox = dialogBox;
-		decisionBox = new DecisionBox();
-		decisionBox.setText(BEOBACHTUNG_DEL_WARNING);
-		
-		
-		
-		final Header<Boolean> selectAllHeader = new Header<Boolean>(
-				new CheckboxCell(true, false)) {
+		this.decisionBox = new DecisionBox();
+		this.decisionBox.setText(BEOBACHTUNG_DEL_WARNING);
 
-			@Override
+		Header<Boolean> selectAllHeader = new Header<Boolean>(new CheckboxCell(
+				true, false)) {
 			public Boolean getValue() {
-				return Boolean.valueOf(allSelected);
+				return Boolean.valueOf(BeobachtungsTable.this.allSelected);
 			}
-
 		};
-
 		selectAllHeader.setUpdater(new ValueUpdater<Boolean>() {
-			@Override
 			public void update(Boolean value) {
-				allSelected = value.booleanValue();
+				BeobachtungsTable.this.allSelected = value.booleanValue();
 				if (value.booleanValue()) {
+					BeobachtungsTable.this.wahrnehmungsService
+							.getBeobachtungen(filter, new Range(0,
+									BeobachtungsTable.this.getRowCount()),
+									new AsyncCallback<BeobachtungsResult>() {
+										public void onFailure(Throwable arg0) {
+											BeobachtungsTable.this.dialogBox
+													.setErrorMessage();
+											BeobachtungsTable.this.dialogBox
+													.center();
+										}
 
-					wahrnehmungsService.getBeobachtungen(filter, new Range(0, getRowCount()),
-							new AsyncCallback<BeobachtungsResult>() {
+										public void onSuccess(
+												BeobachtungsResult result) {
+											Iterator<GwtBeobachtung> localIterator = result
+													.getBeobachtungen()
+													.iterator();
 
-								@Override
-								public void onFailure(Throwable arg0) {
-									dialogBox.setErrorMessage();
-									dialogBox.center();
-								}
-
-								@Override
-								public void onSuccess(BeobachtungsResult result) {
-
-									for (GwtBeobachtung contact : result
-											.getBeobachtungen()) {
-										selectionModel.setSelected(contact,
-												true);
-									}
-								}
-							});
-
+											while (localIterator.hasNext()) {
+												GwtBeobachtung contact = (GwtBeobachtung) localIterator
+														.next();
+												BeobachtungsTable.this
+														.getSelectionModel()
+														.setSelected(contact,
+																true);
+											}
+										}
+									});
 				} else {
-					for (GwtBeobachtung contact : selectionModel
-							.getSelectedSet()) {
+					Iterator<GwtBeobachtung> localIterator = selectionModel
+							.getSelectedSet().iterator();
+
+					while (localIterator.hasNext()) {
+						GwtBeobachtung contact = (GwtBeobachtung) localIterator
+								.next();
 						selectionModel.setSelected(contact, false);
 					}
 				}
 			}
 		});
-
-		final Column<GwtBeobachtung, Boolean> markColumn = new Column<GwtBeobachtung, Boolean>(
+		Column<GwtBeobachtung, Boolean> markColumn = new Column<GwtBeobachtung, Boolean>(
 				new CheckboxCell(true, false)) {
-
-			@Override
 			public Boolean getValue(GwtBeobachtung object) {
 				return Boolean.valueOf(selectionModel.isSelected(object));
 			}
 		};
-
-		final Column<GwtBeobachtung, String> nameColumn = new TextColumn<GwtBeobachtung>() {
-			@Override
+		Column<GwtBeobachtung, String> nameColumn = new TextColumn<GwtBeobachtung>() {
 			public String getValue(GwtBeobachtung object) {
 				return object.getChildName();
 			}
 		};
-
-		final Column<GwtBeobachtung, String> sectionColumn = new TextColumn<GwtBeobachtung>() {
-			@Override
+		Column<GwtBeobachtung, String> sectionColumn = new TextColumn<GwtBeobachtung>() {
 			public String getValue(GwtBeobachtung object) {
 				return object.getSectionName();
 			}
 		};
-
-		final Column<GwtBeobachtung, String> dateColumn = new TextColumn<GwtBeobachtung>() {
-			@Override
+		Column<GwtBeobachtung, String> dateColumn = new TextColumn<GwtBeobachtung>() {
 			public String getValue(GwtBeobachtung object) {
 				return Utils.DATE_FORMAT.format(object.getDate());
 			}
 		};
-
-		final Column<GwtBeobachtung, String> socialColumn = new TextColumn<GwtBeobachtung>() {
-			@Override
+		Column<GwtBeobachtung, String> socialColumn = new TextColumn<GwtBeobachtung>() {
 			public String getValue(GwtBeobachtung object) {
 				if (object.getSocial() != null) {
 					return object.getSocial().getText();
@@ -143,9 +126,7 @@ public class BeobachtungsTable extends CellTable<GwtBeobachtung> {
 				return null;
 			}
 		};
-
-		final Column<GwtBeobachtung, String> durationColumn = new TextColumn<GwtBeobachtung>() {
-			@Override
+		Column<GwtBeobachtung, String> durationColumn = new TextColumn<GwtBeobachtung>() {
 			public String getValue(GwtBeobachtung object) {
 				if (object.getDuration() != null) {
 					return object.getDuration().getText();
@@ -153,71 +134,52 @@ public class BeobachtungsTable extends CellTable<GwtBeobachtung> {
 				return null;
 			}
 		};
-
-		final Column<GwtBeobachtung, String> textColumn = new TextColumn<GwtBeobachtung>() {
-			@Override
-			public String getValue(GwtBeobachtung object) {
-				return Utils.shorten(object.getText(), 20);
-			}
-		};
-
-		final Column<GwtBeobachtung, String> userColumn = new TextColumn<GwtBeobachtung>() {
-			@Override
+		Column<GwtBeobachtung, String> userColumn = new TextColumn<GwtBeobachtung>() {
 			public String getValue(GwtBeobachtung object) {
 				return object.getUser();
 			}
 		};
-
-		final Column<GwtBeobachtung, GwtBeobachtung> editColumn = new IdentityColumn<GwtBeobachtung>(
-				new ActionCell<GwtBeobachtung>(Utils.EDIT,
-						new Delegate<GwtBeobachtung>() {
-							@Override
+		Column<GwtBeobachtung, GwtBeobachtung> editColumn = new IdentityColumn<GwtBeobachtung>(
+				new ActionCell<GwtBeobachtung>("edit",
+						new ActionCell.Delegate<GwtBeobachtung>() {
 							public void execute(GwtBeobachtung object) {
-								final RootPanel rootPanel = RootPanel
-										.get("content");
+								RootPanel rootPanel = RootPanel.get("content");
 								rootPanel.clear();
 								rootPanel.add(new EditContent(authorization,
 										850, object.getKey()));
-								History.newItem(Wahrnehmung.NEW_ENTRY, false);
+								History.newItem("new", false);
 							}
 						}));
-
-		final Column<GwtBeobachtung, GwtBeobachtung> deleteColumn = new IdentityColumn<GwtBeobachtung>(
-				new ActionCell<GwtBeobachtung>(Utils.DEL,
-						new Delegate<GwtBeobachtung>() {
-							@Override
-							public void execute(final GwtBeobachtung object) {
-								decisionBox
-										.addOkClickHandler(new ClickHandler() {
-
-											@Override
-											public void onClick(ClickEvent arg0) {
-												wahrnehmungsService.deleteBeobachtung(
+		Column<GwtBeobachtung, GwtBeobachtung> deleteColumn = new IdentityColumn<GwtBeobachtung>(new ActionCell<GwtBeobachtung>("entf",
+				new ActionCell.Delegate<GwtBeobachtung>() {
+					public void execute(final GwtBeobachtung object) {
+						BeobachtungsTable.this.decisionBox
+								.addOkClickHandler(new ClickHandler() {
+									public void onClick(ClickEvent arg0) {
+										BeobachtungsTable.this.wahrnehmungsService
+												.deleteBeobachtung(
 														object.getKey(),
 														new AsyncCallback<Void>() {
-
-															@Override
 															public void onFailure(
 																	Throwable caught) {
-																dialogBox
+																BeobachtungsTable.this.dialogBox
 																		.setErrorMessage(caught
 																				.getLocalizedMessage());
-																dialogBox
+																BeobachtungsTable.this.dialogBox
 																		.center();
 															}
 
-															@Override
 															public void onSuccess(
 																	Void arg0) {
-																updateTable();
+																BeobachtungsTable.this
+																		.updateTable();
 															}
 														});
-											}
-										});
-								decisionBox.center();
-							}
-						}));
-
+									}
+								});
+						BeobachtungsTable.this.decisionBox.center();
+					}
+				}));
 		setKeyboardSelectionPolicy(KeyboardSelectionPolicy.ENABLED);
 		setPageSize(10);
 		addColumn(markColumn, selectAllHeader);
@@ -226,22 +188,20 @@ public class BeobachtungsTable extends CellTable<GwtBeobachtung> {
 		addColumn(sectionColumn, "Bereich");
 		addColumn(durationColumn, "Dauer");
 		addColumn(socialColumn, "Sozialform");
-		addColumn(textColumn, "Beobachtung");
+
 		addColumn(userColumn, "von");
 		addColumn(editColumn);
 		addColumn(deleteColumn);
 
+		setSelectionModel(selectionModel,
+				DefaultSelectionEventManager.<GwtBeobachtung>createCheckboxManager ());
 
-		setSelectionModel(selectionModel, DefaultSelectionEventManager
-				.<GwtBeobachtung> createCheckboxManager());
-
-		asyncDataProvider = new AsyncDataProvider<GwtBeobachtung>() {
-			@Override
+		this.asyncDataProvider = new AsyncDataProvider<GwtBeobachtung>() {
 			protected void onRangeChanged(HasData<GwtBeobachtung> display) {
-				updateTable();
+				BeobachtungsTable.this.updateTable();
 			}
 		};
-		asyncDataProvider.addDataDisplay(this);
+		this.asyncDataProvider.addDataDisplay(this);
 
 		updateTable();
 	}
@@ -249,24 +209,20 @@ public class BeobachtungsTable extends CellTable<GwtBeobachtung> {
 	public void updateTable() {
 		final Range visibleRange = getVisibleRange();
 
-		wahrnehmungsService.getBeobachtungen(filter, visibleRange,
+		this.wahrnehmungsService.getBeobachtungen(this.filter, visibleRange,
 				new AsyncCallback<BeobachtungsResult>() {
-
-					@Override
 					public void onSuccess(BeobachtungsResult result) {
-						asyncDataProvider.updateRowData(
+						BeobachtungsTable.this.asyncDataProvider.updateRowData(
 								visibleRange.getStart(),
 								result.getBeobachtungen());
-						setRowCount(result.getRowCount());
-						redraw();
+						BeobachtungsTable.this.setRowCount(result.getRowCount());
+						BeobachtungsTable.this.redraw();
 					}
 
-					@Override
 					public void onFailure(Throwable caught) {
-						dialogBox.setErrorMessage();
-						dialogBox.center();
+						BeobachtungsTable.this.dialogBox.setErrorMessage();
+						BeobachtungsTable.this.dialogBox.center();
 					}
 				});
 	}
-	
 }

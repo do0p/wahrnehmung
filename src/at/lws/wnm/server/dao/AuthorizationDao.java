@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -18,20 +18,40 @@ import com.google.appengine.api.memcache.MemcacheServiceFactory;
 import com.google.appengine.api.users.User;
 
 public class AuthorizationDao extends AbstractDao {
-
 	private static final Set<String> SUPER_USER_IDS = new HashSet<String>();
+
+	private final MemcacheService cache = MemcacheServiceFactory
+			.getMemcacheService("authDao");
+
 	static {
 		SUPER_USER_IDS.add("dbrandl72@gmail.com");
 	}
-	
-	private final MemcacheService cache = MemcacheServiceFactory.getMemcacheService("authDao");
 
 	AuthorizationDao() {
 		initCache();
 	}
 
 	public Authorization getAuthorization(User user) {
-		return (Authorization) cache.get(createUserId(user));
+		if (user == null) {
+			return null;
+		}
+		String userId = createUserId(user);
+		Authorization authorization = (Authorization) this.cache.get(userId);
+		if (authorization == null) {
+			if (SUPER_USER_IDS.contains(userId)) {
+				authorization = createSuperUser(userId);
+			} else {
+				EntityManager em = EMF.get().createEntityManager();
+				try {
+					authorization = (Authorization) em.find(
+							Authorization.class, userId);
+				} finally {
+					em.close();
+				}
+			}
+			this.cache.put(userId, authorization);
+		}
+		return authorization;
 	}
 
 	public Collection<Authorization> queryAuthorizations() {
@@ -40,8 +60,8 @@ public class AuthorizationDao extends AbstractDao {
 
 	public void storeAuthorization(Authorization aut) {
 		aut.setUserId(createUserId(aut.getEmail()));
-		cache.put(aut.getUserId(), aut);
-		final EntityManager em = EMF.get().createEntityManager();
+		this.cache.put(aut.getUserId(), aut);
+		EntityManager em = EMF.get().createEntityManager();
 		try {
 			em.persist(aut);
 		} finally {
@@ -50,11 +70,11 @@ public class AuthorizationDao extends AbstractDao {
 	}
 
 	public void deleteAuthorization(String email) {
-		final String userId = createUserId(email);
-		cache.delete(userId);
-		final EntityManager em = EMF.get().createEntityManager();
+		String userId = createUserId(email);
+		this.cache.delete(userId);
+		EntityManager em = EMF.get().createEntityManager();
 		try {
-			final Query query = em
+			Query query = em
 					.createQuery("delete from Authorization a where a.userId = :userId");
 			query.setParameter("userId", userId);
 			query.executeUpdate();
@@ -68,7 +88,7 @@ public class AuthorizationDao extends AbstractDao {
 	}
 
 	private Authorization createSuperUser(String email) {
-		final Authorization superUser = new Authorization();
+		Authorization superUser = new Authorization();
 		superUser.setUserId(email);
 		superUser.setEmail(email);
 		superUser.setAdmin(true);
@@ -77,21 +97,23 @@ public class AuthorizationDao extends AbstractDao {
 	}
 
 	private void initCache() {
-		cache.putAll(queryAuthInternal());
+		this.cache.putAll(queryAuthInternal());
 	}
 
-
-	@SuppressWarnings("unchecked")
 	private Map<String, Authorization> queryAuthInternal() {
-		final Map<String, Authorization> tmpCache = new HashMap<String, Authorization>();
+		Map<String,Authorization> tmpCache = new HashMap<String,Authorization>();
 		for (String superUserId : SUPER_USER_IDS) {
 			tmpCache.put(superUserId, createSuperUser(superUserId));
 		}
-		final EntityManager em = EMF.get().createEntityManager();
+		EntityManager em = EMF.get().createEntityManager();
 		try {
-			final Query query = em.createQuery("select from Authorization");
-			for (Authorization auth : (List<Authorization>) query
-					.getResultList()) {
+			Query query = em.createQuery("select from Authorization");
+
+			@SuppressWarnings("unchecked")
+			Iterator<Authorization> localIterator2 = query.getResultList().iterator();
+
+			while (localIterator2.hasNext()) {
+				Authorization auth = (Authorization) localIterator2.next();
 				tmpCache.put(auth.getUserId(), auth);
 			}
 		} finally {
@@ -103,5 +125,4 @@ public class AuthorizationDao extends AbstractDao {
 	private String createUserId(User user) {
 		return user == null ? null : user.getEmail().toLowerCase();
 	}
-
 }

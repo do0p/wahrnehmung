@@ -1,23 +1,20 @@
 package at.lws.wnm.client.service;
 
-import java.util.Collection;
-
 import at.lws.wnm.shared.model.Authorization;
-
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+import java.util.Collection;
 
 @RemoteServiceRelativePath("auth")
-public interface AuthorizationService extends RemoteService {
+public abstract interface AuthorizationService extends RemoteService
+{
+  Collection<Authorization> queryAuthorizations();
 
-	Collection<Authorization> queryAuthorizations();
+  void storeAuthorization(Authorization paramAuthorization);
 
-	void storeAuthorization(Authorization aut);
+  void deleteAuthorization(String paramString);
 
-	void deleteAuthorization(String email);
+  boolean currentUserIsAdmin();
 
-	boolean currentUserIsAdmin();
-
-	Authorization getAuthorizationForCurrentUser(String followUpUrl);
-
+  Authorization getAuthorizationForCurrentUser(String paramString);
 }

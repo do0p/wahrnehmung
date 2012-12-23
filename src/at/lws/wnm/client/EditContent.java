@@ -1,400 +1,410 @@
 package at.lws.wnm.client;
 
 import java.util.Date;
+import java.util.Iterator;
 
 import at.lws.wnm.client.service.WahrnehmungsService;
 import at.lws.wnm.client.service.WahrnehmungsServiceAsync;
 import at.lws.wnm.client.utils.DecisionBox;
 import at.lws.wnm.client.utils.NameSelection;
 import at.lws.wnm.client.utils.PopUp;
+import at.lws.wnm.client.utils.RichTextToolbar;
 import at.lws.wnm.client.utils.SectionSelection;
+import at.lws.wnm.client.utils.SectionSelectionBox;
 import at.lws.wnm.client.utils.Utils;
 import at.lws.wnm.shared.model.Authorization;
 import at.lws.wnm.shared.model.GwtBeobachtung;
-import at.lws.wnm.shared.model.GwtBeobachtung.DurationEnum;
-import at.lws.wnm.shared.model.GwtBeobachtung.SocialEnum;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyPressEvent;
+import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.DockPanel;
-import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.FocusWidget;
+import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.TextArea;
+import com.google.gwt.user.client.ui.RichTextArea;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.datepicker.client.DateBox;
 
-public class EditContent extends DockPanel {
-
-	private final WahrnehmungsServiceAsync wahrnehmungService = GWT
-			.create(WahrnehmungsService.class);
-
-	private final TextArea textArea = new TextArea();
-	private final DateBox dateBox = new DateBox();
-	private final ListBox durationSelection = new ListBox();
-	private final ListBox socialSelection = new ListBox();
-	private final PopUp dialogBox = new PopUp();
-
-	private NameSelection nameSelection;
-	private SectionSelection sectionSelection;
-
-	private Button sendButton;
-	private Button newButton;
-
-	private boolean changes;
-
-	private Long key;
-
-	private DecisionBox decisionBox;
-
-	private ListBox additionalNames;
-
-	private Button nameAddButton;
-
-	private Button nameRemoveButton;
-
-	public EditContent(Authorization authorization, int width, Long key) {
-		this.key = key;
-		init();
-		layout(width);
-		if (key != null) {
-			loadData(key);
-		}
-	}
-
-	private void loadData(Long key) {
-		wahrnehmungService.getBeobachtung(key,
-				new AsyncCallback<GwtBeobachtung>() {
-
-					@Override
-					public void onFailure(Throwable caught) {
-						dialogBox.setErrorMessage();
-						dialogBox.setDisableWhileShown(sendButton);
-						dialogBox.center();
-					}
-
-					@Override
-					public void onSuccess(GwtBeobachtung result) {
-						nameSelection.setSelected(result.getChildKey());
-						dateBox.setValue(result.getDate());
-						sectionSelection.setSelected(result.getSectionKey());
-						final DurationEnum duration = result.getDuration();
-						if (duration != null) {
-							durationSelection.setSelectedIndex(duration
-									.ordinal() + 1);
-						}
-
-						final SocialEnum social = result.getSocial();
-						if (social != null) {
-							socialSelection.setSelectedIndex(social.ordinal() + 1);
-						}
-						textArea.setText(result.getText());
-						changes = false;
-						sendButton.setEnabled(false);
-					}
-				});
-
-	}
-
-	private void init() {
-
-		final ChangeHandler changeHandler = new ChangeHandler() {
-			@Override
-			public void onChange(ChangeEvent event) {
-				markChanged();
-			}
-		};
-
-		nameSelection = new NameSelection(dialogBox);
-		nameSelection.getTextBox().addChangeHandler(changeHandler);
-
-		additionalNames = new ListBox(true);
-
-		nameAddButton = new Button("\u2193");
-		nameAddButton.setEnabled(key == null);
-		nameAddButton.addClickHandler(new ClickHandler() {
-
-			@Override
-			public void onClick(ClickEvent arg0) {
-				final Long selectedChildKey = nameSelection
-						.getSelectedChildKey();
-				if (selectedChildKey != null
-						&& !isInList(additionalNames,
-								selectedChildKey.toString())) {
-					additionalNames.addItem(nameSelection.getValue(),
-							selectedChildKey.toString());
-					nameSelection.reset();
-				}
-			}
-
-			private boolean isInList(ListBox additionalNames, String value) {
-				for (int i = 0; i < additionalNames.getItemCount(); i++) {
-					if (additionalNames.getValue(i).equals(value)) {
-						return true;
-					}
-				}
-				return false;
-			}
-		});
-		nameRemoveButton = new Button("\u2191");
-		nameRemoveButton.setEnabled(key == null);
-		nameRemoveButton.addClickHandler(new ClickHandler() {
-
-			@Override
-			public void onClick(ClickEvent arg0) {
-				if (additionalNames.getSelectedIndex() > 0)
-					;
-				int itemCount = additionalNames.getItemCount();
-				for (int i = additionalNames.getSelectedIndex(); i < itemCount; i++) {
-					if (additionalNames.isItemSelected(i)) {
-						additionalNames.removeItem(i);
-						i--;
-						itemCount--;
-					}
-				}
-			}
-		});
-
-		dateBox.setValue(new Date());
-		dateBox.setFormat(Utils.DATEBOX_FORMAT);
-		dateBox.addValueChangeHandler(new ValueChangeHandler<Date>() {
-
-			@Override
-			public void onValueChange(ValueChangeEvent<Date> event) {
-				markChanged();
-			}
-		});
-
-		sectionSelection = new SectionSelection(dialogBox, changeHandler);
-
-		socialSelection.addItem("- Sozialform -", "");
-		for (SocialEnum socialForm : SocialEnum.values()) {
-			socialSelection.addItem(socialForm.getText(), socialForm.name());
-		}
-		socialSelection.addChangeHandler(changeHandler);
-
-		durationSelection.addItem("- Dauer -", "");
-		for (DurationEnum duration : DurationEnum.values()) {
-			durationSelection.addItem(duration.getText(), duration.name());
-		}
-		durationSelection.addChangeHandler(changeHandler);
-
-		textArea.addChangeHandler(changeHandler);
-
-		decisionBox = new DecisionBox();
-		decisionBox
-				.setText("Es gibt nicht gespeicherte Eingaben. Fortfahren (Eingaben verlieren)?");
-		decisionBox.addOkClickHandler(new ClickHandler() {
-
-			@Override
-			public void onClick(ClickEvent event) {
-				resetForm();
-			}
-		});
-
-	}
-
-	private void layout(int width) {
-
-		final VerticalPanel nameContainer = new VerticalPanel();
-		nameContainer.setSpacing(5);
-		this.add(nameContainer, WEST);
-
-		Utils.formatLeftTop(nameContainer, nameSelection, NameSelection.WIDTH,
-				Utils.FIELD_HEIGHT);
-		final Panel nameButtoContainer = new FlowPanel();
-		nameButtoContainer.add(nameAddButton);
-		nameButtoContainer.add(nameRemoveButton);
-
-		Utils.formatCenter(nameContainer, nameButtoContainer,
-				NameSelection.WIDTH, Utils.ROW_HEIGHT);
-		Utils.formatLeftTop(nameContainer, additionalNames,
-				NameSelection.WIDTH, 450);
-
-		final VerticalPanel contentContainer = new VerticalPanel();
-		final int contentWidth = width - NameSelection.WIDTH - 10;
-		add(contentContainer, CENTER);
-
-		final Panel selectionContainer = new FlowPanel();
-		
-		Utils.formatLeftCenter(contentContainer, selectionContainer, contentWidth,
-				Utils.ROW_HEIGHT);
-		for (ListBox sectionSelectionBox : sectionSelection
-				.getSectionSelectionBoxes()) {
-			Utils.formatLeftCenter(selectionContainer, sectionSelectionBox,
-					Utils.LISTBOX_WIDTH, Utils.FIELD_HEIGHT);
-		}
-
-		final Panel socialContainer = new FlowPanel();
-		Utils.formatLeftCenter(contentContainer, socialContainer, contentWidth,
-				Utils.ROW_HEIGHT);
-		Utils.formatLeftCenter(socialContainer, durationSelection,
-				Utils.LISTBOX_WIDTH, Utils.FIELD_HEIGHT);
-		Utils.formatLeftCenter(socialContainer, socialSelection,
-				Utils.LISTBOX_WIDTH, Utils.FIELD_HEIGHT);
-
-		textArea.setSize("" + contentWidth + "px", "400px");
-		contentContainer.add(textArea);
-
-		Utils.formatCenter(contentContainer, createButtonContainer(),
-				contentWidth, Utils.ROW_HEIGHT + 2);
-
-		setSize("" + width + "px", "550px");
-
-	}
-
-	private void resetForm() {
-		nameSelection.reset();
-		// sectionSelection.reset();
-		durationSelection.setSelectedIndex(0);
-		socialSelection.setSelectedIndex(0);
-		textArea.setValue("");
-		additionalNames.clear();
-		key = null;
-		nameAddButton.setEnabled(true);
-		nameRemoveButton.setEnabled(true);
-	}
-
-	private SocialEnum getSocialForm() {
-		final int selectedIndex = socialSelection.getSelectedIndex();
-		if (selectedIndex != -1) {
-			final String socialText = socialSelection.getValue(selectedIndex);
-			if (!socialText.isEmpty()) {
-				return SocialEnum.valueOf(socialText);
-			}
-		}
-		return null;
-	}
-
-	private DurationEnum getDuration() {
-		final int selectedIndex = durationSelection.getSelectedIndex();
-		if (selectedIndex != -1) {
-			final String durationText = durationSelection
-					.getValue(selectedIndex);
-			if (!durationText.isEmpty()) {
-				return DurationEnum.valueOf(durationText);
-			}
-		}
-		return null;
-	}
-
-	private Panel createButtonContainer() {
-		final Panel buttonContainer = new FlowPanel();
-
-		sendButton = new Button(Utils.SAVE);
-		sendButton.addClickHandler(new SendbuttonHandler());
-		sendButton.addStyleName("sendButton");
-
-		newButton = new Button(Utils.NEW);
-		newButton.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				if (changes) {
-					decisionBox.center();
-				} else {
-					resetForm();
-				}
-			}
-		});
-		newButton.addStyleName("sendButton");
-
-		Utils.formatLeftCenter(buttonContainer, sendButton, Utils.BUTTON_WIDTH,
-				Utils.ROW_HEIGHT);
-		Utils.formatLeftCenter(buttonContainer, newButton, Utils.BUTTON_WIDTH,
-				Utils.ROW_HEIGHT);
-
-		return buttonContainer;
-	}
-
-	private void markChanged() {
-		if (!changes) {
-			changes = true;
-			sendButton.setEnabled(true);
-		}
-	}
-
-	private class SendbuttonHandler implements ClickHandler {
-
-		public void onClick(ClickEvent event) {
-			sendButton.setEnabled(false);
-			sendNameToServer();
-		}
-
-		private void sendNameToServer() {
-
-			final String text = textArea.getValue();
-			String name = nameSelection.getValue();
-			Long childKey = nameSelection.getSelectedChildKey();
-			if ((Utils.isEmpty(name) || childKey == null)
-					&& additionalNames.getItemCount() > 0) {
-				name = additionalNames.getItemText(0);
-				childKey = Long.valueOf(additionalNames.getValue(0));
-				additionalNames.removeItem(0);
-			}
-
-			final Long sectionKey = sectionSelection.getSelectedSectionKey();
-			final Date date = dateBox.getValue();
-
-			String errorMessage = new String();
-			if (Utils.isEmpty(name)) {
-				errorMessage = errorMessage + "W&auml;hle einen Namen!<br/>";
-			} else if (childKey == null) {
-				errorMessage = errorMessage + "Kein Kind mit Name " + name
-						+ "!<br/>";
-			}
-			if (sectionKey == null) {
-				errorMessage = errorMessage + "W&auml;hle einen Bereich!<br/>";
-			}
-			if (date == null) {
-				errorMessage = errorMessage + "Gib ein Datum an!<br/>";
-			}
-			if (text.isEmpty()) {
-				errorMessage = errorMessage
-						+ "Trage eine Wahrnehmung ein!<br/>";
-			}
-			if (!errorMessage.isEmpty()) {
-				dialogBox.setErrorMessage(errorMessage);
-				dialogBox.setDisableWhileShown(sendButton);
-				dialogBox.center();
-				return;
-			}
-
-			final GwtBeobachtung beobachtung = new GwtBeobachtung();
-			beobachtung.setKey(key);
-			beobachtung.setText(text);
-			beobachtung.setChildKey(childKey);
-			beobachtung.setSectionKey(sectionKey);
-			beobachtung.setDate(date);
-			beobachtung.setDuration(getDuration());
-			beobachtung.setSocial(getSocialForm());
-
-			for (int i = 0; i < additionalNames.getItemCount(); i++) {
-				beobachtung.getAdditionalChildKeys().add(
-						Long.valueOf(additionalNames.getValue(i)));
-			}
-
-			wahrnehmungService.storeBeobachtung(beobachtung,
-					new AsyncCallback<Void>() {
-
-						public void onFailure(Throwable caught) {
-							dialogBox.setErrorMessage();
-							dialogBox.setDisableWhileShown(sendButton);
-							dialogBox.center();
-							sendButton.setEnabled(true);
-						}
-
-						public void onSuccess(Void result) {
-							changes = false;
-							resetForm();
-						}
-					});
-		}
-	}
+public class EditContent extends VerticalPanel
+{
+  private final WahrnehmungsServiceAsync wahrnehmungService = (WahrnehmungsServiceAsync)GWT.create(WahrnehmungsService.class);
+
+  private final RichTextArea textArea = new RichTextArea();
+  private final DateBox dateBox = new DateBox();
+  private final ListBox durationSelection = new ListBox();
+  private final ListBox socialSelection = new ListBox();
+  private final PopUp dialogBox = new PopUp();
+  private NameSelection nameSelection;
+  private SectionSelection sectionSelection;
+  private Button sendButton;
+  private Button newButton;
+  private boolean changes;
+  private Long key;
+  private DecisionBox decisionBox;
+  private ListBox additionalNames;
+  private Button nameAddButton;
+  private Button nameRemoveButton;
+
+  public EditContent(Authorization authorization, int width, Long key)
+  {
+    this.key = key;
+    init();
+    layout(width);
+    if (key != null)
+      loadData(key);
+  }
+
+  private void loadData(Long key)
+  {
+    this.wahrnehmungService.getBeobachtung(key, 
+      new AsyncCallback<GwtBeobachtung>()
+    {
+      public void onFailure(Throwable caught)
+      {
+        EditContent.this.dialogBox.setErrorMessage();
+        EditContent.this.dialogBox.setDisableWhileShown(new FocusWidget[] { EditContent.this.sendButton });
+        EditContent.this.dialogBox.center();
+      }
+
+      public void onSuccess(GwtBeobachtung result)
+      {
+        EditContent.this.nameSelection.setSelected(result.getChildKey());
+        EditContent.this.dateBox.setValue(result.getDate());
+        EditContent.this.sectionSelection.setSelected(result.getSectionKey());
+        GwtBeobachtung.DurationEnum duration = result.getDuration();
+        if (duration != null) {
+          EditContent.this.durationSelection.setSelectedIndex(duration
+            .ordinal() + 1);
+        }
+
+        GwtBeobachtung.SocialEnum social = result.getSocial();
+        if (social != null) {
+          EditContent.this.socialSelection.setSelectedIndex(social.ordinal() + 1);
+        }
+        EditContent.this.textArea.setHTML(result.getText());
+        EditContent.this.changes = false;
+        EditContent.this.sendButton.setEnabled(false);
+      }
+    });
+  }
+
+  private void init()
+  {
+    ChangeHandler changeHandler = new ChangeHandler()
+    {
+      public void onChange(ChangeEvent event) {
+        EditContent.this.markChanged();
+      }
+    };
+    this.nameSelection = new NameSelection(this.dialogBox);
+    this.nameSelection.getTextBox().addChangeHandler(changeHandler);
+
+    this.additionalNames = new ListBox(true);
+
+    this.nameAddButton = new Button("↓");
+    this.nameAddButton.setEnabled(this.key == null);
+    this.nameAddButton.addClickHandler(new ClickHandler()
+    {
+      public void onClick(ClickEvent arg0)
+      {
+        Long selectedChildKey = EditContent.this.nameSelection
+          .getSelectedChildKey();
+        if ((selectedChildKey != null) && 
+          (!isInList(EditContent.this.additionalNames, 
+          selectedChildKey.toString()))) {
+          EditContent.this.additionalNames.addItem(EditContent.this.nameSelection.getValue(), 
+            selectedChildKey.toString());
+          EditContent.this.nameSelection.reset();
+        }
+      }
+
+      private boolean isInList(ListBox additionalNames, String value) {
+        for (int i = 0; i < additionalNames.getItemCount(); i++) {
+          if (additionalNames.getValue(i).equals(value)) {
+            return true;
+          }
+        }
+        return false;
+      }
+    });
+    this.nameRemoveButton = new Button("↑");
+    this.nameRemoveButton.setEnabled(this.key == null);
+    this.nameRemoveButton.addClickHandler(new ClickHandler()
+    {
+      public void onClick(ClickEvent arg0)
+      {
+        if (EditContent.this.additionalNames.getSelectedIndex() > 0);
+        int itemCount = EditContent.this.additionalNames.getItemCount();
+        for (int i = EditContent.this.additionalNames.getSelectedIndex(); i < itemCount; i++)
+          if (EditContent.this.additionalNames.isItemSelected(i)) {
+            EditContent.this.additionalNames.removeItem(i);
+            i--;
+            itemCount--;
+          }
+      }
+    });
+    this.dateBox.setValue(new Date());
+    this.dateBox.setFormat(Utils.DATEBOX_FORMAT);
+    this.dateBox.addValueChangeHandler(new ValueChangeHandler<Date>()
+    {
+      public void onValueChange(ValueChangeEvent<Date> event)
+      {
+        EditContent.this.markChanged();
+      }
+    });
+    this.sectionSelection = new SectionSelection(this.dialogBox, changeHandler);
+
+    this.socialSelection.addItem("- Sozialform -", "");
+    for (GwtBeobachtung.SocialEnum socialForm : GwtBeobachtung.SocialEnum.values()) {
+      this.socialSelection.addItem(socialForm.getText(), socialForm.name());
+    }
+    this.socialSelection.addChangeHandler(changeHandler);
+
+    this.durationSelection.addItem("- Dauer -", "");
+    for (GwtBeobachtung.DurationEnum duration : GwtBeobachtung.DurationEnum.values()) {
+      this.durationSelection.addItem(duration.getText(), duration.name());
+    }
+    this.durationSelection.addChangeHandler(changeHandler);
+
+    this.textArea.addKeyPressHandler(new KeyPressHandler()
+    {
+      public void onKeyPress(KeyPressEvent arg0) {
+        EditContent.this.markChanged();
+      }
+    });
+    this.decisionBox = new DecisionBox();
+    this.decisionBox
+      .setText("Es gibt nicht gespeicherte Eingaben. Fortfahren (Eingaben verlieren)?");
+    this.decisionBox.addOkClickHandler(new ClickHandler()
+    {
+      public void onClick(ClickEvent event)
+      {
+        EditContent.this.resetForm();
+      }
+    });
+  }
+
+  private void layout(int width)
+  {
+    HorizontalPanel rootContainer = new HorizontalPanel();
+    Utils.formatLeftCenter(this, rootContainer, width, 550);
+    add(rootContainer);
+
+    VerticalPanel nameContainer = new VerticalPanel();
+    Utils.formatLeftCenter(rootContainer, nameContainer, 
+      NameSelection.WIDTH, 550);
+    Utils.formatLeftTop(nameContainer, this.nameSelection, NameSelection.WIDTH, 
+      20);
+    HorizontalPanel nameButtoContainer = new HorizontalPanel();
+    nameButtoContainer.add(this.nameAddButton);
+    nameButtoContainer.add(this.nameRemoveButton);
+
+    Utils.formatCenter(nameContainer, nameButtoContainer, 
+      NameSelection.WIDTH, 20);
+    Utils.formatLeftTop(nameContainer, this.additionalNames, 
+      NameSelection.WIDTH, 500);
+
+    VerticalPanel contentContainer = new VerticalPanel();
+    int contentWidth = width - NameSelection.WIDTH - 10;
+    Utils.formatRightCenter(rootContainer, contentContainer, contentWidth, 
+      550);
+
+    HorizontalPanel selectionContainer = new HorizontalPanel();
+    Utils.formatCenter(contentContainer, selectionContainer, contentWidth, 
+      40);
+
+    Iterator<SectionSelectionBox> localIterator = this.sectionSelection
+      .getSectionSelectionBoxes().iterator();
+
+    while (localIterator.hasNext()) {
+      ListBox sectionSelectionBox = (ListBox)localIterator.next();
+      Utils.formatCenter(selectionContainer, sectionSelectionBox, 
+        135, 20);
+    }
+
+    HorizontalPanel socialContainer = new HorizontalPanel();
+    Utils.formatCenter(contentContainer, socialContainer, contentWidth, 
+      40);
+    Utils.formatCenter(socialContainer, this.durationSelection, 
+      135, 20);
+    Utils.formatCenter(socialContainer, this.socialSelection, 
+      135, 20);
+    Utils.formatCenter(socialContainer, this.dateBox, 80, 
+      20);
+
+    this.textArea.setSize(contentWidth + "px", "400px");
+
+    RichTextToolbar toolbar = new RichTextToolbar(this.textArea);
+    toolbar.setWidth("100%");
+
+    Grid grid = new Grid(2, 1);
+    grid.setStyleName("cw-RichText");
+    grid.setWidget(0, 0, toolbar);
+    grid.setWidget(1, 0, this.textArea);
+
+    contentContainer.add(grid);
+
+    Utils.formatCenter(contentContainer, createButtonContainer(), 
+      contentWidth, 40);
+
+    setSize(width + "px", "550px");
+  }
+
+  private void resetForm()
+  {
+    this.nameSelection.reset();
+
+    this.durationSelection.setSelectedIndex(0);
+    this.socialSelection.setSelectedIndex(0);
+    this.textArea.setText("");
+    this.additionalNames.clear();
+    this.key = null;
+    this.nameAddButton.setEnabled(true);
+    this.nameRemoveButton.setEnabled(true);
+  }
+
+  private GwtBeobachtung.SocialEnum getSocialForm() {
+    int selectedIndex = this.socialSelection.getSelectedIndex();
+    if (selectedIndex != -1) {
+      String socialText = this.socialSelection.getValue(selectedIndex);
+      if (!socialText.isEmpty()) {
+        return GwtBeobachtung.SocialEnum.valueOf(socialText);
+      }
+    }
+    return null;
+  }
+
+  private GwtBeobachtung.DurationEnum getDuration() {
+    int selectedIndex = this.durationSelection.getSelectedIndex();
+    if (selectedIndex != -1) {
+      String durationText = this.durationSelection
+        .getValue(selectedIndex);
+      if (!durationText.isEmpty()) {
+        return GwtBeobachtung.DurationEnum.valueOf(durationText);
+      }
+    }
+    return null;
+  }
+
+  private HorizontalPanel createButtonContainer() {
+    HorizontalPanel buttonContainer = new HorizontalPanel();
+    buttonContainer.setWidth("170px");
+
+    this.sendButton = new Button("speichern");
+    this.sendButton.addClickHandler(new SendbuttonHandler());
+    this.sendButton.addStyleName("sendButton");
+
+    this.newButton = new Button("neu");
+    this.newButton.addClickHandler(new ClickHandler()
+    {
+      public void onClick(ClickEvent event) {
+        if (EditContent.this.changes)
+          EditContent.this.decisionBox.center();
+        else
+          EditContent.this.resetForm();
+      }
+    });
+    this.newButton.addStyleName("sendButton");
+
+    Utils.formatLeftCenter(buttonContainer, this.sendButton, 80, 
+      40);
+    Utils.formatLeftCenter(buttonContainer, this.newButton, 80, 
+      40);
+
+    return buttonContainer;
+  }
+
+  private void markChanged() {
+    if (!this.changes) {
+      this.changes = true;
+      this.sendButton.setEnabled(true);
+    }
+  }
+  private class SendbuttonHandler implements ClickHandler {
+    private SendbuttonHandler() {
+    }
+
+    public void onClick(ClickEvent event) { EditContent.this.sendButton.setEnabled(false);
+      sendNameToServer();
+    }
+
+    private void sendNameToServer()
+    {
+      String text = EditContent.this.textArea.getHTML();
+      String name = EditContent.this.nameSelection.getValue();
+      Long childKey = EditContent.this.nameSelection.getSelectedChildKey();
+      if (((Utils.isEmpty(name)) || (childKey == null)) && 
+        (EditContent.this.additionalNames.getItemCount() > 0)) {
+        name = EditContent.this.additionalNames.getItemText(0);
+        childKey = Long.valueOf(EditContent.this.additionalNames.getValue(0));
+        EditContent.this.additionalNames.removeItem(0);
+      }
+
+      Long sectionKey = EditContent.this.sectionSelection.getSelectedSectionKey();
+      Date date = EditContent.this.dateBox.getValue();
+
+      String errorMessage = new String();
+      if (Utils.isEmpty(name))
+        errorMessage = errorMessage + "W&auml;hle einen Namen!<br/>";
+      else if (childKey == null) {
+        errorMessage = errorMessage + "Kein Kind mit Name " + name + 
+          "!<br/>";
+      }
+      if (sectionKey == null) {
+        errorMessage = errorMessage + "W&auml;hle einen Bereich!<br/>";
+      }
+      if (date == null) {
+        errorMessage = errorMessage + "Gib ein Datum an!<br/>";
+      }
+      if (text.isEmpty()) {
+        errorMessage = errorMessage + 
+          "Trage eine Wahrnehmung ein!<br/>";
+      }
+      if (!errorMessage.isEmpty()) {
+        EditContent.this.dialogBox.setErrorMessage(errorMessage);
+        EditContent.this.dialogBox.setDisableWhileShown(new FocusWidget[] { EditContent.this.sendButton });
+        EditContent.this.dialogBox.center();
+        return;
+      }
+
+      GwtBeobachtung beobachtung = new GwtBeobachtung();
+      beobachtung.setKey(EditContent.this.key);
+      beobachtung.setText(text);
+      beobachtung.setChildKey(childKey);
+      beobachtung.setSectionKey(sectionKey);
+      beobachtung.setDate(date);
+      beobachtung.setDuration(EditContent.this.getDuration());
+      beobachtung.setSocial(EditContent.this.getSocialForm());
+
+      for (int i = 0; i < EditContent.this.additionalNames.getItemCount(); i++) {
+        beobachtung.getAdditionalChildKeys().add(
+          Long.valueOf(EditContent.this.additionalNames.getValue(i)));
+      }
+
+      EditContent.this.wahrnehmungService.storeBeobachtung(beobachtung, 
+        new AsyncCallback<Void>()
+      {
+        public void onFailure(Throwable caught) {
+          EditContent.this.dialogBox.setErrorMessage();
+          EditContent.this.dialogBox.setDisableWhileShown(new FocusWidget[] { EditContent.this.sendButton });
+          EditContent.this.dialogBox.center();
+          EditContent.this.sendButton.setEnabled(true);
+        }
+
+        public void onSuccess(Void result) {
+          EditContent.this.changes = false;
+          EditContent.this.resetForm();
+        }
+      });
+    }
+  }
 }

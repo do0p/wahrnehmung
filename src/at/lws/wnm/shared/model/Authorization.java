@@ -20,6 +20,8 @@ public class Authorization implements Serializable {
 	
 	private boolean seeAll;
 	
+	  private Boolean editSections;
+	
 	@Transient
 	private String loginUrl;
 	
@@ -98,6 +100,14 @@ public class Authorization implements Serializable {
 	@Override
 	public int hashCode() {
 		return userId.hashCode();
+	}
+
+	public boolean isEditSections() {
+		return editSections == null ? false : editSections.booleanValue();
+	}
+
+	public void setEditSections(Boolean editSections) {
+		this.editSections = editSections;
 	}
 
 }

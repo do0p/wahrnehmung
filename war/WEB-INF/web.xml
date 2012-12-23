@@ -52,7 +52,7 @@
 
 	<security-constraint>
 		<web-resource-collection>
-			<url-pattern>/*</url-pattern>
+			<web-resource-name>/*</web-resource-name>
 		</web-resource-collection>
 		<user-data-constraint>
 			<transport-guarantee>CONFIDENTIAL</transport-guarantee>
