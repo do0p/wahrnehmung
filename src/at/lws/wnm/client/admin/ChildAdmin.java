@@ -26,6 +26,7 @@ import com.google.gwt.user.datepicker.client.DateBox;
 
 public class ChildAdmin extends VerticalPanel {
 
+	private static final int VISIBLE_CHILDREN = 20;
 	private final ChildServiceAsync childService = GWT
 			.create(ChildService.class);
 	private final Labels labels = GWT.create(Labels.class);
@@ -75,7 +76,7 @@ public class ChildAdmin extends VerticalPanel {
 		buttonPanel.add(cancelButton);
 		data.add(buttonPanel);
 
-		data.add(new HTML("<br/><br/>"));
+		data.add(new HTML(Utils.LINE_BREAK + Utils.LINE_BREAK));
 
 		// remove comments to enable fileupload
 		// final FileUploadForm fileUpload = new
@@ -83,7 +84,7 @@ public class ChildAdmin extends VerticalPanel {
 		// data.add(fileUpload);
 
 		children = new ListBox(false);
-		children.setVisibleItemCount(20);
+		children.setVisibleItemCount(VISIBLE_CHILDREN);
 		children.addClickHandler(new ChildClickHandler());
 		rebuildChildList();
 

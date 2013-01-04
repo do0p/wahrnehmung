@@ -193,12 +193,12 @@ public class EditContent extends VerticalPanel {
 
 	private void layout(int width) {
 		HorizontalPanel rootContainer = new HorizontalPanel();
-		Utils.formatLeftCenter(this, rootContainer, width, 550);
+		Utils.formatLeftCenter(this, rootContainer, width, Utils.APP_WIDTH);
 		add(rootContainer);
 
 		VerticalPanel nameContainer = new VerticalPanel();
 		Utils.formatLeftCenter(rootContainer, nameContainer,
-				NameSelection.WIDTH, 550);
+				NameSelection.WIDTH, Utils.APP_WIDTH);
 		Utils.formatLeftTop(nameContainer, this.nameSelection,
 				NameSelection.WIDTH, 20);
 		HorizontalPanel nameButtoContainer = new HorizontalPanel();
@@ -213,7 +213,7 @@ public class EditContent extends VerticalPanel {
 		VerticalPanel contentContainer = new VerticalPanel();
 		int contentWidth = width - NameSelection.WIDTH - 10;
 		Utils.formatRightCenter(rootContainer, contentContainer, contentWidth,
-				550);
+				Utils.APP_WIDTH);
 
 		HorizontalPanel selectionContainer = new HorizontalPanel();
 		Utils.formatCenter(contentContainer, selectionContainer, contentWidth,
@@ -233,10 +233,10 @@ public class EditContent extends VerticalPanel {
 		Utils.formatCenter(socialContainer, this.socialSelection, 135, 20);
 		Utils.formatCenter(socialContainer, this.dateBox, 80, 20);
 
-		this.textArea.setSize(contentWidth + "px", "400px");
+		this.textArea.setSize(contentWidth + Utils.PIXEL, Utils.TEXT_AREA_WIDTH + Utils.PIXEL);
 
 		RichTextToolbar toolbar = new RichTextToolbar(this.textArea);
-		toolbar.setWidth("100%");
+		toolbar.setWidth(Utils.HUNDERT_PERCENT);
 
 		Grid grid = new Grid(2, 1);
 		grid.setStyleName("cw-RichText");
@@ -248,7 +248,7 @@ public class EditContent extends VerticalPanel {
 		Utils.formatCenter(contentContainer, createButtonContainer(),
 				contentWidth, 40);
 
-		setSize(width + "px", "550px");
+		setSize(width + Utils.PIXEL, Utils.APP_WIDTH + Utils.PIXEL);
 	}
 
 	private void resetForm() {
@@ -288,11 +288,11 @@ public class EditContent extends VerticalPanel {
 
 	private HorizontalPanel createButtonContainer() {
 		HorizontalPanel buttonContainer = new HorizontalPanel();
-		buttonContainer.setWidth("170px");
+		buttonContainer.setWidth(Utils.BUTTON_CONTAINER_WIDTH + Utils.PIXEL);
 
 		this.sendButton = new Button(labels.save());
 		this.sendButton.addClickHandler(new SendbuttonHandler());
-		this.sendButton.addStyleName("sendButton");
+		this.sendButton.addStyleName(Utils.SEND_BUTTON_STYLE);
 
 		this.newButton = new Button(labels.cancel());
 		this.newButton.addClickHandler(new ClickHandler() {
@@ -303,7 +303,7 @@ public class EditContent extends VerticalPanel {
 					EditContent.this.resetForm();
 			}
 		});
-		this.newButton.addStyleName("sendButton");
+		this.newButton.addStyleName(Utils.SEND_BUTTON_STYLE);
 
 		Utils.formatLeftCenter(buttonContainer, this.sendButton, 80, 40);
 		Utils.formatLeftCenter(buttonContainer, this.newButton, 80, 40);

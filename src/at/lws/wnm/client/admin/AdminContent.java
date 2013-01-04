@@ -1,6 +1,7 @@
 package at.lws.wnm.client.admin;
 
 import at.lws.wnm.client.Labels;
+import at.lws.wnm.client.utils.Utils;
 import at.lws.wnm.shared.model.Authorization;
 
 import com.google.gwt.core.client.GWT;
@@ -11,7 +12,7 @@ public class AdminContent extends TabPanel {
 	private final Labels labels = (Labels) GWT.create(Labels.class);
 
 	public AdminContent(Authorization authorization, String width) {
-		setSize("100%", width);
+		setSize(Utils.HUNDERT_PERCENT, width);
 		if (authorization.isAdmin()) {
 			add(new ChildAdmin(), labels.children());
 		}

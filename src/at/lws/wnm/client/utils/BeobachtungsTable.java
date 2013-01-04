@@ -33,6 +33,8 @@ import com.google.gwt.view.client.Range;
 
 public class BeobachtungsTable extends CellTable<GwtBeobachtung> {
 	
+	private static final int PAGE_SIZE = 10;
+
 	private final Labels labels = GWT.create(Labels.class);
 	
 	private final WahrnehmungsServiceAsync wahrnehmungsService = (WahrnehmungsServiceAsync) GWT
@@ -149,7 +151,7 @@ public class BeobachtungsTable extends CellTable<GwtBeobachtung> {
 								RootPanel rootPanel = RootPanel.get(Utils.MAIN_ELEMENT);
 								rootPanel.clear();
 								rootPanel.add(new EditContent(authorization,
-										850, object.getKey()));
+										Utils.APP_WIDTH, object.getKey()));
 								History.newItem(Navigation.NEW_ENTRY, false);
 							}
 						}));
@@ -184,7 +186,7 @@ public class BeobachtungsTable extends CellTable<GwtBeobachtung> {
 					}
 				}));
 		setKeyboardSelectionPolicy(KeyboardSelectionPolicy.ENABLED);
-		setPageSize(10);
+		setPageSize(PAGE_SIZE);
 		addColumn(markColumn, selectAllHeader);
 		addColumn(dateColumn, labels.date());
 		addColumn(nameColumn, labels.name());

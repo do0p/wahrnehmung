@@ -45,7 +45,7 @@ public class Search extends VerticalPanel
     this.sectionSelection = new SectionSelection(dialogBox, null);
     Button sendButton = new Button(labels.filter());
     sendButton.addClickHandler(new FilterButtonHandler());
-    sendButton.addStyleName("sendButton");
+    sendButton.addStyleName(Utils.SEND_BUTTON_STYLE);
     this.selectionModel = createSelectionModel(textArea);
     this.table = new BeobachtungsTable(authorization, this.selectionModel, this.filter, 
       dialogBox);
@@ -76,7 +76,7 @@ public class Search extends VerticalPanel
     SimplePager pager = new SimplePager();
     pager.setDisplay(this.table);
     add(pager);
-    textArea.setSize(width + "px", "400px");
+    textArea.setSize(width + Utils.PIXEL, Utils.TEXT_AREA_WIDTH + Utils.PIXEL);
     add(textArea);
     Utils.formatLeftCenter(this, createButtonContainer(), width, 
       40);
@@ -100,7 +100,7 @@ public class Search extends VerticalPanel
 
   private HorizontalPanel createButtonContainer() {
     HorizontalPanel buttonContainer = new HorizontalPanel();
-    buttonContainer.setWidth("170px");
+    buttonContainer.setWidth(Utils.BUTTON_CONTAINER_WIDTH + Utils.PIXEL);
 
     Button printButton = new Button(labels.print());
     printButton.addClickHandler(new ClickHandler()
@@ -115,7 +115,7 @@ public class Search extends VerticalPanel
         }
       }
     });
-    printButton.addStyleName("sendButton");
+    printButton.addStyleName(Utils.SEND_BUTTON_STYLE);
 
     Utils.formatLeftCenter(buttonContainer, printButton, 
       80, 40);

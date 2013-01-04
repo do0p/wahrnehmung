@@ -16,17 +16,18 @@ import com.google.gwt.user.client.ui.Widget;
 public class Wahrnehmung extends SecuredContent implements
 		ValueChangeHandler<String> {
 
+	
 	private final Labels labels = (Labels) GWT.create(Labels.class);
 	private Navigation navigation;
 
 	protected void onLogin(Authorization authorization) {
 		this.navigation = new Navigation(authorization);
-		RootPanel.get("navigation").add(this.navigation);
+		RootPanel.get(Utils.NAVIGATION_ELEMENT).add(this.navigation);
 		History.addValueChangeHandler(this);
 		changePage(History.getToken());
-		RootPanel.get("logout").add(
+		RootPanel.get(Utils.LOGOUT_ELEMENT).add(
 				new Anchor(labels.logout(), authorization.getLogoutUrl()));
-		RootPanel.get("title").add(new HTML("Wahrnehmung"));
+		RootPanel.get(Utils.TITLE_ELEMENT).add(new HTML(labels.title()));
 	}
 
 	protected void onLogOut(Authorization authorization) {

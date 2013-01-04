@@ -25,10 +25,18 @@ import com.google.gwt.user.datepicker.client.DateBox.Format;
 
 public class Utils {
 	public static final String MAIN_ELEMENT = "content";
+	public static final String LOGOUT_ELEMENT = "logout";
+	public static final String TITLE_ELEMENT = "title";
+	public static final String NAVIGATION_ELEMENT = "navigation";
+	public static final String PIXEL = "px";
+	public static final String HUNDERT_PERCENT = "100%";
+	public static final String LINE_BREAK = "<br/>";
+	public static final String SEND_BUTTON_STYLE = "sendButton";
+	public static final String DELETED_STYLE = "deleted";
+	
 	public static final String DATE_FORMAT_STRING = "d.M.yy";
 	public static final String SHORTEN_POSTFIX = "...";
 
-	public static final String LINE_BREAK = "<br/>";
 
 	public static final String UP_ARROW = "↑";
 	public static final String DOWN_ARROW = "↓";
@@ -42,6 +50,9 @@ public class Utils {
 	public static final int BUTTON_WIDTH = 80;
 	public static final int ROW_HEIGHT = 40;
 	public static final int LISTBOX_WIDTH = 135;
+	public static final int TEXT_AREA_WIDTH = 400;
+	public static final int APP_WIDTH = 850;
+	public static final int BUTTON_CONTAINER_WIDTH = 170;
 
 	public static String formatChildName(GwtChild child) {
 		final String firstName = child.getFirstName();
@@ -116,8 +127,8 @@ public class Utils {
 			int heightPx, final HorizontalAlignmentConstant horizontalAlign,
 			final VerticalAlignmentConstant verticalAlign) {
 		panel.add(widget);
-		final String width = "" + widthPx + "px";
-		final String height = "" + heightPx + "px";
+		final String width = "" + widthPx + Utils.PIXEL;
+		final String height = "" + heightPx + Utils.PIXEL;
 		widget.setSize(width , height);
 		if (panel instanceof CellPanel) {
 			CellPanel cPanel = (CellPanel) panel;
@@ -179,6 +190,8 @@ public class Utils {
 		one.add(author);
 		return one;
 	}
+
+
 
 
 

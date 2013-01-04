@@ -282,8 +282,8 @@ public class RichTextToolbar extends Composite {
 		Image extract = new Image(url, left.intValue(), top.intValue(),
 				width.intValue(), height.intValue());
 		ToggleButton tb = new ToggleButton(extract);
-		tb.setHeight(height + "px");
-		tb.setWidth(width + "px");
+		tb.setHeight(height + Utils.PIXEL);
+		tb.setWidth(width + Utils.PIXEL);
 		tb.addClickHandler(this.evHandler);
 		if (tip != null) {
 			tb.setTitle(tip);
@@ -296,8 +296,8 @@ public class RichTextToolbar extends Composite {
 		Image extract = new Image(url, left.intValue(), top.intValue(),
 				width.intValue(), height.intValue());
 		PushButton tb = new PushButton(extract);
-		tb.setHeight(height + "px");
-		tb.setWidth(width + "px");
+		tb.setHeight(height + Utils.PIXEL);
+		tb.setWidth(width + Utils.PIXEL);
 		tb.addClickHandler(this.evHandler);
 		if (tip != null) {
 			tb.setTitle(tip);
