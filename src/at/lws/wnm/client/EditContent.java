@@ -193,11 +193,14 @@ public class EditContent extends VerticalPanel {
 
 	private void layout() {
 		HorizontalPanel rootContainer = new HorizontalPanel();
+
 		Utils.formatLeftCenter(this, rootContainer, Utils.APP_WIDTH, Utils.APP_HEIGHT);
+
 		add(rootContainer);
 
 		VerticalPanel nameContainer = new VerticalPanel();
 		Utils.formatLeftCenter(rootContainer, nameContainer,
+
 				NameSelection.WIDTH, Utils.APP_HEIGHT);
 		Utils.formatLeftTop(nameContainer, this.nameSelection,
 				NameSelection.WIDTH, 20);
@@ -213,6 +216,7 @@ public class EditContent extends VerticalPanel {
 		VerticalPanel contentContainer = new VerticalPanel();
 		int contentWidth = Utils.APP_WIDTH - NameSelection.WIDTH - 10;
 		Utils.formatRightCenter(rootContainer, contentContainer, contentWidth,
+
 				Utils.APP_HEIGHT);
 
 		HorizontalPanel selectionContainer = new HorizontalPanel();
@@ -247,6 +251,7 @@ public class EditContent extends VerticalPanel {
 
 		Utils.formatCenter(contentContainer, createButtonContainer(),
 				contentWidth, 40);
+
 
 		setSize(Utils.APP_WIDTH + Utils.PIXEL, Utils.APP_HEIGHT + Utils.PIXEL);
 	}

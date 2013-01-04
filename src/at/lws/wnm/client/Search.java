@@ -29,11 +29,13 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 public class Search extends VerticalPanel {
 	private final Labels labels = (Labels) GWT.create(Labels.class);
 
+
 	private final BeobachtungsTable table;
 	private final BeobachtungsFilter filter;
 	private final NameSelection nameSelection;
 	private final SectionSelection sectionSelection;
 	private final MultiSelectionModel<GwtBeobachtung> selectionModel;
+
 
 	public Search(Authorization authorization) {
 		PopUp dialogBox = new PopUp();
@@ -58,6 +60,7 @@ public class Search extends VerticalPanel {
 		layout(textArea, sendButton);
 	}
 
+
 	private void layout(RichTextArea textArea, Button sendButton) {
 		CellPanel filterBox = new HorizontalPanel();
 		filterBox.setSpacing(5);
@@ -80,6 +83,7 @@ public class Search extends VerticalPanel {
 		Utils.formatLeftCenter(this, createButtonContainer(), Utils.APP_WIDTH,
 				40);
 	}
+
 
 	private MultiSelectionModel<GwtBeobachtung> createSelectionModel(
 			final RichTextArea textArea) {

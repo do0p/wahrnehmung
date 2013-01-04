@@ -34,6 +34,7 @@ public class Navigation extends HorizontalPanel {
 			token = NEW_ENTRY;
 		}
 		if (token.equals(NEW_ENTRY)) {
+
 			return new EditContent(this.authorization, null);
 		}
 		if (token.equals(LIST_ENTRY)) {

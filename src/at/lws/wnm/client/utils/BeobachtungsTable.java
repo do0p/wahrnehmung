@@ -32,7 +32,6 @@ import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.Range;
 
 public class BeobachtungsTable extends CellTable<GwtBeobachtung> {
-
 	private static final int PAGE_SIZE = 10;
 
 	private final Labels labels = GWT.create(Labels.class);
@@ -152,6 +151,7 @@ public class BeobachtungsTable extends CellTable<GwtBeobachtung> {
 										.get(Utils.MAIN_ELEMENT);
 								rootPanel.clear();
 								rootPanel.add(new EditContent(authorization,
+
 										object.getKey()));
 								History.newItem(Navigation.NEW_ENTRY, false);
 							}

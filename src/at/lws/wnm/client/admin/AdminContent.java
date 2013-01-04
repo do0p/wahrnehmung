@@ -11,8 +11,10 @@ public class AdminContent extends TabPanel {
 
 	private final Labels labels = (Labels) GWT.create(Labels.class);
 
+
 	public AdminContent(Authorization authorization) {
 		setSize(Utils.HUNDERT_PERCENT, Utils.APP_WIDTH + Utils.PIXEL);
+
 		if (authorization.isAdmin()) {
 			add(new ChildAdmin(), labels.children());
 		}
