@@ -34,13 +34,13 @@ public class Navigation extends HorizontalPanel {
 			token = NEW_ENTRY;
 		}
 		if (token.equals(NEW_ENTRY)) {
-			return new EditContent(this.authorization, 850, null);
+			return new EditContent(this.authorization, null);
 		}
 		if (token.equals(LIST_ENTRY)) {
-			return new Search(this.authorization, 850);
+			return new Search(this.authorization);
 		}
 		if (token.equals(ADMIN)) {
-			return new AdminContent(this.authorization, "550px");
+			return new AdminContent(this.authorization);
 		}
 		return null;
 	}

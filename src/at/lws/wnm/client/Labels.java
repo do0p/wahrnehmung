@@ -44,4 +44,5 @@ public interface Labels extends Messages {
 	String filter();
 	String print();
 	String logout();
+	String title();
 }

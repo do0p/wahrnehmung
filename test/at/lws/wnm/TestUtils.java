@@ -2,6 +2,9 @@ package at.lws.wnm;
 
 import java.util.Date;
 
+import org.junit.Assert;
+import org.junit.Test;
+
 import at.lws.wnm.server.model.Beobachtung;
 import at.lws.wnm.server.model.Child;
 import at.lws.wnm.server.model.Section;
@@ -28,14 +31,22 @@ public class TestUtils {
 		return beobachtung;
 	}
 
-	public static Beobachtung createBeobachtung(Long childKey, Long sectionkey, User user, Date date) {
-		return createBeobachtung(null, childKey, sectionkey, date,
-				DurationEnum.LONG, SocialEnum.ALONE, TestUtils.TEXT, user.getEmail().toLowerCase());
-		
+	@Test
+	public void testContenation() {
+		int width = 440;
+		Assert.assertEquals("440px", width + "px");
 	}
-	
-	public static Child createChild(Long childKey, String firstName, String lastName)
-	{
+
+	public static Beobachtung createBeobachtung(Long childKey, Long sectionkey,
+			User user, Date date) {
+		return createBeobachtung(null, childKey, sectionkey, date,
+				DurationEnum.LONG, SocialEnum.ALONE, TestUtils.TEXT, user
+						.getEmail().toLowerCase());
+
+	}
+
+	public static Child createChild(Long childKey, String firstName,
+			String lastName) {
 		final Child child = new Child();
 		child.setFirstName(firstName);
 		child.setLastName(lastName);
@@ -49,7 +60,8 @@ public class TestUtils {
 
 	public static final String TEXT = "Standard Text";
 
-	public static Section createSection(Long key, String sectionName, Long parentKey) {
+	public static Section createSection(Long key, String sectionName,
+			Long parentKey) {
 		final Section section = new Section();
 		section.setKey(key);
 		section.setSectionName(sectionName);

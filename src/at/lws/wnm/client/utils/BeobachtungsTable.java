@@ -32,9 +32,11 @@ import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.Range;
 
 public class BeobachtungsTable extends CellTable<GwtBeobachtung> {
-	
+
+	private static final int PAGE_SIZE = 10;
+
 	private final Labels labels = GWT.create(Labels.class);
-	
+
 	private final WahrnehmungsServiceAsync wahrnehmungsService = (WahrnehmungsServiceAsync) GWT
 			.create(WahrnehmungsService.class);
 	private final AsyncDataProvider<GwtBeobachtung> asyncDataProvider;
@@ -146,21 +148,22 @@ public class BeobachtungsTable extends CellTable<GwtBeobachtung> {
 				new ActionCell<GwtBeobachtung>(labels.change(),
 						new ActionCell.Delegate<GwtBeobachtung>() {
 							public void execute(GwtBeobachtung object) {
-								RootPanel rootPanel = RootPanel.get(Utils.MAIN_ELEMENT);
+								RootPanel rootPanel = RootPanel
+										.get(Utils.MAIN_ELEMENT);
 								rootPanel.clear();
 								rootPanel.add(new EditContent(authorization,
-										850, object.getKey()));
+										object.getKey()));
 								History.newItem(Navigation.NEW_ENTRY, false);
 							}
 						}));
-		Column<GwtBeobachtung, GwtBeobachtung> deleteColumn = new IdentityColumn<GwtBeobachtung>(new ActionCell<GwtBeobachtung>(labels.delete(),
-				new ActionCell.Delegate<GwtBeobachtung>() {
-					public void execute(final GwtBeobachtung object) {
-						BeobachtungsTable.this.decisionBox
-								.addOkClickHandler(new ClickHandler() {
-									public void onClick(ClickEvent arg0) {
-										BeobachtungsTable.this.wahrnehmungsService
-												.deleteBeobachtung(
+		Column<GwtBeobachtung, GwtBeobachtung> deleteColumn = new IdentityColumn<GwtBeobachtung>(
+				new ActionCell<GwtBeobachtung>(labels.delete(),
+						new ActionCell.Delegate<GwtBeobachtung>() {
+							public void execute(final GwtBeobachtung object) {
+								BeobachtungsTable.this.decisionBox
+										.addOkClickHandler(new ClickHandler() {
+											public void onClick(ClickEvent arg0) {
+												BeobachtungsTable.this.wahrnehmungsService.deleteBeobachtung(
 														object.getKey(),
 														new AsyncCallback<Void>() {
 															public void onFailure(
@@ -178,13 +181,13 @@ public class BeobachtungsTable extends CellTable<GwtBeobachtung> {
 																		.updateTable();
 															}
 														});
-									}
-								});
-						BeobachtungsTable.this.decisionBox.center();
-					}
-				}));
+											}
+										});
+								BeobachtungsTable.this.decisionBox.center();
+							}
+						}));
 		setKeyboardSelectionPolicy(KeyboardSelectionPolicy.ENABLED);
-		setPageSize(10);
+		setPageSize(PAGE_SIZE);
 		addColumn(markColumn, selectAllHeader);
 		addColumn(dateColumn, labels.date());
 		addColumn(nameColumn, labels.name());
@@ -197,7 +200,8 @@ public class BeobachtungsTable extends CellTable<GwtBeobachtung> {
 		addColumn(deleteColumn);
 
 		setSelectionModel(selectionModel,
-				DefaultSelectionEventManager.<GwtBeobachtung>createCheckboxManager ());
+				DefaultSelectionEventManager
+						.<GwtBeobachtung> createCheckboxManager());
 
 		this.asyncDataProvider = new AsyncDataProvider<GwtBeobachtung>() {
 			protected void onRangeChanged(HasData<GwtBeobachtung> display) {

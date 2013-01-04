@@ -28,6 +28,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class AuthorizationAdmin extends VerticalPanel {
 	
+	private static final int VISIBLE_USERS = 20;
 	private final AuthorizationServiceAsync authorizationService = (AuthorizationServiceAsync) GWT
 			.create(AuthorizationService.class);
 	private final Labels labels = (Labels) GWT.create(Labels.class);
@@ -74,7 +75,7 @@ public class AuthorizationAdmin extends VerticalPanel {
 		data.add(buttonPanel);
 
 		this.users = new ListBox(false);
-		this.users.setVisibleItemCount(20);
+		this.users.setVisibleItemCount(VISIBLE_USERS);
 		this.users.addClickHandler(new UserClickHandler());
 		rebuildUsersList();
 
@@ -121,7 +122,7 @@ public class AuthorizationAdmin extends VerticalPanel {
 		if (this.deleteButton.isEnabled()) {
 			this.deleteButton.setEnabled(false);
 		}
-		this.saveButton.setHTML("anlegen");
+		this.saveButton.setHTML(labels.create());
 	}
 
 	public class CancelClickHandler implements ClickHandler {

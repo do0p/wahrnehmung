@@ -165,7 +165,7 @@ public class SectionAdmin extends VerticalPanel {
 							decisionBox.addOkClickHandler(new ClickHandler() {
 								@Override
 								public void onClick(ClickEvent event) {
-									sectionName.setStylePrimaryName("deleted");
+									sectionName.setStylePrimaryName(Utils.DELETED_STYLE);
 									sectionItem.setState(false);
 									editClickHandler.removeHandler();
 									createDelItem(section);

@@ -26,110 +26,108 @@ import com.google.gwt.view.client.CellPreviewEvent;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 
-public class Search extends VerticalPanel
-{
-  private final Labels labels = (Labels) GWT.create(Labels.class);	
-	
-  private final BeobachtungsTable table;
-  private final BeobachtungsFilter filter;
-  private final NameSelection nameSelection;
-  private final SectionSelection sectionSelection;
-  private final MultiSelectionModel<GwtBeobachtung> selectionModel;
+public class Search extends VerticalPanel {
+	private final Labels labels = (Labels) GWT.create(Labels.class);
 
-  public Search(Authorization authorization, int width)
-  {
-    PopUp dialogBox = new PopUp();
-    final RichTextArea textArea = new RichTextArea();
-    this.filter = new BeobachtungsFilter();
-    this.nameSelection = new NameSelection(dialogBox);
-    this.sectionSelection = new SectionSelection(dialogBox, null);
-    Button sendButton = new Button(labels.filter());
-    sendButton.addClickHandler(new FilterButtonHandler());
-    sendButton.addStyleName("sendButton");
-    this.selectionModel = createSelectionModel(textArea);
-    this.table = new BeobachtungsTable(authorization, this.selectionModel, this.filter, 
-      dialogBox);
-    this.table.addCellPreviewHandler(new CellPreviewEvent.Handler<GwtBeobachtung>()
-    {
-      public void onCellPreview(CellPreviewEvent<GwtBeobachtung> event) {
-        textArea.setHTML(((GwtBeobachtung)event.getValue()).getText());
-      }
-    });
-    layout(width, textArea, sendButton);
-  }
+	private final BeobachtungsTable table;
+	private final BeobachtungsFilter filter;
+	private final NameSelection nameSelection;
+	private final SectionSelection sectionSelection;
+	private final MultiSelectionModel<GwtBeobachtung> selectionModel;
 
-  private void layout(int width, RichTextArea textArea, Button sendButton)
-  {
-    CellPanel filterBox = new HorizontalPanel();
-    filterBox.setSpacing(5);
-    add(filterBox);
-    Utils.formatLeftCenter(filterBox, this.nameSelection, NameSelection.WIDTH, 
-      20);
+	public Search(Authorization authorization) {
+		PopUp dialogBox = new PopUp();
+		final RichTextArea textArea = new RichTextArea();
+		this.filter = new BeobachtungsFilter();
+		this.nameSelection = new NameSelection(dialogBox);
+		this.sectionSelection = new SectionSelection(dialogBox, null);
+		Button sendButton = new Button(labels.filter());
+		sendButton.addClickHandler(new FilterButtonHandler());
+		sendButton.addStyleName(Utils.SEND_BUTTON_STYLE);
+		this.selectionModel = createSelectionModel(textArea);
+		this.table = new BeobachtungsTable(authorization, this.selectionModel,
+				this.filter, dialogBox);
+		this.table
+				.addCellPreviewHandler(new CellPreviewEvent.Handler<GwtBeobachtung>() {
+					public void onCellPreview(
+							CellPreviewEvent<GwtBeobachtung> event) {
+						textArea.setHTML(((GwtBeobachtung) event.getValue())
+								.getText());
+					}
+				});
+		layout(textArea, sendButton);
+	}
 
-    for (ListBox selectionBox : this.sectionSelection.getSectionSelectionBoxes()) {
-      Utils.formatLeftCenter(filterBox, selectionBox, 
-        135, 20);
-    }
-    Utils.formatLeftCenter(filterBox, sendButton, 80, 
-      40);
-    add(this.table);
-    SimplePager pager = new SimplePager();
-    pager.setDisplay(this.table);
-    add(pager);
-    textArea.setSize(width + "px", "400px");
-    add(textArea);
-    Utils.formatLeftCenter(this, createButtonContainer(), width, 
-      40);
-  }
+	private void layout(RichTextArea textArea, Button sendButton) {
+		CellPanel filterBox = new HorizontalPanel();
+		filterBox.setSpacing(5);
+		add(filterBox);
+		Utils.formatLeftCenter(filterBox, this.nameSelection,
+				NameSelection.WIDTH, 20);
 
-  private MultiSelectionModel<GwtBeobachtung> createSelectionModel(final RichTextArea textArea) {
-    final MultiSelectionModel<GwtBeobachtung> selectionModel = new MultiSelectionModel<GwtBeobachtung>();
-    selectionModel
-      .addSelectionChangeHandler(new SelectionChangeEvent.Handler()
-    {
-      public void onSelectionChange(SelectionChangeEvent event)
-      {
-        Set<GwtBeobachtung> selectedObjects = selectionModel.getSelectedSet();
-        if (!selectedObjects.isEmpty())
-          textArea.setHTML(((GwtBeobachtung)selectedObjects.iterator().next())
-            .getText());
-      }
-    });
-    return selectionModel;
-  }
+		for (ListBox selectionBox : this.sectionSelection
+				.getSectionSelectionBoxes()) {
+			Utils.formatLeftCenter(filterBox, selectionBox, 135, 20);
+		}
+		Utils.formatLeftCenter(filterBox, sendButton, 80, 40);
+		add(this.table);
+		SimplePager pager = new SimplePager();
+		pager.setDisplay(this.table);
+		add(pager);
+		textArea.setSize(Utils.APP_WIDTH + Utils.PIXEL, Utils.TEXT_AREA_WIDTH
+				+ Utils.PIXEL);
+		add(textArea);
+		Utils.formatLeftCenter(this, createButtonContainer(), Utils.APP_WIDTH,
+				40);
+	}
 
-  private HorizontalPanel createButtonContainer() {
-    HorizontalPanel buttonContainer = new HorizontalPanel();
-    buttonContainer.setWidth("170px");
+	private MultiSelectionModel<GwtBeobachtung> createSelectionModel(
+			final RichTextArea textArea) {
+		final MultiSelectionModel<GwtBeobachtung> selectionModel = new MultiSelectionModel<GwtBeobachtung>();
+		selectionModel
+				.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+					public void onSelectionChange(SelectionChangeEvent event) {
+						Set<GwtBeobachtung> selectedObjects = selectionModel
+								.getSelectedSet();
+						if (!selectedObjects.isEmpty())
+							textArea.setHTML(((GwtBeobachtung) selectedObjects
+									.iterator().next()).getText());
+					}
+				});
+		return selectionModel;
+	}
 
-    Button printButton = new Button(labels.print());
-    printButton.addClickHandler(new ClickHandler()
-    {
-      public void onClick(ClickEvent event)
-      {
-        Set<GwtBeobachtung> selectedSet = Search.this.selectionModel
-          .getSelectedSet();
-        if (!selectedSet.isEmpty())
-        {
-          Print.it(Utils.createPrintHtml(selectedSet));
-        }
-      }
-    });
-    printButton.addStyleName("sendButton");
+	private HorizontalPanel createButtonContainer() {
+		HorizontalPanel buttonContainer = new HorizontalPanel();
+		buttonContainer.setWidth(Utils.BUTTON_CONTAINER_WIDTH + Utils.PIXEL);
 
-    Utils.formatLeftCenter(buttonContainer, printButton, 
-      80, 40);
+		Button printButton = new Button(labels.print());
+		printButton.addClickHandler(new ClickHandler() {
+			public void onClick(ClickEvent event) {
+				Set<GwtBeobachtung> selectedSet = Search.this.selectionModel
+						.getSelectedSet();
+				if (!selectedSet.isEmpty()) {
+					Print.it(Utils.createPrintHtml(selectedSet));
+				}
+			}
+		});
+		printButton.addStyleName(Utils.SEND_BUTTON_STYLE);
 
-    return buttonContainer;
-  }
-  public class FilterButtonHandler implements ClickHandler {
-    public FilterButtonHandler() {
-    }
+		Utils.formatLeftCenter(buttonContainer, printButton, 80, 40);
 
-    public void onClick(ClickEvent event) {
-      Search.this.filter.setChildKey(Search.this.nameSelection.getSelectedChildKey());
-      Search.this.filter.setSectionKey(Search.this.sectionSelection.getSelectedSectionKey());
-      Search.this.table.updateTable();
-    }
-  }
+		return buttonContainer;
+	}
+
+	public class FilterButtonHandler implements ClickHandler {
+		public FilterButtonHandler() {
+		}
+
+		public void onClick(ClickEvent event) {
+			Search.this.filter.setChildKey(Search.this.nameSelection
+					.getSelectedChildKey());
+			Search.this.filter.setSectionKey(Search.this.sectionSelection
+					.getSelectedSectionKey());
+			Search.this.table.updateTable();
+		}
+	}
 }
