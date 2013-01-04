@@ -12,6 +12,7 @@ import at.lws.wnm.shared.model.Authorization;
 import at.lws.wnm.shared.model.BeobachtungsFilter;
 import at.lws.wnm.shared.model.GwtBeobachtung;
 
+import com.google.gwt.core.shared.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.cellview.client.SimplePager;
@@ -27,6 +28,8 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 
 public class Search extends VerticalPanel
 {
+  private final Labels labels = (Labels) GWT.create(Labels.class);	
+	
   private final BeobachtungsTable table;
   private final BeobachtungsFilter filter;
   private final NameSelection nameSelection;
@@ -40,7 +43,7 @@ public class Search extends VerticalPanel
     this.filter = new BeobachtungsFilter();
     this.nameSelection = new NameSelection(dialogBox);
     this.sectionSelection = new SectionSelection(dialogBox, null);
-    Button sendButton = new Button("filter");
+    Button sendButton = new Button(labels.filter());
     sendButton.addClickHandler(new FilterButtonHandler());
     sendButton.addStyleName("sendButton");
     this.selectionModel = createSelectionModel(textArea);
@@ -99,7 +102,7 @@ public class Search extends VerticalPanel
     HorizontalPanel buttonContainer = new HorizontalPanel();
     buttonContainer.setWidth("170px");
 
-    Button printButton = new Button("drucken");
+    Button printButton = new Button(labels.print());
     printButton.addClickHandler(new ClickHandler()
     {
       public void onClick(ClickEvent event)

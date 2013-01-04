@@ -1,5 +1,8 @@
 package at.lws.wnm.client.utils;
 
+import at.lws.wnm.client.Labels;
+
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
@@ -10,9 +13,8 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class PopUp extends DialogBox {
 
-	private static final String SERVER_ERROR = "An error occurred while "
-			+ "attempting to contact the server. Please check your network "
-			+ "connection and try again.";
+	private final Labels labels = GWT.create(Labels.class);
+	
 
 	private final HTML serverResponseLabel;
 	private final Button closeButton;
@@ -21,7 +23,7 @@ public class PopUp extends DialogBox {
 
 	public PopUp() {
 		serverResponseLabel = new HTML();
-		closeButton = new Button("Close");
+		closeButton = new Button(labels.close());
 		closeButton.getElement().setId("closeButton");
 		closeButton.addClickHandler(new CloseButtonHandler());
 		setText("Remote Procedure Call");
@@ -43,7 +45,7 @@ public class PopUp extends DialogBox {
 	}
 
 	public void setErrorMessage() {
-		setErrorMessage(SERVER_ERROR);
+		setErrorMessage(labels.serverError());
 	}
 
 	public void setErrorMessage(String errorMessage) {

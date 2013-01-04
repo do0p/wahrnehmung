@@ -3,6 +3,7 @@ package at.lws.wnm.client.utils;
 import java.util.Iterator;
 
 import at.lws.wnm.client.EditContent;
+import at.lws.wnm.client.Labels;
 import at.lws.wnm.client.service.WahrnehmungsService;
 import at.lws.wnm.client.service.WahrnehmungsServiceAsync;
 import at.lws.wnm.shared.model.Authorization;
@@ -31,7 +32,9 @@ import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.Range;
 
 public class BeobachtungsTable extends CellTable<GwtBeobachtung> {
-	private static final String BEOBACHTUNG_DEL_WARNING = "Achtung, diese Beobachtung wird gel&ouml;scht. Der Vorgang nicht mehr r&uuml;ckg&auml;nig gemacht werden!";
+	
+	private final Labels labels = GWT.create(Labels.class);
+	
 	private final WahrnehmungsServiceAsync wahrnehmungsService = (WahrnehmungsServiceAsync) GWT
 			.create(WahrnehmungsService.class);
 	private final AsyncDataProvider<GwtBeobachtung> asyncDataProvider;
@@ -46,7 +49,7 @@ public class BeobachtungsTable extends CellTable<GwtBeobachtung> {
 		this.filter = filter;
 		this.dialogBox = dialogBox;
 		this.decisionBox = new DecisionBox();
-		this.decisionBox.setText(BEOBACHTUNG_DEL_WARNING);
+		this.decisionBox.setText(labels.observationDelWarning());
 
 		Header<Boolean> selectAllHeader = new Header<Boolean>(new CheckboxCell(
 				true, false)) {
@@ -140,17 +143,17 @@ public class BeobachtungsTable extends CellTable<GwtBeobachtung> {
 			}
 		};
 		Column<GwtBeobachtung, GwtBeobachtung> editColumn = new IdentityColumn<GwtBeobachtung>(
-				new ActionCell<GwtBeobachtung>("edit",
+				new ActionCell<GwtBeobachtung>(labels.change(),
 						new ActionCell.Delegate<GwtBeobachtung>() {
 							public void execute(GwtBeobachtung object) {
-								RootPanel rootPanel = RootPanel.get("content");
+								RootPanel rootPanel = RootPanel.get(Utils.MAIN_ELEMENT);
 								rootPanel.clear();
 								rootPanel.add(new EditContent(authorization,
 										850, object.getKey()));
-								History.newItem("new", false);
+								History.newItem(Navigation.NEW_ENTRY, false);
 							}
 						}));
-		Column<GwtBeobachtung, GwtBeobachtung> deleteColumn = new IdentityColumn<GwtBeobachtung>(new ActionCell<GwtBeobachtung>("entf",
+		Column<GwtBeobachtung, GwtBeobachtung> deleteColumn = new IdentityColumn<GwtBeobachtung>(new ActionCell<GwtBeobachtung>(labels.delete(),
 				new ActionCell.Delegate<GwtBeobachtung>() {
 					public void execute(final GwtBeobachtung object) {
 						BeobachtungsTable.this.decisionBox
@@ -183,13 +186,13 @@ public class BeobachtungsTable extends CellTable<GwtBeobachtung> {
 		setKeyboardSelectionPolicy(KeyboardSelectionPolicy.ENABLED);
 		setPageSize(10);
 		addColumn(markColumn, selectAllHeader);
-		addColumn(dateColumn, "Datum");
-		addColumn(nameColumn, "Name");
-		addColumn(sectionColumn, "Bereich");
-		addColumn(durationColumn, "Dauer");
-		addColumn(socialColumn, "Sozialform");
+		addColumn(dateColumn, labels.date());
+		addColumn(nameColumn, labels.name());
+		addColumn(sectionColumn, labels.section());
+		addColumn(durationColumn, labels.duration());
+		addColumn(socialColumn, labels.socialForm());
 
-		addColumn(userColumn, "von");
+		addColumn(userColumn, labels.teacher());
 		addColumn(editColumn);
 		addColumn(deleteColumn);
 

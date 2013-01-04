@@ -2,6 +2,7 @@ package at.lws.wnm.client.admin;
 
 import java.util.List;
 
+import at.lws.wnm.client.Labels;
 import at.lws.wnm.client.service.ChildService;
 import at.lws.wnm.client.service.ChildServiceAsync;
 import at.lws.wnm.client.utils.DecisionBox;
@@ -25,10 +26,9 @@ import com.google.gwt.user.datepicker.client.DateBox;
 
 public class ChildAdmin extends VerticalPanel {
 
-	private static final String CHILD_DEL_WARNING = "Achtung, dieses Kind und alle seine Beobachtungen werden gel&ouml;scht. Der Vorgang nicht mehr r&uuml;ckg&auml;nig gemacht werden!";
-
 	private final ChildServiceAsync childService = GWT
 			.create(ChildService.class);
+	private final Labels labels = GWT.create(Labels.class);
 
 	private final TextBox fnBox;
 	private final TextBox lnBox;
@@ -51,19 +51,19 @@ public class ChildAdmin extends VerticalPanel {
 		lnBox = new TextBox();
 		bdBox = new DateBox();
 		bdBox.setFormat(Utils.DATEBOX_FORMAT);
-		saveButton = new Button(Utils.ADD);
-		deleteButton = new Button(Utils.DEL);
+		saveButton = new Button(labels.create());
+		deleteButton = new Button(labels.delete());
 		deleteButton.setEnabled(false);
-		cancelButton = new Button(Utils.CANCEL);
+		cancelButton = new Button(labels.cancel());
 		dialogBox = new PopUp();
 		// saveSuccess = new SaveSuccess();
 
 		final Grid grid = new Grid(3, 2);
-		grid.setWidget(0, 0, new Label("Vorname"));
+		grid.setWidget(0, 0, new Label(labels.firstName()));
 		grid.setWidget(0, 1, fnBox);
-		grid.setWidget(1, 0, new Label("Nachname"));
+		grid.setWidget(1, 0, new Label(labels.lastName()));
 		grid.setWidget(1, 1, lnBox);
-		grid.setWidget(2, 0, new Label("Geburtstag"));
+		grid.setWidget(2, 0, new Label(labels.birthday()));
 		grid.setWidget(2, 1, bdBox);
 
 		final VerticalPanel data = new VerticalPanel();
@@ -98,7 +98,7 @@ public class ChildAdmin extends VerticalPanel {
 		deleteButton.addClickHandler(new DeleteClickHandler());
 
 		decisionBox = new DecisionBox();
-		decisionBox.setText(CHILD_DEL_WARNING);
+		decisionBox.setText(labels.childDelWarning());
 	}
 
 	private void rebuildChildList() {
@@ -130,7 +130,7 @@ public class ChildAdmin extends VerticalPanel {
 		if (deleteButton.isEnabled()) {
 			deleteButton.setEnabled(false);
 		}
-		saveButton.setHTML(Utils.ADD);
+		saveButton.setHTML(labels.create());
 	}
 
 	public class SaveClickHandler implements ClickHandler {
@@ -190,7 +190,7 @@ public class ChildAdmin extends VerticalPanel {
 					fnBox.setText(child.getFirstName());
 					lnBox.setText(child.getLastName());
 					bdBox.setValue(child.getBirthDay());
-					saveButton.setHTML(Utils.CHANGE);
+					saveButton.setHTML(labels.change());
 					deleteButton.setEnabled(true);
 
 				}

@@ -1,6 +1,9 @@
 package at.lws.wnm.client.utils;
 
 
+import at.lws.wnm.client.Labels;
+
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -12,6 +15,8 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class DecisionBox extends DialogBox {
 
+	private final Labels labels = GWT.create(Labels.class);
+	
 	public class HideClickHandler implements ClickHandler {
 			@Override
 			public void onClick(ClickEvent event) {
@@ -28,9 +33,9 @@ public class DecisionBox extends DialogBox {
 	public DecisionBox()
 	{
 		super(false, true);
-		okButton = new Button(Utils.OK);
+		okButton = new Button(labels.ok());
 		okButton.addClickHandler(new HideClickHandler());
-		cancelButton = new Button(Utils.CANCEL);
+		cancelButton = new Button(labels.cancel());
 		cancelButton.addClickHandler(new HideClickHandler());
 		text = new HTML();
 		

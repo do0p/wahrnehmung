@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import at.lws.wnm.client.Labels;
 import at.lws.wnm.client.service.SectionService;
 import at.lws.wnm.client.service.SectionServiceAsync;
 import at.lws.wnm.shared.model.GwtSection;
@@ -20,6 +21,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public class SectionSelection {
 
+	private final Labels labels = GWT.create(Labels.class);
 	private final SectionServiceAsync sectionService = GWT
 			.create(SectionService.class);
 
@@ -35,9 +37,12 @@ public class SectionSelection {
 		this.dialogBox = dialogBox;
 
 		selectionBoxes = new ArrayList<SectionSelectionBox>();
-		selectionBoxes.add(createSelection("- Kategorie -", changeHandler));
-		selectionBoxes.add(createSelection("- Bereich -", changeHandler));
-		selectionBoxes.add(createSelection("- Subbereich -", changeHandler));
+		selectionBoxes.add(createSelection("- " + labels.category() + " -",
+				changeHandler));
+		selectionBoxes.add(createSelection("- " + labels.section() + " -",
+				changeHandler));
+		selectionBoxes.add(createSelection("- " + labels.subSection() + " -",
+				changeHandler));
 
 		final Iterator<SectionSelectionBox> iterator = selectionBoxes
 				.iterator();
@@ -119,8 +124,7 @@ public class SectionSelection {
 				}
 
 				updated = true;
-				if(selectedSectionKey != null)
-				{
+				if (selectedSectionKey != null) {
 					setSelectedInternal(selectedSectionKey);
 					selectedSectionKey = null;
 				}

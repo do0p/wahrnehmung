@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import at.lws.wnm.client.Labels;
 import at.lws.wnm.client.service.SectionService;
 import at.lws.wnm.client.service.SectionServiceAsync;
 import at.lws.wnm.client.utils.DecisionBox;
@@ -30,7 +31,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class SectionAdmin extends VerticalPanel {
 
-	private static final String SECTION_DEL_WARNING = "Achtung, dieser Bereich und alle Subbereiche werden gel&ouml;scht. Nach dem Speichern kann der Vorgang nicht mehr r&uuml;ckg&auml;nig gemacht werden!";
+	private final Labels labels = GWT.create(Labels.class);
 	private final SectionServiceAsync sectionService = GWT
 			.create(SectionService.class);
 
@@ -47,8 +48,8 @@ public class SectionAdmin extends VerticalPanel {
 
 	public SectionAdmin() {
 
-		saveButton = new Button(Utils.SAVE);
-		cancelButton = new Button(Utils.CANCEL);
+		saveButton = new Button(labels.save());
+		cancelButton = new Button(labels.cancel());
 		dialogBox = new PopUp();
 //		saveSuccess = new SaveSuccess();
 
@@ -62,7 +63,7 @@ public class SectionAdmin extends VerticalPanel {
 		add(buttonPanel);
 
 		decisionBox = new DecisionBox();
-		decisionBox.setText(SECTION_DEL_WARNING);
+		decisionBox.setText(labels.sectionDelWarning());
 		
 		saveButton.addClickHandler(new SaveClickHandler());
 		cancelButton.addClickHandler(new ClickHandler() {
@@ -141,8 +142,8 @@ public class SectionAdmin extends VerticalPanel {
 			for (final GwtSection section : sections) {
 				final InlineLabel sectionName = new InlineLabel(
 						section.getSectionName());
-				final Anchor sectionEdit = new Anchor(Utils.EDIT);
-				final Anchor sectionDel = new Anchor(Utils.DEL);
+				final Anchor sectionEdit = new Anchor(labels.change());
+				final Anchor sectionDel = new Anchor(labels.delete());
 
 				final TreeItem sectionItem = new TreeItem(createSectionLabel(
 						sectionName, sectionEdit, sectionDel));
@@ -199,7 +200,7 @@ public class SectionAdmin extends VerticalPanel {
 
 		private void addPlusItem(final Long parentKey,
 				final TreeItem sectionItem) {
-			final Anchor addLabel = new Anchor(Utils.NEW);
+			final Anchor addLabel = new Anchor(labels.create());
 			final TreeItem addItem = new TreeItem(addLabel);
 			sectionItem.addItem(addItem);
 			addLabel.addClickHandler(new ClickHandler() {

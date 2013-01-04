@@ -24,18 +24,15 @@ import com.google.gwt.user.datepicker.client.DateBox;
 import com.google.gwt.user.datepicker.client.DateBox.Format;
 
 public class Utils {
+	public static final String MAIN_ELEMENT = "content";
 	public static final String DATE_FORMAT_STRING = "d.M.yy";
 	public static final String SHORTEN_POSTFIX = "...";
-	public static final String DEL = "entf";
-	public static final String EDIT = "edit";
-	public static final String NEW = "neu";
-	public static final String OK = "ok";
-	public static final String SAVE = "speichern";
-	public static final String FILTER = "filter";
-	public static final String CANCEL = "abbrechen";
-	public static final String ADD = "anlegen";
-	public static final String CHANGE = "&auml;ndern";
-	public static final String PRINT = "drucken";
+
+	public static final String LINE_BREAK = "<br/>";
+
+	public static final String UP_ARROW = "↑";
+	public static final String DOWN_ARROW = "↓";
+
 	public static final DateTimeFormat DATE_FORMAT = DateTimeFormat
 			.getFormat(DATE_FORMAT_STRING);
 	public static final Format DATEBOX_FORMAT = new DateBox.DefaultFormat(
@@ -176,12 +173,15 @@ public class Utils {
 		final VerticalPanel one = new VerticalPanel();
 		one.add(header);
 		one.add(section);
-		one.add(new HTML("<BR/>"));
+		one.add(new HTML(LINE_BREAK));
 		one.add(text);
-		one.add(new HTML("<BR/>"));
+		one.add(new HTML(LINE_BREAK));
 		one.add(author);
 		return one;
 	}
+
+
+
 
 	
 
