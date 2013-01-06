@@ -15,8 +15,6 @@ import com.google.gwt.user.client.ui.SuggestBox;
 
 public class NameSelection extends SuggestBox {
 
-	public static int WIDTH = 200;
-
 	private final PopUp dialogBox;
 
 	private final ChildServiceAsync childService = GWT

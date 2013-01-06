@@ -1,5 +1,6 @@
 package at.lws.wnm.client;
 
+import java.util.List;
 import java.util.Set;
 
 import at.lws.wnm.client.utils.BeobachtungsTable;
@@ -7,6 +8,7 @@ import at.lws.wnm.client.utils.NameSelection;
 import at.lws.wnm.client.utils.PopUp;
 import at.lws.wnm.client.utils.Print;
 import at.lws.wnm.client.utils.SectionSelection;
+import at.lws.wnm.client.utils.SectionSelectionBox;
 import at.lws.wnm.client.utils.Utils;
 import at.lws.wnm.shared.model.Authorization;
 import at.lws.wnm.shared.model.BeobachtungsFilter;
@@ -17,9 +19,10 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.CellPanel;
-import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RichTextArea;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.CellPreviewEvent;
@@ -29,13 +32,11 @@ import com.google.gwt.view.client.SelectionChangeEvent;
 public class Search extends VerticalPanel {
 	private final Labels labels = (Labels) GWT.create(Labels.class);
 
-
 	private final BeobachtungsTable table;
 	private final BeobachtungsFilter filter;
 	private final NameSelection nameSelection;
 	private final SectionSelection sectionSelection;
 	private final MultiSelectionModel<GwtBeobachtung> selectionModel;
-
 
 	public Search(Authorization authorization) {
 		PopUp dialogBox = new PopUp();
@@ -60,30 +61,37 @@ public class Search extends VerticalPanel {
 		layout(textArea, sendButton);
 	}
 
-
 	private void layout(RichTextArea textArea, Button sendButton) {
-		CellPanel filterBox = new HorizontalPanel();
-		filterBox.setSpacing(5);
+		final List<SectionSelectionBox> sectionSelectionBoxes = this.sectionSelection
+				.getSectionSelectionBoxes();
+		final Grid filterBox = new Grid(1, sectionSelectionBoxes.size() + 2);
 		add(filterBox);
-		Utils.formatLeftCenter(filterBox, this.nameSelection,
-				NameSelection.WIDTH, 20);
 
-		for (ListBox selectionBox : this.sectionSelection
-				.getSectionSelectionBoxes()) {
-			Utils.formatLeftCenter(filterBox, selectionBox, 135, 20);
+		nameSelection.setSize(Utils.NAMESELECTION_WIDTH + Utils.PIXEL,
+				Utils.ROW_HEIGHT - 12 + Utils.PIXEL);
+		int i = 0;
+		filterBox.setWidget(0, i++, nameSelection);
+
+		for (ListBox selectionBox : sectionSelectionBoxes) {
+			selectionBox.setSize(Utils.LISTBOX_WIDTH + Utils.PIXEL,
+					Utils.ROW_HEIGHT + Utils.PIXEL);
+			filterBox.setWidget(0, i++, selectionBox);
 		}
-		Utils.formatLeftCenter(filterBox, sendButton, 80, 40);
+
+		sendButton.setSize(Utils.BUTTON_WIDTH + Utils.PIXEL, Utils.ROW_HEIGHT
+				+ Utils.PIXEL);
+		filterBox.setWidget(0, i, sendButton);
+
 		add(this.table);
+
 		SimplePager pager = new SimplePager();
 		pager.setDisplay(this.table);
 		add(pager);
-		textArea.setSize(Utils.APP_WIDTH + Utils.PIXEL, Utils.TEXT_AREA_WIDTH
-				+ Utils.PIXEL);
+		textArea.setSize(Utils.APP_WIDTH - 10 + Utils.PIXEL, Utils.APP_HEIGHT
+				- 300 + Utils.PIXEL);
 		add(textArea);
-		Utils.formatLeftCenter(this, createButtonContainer(), Utils.APP_WIDTH,
-				40);
+		Utils.formatCenter(this, createButtonContainer());
 	}
-
 
 	private MultiSelectionModel<GwtBeobachtung> createSelectionModel(
 			final RichTextArea textArea) {
@@ -101,11 +109,10 @@ public class Search extends VerticalPanel {
 		return selectionModel;
 	}
 
-	private HorizontalPanel createButtonContainer() {
-		HorizontalPanel buttonContainer = new HorizontalPanel();
-		buttonContainer.setWidth(Utils.BUTTON_CONTAINER_WIDTH + Utils.PIXEL);
+	private Panel createButtonContainer() {
+		final Panel buttonContainer = new FlowPanel();
 
-		Button printButton = new Button(labels.print());
+		final Button printButton = new Button(labels.print());
 		printButton.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
 				Set<GwtBeobachtung> selectedSet = Search.this.selectionModel
@@ -115,9 +122,9 @@ public class Search extends VerticalPanel {
 				}
 			}
 		});
-		printButton.addStyleName(Utils.SEND_BUTTON_STYLE);
 
-		Utils.formatLeftCenter(buttonContainer, printButton, 80, 40);
+		printButton.setSize(Utils.BUTTON_WIDTH + Utils.PIXEL, Utils.ROW_HEIGHT + Utils.PIXEL);
+		buttonContainer.add(printButton);
 
 		return buttonContainer;
 	}

@@ -59,7 +59,7 @@ public class SectionAdmin extends VerticalPanel {
 		final HorizontalPanel buttonPanel = new HorizontalPanel();
 		buttonPanel.add(saveButton);
 		buttonPanel.add(cancelButton);
-		buttonPanel.setSpacing(Utils.BUTTON_SPACING);
+		buttonPanel.setSpacing(Utils.SPACING);
 		add(buttonPanel);
 
 		decisionBox = new DecisionBox();
@@ -188,7 +188,7 @@ public class SectionAdmin extends VerticalPanel {
 				final InlineLabel sectionName, final Anchor sectionEdit,
 				final Anchor sectionDel) {
 			final HorizontalPanel sectionLabel = new HorizontalPanel();
-			sectionLabel.setSpacing(Utils.BUTTON_SPACING);
+			sectionLabel.setSpacing(Utils.SPACING);
 			sectionLabel.add(sectionName);
 			sectionLabel.add(new InlineLabel(" ("));
 			sectionLabel.add(sectionEdit);

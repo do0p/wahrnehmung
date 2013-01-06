@@ -42,7 +42,7 @@ public class DecisionBox extends DialogBox {
 		final VerticalPanel root = new VerticalPanel();
 		root.add(text);
 		final HorizontalPanel buttonPanel = new HorizontalPanel();
-		buttonPanel.setSpacing(Utils.BUTTON_SPACING);
+		buttonPanel.setSpacing(Utils.SPACING);
 		buttonPanel.add(okButton);
 		buttonPanel.add(cancelButton);
 		root.add(buttonPanel);

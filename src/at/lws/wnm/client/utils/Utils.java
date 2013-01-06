@@ -33,10 +33,9 @@ public class Utils {
 	public static final String LINE_BREAK = "<br/>";
 	public static final String SEND_BUTTON_STYLE = "sendButton";
 	public static final String DELETED_STYLE = "deleted";
-	
+
 	public static final String DATE_FORMAT_STRING = "d.M.yy";
 	public static final String SHORTEN_POSTFIX = "...";
-
 
 	public static final String UP_ARROW = "↑";
 	public static final String DOWN_ARROW = "↓";
@@ -45,14 +44,14 @@ public class Utils {
 			.getFormat(DATE_FORMAT_STRING);
 	public static final Format DATEBOX_FORMAT = new DateBox.DefaultFormat(
 			DATE_FORMAT);
-	public static final int BUTTON_SPACING = 5;
-	public static final int FIELD_HEIGHT = 20;
+	public static final int SPACING = 3;
 	public static final int BUTTON_WIDTH = 80;
-	public static final int ROW_HEIGHT = 40;
+	public static final int ROW_HEIGHT = 30;
 	public static final int LISTBOX_WIDTH = 135;
-	public static final int TEXT_AREA_WIDTH = 400;
-	public static final int APP_WIDTH = 850;
-	public static final int APP_HEIGHT = 550;
+	public static final int DATEBOX_WIDTH = 80;
+	public static final int APP_WIDTH = 905; // must be at least 870
+	public static final int APP_HEIGHT = 700; // must be at least 350
+	public static final int NAMESELECTION_WIDTH = 200;
 	public static final int BUTTON_CONTAINER_WIDTH = 170;
 
 	public static String formatChildName(GwtChild child) {
@@ -97,45 +96,57 @@ public class Utils {
 				+ SHORTEN_POSTFIX;
 	}
 
-	public static void formatLeftCenter(Panel panel, Widget widget,
-			int width, int height) {
+	public static void formatLeftCenter(Panel panel, Widget widget, int width,
+			int height) {
 		format(panel, widget, width, height, HasHorizontalAlignment.ALIGN_LEFT,
 				HasVerticalAlignment.ALIGN_MIDDLE);
 	}
 
-	public static void formatRightCenter(Panel panel, Widget widget,
-			int width, int height) {
+	public static void formatRightCenter(Panel panel, Widget widget, int width,
+			int height) {
 		format(panel, widget, width, height,
 				HasHorizontalAlignment.ALIGN_RIGHT,
 				HasVerticalAlignment.ALIGN_MIDDLE);
 	}
 
-	public static void formatLeftTop(Panel panel,
-			Widget widget, int width, int height) {
-		format(panel, widget, width, height,
-				HasHorizontalAlignment.ALIGN_LEFT,
+	public static void formatLeftTop(Panel panel, Widget widget, int width,
+			int height) {
+		format(panel, widget, width, height, HasHorizontalAlignment.ALIGN_LEFT,
 				HasVerticalAlignment.ALIGN_TOP);
 	}
 
-	public static void formatCenter(Panel panel,
-			Widget widget, int width, int height) {
+	public static void formatCenter(Panel panel, Widget widget, int width,
+			int height) {
 		format(panel, widget, width, height,
 				HasHorizontalAlignment.ALIGN_CENTER,
 				HasVerticalAlignment.ALIGN_MIDDLE);
 	}
 	
+	public static void formatCenter(Panel panel, Widget widget) {
+		formatCenter(panel, widget, -1, -1);
+	}
+
 	public static void format(Panel panel, Widget widget, int widthPx,
 			int heightPx, final HorizontalAlignmentConstant horizontalAlign,
 			final VerticalAlignmentConstant verticalAlign) {
 		panel.add(widget);
-		final String width = "" + widthPx + Utils.PIXEL;
-		final String height = "" + heightPx + Utils.PIXEL;
-		widget.setSize(width , height);
+		String width = null;
+		String height = null;
+		if (widthPx >= 0) {
+			width = widthPx + Utils.PIXEL;
+			widget.setWidth(width);
+		}
+		if (heightPx >= 0) {
+			height = heightPx + Utils.PIXEL;
+			widget.setHeight(height);
+		}
 		if (panel instanceof CellPanel) {
 			CellPanel cPanel = (CellPanel) panel;
 			cPanel.setCellVerticalAlignment(widget, verticalAlign);
 			cPanel.setCellHorizontalAlignment(widget, horizontalAlign);
-			cPanel.setCellWidth(widget, width);
+			if (width != null) {
+				cPanel.setCellWidth(widget, width);
+			}
 		}
 	}
 
@@ -191,13 +202,6 @@ public class Utils {
 		one.add(author);
 		return one;
 	}
-
-
-
-
-
-
-	
 
 
 }

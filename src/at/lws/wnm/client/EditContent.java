@@ -1,7 +1,8 @@
 package at.lws.wnm.client;
 
+import java.util.Arrays;
 import java.util.Date;
-import java.util.Iterator;
+import java.util.List;
 
 import at.lws.wnm.client.service.WahrnehmungsService;
 import at.lws.wnm.client.service.WahrnehmungsServiceAsync;
@@ -26,15 +27,18 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RichTextArea;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.datepicker.client.DateBox;
 
-public class EditContent extends VerticalPanel {
+public class EditContent extends HorizontalPanel {
 
 	private final Labels labels = (Labels) GWT.create(Labels.class);
 	private final WahrnehmungsServiceAsync wahrnehmungService = (WahrnehmungsServiceAsync) GWT
@@ -182,8 +186,7 @@ public class EditContent extends VerticalPanel {
 			}
 		});
 		this.decisionBox = new DecisionBox();
-		this.decisionBox
-				.setText(labels.notSavedWarning());
+		this.decisionBox.setText(labels.notSavedWarning());
 		this.decisionBox.addOkClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
 				EditContent.this.resetForm();
@@ -192,68 +195,99 @@ public class EditContent extends VerticalPanel {
 	}
 
 	private void layout() {
-		HorizontalPanel rootContainer = new HorizontalPanel();
 
-		Utils.formatLeftCenter(this, rootContainer, Utils.APP_WIDTH, Utils.APP_HEIGHT);
+		final Panel nameContainer = createNameSelectionContainer();
+		this.add(nameContainer);
 
-		add(rootContainer);
+		final Panel contentContainer = createContentContainer();
+		this.add(contentContainer);
 
-		VerticalPanel nameContainer = new VerticalPanel();
-		Utils.formatLeftCenter(rootContainer, nameContainer,
+	}
 
-				NameSelection.WIDTH, Utils.APP_HEIGHT);
-		Utils.formatLeftTop(nameContainer, this.nameSelection,
-				NameSelection.WIDTH, 20);
-		HorizontalPanel nameButtoContainer = new HorizontalPanel();
-		nameButtoContainer.add(this.nameAddButton);
-		nameButtoContainer.add(this.nameRemoveButton);
-
-		Utils.formatCenter(nameContainer, nameButtoContainer,
-				NameSelection.WIDTH, 20);
-		Utils.formatLeftTop(nameContainer, this.additionalNames,
-				NameSelection.WIDTH, 500);
+	public VerticalPanel createContentContainer() {
 
 		VerticalPanel contentContainer = new VerticalPanel();
-		int contentWidth = Utils.APP_WIDTH - NameSelection.WIDTH - 10;
-		Utils.formatRightCenter(rootContainer, contentContainer, contentWidth,
+		contentContainer.setSpacing(Utils.SPACING);
 
-				Utils.APP_HEIGHT);
+		final Panel selectionContainer = createSelectionContainer();
+		// Utils.formatCenter(contentContainer, selectionContainer);
+		contentContainer.add(selectionContainer);
 
-		HorizontalPanel selectionContainer = new HorizontalPanel();
-		Utils.formatCenter(contentContainer, selectionContainer, contentWidth,
-				40);
+		final Panel socialContainer = createSocialContainer();
+		// Utils.formatCenter(contentContainer, socialContainer);
+		contentContainer.add(socialContainer);
 
-		Iterator<SectionSelectionBox> localIterator = this.sectionSelection
-				.getSectionSelectionBoxes().iterator();
+		final Panel textArea = createTextArea();
+		contentContainer.add(textArea);
 
-		while (localIterator.hasNext()) {
-			ListBox sectionSelectionBox = (ListBox) localIterator.next();
-			Utils.formatCenter(selectionContainer, sectionSelectionBox, 135, 20);
-		}
+		final Panel buttonContainer = createButtonContainer();
+		Utils.formatCenter(contentContainer, buttonContainer);
 
-		HorizontalPanel socialContainer = new HorizontalPanel();
-		Utils.formatCenter(contentContainer, socialContainer, contentWidth, 40);
-		Utils.formatCenter(socialContainer, this.durationSelection, 135, 20);
-		Utils.formatCenter(socialContainer, this.socialSelection, 135, 20);
-		Utils.formatCenter(socialContainer, this.dateBox, 80, 20);
+		return contentContainer;
+	}
 
-		this.textArea.setSize(contentWidth + Utils.PIXEL, Utils.TEXT_AREA_WIDTH + Utils.PIXEL);
+	public Grid createTextArea() {
+		int textAreaWidth = Utils.APP_WIDTH - Utils.NAMESELECTION_WIDTH - 38;
+		int textAreaHeight = Utils.APP_HEIGHT - 305;
+		this.textArea.setSize(textAreaWidth + Utils.PIXEL, textAreaHeight
+				+ Utils.PIXEL);
 
-		RichTextToolbar toolbar = new RichTextToolbar(this.textArea);
-		toolbar.setWidth(Utils.HUNDERT_PERCENT);
+		final RichTextToolbar toolbar = new RichTextToolbar(this.textArea);
 
-		Grid grid = new Grid(2, 1);
+		final Grid grid = new Grid(2, 1);
 		grid.setStyleName("cw-RichText");
 		grid.setWidget(0, 0, toolbar);
 		grid.setWidget(1, 0, this.textArea);
+		return grid;
+	}
 
-		contentContainer.add(grid);
+	public Grid createSocialContainer() {
+		final Grid socialContainer = new Grid(1, 3);
+		int i = 0;
+		for (Widget widget : Arrays.asList(durationSelection, socialSelection)) {
+			widget.setSize(Utils.LISTBOX_WIDTH + Utils.PIXEL, Utils.ROW_HEIGHT
+					+ Utils.PIXEL);
+			socialContainer.setWidget(0, i++, widget);
+		}
+		dateBox.setSize(Utils.DATEBOX_WIDTH + Utils.PIXEL, Utils.ROW_HEIGHT
+				- 12 + Utils.PIXEL);
+		socialContainer.setWidget(0, i, dateBox);
+		return socialContainer;
+	}
 
-		Utils.formatCenter(contentContainer, createButtonContainer(),
-				contentWidth, 40);
+	public Grid createSelectionContainer() {
+		final List<SectionSelectionBox> sectionSelectionBoxes = this.sectionSelection
+				.getSectionSelectionBoxes();
+		final Grid selectionContainer = new Grid(1, sectionSelectionBoxes.size());
+		int i = 0;
+		for (SectionSelectionBox sectionSelectionBox : sectionSelectionBoxes) {
+			sectionSelectionBox.setSize(Utils.LISTBOX_WIDTH + Utils.PIXEL,
+					Utils.ROW_HEIGHT + Utils.PIXEL);
+			selectionContainer.setWidget(0, i++, sectionSelectionBox);
+		}
+		return selectionContainer;
+	}
 
+	public VerticalPanel createNameSelectionContainer() {
 
-		setSize(Utils.APP_WIDTH + Utils.PIXEL, Utils.APP_HEIGHT + Utils.PIXEL);
+		final VerticalPanel nameContainer = new VerticalPanel();
+		nameContainer.setSpacing(Utils.SPACING);
+
+		nameSelection.setWidth(Utils.NAMESELECTION_WIDTH + Utils.PIXEL);
+		nameSelection.setHeight(Utils.ROW_HEIGHT - 12 + Utils.PIXEL);
+		nameContainer.add(nameSelection);
+
+		final Grid nameButtoContainer = new Grid(1, 2);
+		nameButtoContainer.setWidget(0, 0, this.nameAddButton);
+		nameButtoContainer.setWidget(0, 1, this.nameRemoveButton);
+		Utils.formatCenter(nameContainer, nameButtoContainer);
+
+		final int nameSelectionHeight = Utils.APP_HEIGHT - 238;
+		additionalNames.setSize(Utils.HUNDERT_PERCENT, nameSelectionHeight
+				+ Utils.PIXEL);
+		nameContainer.add(additionalNames);
+
+		return nameContainer;
 	}
 
 	private void resetForm() {
@@ -291,15 +325,17 @@ public class EditContent extends VerticalPanel {
 		return null;
 	}
 
-	private HorizontalPanel createButtonContainer() {
-		HorizontalPanel buttonContainer = new HorizontalPanel();
-		buttonContainer.setWidth(Utils.BUTTON_CONTAINER_WIDTH + Utils.PIXEL);
+	private Panel createButtonContainer() {
+		final Grid buttonContainer = new Grid(1, 2);
 
 		this.sendButton = new Button(labels.save());
+		sendButton.setSize(Utils.BUTTON_WIDTH + Utils.PIXEL, Utils.ROW_HEIGHT
+				+ Utils.PIXEL);
 		this.sendButton.addClickHandler(new SendbuttonHandler());
-		this.sendButton.addStyleName(Utils.SEND_BUTTON_STYLE);
 
 		this.newButton = new Button(labels.cancel());
+		newButton.setSize(Utils.BUTTON_WIDTH + Utils.PIXEL, Utils.ROW_HEIGHT
+				+ Utils.PIXEL);
 		this.newButton.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
 				if (EditContent.this.changes)
@@ -308,10 +344,9 @@ public class EditContent extends VerticalPanel {
 					EditContent.this.resetForm();
 			}
 		});
-		this.newButton.addStyleName(Utils.SEND_BUTTON_STYLE);
 
-		Utils.formatLeftCenter(buttonContainer, this.sendButton, 80, 40);
-		Utils.formatLeftCenter(buttonContainer, this.newButton, 80, 40);
+		buttonContainer.setWidget(0, 0, this.sendButton);
+		buttonContainer.setWidget(0, 1, this.newButton);
 
 		return buttonContainer;
 	}
@@ -351,19 +386,24 @@ public class EditContent extends VerticalPanel {
 
 			String errorMessage = new String();
 			if (Utils.isEmpty(name))
-				errorMessage = errorMessage + labels.noChild() + Utils.LINE_BREAK;
+				errorMessage = errorMessage + labels.noChild()
+						+ Utils.LINE_BREAK;
 			else if (childKey == null) {
-				errorMessage = errorMessage + labels.noChildWithName(name) + Utils.LINE_BREAK;
+				errorMessage = errorMessage + labels.noChildWithName(name)
+						+ Utils.LINE_BREAK;
 			}
 			if (sectionKey == null) {
-				errorMessage = errorMessage + labels.noSection() + Utils.LINE_BREAK;
+				errorMessage = errorMessage + labels.noSection()
+						+ Utils.LINE_BREAK;
 			}
 			if (date == null) {
-				errorMessage = errorMessage + labels.noDate()  + Utils.LINE_BREAK;;
+				errorMessage = errorMessage + labels.noDate()
+						+ Utils.LINE_BREAK;
+				;
 			}
 			if (text.isEmpty()) {
-				errorMessage = errorMessage
-						+ labels.noObservation() + Utils.LINE_BREAK;
+				errorMessage = errorMessage + labels.noObservation()
+						+ Utils.LINE_BREAK;
 			}
 			if (!errorMessage.isEmpty()) {
 				EditContent.this.dialogBox.setErrorMessage(errorMessage);
