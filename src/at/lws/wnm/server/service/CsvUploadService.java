@@ -56,6 +56,7 @@ public class CsvUploadService extends HttpServlet {
 					}
 				}
 				if (fnPos == NOT_SET || lnPos == NOT_SET || bdPos == NOT_SET) {
+					csvReader.close();
 					throw new IllegalArgumentException("missing fields");
 				}
 
@@ -79,6 +80,7 @@ public class CsvUploadService extends HttpServlet {
 					line = csvReader.readNext();
 				}
 				resp.getOutputStream().print("" + inserted + " Kinder hinzugefügt, " + duplicate + " waren schon angelegt.");
+				csvReader.close();
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

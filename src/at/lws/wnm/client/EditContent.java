@@ -27,7 +27,6 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -110,7 +109,7 @@ public class EditContent extends HorizontalPanel {
 			}
 		};
 		this.nameSelection = new NameSelection(this.dialogBox);
-		this.nameSelection.getTextBox().addChangeHandler(changeHandler);
+		this.nameSelection.getValueBox().addChangeHandler(changeHandler);
 
 		this.additionalNames = new ListBox(true);
 
