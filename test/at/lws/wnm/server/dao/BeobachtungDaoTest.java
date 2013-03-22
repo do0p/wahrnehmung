@@ -14,6 +14,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import at.lws.wnm.TestUtils;
+import at.lws.wnm.server.dao.BeobachtungDao;
+import at.lws.wnm.server.dao.DaoRegistry;
+import at.lws.wnm.server.dao.EMF;
 import at.lws.wnm.server.model.Beobachtung;
 import at.lws.wnm.shared.model.BeobachtungsFilter;
 import at.lws.wnm.shared.model.GwtBeobachtung;
@@ -208,8 +211,7 @@ public class BeobachtungDaoTest {
 
 		final BeobachtungsFilter filter = TestUtils.createFilter(CHILD_KEY1,
 				SECTION_KEY1);
-		final List<GwtBeobachtung> beobachtungen = beobachtungsDao
-				.getBeobachtungen(filter, range, user1, em);
+		final List<GwtBeobachtung> beobachtungen = beobachtungsDao.getBeobachtungen(filter, range, user1, em);
 		Assert.assertEquals(1, beobachtungen.size());
 		Assert.assertEquals(beobachtung, beobachtungen.get(0));
 	}
