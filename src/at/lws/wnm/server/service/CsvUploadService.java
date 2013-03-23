@@ -14,7 +14,6 @@ import org.apache.commons.fileupload.FileItemIterator;
 import org.apache.commons.fileupload.FileItemStream;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
-import at.lws.wnm.client.utils.Utils;
 import at.lws.wnm.server.dao.ChildDao;
 import at.lws.wnm.server.dao.DaoRegistry;
 import at.lws.wnm.shared.model.GwtChild;
@@ -63,7 +62,7 @@ public class CsvUploadService extends HttpServlet {
 				String[] line = csvReader.readNext();
 				final ChildDao childDao = DaoRegistry.get(ChildDao.class);
 				final SimpleDateFormat dateFormat = new SimpleDateFormat(
-						Utils.DATE_FORMAT_STRING);
+						at.lws.wnm.shared.model.Utils.DATE_FORMAT_STRING);
 				int inserted = 0;
 				int duplicate = 0;
 				while (line != null) {

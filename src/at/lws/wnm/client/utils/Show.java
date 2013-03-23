@@ -53,9 +53,9 @@ public class Show extends DialogBox {
 		if (beobachtungen == null || beobachtungen.isEmpty()) {
 			dialogVPanel.setWidget(0, 0, serverResponseLabel);
 		} else {
-			final HTML beobachtungenPanel = new HTML(Utils.createPrintHtml(beobachtungen));
+			final HTML beobachtungenPanel = new HTML(at.lws.wnm.shared.model.Utils.createPrintHtml(beobachtungen));
 			final ScrollPanel scroll = new ScrollPanel(beobachtungenPanel);
-			scroll.setSize(465 +"px", 600 + "px");
+			scroll.setSize(615 +"px", 600 + "px");
 			dialogVPanel.setWidget(0, 0, scroll);
 		
 		}

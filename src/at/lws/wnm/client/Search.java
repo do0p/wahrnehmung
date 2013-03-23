@@ -120,7 +120,7 @@ public class Search extends VerticalPanel {
 				Set<GwtBeobachtung> selectedSet = Search.this.selectionModel
 						.getSelectedSet();
 				if (!selectedSet.isEmpty()) {
-					Print.it(Utils.createPrintHtml(selectedSet));
+					Print.it(at.lws.wnm.shared.model.Utils.createPrintHtml(selectedSet));
 				}
 			}
 		});

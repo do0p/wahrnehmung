@@ -119,7 +119,7 @@ public class BeobachtungsTable extends CellTable<GwtBeobachtung> {
 		};
 		Column<GwtBeobachtung, String> dateColumn = new TextColumn<GwtBeobachtung>() {
 			public String getValue(GwtBeobachtung object) {
-				return Utils.DATE_FORMAT.format(object.getDate());
+				return at.lws.wnm.shared.model.Utils.DATE_FORMAT.format(object.getDate());
 			}
 		};
 		Column<GwtBeobachtung, String> socialColumn = new TextColumn<GwtBeobachtung>() {
