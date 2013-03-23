@@ -9,6 +9,7 @@ import at.lws.wnm.client.utils.PopUp;
 import at.lws.wnm.client.utils.Print;
 import at.lws.wnm.client.utils.SectionSelection;
 import at.lws.wnm.client.utils.SectionSelectionBox;
+import at.lws.wnm.client.utils.Show;
 import at.lws.wnm.client.utils.Utils;
 import at.lws.wnm.shared.model.Authorization;
 import at.lws.wnm.shared.model.BeobachtungsFilter;
@@ -19,7 +20,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Panel;
@@ -37,6 +37,7 @@ public class Search extends VerticalPanel {
 	private final NameSelection nameSelection;
 	private final SectionSelection sectionSelection;
 	private final MultiSelectionModel<GwtBeobachtung> selectionModel;
+	private final Show beobachtungen;
 
 	public Search(Authorization authorization) {
 		PopUp dialogBox = new PopUp();
@@ -58,6 +59,7 @@ public class Search extends VerticalPanel {
 								.getText());
 					}
 				});
+		beobachtungen = new Show();
 		layout(textArea, sendButton);
 	}
 
@@ -110,7 +112,7 @@ public class Search extends VerticalPanel {
 	}
 
 	private Panel createButtonContainer() {
-		final Panel buttonContainer = new FlowPanel();
+		final Grid buttonContainer = new Grid(1,2);
 
 		final Button printButton = new Button(labels.print());
 		printButton.addClickHandler(new ClickHandler() {
@@ -124,8 +126,24 @@ public class Search extends VerticalPanel {
 		});
 
 		printButton.setSize(Utils.BUTTON_WIDTH + Utils.PIXEL, Utils.ROW_HEIGHT + Utils.PIXEL);
-		buttonContainer.add(printButton);
+		buttonContainer.setWidget(0, 0, printButton);
 
+		final Button showButton = new Button(labels.show());
+		showButton.addClickHandler(new ClickHandler() {
+			public void onClick(ClickEvent event) {
+				Set<GwtBeobachtung> selectedSet = Search.this.selectionModel
+						.getSelectedSet();
+				if (!selectedSet.isEmpty()) {
+					beobachtungen.setBeobachtungen(selectedSet);
+					beobachtungen.center();
+				}
+			}
+		});
+
+		showButton.setSize(Utils.BUTTON_WIDTH + Utils.PIXEL, Utils.ROW_HEIGHT + Utils.PIXEL);
+		buttonContainer.setWidget(0, 1, showButton);
+
+		
 		return buttonContainer;
 	}
 
