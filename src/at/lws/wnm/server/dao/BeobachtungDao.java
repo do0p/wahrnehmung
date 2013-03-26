@@ -1,6 +1,8 @@
 package at.lws.wnm.server.dao;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -45,14 +47,22 @@ public class BeobachtungDao extends AbstractDao {
 		final StringBuilder queryBuilder = new StringBuilder();
 		queryBuilder.append("select b from Beobachtung b");
 		queryBuilder.append(createWhereQuery(filter, user, childKeys));
-		queryBuilder.append(" order by b.date desc");
+		//queryBuilder.append(" order by b.date desc");
 
 		final Query query = em.createQuery(queryBuilder.toString());
 		addParameter(query, filter, user, childKeys);
 		query.setFirstResult(range.getStart());
 		query.setMaxResults(range.getLength());
 
-		return mapToGwtBeobachtung(query.getResultList(), em);
+		final List<GwtBeobachtung> result = mapToGwtBeobachtung(query.getResultList(), em);
+		Collections.sort(result, new Comparator<GwtBeobachtung>() {
+
+			@Override
+			public int compare(GwtBeobachtung o1, GwtBeobachtung o2) {
+				return o2.getDate().compareTo(o1.getDate());
+			}
+		});
+		return result;
 	}
 
 	public int getRowCount(BeobachtungsFilter filter, User user) {
