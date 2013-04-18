@@ -33,14 +33,14 @@ public class SectionServiceImpl extends RemoteServiceServlet implements
 	@Override
 	public void storeSection(GwtSection section)
 			throws IllegalArgumentException {
-		authorizationService.assertCurrentUserIsAdmin();
+		authorizationService.assertCurrentUserIsSectionAdmin();
 		sectionDao.storeSection(section);
 	}
 
 	@Override
 	public void deleteSection(GwtSection section)
 			throws IllegalStateException {
-		authorizationService.assertCurrentUserIsAdmin();
+		authorizationService.assertCurrentUserIsSectionAdmin();
 		final List<Long> allSectionKeysToDelete = sectionDao
 				.getAllChildKeys(section.getKey());
 		allSectionKeysToDelete.add(section.getKey());
