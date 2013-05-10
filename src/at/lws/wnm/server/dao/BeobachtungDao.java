@@ -47,7 +47,7 @@ public class BeobachtungDao extends AbstractDao {
 		final StringBuilder queryBuilder = new StringBuilder();
 		queryBuilder.append("select b from Beobachtung b");
 		queryBuilder.append(createWhereQuery(filter, user, childKeys));
-		//queryBuilder.append(" order by b.date desc");
+		queryBuilder.append(" order by b.date desc");
 
 		final Query query = em.createQuery(queryBuilder.toString());
 		addParameter(query, filter, user, childKeys);

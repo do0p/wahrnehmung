@@ -1,12 +1,13 @@
 package at.lws.wnm.shared.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 public class BeobachtungsResult implements Serializable {
 	private static final long serialVersionUID = 4974219726001956959L;
 	private int rowCount;
-	private List<GwtBeobachtung> beobachtungen;
+	private List<GwtBeobachtung> beobachtungen = new ArrayList<GwtBeobachtung>();
 
 	public int getRowCount() {
 		return rowCount;

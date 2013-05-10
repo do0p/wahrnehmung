@@ -56,9 +56,13 @@ public class WahrnehmungsServiceImpl extends RemoteServiceServlet implements
 			Range range) {
 		final User user = getUserForQuery();
 		final BeobachtungsResult result = new BeobachtungsResult();
+		if(filter.getChildKey() != null)
+		{
 		result.setBeobachtungen(beobachtungsDao.getBeobachtungen(filter, range,
 				user));
 		result.setRowCount(beobachtungsDao.getRowCount(filter, user));
+		}
+		
 		return result;
 	}
 
