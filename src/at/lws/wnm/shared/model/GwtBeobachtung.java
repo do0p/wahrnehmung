@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class GwtBeobachtung implements Serializable {
+public class GwtBeobachtung implements Serializable, Comparable<GwtBeobachtung> {
 
 	private static final long serialVersionUID = -2732611746367965750L;
 	private String text;
@@ -184,6 +184,19 @@ public class GwtBeobachtung implements Serializable {
 		result = result * 17 + date.hashCode();
 		result = result * 17 + additionalChildKeys.hashCode();
 		return result * 17 + user.hashCode();
+	}
+
+	@Override
+	public int compareTo(GwtBeobachtung other) {
+		if(date == null)
+		{
+			return 1;
+		}
+		if(other.date == null)
+		{
+			return -1;
+		}
+		return other.date.compareTo(date);
 	}
 
 	

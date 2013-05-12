@@ -2,6 +2,7 @@ package at.lws.wnm.client;
 
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 import at.lws.wnm.client.utils.BeobachtungsTable;
 import at.lws.wnm.client.utils.NameSelection;
@@ -117,8 +118,8 @@ public class Search extends VerticalPanel {
 		final Button printButton = new Button(labels.print());
 		printButton.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
-				Set<GwtBeobachtung> selectedSet = Search.this.selectionModel
-						.getSelectedSet();
+				Set<GwtBeobachtung> selectedSet = new TreeSet<GwtBeobachtung>( Search.this.selectionModel
+						.getSelectedSet());
 				if (!selectedSet.isEmpty()) {
 					Print.it(at.lws.wnm.shared.model.Utils.createPrintHtml(selectedSet));
 				}
@@ -131,8 +132,8 @@ public class Search extends VerticalPanel {
 		final Button showButton = new Button(labels.show());
 		showButton.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
-				Set<GwtBeobachtung> selectedSet = Search.this.selectionModel
-						.getSelectedSet();
+				Set<GwtBeobachtung> selectedSet = new TreeSet<GwtBeobachtung>( Search.this.selectionModel
+						.getSelectedSet());
 				if (!selectedSet.isEmpty()) {
 					beobachtungen.setBeobachtungen(selectedSet);
 					beobachtungen.center();
