@@ -23,7 +23,7 @@ public class SectionDao extends AbstractDao {
 	private final MemcacheService cache = MemcacheServiceFactory
 			.getMemcacheService("section");
 
-	SectionDao() {
+	public SectionDao() {
 
 	}
 

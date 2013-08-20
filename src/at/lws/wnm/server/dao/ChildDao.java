@@ -18,7 +18,7 @@ public class ChildDao extends AbstractDao {
 	private final MemcacheService cache = MemcacheServiceFactory
 			.getMemcacheService("childDao");
 
-	ChildDao() {
+	public ChildDao() {
 	}
 
 	@SuppressWarnings("unchecked")

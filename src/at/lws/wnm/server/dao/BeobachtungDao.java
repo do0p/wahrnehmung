@@ -25,7 +25,7 @@ public class BeobachtungDao extends AbstractDao {
 	private final MemcacheService cache = MemcacheServiceFactory
 			.getMemcacheService("beobachtungsDao");
 
-	BeobachtungDao() {
+	public BeobachtungDao() {
 
 	}
 

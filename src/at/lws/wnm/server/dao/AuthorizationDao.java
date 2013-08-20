@@ -27,7 +27,7 @@ public class AuthorizationDao extends AbstractDao {
 		SUPER_USER_IDS.add("dbrandl72@gmail.com");
 	}
 
-	AuthorizationDao() {
+	public AuthorizationDao() {
 		initCache();
 	}
 

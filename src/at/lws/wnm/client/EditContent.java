@@ -109,7 +109,7 @@ public class EditContent extends HorizontalPanel {
 			}
 		};
 		this.nameSelection = new NameSelection(this.dialogBox);
-		this.nameSelection.getValueBox().addChangeHandler(changeHandler);
+		this.nameSelection.getTextBox().addChangeHandler(changeHandler);
 
 		this.additionalNames = new ListBox(true);
 

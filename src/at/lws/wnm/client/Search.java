@@ -16,7 +16,7 @@ import at.lws.wnm.shared.model.Authorization;
 import at.lws.wnm.shared.model.BeobachtungsFilter;
 import at.lws.wnm.shared.model.GwtBeobachtung;
 
-import com.google.gwt.core.shared.GWT;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.cellview.client.SimplePager;
