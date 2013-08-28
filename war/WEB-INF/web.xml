@@ -11,6 +11,15 @@
 	</servlet-mapping>
 	
 	<servlet>
+		<servlet-name>migrationServlet</servlet-name>
+		<servlet-class>at.lws.wnm.server.service.MigrationService</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>migrationServlet</servlet-name>
+		<url-pattern>/wahrnehmung/migration</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
 		<servlet-name>wahrnehmungServlet</servlet-name>
 		<servlet-class>at.lws.wnm.server.service.WahrnehmungsServiceImpl</servlet-class>
 	</servlet>

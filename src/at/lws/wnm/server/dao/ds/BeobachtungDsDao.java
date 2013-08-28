@@ -30,6 +30,7 @@ public class BeobachtungDsDao extends AbstractDsDao {
 
 	public static final String BEOBACHTUNGS_DAO_MEMCACHE = "beobachtungsDao";
 	public static final String BEOBACHTUNGS_GROUP_KIND = "BeobachtungsGroup";
+	public static final String BEOBACHTUNGS_KEY_FIELD = "beobachtungsKey";
 	public static final String BEOBACHTUNG_KIND = "BeobachtungDs";
 	public static final String DATE_FIELD = "date";
 	public static final String SECTION_KEY_FIELD = "sectionKey";
@@ -76,6 +77,7 @@ public class BeobachtungDsDao extends AbstractDsDao {
 		if (masterBeobachtungsKey != null) {
 			final Entity beobachtungsGroup = new Entity(
 					BEOBACHTUNGS_GROUP_KIND, toKey(masterBeobachtungsKey));
+			beobachtungsGroup.setProperty(BEOBACHTUNGS_KEY_FIELD, beobachtung.getKey());
 			getDatastoreService().put(beobachtungsGroup);
 		}
 		final String key = toString(beobachtung.getKey());

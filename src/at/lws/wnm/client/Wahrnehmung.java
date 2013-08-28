@@ -16,7 +16,6 @@ import com.google.gwt.user.client.ui.Widget;
 public class Wahrnehmung extends SecuredContent implements
 		ValueChangeHandler<String> {
 
-	
 	private final Labels labels = (Labels) GWT.create(Labels.class);
 	private Navigation navigation;
 

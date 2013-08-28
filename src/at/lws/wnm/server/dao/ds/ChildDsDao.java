@@ -123,7 +123,7 @@ public class ChildDsDao extends AbstractDsDao {
 		return child;
 	}
 
-	private String formatChildName(Entity child) {
+	public static String formatChildName(Entity child) {
 		return child.getProperty(FIRSTNAME_FIELD) + " "
 				+ child.getProperty(LASTNAME_FIELD);
 	}
