@@ -2,38 +2,28 @@ package at.lws.wnm.shared.model;
 
 import java.io.Serializable;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Transient;
-
-@Entity
 public class Authorization implements Serializable {
 
 	private static final long serialVersionUID = -5057466504583370610L;
 
-	@Id
 	private String userId; // lowercase Email
 
 	private String email;
 
 	private boolean admin;
-	
+
 	private boolean seeAll;
-	
-	  private Boolean editSections;
-	
-	@Transient
+
+	private Boolean editSections;
+
 	private String loginUrl;
-	
-	@Transient
+
 	private String logoutUrl;
 
-	@Transient
 	private boolean loggedIn;
 
 	private String key;
-	
-	
+
 	public boolean isLoggedIn() {
 		return loggedIn;
 	}
