@@ -1,9 +1,13 @@
 package at.lws.wnm.server.dao;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -50,13 +54,13 @@ public class SectionDao extends AbstractDao {
 		}
 	}
 
-	public List<Long> getAllChildKeys(Long key) {
+	public Set<Long> getAllChildKeys(Long key) {
 		updateChildKeys();
 		final List<Long> children = sectionChildCache.get(key);
 		if (children == null) {
-			return new ArrayList<Long>();
+			return new HashSet<Long>();
 		}
-		return new ArrayList<Long>(children);
+		return new HashSet<Long>(children);
 	}
 
 	public void storeSection(GwtSection gwtSection) {
@@ -81,7 +85,7 @@ public class SectionDao extends AbstractDao {
 		}
 	}
 
-	public void deleteSections(List<Long> sectionNos) {
+	public void deleteSections(Collection<Long> sectionNos) {
 		if (sectionNos == null || sectionNos.isEmpty()) {
 			return;
 		}
@@ -102,8 +106,9 @@ public class SectionDao extends AbstractDao {
 			queryBuilder.append(")");
 
 			final Query query = em.createQuery(queryBuilder.toString());
+			final Iterator<Long> iterator = sectionNos.iterator();
 			for (int i = 0; i < sectionNos.size(); i++) {
-				query.setParameter(i + 1, sectionNos.get(i));
+				query.setParameter(i + 1, iterator.next());
 			}
 			synchronized (this) {
 				query.executeUpdate();

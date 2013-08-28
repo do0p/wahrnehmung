@@ -40,17 +40,22 @@ public class Section implements Serializable {
 
 	public GwtSection toGwt() {
 		final GwtSection section = new GwtSection();
-		section.setKey(key);
+		section.setKey(key == null ? null : key.toString());
 		section.setSectionName(sectionName);
-		section.setParentKey(parentKey);
+		section.setParentKey(parentKey == null ? null : parentKey.toString());
 		return section;
 	}
 
 	public static Section valueOf(GwtSection gwtSection) {
 		final Section section = new Section();
-		section.key = gwtSection.getKey();
+		final String sectionKey = gwtSection.getKey();
+		if(sectionKey != null) {
+			section.key = Long.valueOf(sectionKey);
+		}
 		section.sectionName = gwtSection.getSectionName();
-		section.parentKey = gwtSection.getParentKey();
+		if (gwtSection.getParentKey() != null) {
+			section.parentKey = Long.valueOf(gwtSection.getParentKey());
+		}
 		return section;
 
 	}

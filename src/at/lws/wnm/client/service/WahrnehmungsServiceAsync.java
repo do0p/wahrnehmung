@@ -18,9 +18,9 @@ public interface WahrnehmungsServiceAsync {
 	void getBeobachtungen(BeobachtungsFilter filter, Range range,
 			AsyncCallback<BeobachtungsResult> callback);
 
-	void getBeobachtung(Long beobachtungsKey,
+	void getBeobachtung(String beobachtungsKey,
 			AsyncCallback<GwtBeobachtung> callback);
 
-	void deleteBeobachtung(Long beobachtungsKey, AsyncCallback<Void> callback);
+	void deleteBeobachtung(String beobachtungsKey, AsyncCallback<Void> callback);
 
 }

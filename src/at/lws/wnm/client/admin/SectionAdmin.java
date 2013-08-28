@@ -108,15 +108,15 @@ public class SectionAdmin extends VerticalPanel {
 
 		@Override
 		public void onSuccess(List<GwtSection> sections) {
-			final Map<Long, List<GwtSection>> groupedSections = groupSections(sections);
+			final Map<String, List<GwtSection>> groupedSections = groupSections(sections);
 			final List<GwtSection> rootSections = groupedSections.get(null);
 
 			addChildSections(rootSections, tree, groupedSections);
-			tree.add(createSaveItem((Long) null));
+			tree.add(createSaveItem((String) null));
 
 		}
 
-		private SaveItem createSaveItem(Long parentKey) {
+		private SaveItem createSaveItem(String parentKey) {
 			final SaveItem saveItem = new SaveItem(parentKey);
 			saveItems.add(saveItem);
 			return saveItem;
@@ -134,8 +134,7 @@ public class SectionAdmin extends VerticalPanel {
 		}
 
 		private void addChildSections(List<GwtSection> sections,
-				final HasTreeItems parent,
-				Map<Long, List<GwtSection>> groupedSections) {
+				final HasTreeItems parent,				Map<String, List<GwtSection>> groupedSections) {
 			if (sections == null) {
 				return;
 			}
@@ -198,7 +197,7 @@ public class SectionAdmin extends VerticalPanel {
 			return sectionLabel;
 		}
 
-		private void addPlusItem(final Long parentKey,
+		private void addPlusItem(final String parentKey,
 				final TreeItem sectionItem) {
 			final Anchor addLabel = new Anchor(labels.create());
 			final TreeItem addItem = new TreeItem(addLabel);
@@ -214,9 +213,9 @@ public class SectionAdmin extends VerticalPanel {
 			});
 		}
 
-		private Map<Long, List<GwtSection>> groupSections(
+		private Map<String, List<GwtSection>> groupSections(
 				List<GwtSection> sections) {
-			final Map<Long, List<GwtSection>> result = new HashMap<Long, List<GwtSection>>();
+			final Map<String, List<GwtSection>> result = new HashMap<String, List<GwtSection>>();
 			for (GwtSection section : sections) {
 				List<GwtSection> sectionList = result.get(section
 						.getParentKey());
@@ -277,11 +276,11 @@ public class SectionAdmin extends VerticalPanel {
 
 	public class SaveItem extends TextBox {
 
-		private Long parentKey;
+		private String parentKey;
 		private GwtSection section;
 		private boolean delete;
 
-		public SaveItem(Long parentKey) {
+		public SaveItem(String parentKey) {
 			this.parentKey = parentKey;
 			setFocus(true);
 		}

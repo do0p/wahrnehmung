@@ -6,23 +6,23 @@ public class BeobachtungsFilter implements Serializable {
 
 	private static final long serialVersionUID = -2596604865356427443L;
 	
-	private Long childKey;
+	private String childKey;
 
-	private Long sectionKey;
+	private String sectionKey;
 
-	public Long getChildKey() {
+	public String getChildKey() {
 		return childKey;
 	}
 
-	public void setChildKey(Long childKey) {
+	public void setChildKey(String childKey) {
 		this.childKey = childKey;
 	}
 
-	public void setSectionKey(Long sectionKey) {
+	public void setSectionKey(String sectionKey) {
 		this.sectionKey = sectionKey;
 	}
 
-	public Long getSectionKey() {
+	public String getSectionKey() {
 		return sectionKey;
 	}
 

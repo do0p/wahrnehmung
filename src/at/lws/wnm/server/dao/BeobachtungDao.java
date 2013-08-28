@@ -1,9 +1,12 @@
 package at.lws.wnm.server.dao;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -42,19 +45,20 @@ public class BeobachtungDao extends AbstractDao {
 	@SuppressWarnings("unchecked")
 	List<GwtBeobachtung> getBeobachtungen(BeobachtungsFilter filter,
 			Range range, User user, EntityManager em) {
-		final List<Long> childKeys = getSectionDao().getAllChildKeys(
-				filter.getSectionKey());
+		final String sectionKey = filter.getSectionKey();
+		final Collection<Long> childSectionKeys = getChildSectionKeys(sectionKey);
 		final StringBuilder queryBuilder = new StringBuilder();
 		queryBuilder.append("select b from Beobachtung b");
-		queryBuilder.append(createWhereQuery(filter, user, childKeys));
+		queryBuilder.append(createWhereQuery(filter, user, childSectionKeys));
 		queryBuilder.append(" order by b.date desc");
 
 		final Query query = em.createQuery(queryBuilder.toString());
-		addParameter(query, filter, user, childKeys);
+		addParameter(query, filter, user, childSectionKeys);
 		query.setFirstResult(range.getStart());
 		query.setMaxResults(range.getLength());
 
-		final List<GwtBeobachtung> result = mapToGwtBeobachtung(query.getResultList(), em);
+		final List<GwtBeobachtung> result = mapToGwtBeobachtung(
+				query.getResultList(), em);
 		Collections.sort(result, new Comparator<GwtBeobachtung>() {
 
 			@Override
@@ -67,20 +71,31 @@ public class BeobachtungDao extends AbstractDao {
 
 	public int getRowCount(BeobachtungsFilter filter, User user) {
 
-		final List<Long> childKeys = getSectionDao().getAllChildKeys(
-				filter.getSectionKey());
+		final String sectionKey = filter.getSectionKey();
+		final Collection<Long> childSectionKeys = getChildSectionKeys(sectionKey);
 		final StringBuilder queryBuilder = new StringBuilder();
 		queryBuilder.append("select count(b) from Beobachtung b");
-		queryBuilder.append(createWhereQuery(filter, user, childKeys));
+		queryBuilder.append(createWhereQuery(filter, user, childSectionKeys));
 
 		final EntityManager em = EMF.get().createEntityManager();
 		try {
 			final Query query = em.createQuery(queryBuilder.toString());
-			addParameter(query, filter, user, childKeys);
+			addParameter(query, filter, user, childSectionKeys);
 			return ((Integer) query.getSingleResult()).intValue();
 		} finally {
 			em.close();
 		}
+	}
+
+	private Collection<Long> getChildSectionKeys(String sectionKey) {
+		final Set<Long> childSectionKeys;
+		if (sectionKey != null && !sectionKey.isEmpty()) {
+			childSectionKeys = getSectionDao().getAllChildKeys(
+					Long.valueOf(sectionKey));
+		} else {
+			childSectionKeys = Collections.emptySet();
+		}
+		return childSectionKeys;
 	}
 
 	public GwtBeobachtung getBeobachtung(Long beobachtungsKey) {
@@ -98,7 +113,7 @@ public class BeobachtungDao extends AbstractDao {
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<GwtBeobachtung> getBeobachtungen(List<Long> sectionNos,
+	public List<GwtBeobachtung> getBeobachtungen(Collection<Long> sectionNos,
 			final EntityManager em) {
 		if (sectionNos == null || sectionNos.isEmpty()) {
 			return new ArrayList<GwtBeobachtung>();
@@ -115,8 +130,9 @@ public class BeobachtungDao extends AbstractDao {
 		queryBuilder.append(" )");
 
 		final Query query = em.createQuery(queryBuilder.toString());
+		Iterator<Long> iterator = sectionNos.iterator();
 		for (int i = 0; i < sectionNos.size(); i++) {
-			query.setParameter(i + 1, sectionNos.get(i));
+			query.setParameter(i + 1, iterator.next());
 
 		}
 		return mapToGwtBeobachtung(query.getResultList(), em);
@@ -146,12 +162,12 @@ public class BeobachtungDao extends AbstractDao {
 		return beobachtung.getKey();
 	}
 
-	public void deleteAllFromChild(Long key) {
+	public void deleteAllFromChild(String key) {
 		final EntityManager em = EMF.get().createEntityManager();
 		try {
 			final Query query = em
 					.createQuery("delete from Beobachtung b where b.childKey = :childKey");
-			query.setParameter("childKey", key);
+			query.setParameter("childKey", Long.valueOf(key));
 			query.executeUpdate();
 		} finally {
 			em.close();
@@ -159,15 +175,15 @@ public class BeobachtungDao extends AbstractDao {
 	}
 
 	private String createWhereQuery(BeobachtungsFilter filter, User user,
-			List<Long> childKeys) {
+			Collection<Long> childKeys) {
 		final List<String> subQueries = new ArrayList<String>();
 
-		if (filter.getChildKey() != null) {
+		if (filter.getChildKey() != null && !filter.getChildKey().isEmpty()) {
 			subQueries.add(" b.childKey = :childKey");
 		}
 
-		final Long sectionKey = filter.getSectionKey();
-		if (sectionKey != null) {
+		final String sectionKeyStr = filter.getSectionKey();
+		if (sectionKeyStr != null && !sectionKeyStr.isEmpty()) {
 			final StringBuilder query = new StringBuilder();
 			query.append(" b.sectionKey in ( :sectionKey0");
 			for (int i = 1; i <= childKeys.size(); i++) {
@@ -188,16 +204,17 @@ public class BeobachtungDao extends AbstractDao {
 	}
 
 	private void addParameter(Query query, BeobachtungsFilter filter,
-			User user, List<Long> childKeys) {
-		if (filter.getChildKey() != null) {
-			query.setParameter("childKey", filter.getChildKey());
+			User user, Collection<Long> childKeys) {
+		if (filter.getChildKey() != null && !filter.getChildKey().isEmpty()) {
+			query.setParameter("childKey", Long.valueOf(filter.getChildKey()));
 		}
 
-		final Long sectionKey = filter.getSectionKey();
-		if (sectionKey != null) {
-			query.setParameter("sectionKey0", filter.getSectionKey());
+		String sectionKeyStr = filter.getSectionKey();
+		if (sectionKeyStr != null && !sectionKeyStr.isEmpty() ) {
+			query.setParameter("sectionKey0", Long.valueOf(sectionKeyStr));
+			final Iterator<Long> iterator = childKeys.iterator();
 			for (int i = 1; i <= childKeys.size(); i++) {
-				query.setParameter("sectionKey" + i, childKeys.get(i - 1));
+				query.setParameter("sectionKey" + i, iterator.next());
 			}
 		}
 

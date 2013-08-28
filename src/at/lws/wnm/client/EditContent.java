@@ -53,13 +53,13 @@ public class EditContent extends HorizontalPanel {
 	private Button sendButton;
 	private Button newButton;
 	private boolean changes;
-	private Long key;
+	private String key;
 	private DecisionBox decisionBox;
 	private ListBox additionalNames;
 	private Button nameAddButton;
 	private Button nameRemoveButton;
 
-	public EditContent(Authorization authorization, Long key) {
+	public EditContent(Authorization authorization, String key) {
 		this.key = key;
 		init();
 		layout();
@@ -67,7 +67,7 @@ public class EditContent extends HorizontalPanel {
 			loadData(key);
 	}
 
-	private void loadData(Long key) {
+	private void loadData(String key) {
 		this.wahrnehmungService.getBeobachtung(key,
 				new AsyncCallback<GwtBeobachtung>() {
 					public void onFailure(Throwable caught) {
@@ -117,7 +117,7 @@ public class EditContent extends HorizontalPanel {
 		this.nameAddButton.setEnabled(this.key == null);
 		this.nameAddButton.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent arg0) {
-				Long selectedChildKey = EditContent.this.nameSelection
+				String selectedChildKey = EditContent.this.nameSelection
 						.getSelectedChildKey();
 				if ((selectedChildKey != null)
 						&& (!isInList(EditContent.this.additionalNames,
@@ -369,17 +369,16 @@ public class EditContent extends HorizontalPanel {
 		private void sendNameToServer() {
 			String text = EditContent.this.textArea.getHTML();
 			String name = EditContent.this.nameSelection.getValue();
-			Long childKey = EditContent.this.nameSelection
+			String childKey = EditContent.this.nameSelection
 					.getSelectedChildKey();
 			if (((Utils.isEmpty(name)) || (childKey == null))
 					&& (EditContent.this.additionalNames.getItemCount() > 0)) {
 				name = EditContent.this.additionalNames.getItemText(0);
-				childKey = Long.valueOf(EditContent.this.additionalNames
-						.getValue(0));
+				childKey = EditContent.this.additionalNames.getValue(0);
 				EditContent.this.additionalNames.removeItem(0);
 			}
 
-			Long sectionKey = EditContent.this.sectionSelection
+			String sectionKey = EditContent.this.sectionSelection
 					.getSelectedSectionKey();
 			Date date = EditContent.this.dateBox.getValue();
 
@@ -422,9 +421,8 @@ public class EditContent extends HorizontalPanel {
 			beobachtung.setSocial(EditContent.this.getSocialForm());
 
 			for (int i = 0; i < EditContent.this.additionalNames.getItemCount(); i++) {
-				beobachtung.getAdditionalChildKeys().add(
-						Long.valueOf(EditContent.this.additionalNames
-								.getValue(i)));
+				beobachtung.getAdditionalChildKeys().add(EditContent.this.additionalNames
+								.getValue(i));
 			}
 
 			EditContent.this.wahrnehmungService.storeBeobachtung(beobachtung,

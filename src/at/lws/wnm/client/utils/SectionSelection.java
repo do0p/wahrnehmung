@@ -25,13 +25,13 @@ public class SectionSelection {
 	private final SectionServiceAsync sectionService = GWT
 			.create(SectionService.class);
 
-	private final Map<Long, List<String[]>> subSectionSelections = new HashMap<Long, List<String[]>>();
+	private final Map<String, List<String[]>> subSectionSelections = new HashMap<String, List<String[]>>();
 	private final PopUp dialogBox;
 	private final List<SectionSelectionBox> selectionBoxes;
-	private final Map<Long, List<Integer>> sectionSelectionMap = new HashMap<Long, List<Integer>>();
+	private final Map<String, List<Integer>> sectionSelectionMap = new HashMap<String, List<Integer>>();
 	private boolean updated;
 
-	private Long selectedSectionKey;
+	private String selectedSectionKey;
 
 	public SectionSelection(PopUp dialogBox, ChangeHandler changeHandler) {
 		this.dialogBox = dialogBox;
@@ -68,10 +68,10 @@ public class SectionSelection {
 		return sectionSelectionBox;
 	}
 
-	public Long getSelectedSectionKey() {
+	public String getSelectedSectionKey() {
 
 		for (int i = selectionBoxes.size() - 1; i > -1; i--) {
-			final Long value = selectionBoxes.get(i).getSelectedValue();
+			final String value = selectionBoxes.get(i).getSelectedValue();
 			if (value != null) {
 				return value;
 			}
@@ -91,7 +91,7 @@ public class SectionSelection {
 			@Override
 			public void onSuccess(List<GwtSection> result) {
 
-				final Map<Long, List<GwtSection>> children = new HashMap<Long, List<GwtSection>>();
+				final Map<String, List<GwtSection>> children = new HashMap<String, List<GwtSection>>();
 				final SectionSelectionBox parentBox = selectionBoxes.get(0);
 				for (GwtSection section : result) {
 					if (section.getParentKey() == null) {
@@ -109,7 +109,7 @@ public class SectionSelection {
 					}
 				}
 
-				for (Long parentKey : parentBox.getValues()) {
+				for (String parentKey : parentBox.getValues()) {
 					final ArrayList<String[]> subSelectionItems = new ArrayList<String[]>();
 					subSectionSelections.put(parentKey, subSelectionItems);
 					addChildren(children, parentKey, 0, subSelectionItems);
@@ -118,7 +118,7 @@ public class SectionSelection {
 				for (int i = 1; i < parentBox.getItemCount(); i++) {
 					final ArrayList<Integer> indexList = new ArrayList<Integer>(
 							Arrays.asList(Integer.valueOf(i)));
-					final Long parentKey = parentBox.getLongValue(i);
+					final String parentKey = parentBox.getValue(i);
 					sectionSelectionMap.put(parentKey, indexList);
 					addChildSectionIndices(parentKey, children, indexList, 0);
 				}
@@ -130,8 +130,8 @@ public class SectionSelection {
 				}
 			}
 
-			private void addChildSectionIndices(Long parentKey,
-					Map<Long, List<GwtSection>> children,
+			private void addChildSectionIndices(String parentKey,
+					Map<String, List<GwtSection>> children,
 					List<Integer> indexList, int preset) {
 				final List<GwtSection> list = children.get(parentKey);
 				if (list == null) {
@@ -145,7 +145,7 @@ public class SectionSelection {
 									indexList.size())));
 					final int pos = i + 1 + preset;
 					childIndexList.add(Integer.valueOf(pos));
-					final Long newParentKey = list.get(i).getKey();
+					final String newParentKey = list.get(i).getKey();
 					sectionSelectionMap.put(newParentKey, childIndexList);
 					addChildSectionIndices(
 							newParentKey,
@@ -157,8 +157,8 @@ public class SectionSelection {
 
 			}
 
-			private void addChildren(Map<Long, List<GwtSection>> children,
-					Long parentKey, int depth, List<String[]> subSelectionItems) {
+			private void addChildren(Map<String, List<GwtSection>> children,
+					String parentKey, int depth, List<String[]> subSelectionItems) {
 				final List<GwtSection> sections = children.get(parentKey);
 				if (sections != null) {
 					for (GwtSection section : sections) {
@@ -212,7 +212,7 @@ public class SectionSelection {
 			sub.setEnabled(false);
 			sub.fireEvent(event);
 			if (main.getSelectedIndex() != -1) {
-				final Long value = main.getSelectedValue();
+				final String value = main.getSelectedValue();
 				if (value != null) {
 					final List<String[]> subSelectionItems = subSectionSelections
 							.get(value);
@@ -237,7 +237,7 @@ public class SectionSelection {
 		return Collections.unmodifiableList(selectionBoxes);
 	}
 
-	public void setSelected(Long sectionKey) {
+	public void setSelected(String sectionKey) {
 
 		if (updated) {
 			setSelectedInternal(sectionKey);
@@ -246,7 +246,7 @@ public class SectionSelection {
 		}
 	}
 
-	private void setSelectedInternal(Long sectionKey) {
+	private void setSelectedInternal(String sectionKey) {
 		final List<Integer> indices = sectionSelectionMap.get(sectionKey);
 		for (int i = 0; i < indices.size(); i++) {
 			final SectionSelectionBox sectionSelectionBox = selectionBoxes

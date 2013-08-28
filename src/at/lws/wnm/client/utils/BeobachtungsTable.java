@@ -150,9 +150,7 @@ public class BeobachtungsTable extends CellTable<GwtBeobachtung> {
 								RootPanel rootPanel = RootPanel
 										.get(Utils.MAIN_ELEMENT);
 								rootPanel.clear();
-								rootPanel.add(new EditContent(authorization,
-
-										object.getKey()));
+								rootPanel.add(new EditContent(authorization,object.getKey()));
 								History.newItem(Navigation.NEW_ENTRY, false);
 							}
 						}));

@@ -14,6 +14,6 @@ public interface ChildServiceAsync {
 
 	void deleteChild(GwtChild child, AsyncCallback<Void> callback);
 
-	void getChild(Long key, AsyncCallback<GwtChild> callback);
+	void getChild(String key, AsyncCallback<GwtChild> callback);
 
 }

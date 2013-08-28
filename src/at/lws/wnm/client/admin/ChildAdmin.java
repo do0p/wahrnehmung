@@ -42,7 +42,7 @@ public class ChildAdmin extends VerticalPanel {
 
 	private final ListBox children;
 
-	private Long childNo;
+	private String childNo;
 
 	private DecisionBox decisionBox;
 
@@ -174,8 +174,7 @@ public class ChildAdmin extends VerticalPanel {
 			if (selectedIndex < 0) {
 				return;
 			}
-			final Long childKey = Long
-					.valueOf(children.getValue(selectedIndex));
+			final String childKey = children.getValue(selectedIndex);
 			childService.getChild(childKey, new AsyncCallback<GwtChild>() {
 
 				@Override

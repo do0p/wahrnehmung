@@ -30,6 +30,8 @@ public class Authorization implements Serializable {
 
 	@Transient
 	private boolean loggedIn;
+
+	private String key;
 	
 	
 	public boolean isLoggedIn() {
@@ -108,6 +110,14 @@ public class Authorization implements Serializable {
 
 	public void setEditSections(Boolean editSections) {
 		this.editSections = editSections;
+	}
+
+	public String getKey() {
+		return key;
+	}
+
+	public void setKey(String key) {
+		this.key = key;
 	}
 
 }

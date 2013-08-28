@@ -18,8 +18,8 @@ public interface WahrnehmungsService extends RemoteService {
 
 	BeobachtungsResult getBeobachtungen(BeobachtungsFilter filter, Range range);
 	
-	GwtBeobachtung getBeobachtung(Long beobachtungsKey);
+	GwtBeobachtung getBeobachtung(String beobachtungsKey);
 	
-	void deleteBeobachtung(Long beobachtungsKey);
+	void deleteBeobachtung(String beobachtungsKey);
 	
 }

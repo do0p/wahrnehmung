@@ -9,7 +9,9 @@ public class GwtChild implements Serializable, Comparable<GwtChild>{
 	private String firstName;
 	private String lastName;
 	private Date birthDay;
-	private Long key;
+	private String key;
+
+
 
 	public String getFirstName() {
 		return firstName;
@@ -35,14 +37,15 @@ public class GwtChild implements Serializable, Comparable<GwtChild>{
 		return birthDay;
 	}
 
-	public Long getKey() {
+	public String getKey() {
 		return key;
 	}
 
-	public void setKey(Long key) {
+	public void setKey(String key) {
 		this.key = key;
 	}
 
+	
 	@Override
 	public int compareTo(GwtChild other) {
 		int result = lastName.compareTo(other.lastName);
@@ -56,4 +59,6 @@ public class GwtChild implements Serializable, Comparable<GwtChild>{
 		}
 		return result;
 	}
+
+	
 }

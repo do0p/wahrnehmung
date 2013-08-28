@@ -14,8 +14,8 @@ import org.apache.commons.fileupload.FileItemIterator;
 import org.apache.commons.fileupload.FileItemStream;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
-import at.lws.wnm.server.dao.ChildDao;
 import at.lws.wnm.server.dao.DaoRegistry;
+import at.lws.wnm.server.dao.ds.ChildDsDao;
 import at.lws.wnm.shared.model.GwtChild;
 import au.com.bytecode.opencsv.CSVReader;
 
@@ -60,7 +60,7 @@ public class CsvUploadService extends HttpServlet {
 				}
 
 				String[] line = csvReader.readNext();
-				final ChildDao childDao = DaoRegistry.get(ChildDao.class);
+				final ChildDsDao childDao = DaoRegistry.get(ChildDsDao.class);
 				final SimpleDateFormat dateFormat = new SimpleDateFormat(
 						at.lws.wnm.shared.model.Utils.DATE_FORMAT_STRING);
 				int inserted = 0;
@@ -78,7 +78,7 @@ public class CsvUploadService extends HttpServlet {
 					}
 					line = csvReader.readNext();
 				}
-				resp.getOutputStream().print("" + inserted + " Kinder hinzugefügt, " + duplicate + " waren schon angelegt.");
+				resp.getOutputStream().print("" + inserted + " Kinder hinzugefï¿½gt, " + duplicate + " waren schon angelegt.");
 				csvReader.close();
 			}
 		} catch (Exception e) {

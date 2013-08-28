@@ -1,24 +1,26 @@
 package at.lws.wnm.server.service;
 
+import java.util.Collection;
+
 import at.lws.wnm.client.service.AuthorizationService;
-import at.lws.wnm.server.dao.AuthorizationDao;
 import at.lws.wnm.server.dao.DaoRegistry;
+import at.lws.wnm.server.dao.ds.AuthorizationDsDao;
 import at.lws.wnm.shared.model.Authorization;
+
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
-import java.util.Collection;
 
 public class AuthorizationServiceImpl extends RemoteServiceServlet
   implements AuthorizationService
 {
   private static final long serialVersionUID = 3902038151789960035L;
-  private final AuthorizationDao authorizationDao;
+  private final AuthorizationDsDao authorizationDao;
   private UserService userService;
 
   public AuthorizationServiceImpl()
   {
-    this.authorizationDao = ((AuthorizationDao)DaoRegistry.get(AuthorizationDao.class));
+    this.authorizationDao = DaoRegistry.get(AuthorizationDsDao.class);
     this.userService = UserServiceFactory.getUserService();
   }
 

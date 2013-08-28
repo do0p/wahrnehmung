@@ -10,20 +10,18 @@ import javax.persistence.Id;
 
 import at.lws.wnm.shared.model.GwtChild;
 
-
 @Entity
-public class Child implements Serializable, Comparable<Child>{
+public class Child implements Serializable, Comparable<Child> {
 
 	private static final long serialVersionUID = -112994610784102648L;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long key;
-	
+
 	private String firstName;
 	private String lastName;
 	private Date birthDay;
-
 
 	public Long getKey() {
 		return key;
@@ -57,10 +55,12 @@ public class Child implements Serializable, Comparable<Child>{
 		this.birthDay = birthDay;
 	}
 
-
 	public static Child valueOf(GwtChild gwtChild) {
 		final Child child = new Child();
-		child.key = gwtChild.getKey();
+		final String childKey = gwtChild.getKey();
+		if (childKey != null) {
+			child.key = Long.valueOf(childKey);
+		}
 		child.firstName = gwtChild.getFirstName();
 		child.lastName = gwtChild.getLastName();
 		child.birthDay = gwtChild.getBirthDay();
@@ -69,7 +69,7 @@ public class Child implements Serializable, Comparable<Child>{
 
 	public GwtChild toGwt() {
 		final GwtChild child = new GwtChild();
-		child.setKey(key);
+		child.setKey(key == null ? null : key.toString());
 		child.setFirstName(firstName);
 		child.setLastName(lastName);
 		child.setBirthDay(birthDay);
@@ -79,11 +79,9 @@ public class Child implements Serializable, Comparable<Child>{
 	@Override
 	public int compareTo(Child other) {
 		int result = lastName.compareTo(other.lastName);
-		if(result == 0)
-		{
+		if (result == 0) {
 			result = firstName.compareTo(other.firstName);
-			if(result == 0)
-			{
+			if (result == 0) {
 				result = birthDay.compareTo(other.birthDay);
 			}
 		}

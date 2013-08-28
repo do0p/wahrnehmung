@@ -6,10 +6,10 @@ public class GwtSection implements Serializable{
 
 	private static final long serialVersionUID = 4741899568904397965L;
 	private String sectionName;
-	private Long key;
-	private Long parentKey;
+	private String key;
+	private String parentKey;
 
-	public Long getKey() {
+	public String getKey() {
 		return key;
 	}
 
@@ -21,15 +21,15 @@ public class GwtSection implements Serializable{
 		this.sectionName = sectionName;
 	}
 
-	public void setKey(Long key) {
+	public void setKey(String key) {
 		this.key = key;
 	}
 
-	public Long getParentKey() {
+	public String getParentKey() {
 		return parentKey;
 	}
 
-	public void setParentKey(Long parentKey) {
+	public void setParentKey(String parentKey) {
 		this.parentKey = parentKey;
 	}
 

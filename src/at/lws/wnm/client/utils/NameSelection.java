@@ -19,11 +19,11 @@ public class NameSelection extends SuggestBox {
 
 	private final ChildServiceAsync childService = GWT
 			.create(ChildService.class);
-	private final Map<String, Long> childMap = new HashMap<String, Long>();
-	private final Map<Long, String> reverseChildMap = new HashMap<Long, String>();
+	private final Map<String, String> childMap = new HashMap<String, String>();
+	private final Map<String, String> reverseChildMap = new HashMap<String, String>();
 	private boolean updated;
 
-	private Long selectedChildKey;
+	private String selectedChildKey;
 
 	public NameSelection(PopUp dialogBox) {
 		super(new MultiWordSuggestOracle());
@@ -31,7 +31,7 @@ public class NameSelection extends SuggestBox {
 		updateChildList();
 	}
 
-	public Long getSelectedChildKey() {
+	public String getSelectedChildKey() {
 		return childMap.get(getValue());
 	}
 
@@ -78,7 +78,7 @@ public class NameSelection extends SuggestBox {
 		setText("");
 	}
 
-	public void setSelected(Long childKey) {
+	public void setSelected(String childKey) {
 		if (updated) {
 			setSelectedInternal(childKey);
 		} else {
@@ -86,7 +86,7 @@ public class NameSelection extends SuggestBox {
 		}
 	}
 
-	private void setSelectedInternal(Long childKey) {
+	private void setSelectedInternal(String childKey) {
 		setText(reverseChildMap.get(childKey));
 	}
 

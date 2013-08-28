@@ -5,29 +5,37 @@ import java.util.Date;
 import org.junit.Assert;
 import org.junit.Test;
 
-import at.lws.wnm.server.model.Beobachtung;
-import at.lws.wnm.server.model.Child;
-import at.lws.wnm.server.model.Section;
+import at.lws.wnm.server.dao.ds.BeobachtungDsDao;
+import at.lws.wnm.server.dao.ds.ChildDsDao;
+import at.lws.wnm.server.dao.ds.SectionDsDao;
+import at.lws.wnm.shared.model.Authorization;
 import at.lws.wnm.shared.model.BeobachtungsFilter;
+import at.lws.wnm.shared.model.GwtBeobachtung;
 import at.lws.wnm.shared.model.GwtBeobachtung.DurationEnum;
 import at.lws.wnm.shared.model.GwtBeobachtung.SocialEnum;
+import at.lws.wnm.shared.model.GwtChild;
+import at.lws.wnm.shared.model.GwtSection;
 
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Text;
 import com.google.appengine.api.users.User;
 
 public class TestUtils {
 
-	public static Beobachtung createBeobachtung(Long key, Long childKey,
-			Long sectionKey, Date date, DurationEnum duration,
-			SocialEnum social, String text, String userName) {
-		final Beobachtung beobachtung = new Beobachtung();
+	public static GwtBeobachtung createBeobachtung(String key, String childKey,
+			String sectionKey, Date date, DurationEnum duration,
+			SocialEnum social, String text, User user) {
+		final GwtBeobachtung beobachtung = new GwtBeobachtung();
 		beobachtung.setKey(key);
 		beobachtung.setChildKey(childKey);
 		beobachtung.setSectionKey(sectionKey);
 		beobachtung.setDate(date);
-		beobachtung.setDuration(duration.name());
-		beobachtung.setSocial(social.name());
-		beobachtung.setText(new Text(text));
+		beobachtung.setDuration(duration);
+		beobachtung.setSocial(social);
+		beobachtung.setText(text);
+		beobachtung.setUser(user.getEmail());
 		return beobachtung;
 	}
 
@@ -37,22 +45,17 @@ public class TestUtils {
 		Assert.assertEquals("440px", width + "px");
 	}
 
-	public static Beobachtung createBeobachtung(Long childKey, Long sectionkey,
-			User user, Date date) {
+	public static String toString(Key key) {
+		return KeyFactory.keyToString(key);
+	}
+
+	public static GwtBeobachtung createBeobachtung(String childKey,
+			String sectionkey, User user, Date date) {
 		return createBeobachtung(null, childKey, sectionkey, date,
-				DurationEnum.LONG, SocialEnum.ALONE, TestUtils.TEXT, user
-						.getEmail().toLowerCase());
+				DurationEnum.LONG, SocialEnum.ALONE, TestUtils.TEXT, user);
 
 	}
 
-	public static Child createChild(Long childKey, String firstName,
-			String lastName) {
-		final Child child = new Child();
-		child.setFirstName(firstName);
-		child.setLastName(lastName);
-		child.setKey(childKey);
-		return child;
-	}
 
 	public static User createUser(String email) {
 		return new User(email, "authDomain");
@@ -60,20 +63,87 @@ public class TestUtils {
 
 	public static final String TEXT = "Standard Text";
 
-	public static Section createSection(Long key, String sectionName,
-			Long parentKey) {
-		final Section section = new Section();
+	public static GwtSection createSection(String key, String sectionName,
+			String parentKey) {
+		final GwtSection section = new GwtSection();
 		section.setKey(key);
 		section.setSectionName(sectionName);
 		section.setParentKey(parentKey);
 		return section;
 	}
 
-	public static BeobachtungsFilter createFilter(Long childKey, Long sectionKey) {
+	public static BeobachtungsFilter createFilter(String childKey,
+			String sectionKey) {
 		final BeobachtungsFilter filter = new BeobachtungsFilter();
 		filter.setChildKey(childKey);
 		filter.setSectionKey(sectionKey);
 		return filter;
 	}
 
+	public static GwtChild createGwtChild(String key, String firstName,
+			String lastName, Date birthday) {
+		final GwtChild child = new GwtChild();
+		child.setKey(key);
+		child.setFirstName(firstName);
+		child.setLastName(lastName);
+		child.setBirthDay(birthday);
+		return child;
+	}
+
+	public static Entity createChildEntity(String firstName,
+			String lastName) {
+		final Entity child = new Entity(ChildDsDao.CHILD_KIND);
+		child.setProperty(ChildDsDao.FIRSTNAME_FIELD, firstName);
+		child.setProperty(ChildDsDao.LASTNAME_FIELD, firstName);
+		return child;
+	}
+
+	public static Entity createSectionEntity(String sectionName, String parentKey) {
+
+		final Entity entity;
+		if (parentKey == null) {
+			entity = new Entity(SectionDsDao.SECTION_KIND);
+		} else {
+			entity = new Entity(SectionDsDao.SECTION_KIND, toKey(parentKey));
+		}
+		entity.setProperty(SectionDsDao.SECTION_NAME_FIELD, sectionName);
+		return entity;
+	}
+
+	public static Entity createBeobachtungEntity(GwtBeobachtung gwtBeobachtung,
+			User user) {
+
+		final Entity entity = new Entity(BeobachtungDsDao.BEOBACHTUNG_KIND,
+				toKey(gwtBeobachtung.getChildKey()));
+
+		entity.setProperty(BeobachtungDsDao.SECTION_KEY_FIELD,
+				toKey(gwtBeobachtung.getSectionKey()));
+		entity.setProperty(BeobachtungDsDao.DATE_FIELD,
+				gwtBeobachtung.getDate());
+		entity.setProperty(BeobachtungDsDao.TEXT_FIELD,
+				new Text(gwtBeobachtung.getText()));
+		entity.setProperty(BeobachtungDsDao.USER_FIELD, user);
+		final DurationEnum duration = gwtBeobachtung.getDuration();
+		if (duration != null) {
+			entity.setProperty(BeobachtungDsDao.DURATION_FIELD, duration.name());
+		}
+		final SocialEnum social = gwtBeobachtung.getSocial();
+		if (social != null) {
+			entity.setProperty(BeobachtungDsDao.SOCIAL_FIELD, social.name());
+		}
+		return entity;
+	}
+
+	private static Key toKey(String key) {
+		return KeyFactory.stringToKey(key);
+	}
+
+	public static Authorization createAuthorization(String email, boolean admin, Boolean editSections, boolean seeAll) {
+		final Authorization authorization = new Authorization();
+		authorization.setEmail(email);
+		authorization.setAdmin(admin);
+		authorization.setEditSections(editSections);
+		authorization.setSeeAll(seeAll);
+		return authorization;
+	}
 }

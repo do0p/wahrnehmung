@@ -81,11 +81,17 @@ public class Beobachtung implements Serializable {
 
 	public static Beobachtung valueOf(GwtBeobachtung gwtBeobachtung) {
 		final Beobachtung beobachtung = new Beobachtung();
-		beobachtung.setChildKey(gwtBeobachtung.getChildKey());
-		beobachtung.setSectionKey(gwtBeobachtung.getSectionKey());
+		if(gwtBeobachtung.getKey() != null)
+		{
+			beobachtung.setKey(Long.valueOf(gwtBeobachtung.getKey()));
+		}
+		beobachtung.setChildKey(Long.valueOf(gwtBeobachtung.getChildKey()));
+		beobachtung.setSectionKey(Long.valueOf(gwtBeobachtung.getSectionKey()));
 		beobachtung.setDate(gwtBeobachtung.getDate());
 		beobachtung.setText(new Text(gwtBeobachtung.getText()));
-		beobachtung.setKey(gwtBeobachtung.getKey());
+		if (gwtBeobachtung.getKey() != null) {
+			beobachtung.setKey(Long.valueOf(gwtBeobachtung.getKey()));
+		}
 		final DurationEnum gwtDuration = gwtBeobachtung.getDuration();
 		if (gwtDuration != null) {
 			beobachtung.setDuration(gwtDuration.name());
@@ -94,16 +100,21 @@ public class Beobachtung implements Serializable {
 		if (gwtSocial != null) {
 			beobachtung.setSocial(gwtSocial.name());
 		}
-	//	beobachtung.setUser(gwtBeobachtung.getUser());
+		// beobachtung.setUser(gwtBeobachtung.getUser());
 		return beobachtung;
 	}
 
-
 	public GwtBeobachtung toGwt() {
 		final GwtBeobachtung beobachtung = new GwtBeobachtung();
-		beobachtung.setKey(key);
-		beobachtung.setChildKey(childKey);
-		beobachtung.setSectionKey(sectionKey);
+		if (key != null) {
+			beobachtung.setKey(key.toString());
+		}
+		if (childKey != null) {
+			beobachtung.setChildKey(childKey.toString());
+		}
+		if (sectionKey != null) {
+			beobachtung.setSectionKey(sectionKey.toString());
+		}
 		beobachtung.setDate(date);
 		beobachtung.setText(text.getValue());
 		if (duration != null) {
@@ -131,7 +142,7 @@ public class Beobachtung implements Serializable {
 	public void setSocial(String social) {
 		this.social = social;
 	}
-	
+
 	public void setUser(User user) {
 		this.user = user;
 	}

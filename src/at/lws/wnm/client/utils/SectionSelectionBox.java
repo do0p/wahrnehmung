@@ -24,35 +24,31 @@ public class SectionSelectionBox extends ListBox {
 		init();
 	}
 
-	public Long getSelectedValue() {
+	public String getSelectedValue() {
 		if (isEnabled()) {
 			final int index = getSelectedIndex();
 			if (index != -1) {
-				return getLongValue(index);
+				return getValue(index);
 			}
 		}
 		return null;
 	}
 
-	public Long getLongValue(int index) {
-		final String value = getValue(index);
-		if (!value.isEmpty()) {
-			return Long.valueOf(value);
-		}
-		return null;
-	}
-
-	public List<Long> getValues() {
-		final List<Long> result = new ArrayList<Long>();
-		for(int i = 0; i < getItemCount(); i++)
-		{
-			final Long value = getLongValue(i);
-			if(value != null)
-			{
+	public List<String> getValues() {
+		final List<String> result = new ArrayList<String>();
+		for (int i = 0; i < getItemCount(); i++) {
+			final String value = getValue(i);
+			if (value != null) {
 				result.add(value);
 			}
 		}
 		return result;
 	}
-	
+
+	@Override
+	public String getValue(int index) {
+		final String value = super.getValue(index);
+		return value == null || value.isEmpty() ? null : value;
+	}
+
 }

@@ -11,26 +11,26 @@ public class GwtBeobachtung implements Serializable, Comparable<GwtBeobachtung> 
 
 	private static final long serialVersionUID = -2732611746367965750L;
 	private String text;
-	private Long childKey;
-	private Long sectionKey;
+	private String childKey;
+	private String sectionKey;
 	private Date date;
-	private Long key;
+	private String key;
 	private String childName;
 	private String sectionName;
 	private SocialEnum social;
 	private DurationEnum duration;
 	private String user;
-	private List<Long> additionalChildKeys = new ArrayList<Long>();
+	private List<String> additionalChildKeys = new ArrayList<String>();
 
 	public void setText(String text) {
 		this.text = text;
 	}
 
-	public void setChildKey(Long childKey) {
+	public void setChildKey(String childKey) {
 		this.childKey = childKey;
 	}
 
-	public void setSectionKey(Long sectionKey) {
+	public void setSectionKey(String sectionKey) {
 		this.sectionKey = sectionKey;
 	}
 
@@ -38,11 +38,11 @@ public class GwtBeobachtung implements Serializable, Comparable<GwtBeobachtung> 
 		this.date = date;
 	}
 
-	public Long getChildKey() {
+	public String getChildKey() {
 		return childKey;
 	}
 
-	public Long getSectionKey() {
+	public String getSectionKey() {
 		return sectionKey;
 	}
 
@@ -54,11 +54,11 @@ public class GwtBeobachtung implements Serializable, Comparable<GwtBeobachtung> 
 		return date;
 	}
 
-	public Long getKey() {
+	public String getKey() {
 		return key;
 	}
 
-	public void setKey(Long key) {
+	public void setKey(String key) {
 		this.key = key;
 	}
 
@@ -152,10 +152,10 @@ public class GwtBeobachtung implements Serializable, Comparable<GwtBeobachtung> 
 		this.user = user;
 	}
 
-	public List<Long> getAdditionalChildKeys() {
+	public List<String> getAdditionalChildKeys() {
 		return additionalChildKeys;
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		if (!(obj instanceof GwtBeobachtung)) {
@@ -167,12 +167,11 @@ public class GwtBeobachtung implements Serializable, Comparable<GwtBeobachtung> 
 				&& text.equals(other.text)
 				&& ObjectUtils.equals(social, other.social)
 				&& ObjectUtils.equals(duration, other.duration)
-				&& date.equals(other.date) 
-				&& user.equals(other.user)
+				&& date.equals(other.date) && user.equals(other.user)
 				&& additionalChildKeys.equals(other.additionalChildKeys);
-		
+
 	}
-	
+
 	@Override
 	public int hashCode() {
 		int result = 37;
@@ -188,19 +187,20 @@ public class GwtBeobachtung implements Serializable, Comparable<GwtBeobachtung> 
 
 	@Override
 	public int compareTo(GwtBeobachtung other) {
-		if(date == null)
-		{
-			return 1;
+		int result = childKey.compareTo(other.childKey);
+		if (result == 0) {
+			result = other.date.compareTo(date);
+			if (result == 0) {
+				result = sectionKey.compareTo(other.sectionKey);
+				if (result == 0) {
+					result = user.compareTo(other.user);
+					if (result == 0) {
+						result = text.compareTo(other.text);
+					}
+				}
+			}
 		}
-		if(other.date == null)
-		{
-			return -1;
-		}
-		return other.date.compareTo(date);
+		return result;
 	}
-
-	
-
-	
 
 }

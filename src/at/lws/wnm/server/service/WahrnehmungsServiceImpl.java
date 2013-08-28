@@ -1,9 +1,9 @@
 package at.lws.wnm.server.service;
 
 import at.lws.wnm.client.service.WahrnehmungsService;
-import at.lws.wnm.server.dao.AuthorizationDao;
-import at.lws.wnm.server.dao.BeobachtungDao;
 import at.lws.wnm.server.dao.DaoRegistry;
+import at.lws.wnm.server.dao.ds.AuthorizationDsDao;
+import at.lws.wnm.server.dao.ds.BeobachtungDsDao;
 import at.lws.wnm.shared.model.Authorization;
 import at.lws.wnm.shared.model.BeobachtungsFilter;
 import at.lws.wnm.shared.model.BeobachtungsResult;
@@ -22,32 +22,31 @@ import com.google.gwt.view.client.Range;
 public class WahrnehmungsServiceImpl extends RemoteServiceServlet implements
 		WahrnehmungsService {
 
-	private final BeobachtungDao beobachtungsDao;
-
+	private final BeobachtungDsDao beobachtungsDao;
 	private final UserService userService;
-
-	private AuthorizationDao authorizationDao;
+	private final AuthorizationDsDao authorizationDao;
 
 	public WahrnehmungsServiceImpl() {
-		beobachtungsDao = DaoRegistry.get(BeobachtungDao.class);
-		authorizationDao = DaoRegistry.get(AuthorizationDao.class);
+		beobachtungsDao = DaoRegistry.get(BeobachtungDsDao.class);
+		authorizationDao = DaoRegistry.get(AuthorizationDsDao.class);
 		userService = UserServiceFactory.getUserService();
 	}
 
 	@Override
 	public void storeBeobachtung(GwtBeobachtung beobachtung) {
 		final User currentUser = userService.getCurrentUser();
-		final Long masterBeobachtungsKey = beobachtungsDao.storeBeobachtung(beobachtung,
-				currentUser, null);
-		for(Long additionalChildKey : beobachtung.getAdditionalChildKeys())
-		{
+		beobachtungsDao.storeBeobachtung(beobachtung, currentUser, null);
+		final String masterBeobachtungsKey = beobachtung.getKey();
+		for (String additionalChildKey : beobachtung.getAdditionalChildKeys()) {
+			beobachtung.setKey(null);
 			beobachtung.setChildKey(additionalChildKey);
-			beobachtungsDao.storeBeobachtung(beobachtung, currentUser, masterBeobachtungsKey);
+			beobachtungsDao.storeBeobachtung(beobachtung, currentUser,
+					masterBeobachtungsKey);
 		}
 	}
 
 	@Override
-	public GwtBeobachtung getBeobachtung(Long beobachtungsKey) {
+	public GwtBeobachtung getBeobachtung(String beobachtungsKey) {
 		return beobachtungsDao.getBeobachtung(beobachtungsKey);
 	}
 
@@ -56,13 +55,12 @@ public class WahrnehmungsServiceImpl extends RemoteServiceServlet implements
 			Range range) {
 		final User user = getUserForQuery();
 		final BeobachtungsResult result = new BeobachtungsResult();
-		if(filter.getChildKey() != null)
-		{
-		result.setBeobachtungen(beobachtungsDao.getBeobachtungen(filter, range,
-				user));
-		result.setRowCount(beobachtungsDao.getRowCount(filter, user));
+		if (filter.getChildKey() != null) {
+			result.setBeobachtungen(beobachtungsDao.getBeobachtungen(filter,
+					range, user));
+			result.setRowCount(beobachtungsDao.getRowCount(filter, user));
 		}
-		
+
 		return result;
 	}
 
@@ -75,7 +73,7 @@ public class WahrnehmungsServiceImpl extends RemoteServiceServlet implements
 	}
 
 	@Override
-	public void deleteBeobachtung(Long beobachtungsKey) {
+	public void deleteBeobachtung(String beobachtungsKey) {
 		beobachtungsDao.deleteBeobachtung(beobachtungsKey);
 
 	}

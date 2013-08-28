@@ -9,7 +9,7 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
 @RemoteServiceRelativePath("child")
 public interface ChildService extends RemoteService {
-	GwtChild getChild(Long key) throws IllegalArgumentException;
+	GwtChild getChild(String key) throws IllegalArgumentException;
 	
 	List<GwtChild> queryChildren();
 	
