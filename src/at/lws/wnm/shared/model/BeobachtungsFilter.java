@@ -1,6 +1,7 @@
 package at.lws.wnm.shared.model;
 
 import java.io.Serializable;
+import java.util.Date;
 
 public class BeobachtungsFilter implements Serializable {
 
@@ -9,6 +10,8 @@ public class BeobachtungsFilter implements Serializable {
 	private String childKey;
 
 	private String sectionKey;
+
+	private Date[] timeRange;
 
 	public String getChildKey() {
 		return childKey;
@@ -24,6 +27,14 @@ public class BeobachtungsFilter implements Serializable {
 
 	public String getSectionKey() {
 		return sectionKey;
+	}
+
+	public Date[] getTimeRange() {
+		return timeRange;
+	}
+
+	public void setTimeRange(Date[] timeRange) {
+		this.timeRange = timeRange;
 	}
 
 }

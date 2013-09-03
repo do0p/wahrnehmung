@@ -12,6 +12,7 @@ import at.lws.wnm.client.utils.SectionSelection;
 import at.lws.wnm.client.utils.SectionSelectionBox;
 import at.lws.wnm.client.utils.Show;
 import at.lws.wnm.client.utils.Utils;
+import at.lws.wnm.client.utils.YearSelection;
 import at.lws.wnm.shared.model.Authorization;
 import at.lws.wnm.shared.model.BeobachtungsFilter;
 import at.lws.wnm.shared.model.GwtBeobachtung;
@@ -31,12 +32,15 @@ import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 
 public class Search extends VerticalPanel {
+	private static final int START_YEAR = 2012;
+
 	private final Labels labels = (Labels) GWT.create(Labels.class);
 
 	private final BeobachtungsTable table;
 	private final BeobachtungsFilter filter;
 	private final NameSelection nameSelection;
 	private final SectionSelection sectionSelection;
+	private final YearSelection yearSelection;
 	private final MultiSelectionModel<GwtBeobachtung> selectionModel;
 	private final Show beobachtungen;
 
@@ -46,6 +50,7 @@ public class Search extends VerticalPanel {
 		this.filter = new BeobachtungsFilter();
 		this.nameSelection = new NameSelection(dialogBox);
 		this.sectionSelection = new SectionSelection(dialogBox, null);
+		this.yearSelection = new YearSelection(START_YEAR);
 		Button sendButton = new Button(labels.filter());
 		sendButton.addClickHandler(new FilterButtonHandler());
 		sendButton.addStyleName(Utils.SEND_BUTTON_STYLE);
@@ -67,7 +72,7 @@ public class Search extends VerticalPanel {
 	private void layout(RichTextArea textArea, Button sendButton) {
 		final List<SectionSelectionBox> sectionSelectionBoxes = this.sectionSelection
 				.getSectionSelectionBoxes();
-		final Grid filterBox = new Grid(1, sectionSelectionBoxes.size() + 2);
+		final Grid filterBox = new Grid(1, sectionSelectionBoxes.size() + 3);
 		add(filterBox);
 
 		nameSelection.setSize(Utils.NAMESELECTION_WIDTH + Utils.PIXEL,
@@ -81,6 +86,10 @@ public class Search extends VerticalPanel {
 			filterBox.setWidget(0, i++, selectionBox);
 		}
 
+		yearSelection.setSize(Utils.LISTBOX_WIDTH + Utils.PIXEL,
+				Utils.ROW_HEIGHT + Utils.PIXEL);
+		filterBox.setWidget(0, i++, yearSelection);
+		
 		sendButton.setSize(Utils.BUTTON_WIDTH + Utils.PIXEL, Utils.ROW_HEIGHT
 				+ Utils.PIXEL);
 		filterBox.setWidget(0, i, sendButton);
@@ -157,6 +166,7 @@ public class Search extends VerticalPanel {
 					.getSelectedChildKey());
 			Search.this.filter.setSectionKey(Search.this.sectionSelection
 					.getSelectedSectionKey());
+			Search.this.filter.setTimeRange(Search.this.yearSelection.getSelectedTimeRange());
 			Search.this.table.updateTable();
 		}
 	}

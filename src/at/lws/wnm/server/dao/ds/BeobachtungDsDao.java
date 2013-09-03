@@ -1,7 +1,10 @@
 package at.lws.wnm.server.dao.ds;
 
-import static com.google.appengine.api.datastore.FetchOptions.Builder.*;
+import static com.google.appengine.api.datastore.FetchOptions.Builder.withDefaults;
+import static com.google.appengine.api.datastore.FetchOptions.Builder.withOffset;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -116,30 +119,36 @@ public class BeobachtungDsDao extends AbstractDsDao {
 
 	private Query createQuery(BeobachtungsFilter filter, User user) {
 
-		final Collection<String> childSectionKeys = getSectionDao().getAllChildKeys(
-				filter.getSectionKey());
+		final Query query = createQuery(filter.getChildKey());
+		addSubfilters(createSubFilters(filter, user), query);
 
-		final String childKey = filter.getChildKey();
-		final Query query;
-		if (childKey == null) {
-			query = new Query(BEOBACHTUNG_KIND);
-		} else {
-			query = new Query(BEOBACHTUNG_KIND, toKey(childKey));
-		}
+		return query;
+
+	}
+
+	private List<Filter> createSubFilters(BeobachtungsFilter filter, User user) {
 		final List<Filter> subFilters = new ArrayList<Filter>();
+		addSectionFilter(filter.getSectionKey(), subFilters);
+		addUserFilter(user, subFilters);
+		addTimeRangeFilter(filter.getTimeRange(), subFilters);
+		return subFilters;
+	}
 
-		final String sectionKey = filter.getSectionKey();
-		if (sectionKey != null) {
-			final List<String> sectionKeys = new ArrayList<String>(
-					childSectionKeys);
-			sectionKeys.add(sectionKey);
-			subFilters.add(createSectionFilter(sectionKeys));
+	private void addTimeRangeFilter(Date[] timeRange, List<Filter> subFilters) {
+		if(timeRange != null && timeRange.length == 2)
+		{
+			final Date startDate = timeRange[0];
+			final Date endDate = timeRange[1];
+			
+			final Filter startTimeFilter =  new Query.FilterPredicate(DATE_FIELD, FilterOperator.GREATER_THAN_OR_EQUAL, startDate);
+			final Filter endTimeFilter =  new Query.FilterPredicate(DATE_FIELD, FilterOperator.LESS_THAN_OR_EQUAL, endDate);
+			final Filter timeRangeFilter = new Query.CompositeFilter(
+					CompositeFilterOperator.AND, Arrays.asList(startTimeFilter, endTimeFilter));
+			subFilters.add(timeRangeFilter);
 		}
+	}
 
-		if (user != null) {
-			subFilters.add(createEqualsPredicate(USER_FIELD, user));
-		}
-
+	private void addSubfilters(final List<Filter> subFilters, final Query query) {
 		if (!subFilters.isEmpty()) {
 			final Filter dsFilter;
 			if (subFilters.size() == 1) {
@@ -150,11 +159,34 @@ public class BeobachtungDsDao extends AbstractDsDao {
 			}
 			query.setFilter(dsFilter);
 		}
+	}
 
+	private Query createQuery(String childKey) {
+		final Query query;
+		if (childKey == null) {
+			query = new Query(BEOBACHTUNG_KIND);
+		} else {
+			query = new Query(BEOBACHTUNG_KIND, toKey(childKey));
+		}
 		query.addSort(DATE_FIELD, SortDirection.DESCENDING);
-
 		return query;
+	}
 
+	private void addUserFilter(User user, final List<Filter> subFilters) {
+		if (user != null) {
+			subFilters.add(createEqualsPredicate(USER_FIELD, user));
+		}
+	}
+
+	private void addSectionFilter(String sectionKey, List<Filter> subFilters) {
+		if (sectionKey != null) {
+			final Collection<String> childSectionKeys = getSectionDao().getAllChildKeys(
+					sectionKey);
+			final List<String> sectionKeys = new ArrayList<String>(
+					childSectionKeys);
+			sectionKeys.add(sectionKey);
+			subFilters.add(createSectionFilter(sectionKeys));
+		}
 	}
 
 	private Filter createSectionFilter(Collection<String> sectionKeys) {

@@ -72,11 +72,13 @@ public class TestUtils {
 		return section;
 	}
 
+	
 	public static BeobachtungsFilter createFilter(String childKey,
-			String sectionKey) {
+			String sectionKey, Date ... timeRange) {
 		final BeobachtungsFilter filter = new BeobachtungsFilter();
 		filter.setChildKey(childKey);
 		filter.setSectionKey(sectionKey);
+		filter.setTimeRange(timeRange);
 		return filter;
 	}
 

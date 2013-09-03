@@ -145,6 +145,9 @@ public class BeobachtungDsDaoTest extends AbstractDsDaoTest {
 						createFilter(child1Key, section2Key), range, user1),
 				beobachtung1);
 
+		assertEquals(beobachtungsDao.getBeobachtungen(
+				createFilter(child1Key, null, new Date(NOW),new Date(NOW + HOUR)), range, null),
+		beobachtung2, beobachtung1);
 	}
 
 	@Test
