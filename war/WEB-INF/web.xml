@@ -1,4 +1,7 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.5" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee                http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	version="2.5"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee                http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
 
 	<!-- Servlets -->
 	<servlet>
@@ -9,16 +12,11 @@
 		<servlet-name>csvUploadServlet</servlet-name>
 		<url-pattern>/wahrnehmung/csvUpload</url-pattern>
 	</servlet-mapping>
-	
-<!--  	<servlet>
-		<servlet-name>migrationServlet</servlet-name>
-		<servlet-class>at.lws.wnm.server.service.MigrationService</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>migrationServlet</servlet-name>
-		<url-pattern>/wahrnehmung/migration</url-pattern>
-	</servlet-mapping>  -->
-	
+
+	<!-- <servlet> <servlet-name>migrationServlet</servlet-name> <servlet-class>at.lws.wnm.server.service.MigrationService</servlet-class> 
+		</servlet> <servlet-mapping> <servlet-name>migrationServlet</servlet-name> 
+		<url-pattern>/wahrnehmung/migration</url-pattern> </servlet-mapping> -->
+
 	<servlet>
 		<servlet-name>wahrnehmungServlet</servlet-name>
 		<servlet-class>at.lws.wnm.server.service.WahrnehmungsServiceImpl</servlet-class>
@@ -74,18 +72,18 @@
 		<welcome-file>Wahrnehmung.html</welcome-file>
 	</welcome-file-list>
 
-  <servlet>
-    <servlet-name>SystemServiceServlet</servlet-name>
-    <servlet-class>com.google.api.server.spi.SystemServiceServlet</servlet-class>
-    <init-param>
-      <param-name>services</param-name>
-      <param-value/>
-    </init-param>
-  </servlet>
+	<servlet>
+		<servlet-name>SystemServiceServlet</servlet-name>
+		<servlet-class>com.google.api.server.spi.SystemServiceServlet</servlet-class>
+		<init-param>
+			<param-name>services</param-name>
+			<param-value />
+		</init-param>
+	</servlet>
 
-  <servlet-mapping>
-    <servlet-name>SystemServiceServlet</servlet-name>
-    <url-pattern>/_ah/spi/*</url-pattern>
-  </servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>SystemServiceServlet</servlet-name>
+		<url-pattern>/_ah/spi/*</url-pattern>
+	</servlet-mapping>
 
 </web-app>
