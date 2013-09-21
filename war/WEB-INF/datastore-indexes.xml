@@ -1,4 +1,4 @@
-<datastore-indexes autoGenerate="true">
+<datastore-indexes >
 
     <datastore-index kind="ChildDs" ancestor="false" source="auto">
         <property name="lastname" direction="asc"/>

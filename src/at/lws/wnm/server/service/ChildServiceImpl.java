@@ -10,10 +10,10 @@ import at.lws.wnm.shared.model.GwtChild;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
-@SuppressWarnings("serial")
 public class ChildServiceImpl extends RemoteServiceServlet implements
 		ChildService {
 
+	private static final long serialVersionUID = -6319980504490088717L;
 	private final ChildDsDao childDao;
 	private final BeobachtungDsDao beobachtungsDao;
 	private final AuthorizationServiceImpl authorizationService;

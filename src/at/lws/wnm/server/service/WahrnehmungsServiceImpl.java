@@ -18,10 +18,10 @@ import com.google.gwt.view.client.Range;
 /**
  * The server side implementation of the RPC service.
  */
-@SuppressWarnings("serial")
 public class WahrnehmungsServiceImpl extends RemoteServiceServlet implements
 		WahrnehmungsService {
 
+	private static final long serialVersionUID = 6513086238987365801L;
 	private final BeobachtungDsDao beobachtungsDao;
 	private final UserService userService;
 	private final AuthorizationDsDao authorizationDao;

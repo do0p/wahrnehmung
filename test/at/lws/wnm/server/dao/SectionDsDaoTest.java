@@ -10,6 +10,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import at.lws.wnm.TestUtils;
+import at.lws.wnm.server.dao.AbstractDsDaoTest;
+import at.lws.wnm.server.dao.DaoRegistry;
 import at.lws.wnm.server.dao.ds.SectionDsDao;
 import at.lws.wnm.shared.model.GwtSection;
 

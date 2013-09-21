@@ -55,7 +55,6 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.Timer;
 
-@SuppressWarnings("deprecation")
 public class Print {
 
     /**

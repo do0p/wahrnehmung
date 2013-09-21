@@ -10,10 +10,10 @@ import at.lws.wnm.shared.model.GwtSection;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
-@SuppressWarnings("serial")
 public class SectionServiceImpl extends RemoteServiceServlet implements
 		SectionService {
 
+	private static final long serialVersionUID = -4141659112765911287L;
 	private final SectionDsDao sectionDao;
 	private AuthorizationServiceImpl authorizationService;
 

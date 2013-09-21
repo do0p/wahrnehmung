@@ -257,7 +257,8 @@ public class EditContent extends HorizontalPanel {
 	public Grid createSelectionContainer() {
 		final List<SectionSelectionBox> sectionSelectionBoxes = this.sectionSelection
 				.getSectionSelectionBoxes();
-		final Grid selectionContainer = new Grid(1, sectionSelectionBoxes.size());
+		final Grid selectionContainer = new Grid(1,
+				sectionSelectionBoxes.size());
 		int i = 0;
 		for (SectionSelectionBox sectionSelectionBox : sectionSelectionBoxes) {
 			sectionSelectionBox.setSize(Utils.LISTBOX_WIDTH + Utils.PIXEL,
@@ -421,8 +422,8 @@ public class EditContent extends HorizontalPanel {
 			beobachtung.setSocial(EditContent.this.getSocialForm());
 
 			for (int i = 0; i < EditContent.this.additionalNames.getItemCount(); i++) {
-				beobachtung.getAdditionalChildKeys().add(EditContent.this.additionalNames
-								.getValue(i));
+				beobachtung.getAdditionalChildKeys().add(
+						EditContent.this.additionalNames.getValue(i));
 			}
 
 			EditContent.this.wahrnehmungService.storeBeobachtung(beobachtung,
