@@ -1,7 +1,11 @@
 package at.lws.wnm.server.service;
 
+import java.text.Collator;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 
 import at.lws.wnm.client.service.SectionService;
 import at.lws.wnm.server.dao.DaoRegistry;
@@ -27,9 +31,12 @@ public class SectionServiceImpl extends RemoteServiceServlet implements
 	@Override
 	public List<GwtSection> querySections() {
 
-		return sectionDao.getAllSections();
+		List<GwtSection> allSections = sectionDao.getAllSections();
+		sort(allSections);
+		return allSections;
 
 	}
+
 
 	@Override
 	public void storeSection(GwtSection section)
@@ -48,4 +55,14 @@ public class SectionServiceImpl extends RemoteServiceServlet implements
 		sectionDao.deleteSections(allSectionKeysToDelete);
 	}
 
+	private void sort(List<GwtSection> allSections) {
+		Collections.sort(allSections, new Comparator<GwtSection>() {
+			
+			@Override
+			public int compare(GwtSection o1, GwtSection o2) {
+				
+				return Collator.getInstance(Locale.GERMAN).compare(o1.getSectionName(),o2.getSectionName());
+			}
+		});
+	}
 }
