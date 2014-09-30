@@ -1,5 +1,6 @@
 package at.lws.wnm;
 
+import java.util.Arrays;
 import java.util.Date;
 
 import org.junit.Assert;
@@ -56,7 +57,6 @@ public class TestUtils {
 
 	}
 
-
 	public static User createUser(String email) {
 		return new User(email, "authDomain");
 	}
@@ -72,9 +72,8 @@ public class TestUtils {
 		return section;
 	}
 
-	
 	public static BeobachtungsFilter createFilter(String childKey,
-			String sectionKey, Date ... timeRange) {
+			String sectionKey, Date... timeRange) {
 		final BeobachtungsFilter filter = new BeobachtungsFilter();
 		filter.setChildKey(childKey);
 		filter.setSectionKey(sectionKey);
@@ -83,24 +82,27 @@ public class TestUtils {
 	}
 
 	public static GwtChild createGwtChild(String key, String firstName,
-			String lastName, Date birthday) {
+			String lastName, Date birthday, Date... dialogueDates) {
 		final GwtChild child = new GwtChild();
 		child.setKey(key);
 		child.setFirstName(firstName);
 		child.setLastName(lastName);
 		child.setBirthDay(birthday);
+		if (dialogueDates != null && dialogueDates.length > 0) {
+			child.setDevelopementDialogueDates(Arrays.asList(dialogueDates));
+		}
 		return child;
 	}
 
-	public static Entity createChildEntity(String firstName,
-			String lastName) {
+	public static Entity createChildEntity(String firstName, String lastName) {
 		final Entity child = new Entity(ChildDsDao.CHILD_KIND);
 		child.setProperty(ChildDsDao.FIRSTNAME_FIELD, firstName);
 		child.setProperty(ChildDsDao.LASTNAME_FIELD, firstName);
 		return child;
 	}
 
-	public static Entity createSectionEntity(String sectionName, String parentKey) {
+	public static Entity createSectionEntity(String sectionName,
+			String parentKey) {
 
 		final Entity entity;
 		if (parentKey == null) {
@@ -140,7 +142,8 @@ public class TestUtils {
 		return KeyFactory.stringToKey(key);
 	}
 
-	public static Authorization createAuthorization(String email, boolean admin, Boolean editSections, boolean seeAll) {
+	public static Authorization createAuthorization(String email,
+			boolean admin, Boolean editSections, boolean seeAll) {
 		final Authorization authorization = new Authorization();
 		authorization.setEmail(email);
 		authorization.setAdmin(admin);

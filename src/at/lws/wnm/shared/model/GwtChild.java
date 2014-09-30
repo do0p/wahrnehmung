@@ -1,7 +1,9 @@
 package at.lws.wnm.shared.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class GwtChild implements Serializable, Comparable<GwtChild>{
 
@@ -10,8 +12,23 @@ public class GwtChild implements Serializable, Comparable<GwtChild>{
 	private String lastName;
 	private Date birthDay;
 	private String key;
+	private List<Date> developementDialogueDates;
 
 
+	public List<Date> getDevelopementDialogueDates() {
+		return developementDialogueDates;
+	}
+
+	public void setDevelopementDialogueDates(List<Date> developementDialogues) {
+		this.developementDialogueDates = developementDialogues;
+	}
+	
+	public void addDevelopementDialogueDate(Date date){
+		if(developementDialogueDates == null){
+			developementDialogueDates = new ArrayList<Date>();
+		}
+		developementDialogueDates.add(date);
+	}
 
 	public String getFirstName() {
 		return firstName;
