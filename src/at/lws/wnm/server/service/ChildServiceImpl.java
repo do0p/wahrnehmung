@@ -1,5 +1,6 @@
 package at.lws.wnm.server.service;
 
+import java.util.Date;
 import java.util.List;
 
 import at.lws.wnm.client.service.ChildService;
@@ -47,6 +48,13 @@ public class ChildServiceImpl extends RemoteServiceServlet implements
 	@Override
 	public GwtChild getChild(String key) {
 		return childDao.getChild(key);
+	}
+
+	@Override
+	public void addDevelopementDialogueDate(String key, Date date)  throws IllegalArgumentException {
+		GwtChild child = childDao.getChild(key);
+		child.addDevelopementDialogueDate(date);
+		childDao.storeChild(child);
 	}
 
 }

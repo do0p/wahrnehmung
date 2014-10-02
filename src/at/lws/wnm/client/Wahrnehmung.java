@@ -26,7 +26,6 @@ public class Wahrnehmung extends SecuredContent implements
 		changePage(History.getToken());
 		RootPanel.get(Utils.LOGOUT_ELEMENT).add(
 				new Anchor(labels.logout(), authorization.getLogoutUrl()));
-		RootPanel.get(Utils.TITLE_ELEMENT).add(new HTML(labels.title()));
 	}
 
 	protected void onLogOut(Authorization authorization) {

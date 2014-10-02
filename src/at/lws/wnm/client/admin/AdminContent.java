@@ -24,7 +24,9 @@ public class AdminContent extends TabPanel {
 		if (authorization.isAdmin()) {
 			add(new AuthorizationAdmin(), labels.user());
 		}
-		if ((authorization.isAdmin()) || (authorization.isEditSections()))
+//		add(new DevelopementDialogueAdmin(), labels.developementDialogueDates());
+		if ((authorization.isAdmin()) || (authorization.isEditSections())) {
 			selectTab(0);
+		}
 	}
 }

@@ -1,5 +1,6 @@
 package at.lws.wnm.client.service;
 
+import java.util.Date;
 import java.util.List;
 
 import at.lws.wnm.shared.model.GwtChild;
@@ -16,4 +17,6 @@ public interface ChildService extends RemoteService {
 	void storeChild(GwtChild child) throws IllegalArgumentException;
 	
 	void deleteChild(GwtChild child) throws IllegalArgumentException;
+	
+	void addDevelopementDialogueDate(String key, Date date);
 }

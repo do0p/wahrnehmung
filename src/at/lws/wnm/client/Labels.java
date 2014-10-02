@@ -1,6 +1,7 @@
 package at.lws.wnm.client;
 
 import com.google.gwt.i18n.client.Messages;
+import com.google.gwt.user.client.ui.IsWidget;
 
 public interface Labels extends Messages {
 	String children();
@@ -45,4 +46,7 @@ public interface Labels extends Messages {
 	String print();
 	String logout();
 	String title();
+	String developementDialogueDates();
+	String noChildSelected();
+	String noDateGiven();
 }

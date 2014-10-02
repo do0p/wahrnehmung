@@ -17,7 +17,7 @@ import com.google.gwt.user.datepicker.client.DateBox.Format;
 public class Utils {
 	public static final String MAIN_ELEMENT = "content";
 	public static final String LOGOUT_ELEMENT = "logout";
-	public static final String TITLE_ELEMENT = "title";
+//	public static final String TITLE_ELEMENT = "title";
 	public static final String NAVIGATION_ELEMENT = "navigation";
 	public static final String PIXEL = "px";
 	public static final String HUNDERT_PERCENT = "100%";
