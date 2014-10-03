@@ -26,7 +26,9 @@ public class GwtChild implements Serializable, Comparable<GwtChild> {
 		if (developementDialogueDates == null) {
 			developementDialogueDates = new ArrayList<Date>();
 		}
-		developementDialogueDates.add(date);
+		if(!developementDialogueDates.contains(date)){
+			developementDialogueDates.add(date);
+		}
 	}
 
 	public String getFirstName() {

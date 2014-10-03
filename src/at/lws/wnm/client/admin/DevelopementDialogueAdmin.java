@@ -16,7 +16,9 @@ import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
+import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -67,9 +69,14 @@ public class DevelopementDialogueAdmin extends AbstractAdminTab {
 
 	private void layout() {
 
+		final Grid grid = new Grid(3, 2);
+		grid.setWidget(0, 0, new Label(labels().child()));
+		grid.setWidget(0, 1, nameSelection);
+		grid.setWidget(1, 0, new Label(labels().date()));
+		grid.setWidget(1, 1, dateBox);
+		
 		final VerticalPanel data = new VerticalPanel();
-		data.add(nameSelection);
-		data.add(dateBox);
+		data.add(grid);
 		data.add(getButtonPanel());
 
 		final HorizontalPanel root = new HorizontalPanel();

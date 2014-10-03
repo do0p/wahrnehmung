@@ -5,6 +5,7 @@ import com.google.gwt.user.client.ui.IsWidget;
 
 public interface Labels extends Messages {
 	String children();
+	String child();
 	String sections();
 	String section();
 	String subSection();
