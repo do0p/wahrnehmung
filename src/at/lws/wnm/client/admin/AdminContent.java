@@ -13,7 +13,7 @@ public class AdminContent extends TabPanel {
 
 
 	public AdminContent(Authorization authorization) {
-		setSize(Utils.HUNDERT_PERCENT, Utils.APP_WIDTH + Utils.PIXEL);
+		setSize(Utils.HUNDRED_PERCENT, Utils.APP_WIDTH + Utils.PIXEL);
 
 		if (authorization.isAdmin()) {
 			add(new ChildAdmin(), labels.children());
@@ -24,7 +24,7 @@ public class AdminContent extends TabPanel {
 		if (authorization.isAdmin()) {
 			add(new AuthorizationAdmin(), labels.user());
 		}
-//		add(new DevelopementDialogueAdmin(), labels.developementDialogueDates());
+		add(new DevelopementDialogueAdmin(), labels.developementDialogueDates());
 		if ((authorization.isAdmin()) || (authorization.isEditSections())) {
 			selectTab(0);
 		}

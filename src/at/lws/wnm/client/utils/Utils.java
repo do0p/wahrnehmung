@@ -20,7 +20,7 @@ public class Utils {
 //	public static final String TITLE_ELEMENT = "title";
 	public static final String NAVIGATION_ELEMENT = "navigation";
 	public static final String PIXEL = "px";
-	public static final String HUNDERT_PERCENT = "100%";
+	public static final String HUNDRED_PERCENT = "100%";
 	public static final String LINE_BREAK = "<br/>";
 	public static final String SEND_BUTTON_STYLE = "sendButton";
 	public static final String DELETED_STYLE = "deleted";

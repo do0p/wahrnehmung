@@ -20,4 +20,7 @@ public interface ChildServiceAsync {
 	void addDevelopementDialogueDate(String key, Date date,
 			AsyncCallback<Void> callback);
 
+	void deleteDevelopementDialogueDate(String key,
+			Date date, AsyncCallback<Void> callback);
+
 }

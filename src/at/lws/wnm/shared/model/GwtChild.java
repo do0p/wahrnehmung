@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class GwtChild implements Serializable, Comparable<GwtChild>{
+public class GwtChild implements Serializable, Comparable<GwtChild> {
 
 	private static final long serialVersionUID = 5870082887319396186L;
 	private String firstName;
@@ -14,7 +14,6 @@ public class GwtChild implements Serializable, Comparable<GwtChild>{
 	private String key;
 	private List<Date> developementDialogueDates;
 
-
 	public List<Date> getDevelopementDialogueDates() {
 		return developementDialogueDates;
 	}
@@ -22,9 +21,9 @@ public class GwtChild implements Serializable, Comparable<GwtChild>{
 	public void setDevelopementDialogueDates(List<Date> developementDialogues) {
 		this.developementDialogueDates = developementDialogues;
 	}
-	
-	public void addDevelopementDialogueDate(Date date){
-		if(developementDialogueDates == null){
+
+	public void addDevelopementDialogueDate(Date date) {
+		if (developementDialogueDates == null) {
 			developementDialogueDates = new ArrayList<Date>();
 		}
 		developementDialogueDates.add(date);
@@ -62,20 +61,22 @@ public class GwtChild implements Serializable, Comparable<GwtChild>{
 		this.key = key;
 	}
 
-	
 	@Override
 	public int compareTo(GwtChild other) {
 		int result = lastName.compareTo(other.lastName);
-		if(result == 0)
-		{
+		if (result == 0) {
 			result = firstName.compareTo(other.firstName);
-			if(result == 0)
-			{
+			if (result == 0) {
 				result = birthDay.compareTo(other.birthDay);
 			}
 		}
 		return result;
 	}
 
-	
+	public void removeDevelopementDialogueDate(Date date) {
+		if (developementDialogueDates != null) {
+			developementDialogueDates.remove(date);
+		}
+	}
+
 }

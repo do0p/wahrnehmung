@@ -283,7 +283,7 @@ public class EditContent extends HorizontalPanel {
 		Utils.formatCenter(nameContainer, nameButtoContainer);
 
 		final int nameSelectionHeight = Utils.APP_HEIGHT - 238;
-		additionalNames.setSize(Utils.HUNDERT_PERCENT, nameSelectionHeight
+		additionalNames.setSize(Utils.HUNDRED_PERCENT, nameSelectionHeight
 				+ Utils.PIXEL);
 		nameContainer.add(additionalNames);
 

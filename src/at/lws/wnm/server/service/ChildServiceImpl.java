@@ -57,4 +57,12 @@ public class ChildServiceImpl extends RemoteServiceServlet implements
 		childDao.storeChild(child);
 	}
 
+	@Override
+	public void deleteDevelopementDialogueDate(String key, Date date) {
+		GwtChild child = childDao.getChild(key);
+		child.removeDevelopementDialogueDate(date);
+		childDao.storeChild(child);
+		
+	}
+
 }

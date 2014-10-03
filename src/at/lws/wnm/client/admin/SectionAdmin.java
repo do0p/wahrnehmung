@@ -5,11 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import at.lws.wnm.client.Labels;
 import at.lws.wnm.client.service.SectionService;
 import at.lws.wnm.client.service.SectionServiceAsync;
 import at.lws.wnm.client.utils.DecisionBox;
-import at.lws.wnm.client.utils.PopUp;
 import at.lws.wnm.client.utils.Utils;
 import at.lws.wnm.shared.model.GwtSection;
 
@@ -18,61 +16,47 @@ import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HasTreeItems;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Tree;
 import com.google.gwt.user.client.ui.TreeItem;
-import com.google.gwt.user.client.ui.VerticalPanel;
 
-public class SectionAdmin extends VerticalPanel {
+public class SectionAdmin extends AbstractAdminTab {
 
-	private final Labels labels = GWT.create(Labels.class);
 	private final SectionServiceAsync sectionService = GWT
 			.create(SectionService.class);
 
-	private final Button saveButton;
-	private final PopUp dialogBox;
-//	private final SaveSuccess saveSuccess;
-	private Tree tree;
+	// private final SaveSuccess saveSuccess;
+	private final Tree tree;
 
-	private Button cancelButton;
-	private List<SaveItem> saveItems = new ArrayList<SaveItem>();
+	private final List<SaveItem> saveItems = new ArrayList<SaveItem>();
 
 	private int countDown = 0;
-	private DecisionBox decisionBox;
+	private final DecisionBox decisionBox;
 
 	public SectionAdmin() {
-
-		saveButton = new Button(labels.save());
-		cancelButton = new Button(labels.cancel());
-		dialogBox = new PopUp();
-//		saveSuccess = new SaveSuccess();
-
-		tree = new Tree();
-		add(tree);
-
-		final HorizontalPanel buttonPanel = new HorizontalPanel();
-		buttonPanel.add(saveButton);
-		buttonPanel.add(cancelButton);
-		buttonPanel.setSpacing(Utils.SPACING);
-		add(buttonPanel);
+		super(false);
 
 		decisionBox = new DecisionBox();
-		decisionBox.setText(labels.sectionDelWarning());
-		
-		saveButton.addClickHandler(new SaveClickHandler());
-		cancelButton.addClickHandler(new ClickHandler() {
+		decisionBox.setText(labels().sectionDelWarning());
 
-			@Override
-			public void onClick(ClickEvent event) {
-				resetForm();
-			}
-		});
+		tree = new Tree();
+
+		// saveSuccess = new SaveSuccess();
+
+		layout();
+		
+		updateButtonPanel();
+
+	}
+
+	private void layout() {
+
+		add(tree);
+		add(getButtonPanel());
 	}
 
 	@Override
@@ -86,25 +70,19 @@ public class SectionAdmin extends VerticalPanel {
 
 	private void resetFormAtTheEnd() {
 		if (--countDown < 1) {
-			resetForm();
+			reset();
 		}
 	}
 
-	private void resetForm() {
+	@Override
+	void reset() {
 		countDown = 0;
 		saveItems.clear();
 		tree.clear();
 		refresh();
 	}
 
-	private class TreeBuilder implements AsyncCallback<List<GwtSection>> {
-
-		@Override
-		public void onFailure(Throwable caught) {
-			dialogBox.setErrorMessage(caught.getLocalizedMessage());
-			dialogBox.setDisableWhileShown(saveButton);
-			dialogBox.center();
-		}
+	private class TreeBuilder extends ErrorReportingCallback<List<GwtSection>> {
 
 		@Override
 		public void onSuccess(List<GwtSection> sections) {
@@ -134,15 +112,16 @@ public class SectionAdmin extends VerticalPanel {
 		}
 
 		private void addChildSections(List<GwtSection> sections,
-				final HasTreeItems parent,				Map<String, List<GwtSection>> groupedSections) {
+				final HasTreeItems parent,
+				Map<String, List<GwtSection>> groupedSections) {
 			if (sections == null) {
 				return;
 			}
 			for (final GwtSection section : sections) {
 				final InlineLabel sectionName = new InlineLabel(
 						section.getSectionName());
-				final Anchor sectionEdit = new Anchor(labels.change());
-				final Anchor sectionDel = new Anchor(labels.delete());
+				final Anchor sectionEdit = new Anchor(labels().change());
+				final Anchor sectionDel = new Anchor(labels().delete());
 
 				final TreeItem sectionItem = new TreeItem(createSectionLabel(
 						sectionName, sectionEdit, sectionDel));
@@ -164,7 +143,8 @@ public class SectionAdmin extends VerticalPanel {
 							decisionBox.addOkClickHandler(new ClickHandler() {
 								@Override
 								public void onClick(ClickEvent event) {
-									sectionName.setStylePrimaryName(Utils.DELETED_STYLE);
+									sectionName
+											.setStylePrimaryName(Utils.DELETED_STYLE);
 									sectionItem.setState(false);
 									editClickHandler.removeHandler();
 									createDelItem(section);
@@ -199,7 +179,7 @@ public class SectionAdmin extends VerticalPanel {
 
 		private void addPlusItem(final String parentKey,
 				final TreeItem sectionItem) {
-			final Anchor addLabel = new Anchor(labels.create());
+			final Anchor addLabel = new Anchor(labels().create());
 			final TreeItem addItem = new TreeItem(addLabel);
 			sectionItem.addItem(addItem);
 			addLabel.addClickHandler(new ClickHandler() {
@@ -230,51 +210,45 @@ public class SectionAdmin extends VerticalPanel {
 
 	}
 
-	public class SaveClickHandler implements ClickHandler {
+	@Override
+	void save() {
+		final List<SaveItem> tmpSaveItems = new ArrayList<SaveItem>(saveItems);
+		countDown = saveItems.size();
+		for (final SaveItem saveItem : tmpSaveItems) {
 
-
-		@Override
-		public void onClick(ClickEvent event) {
-			final List<SaveItem> tmpSaveItems = new ArrayList<SaveItem>(
-					saveItems);
-			countDown = saveItems.size();
-			for (final SaveItem saveItem : tmpSaveItems) {
-
-				if (saveItem.delete) {
-					sectionService.deleteSection(saveItem.section,
-							new AsyncVoidCallBack());
-				} else {
-					final String value = saveItem.getValue();
-					if (Utils.isEmpty(value)) {
-						countDown--;
-						continue;
-					}
-					sectionService.storeSection(
-							createSectionFromSaveItem(saveItem, value),
-							new AsyncVoidCallBack());
-				}
-			}
-		}
-
-		private GwtSection createSectionFromSaveItem(SaveItem saveItem,
-				final String value) {
-
-			final GwtSection section;
-
-			if (saveItem.section != null) {
-				section = saveItem.section;
-				section.setSectionName(value);
+			if (saveItem.delete) {
+				sectionService.deleteSection(saveItem.section,
+						new AsyncVoidCallBack());
 			} else {
-				section = new GwtSection();
-				section.setParentKey(saveItem.parentKey);
-				section.setSectionName(value);
+				final String value = saveItem.getValue();
+				if (Utils.isEmpty(value)) {
+					countDown--;
+					continue;
+				}
+				sectionService.storeSection(
+						createSectionFromSaveItem(saveItem, value),
+						new AsyncVoidCallBack());
 			}
-			return section;
 		}
-
 	}
 
-	public class SaveItem extends TextBox {
+	private GwtSection createSectionFromSaveItem(SaveItem saveItem,
+			final String value) {
+
+		final GwtSection section;
+
+		if (saveItem.section != null) {
+			section = saveItem.section;
+			section.setSectionName(value);
+		} else {
+			section = new GwtSection();
+			section.setParentKey(saveItem.parentKey);
+			section.setSectionName(value);
+		}
+		return section;
+	}
+
+	private class SaveItem extends TextBox {
 
 		private String parentKey;
 		private GwtSection section;
@@ -299,33 +273,33 @@ public class SectionAdmin extends VerticalPanel {
 
 	}
 
-	public class AsyncVoidCallBack implements AsyncCallback<Void> {
+	private class AsyncVoidCallBack extends ErrorReportingCallback<Void> {
 
 		@Override
 		public void onFailure(Throwable caught) {
-			final String errorMessage = caught.getLocalizedMessage();
-			showError(errorMessage);
+			super.onFailure(caught);
 			resetFormAtTheEnd();
 		}
 
 		@Override
 		public void onSuccess(Void result) {
-//			if (!dialogBox.isShowing()) {
-//				saveSuccess.center();
-//				saveSuccess.show();
-//			}
+			// if (!dialogBox.isShowing()) {
+			// saveSuccess.center();
+			// saveSuccess.show();
+			// }
 			resetFormAtTheEnd();
 		}
 
-		private void showError(final String errorMessage) {
-//			if (saveSuccess.isShowing()) {
-//				saveSuccess.hide();
-//			}
-			dialogBox.setErrorMessage(errorMessage);
-			dialogBox.setDisableWhileShown(saveButton);
-			dialogBox.center();
-		}
+	}
 
+	@Override
+	boolean enableCancel() {
+		return true;
+	}
+
+	@Override
+	boolean enableSave() {
+		return true;
 	}
 
 }
