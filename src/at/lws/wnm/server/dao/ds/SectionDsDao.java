@@ -30,6 +30,11 @@ public class SectionDsDao extends AbstractDsDao {
 	private Map<String, List<String>> sectionChildCache;
 	private volatile boolean sectionChildCacheUpdateNeeded = true;
 
+	public GwtSection getSection(String sectionKey) {
+		final Entity section = getCachedEntity(toKey(sectionKey));
+		return toGwt(section);
+	}
+	
 	public String getSectionName(String sectionKey) {
 		final Entity section = getCachedEntity(toKey(sectionKey));
 		return (String) section.getProperty(SECTION_NAME_FIELD);
