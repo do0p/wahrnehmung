@@ -109,8 +109,26 @@ public class BeobachtungDsDao extends AbstractDsDao {
 				result.add(summary);
 			}
 		}
-		result.addAll(new HashSet<GwtBeobachtung>(filteredBeobachtungen
-				.values()));
+		Collection<GwtBeobachtung> values = filteredBeobachtungen
+				.values();
+		result.addAll(getBeobachtungenForDisplay(values, filter.isShowEmptyEntries()));
+		return result;
+	}
+
+	private HashSet<GwtBeobachtung> getBeobachtungenForDisplay(
+			Collection<GwtBeobachtung> beobachtungen, boolean showEmptyEntries) {
+		HashSet<GwtBeobachtung> result = new HashSet<GwtBeobachtung>();
+		if(showEmptyEntries) {
+			result.addAll(beobachtungen);
+		} else {
+			for(GwtBeobachtung beobachtung : beobachtungen) {
+				String text = beobachtung.getText();
+				if(text == null || text.isEmpty() || text.equals("<br>")) {
+					continue;
+				}
+				result.add(beobachtung);
+			}
+		}
 		return result;
 	}
 

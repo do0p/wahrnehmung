@@ -13,6 +13,8 @@ public class BeobachtungsFilter implements Serializable {
 
 	private Date[] timeRange;
 
+	private boolean showEmptyEntries;
+
 	public String getChildKey() {
 		return childKey;
 	}
@@ -35,6 +37,14 @@ public class BeobachtungsFilter implements Serializable {
 
 	public void setTimeRange(Date[] timeRange) {
 		this.timeRange = timeRange;
+	}
+
+	public boolean isShowEmptyEntries() {
+		return showEmptyEntries;
+	}
+
+	public void setShowEmptyEntries(boolean showEmptyEntries) {
+		this.showEmptyEntries = showEmptyEntries;
 	}
 
 }

@@ -400,10 +400,10 @@ public class EditContent extends HorizontalPanel {
 						+ Utils.LINE_BREAK;
 				;
 			}
-			if (text.isEmpty()) {
-				errorMessage = errorMessage + labels.noObservation()
-						+ Utils.LINE_BREAK;
-			}
+//			if (text.isEmpty()) {
+//				errorMessage = errorMessage + labels.noObservation()
+//						+ Utils.LINE_BREAK;
+//			}
 			if (!errorMessage.isEmpty()) {
 				EditContent.this.dialogBox.setErrorMessage(errorMessage);
 				EditContent.this.dialogBox
