@@ -18,8 +18,12 @@ import at.lws.wnm.shared.model.BeobachtungsFilter;
 import at.lws.wnm.shared.model.GwtBeobachtung;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Grid;
@@ -27,6 +31,7 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RichTextArea;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
 import com.google.gwt.view.client.CellPreviewEvent;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
@@ -49,11 +54,34 @@ public class Search extends VerticalPanel {
 		final RichTextArea textArea = new RichTextArea();
 		this.filter = new BeobachtungsFilter();
 		this.nameSelection = new NameSelection(dialogBox);
+		nameSelection.addSelectionHandler(new SelectionHandler<Suggestion>() {
+			@Override
+			public void onSelection(SelectionEvent<Suggestion> event) {
+				search();
+			}
+		});
 		this.sectionSelection = new SectionSelection(dialogBox, null);
+		sectionSelection.addChangeHandler(new ChangeHandler() {
+			@Override
+			public void onChange(ChangeEvent event) {
+				search();
+			}
+		});
 		this.yearSelection = new YearSelection(START_YEAR);
-		Button sendButton = new Button(labels.filter());
-		sendButton.addClickHandler(new FilterButtonHandler());
-		sendButton.addStyleName(Utils.SEND_BUTTON_STYLE);
+		yearSelection.addChangeHandler(new ChangeHandler() {
+			@Override
+			public void onChange(ChangeEvent event) {
+				search();
+			}
+		});
+//		Button sendButton = new Button(labels.filter());
+//		sendButton.addClickHandler(new ClickHandler() {
+//			@Override
+//			public void onClick(ClickEvent event) {
+//				search();
+//			}
+//		});
+//		sendButton.addStyleName(Utils.SEND_BUTTON_STYLE);
 		this.selectionModel = createSelectionModel(textArea);
 		this.table = new BeobachtungsTable(authorization, this.selectionModel,
 				this.filter, dialogBox);
@@ -66,10 +94,10 @@ public class Search extends VerticalPanel {
 					}
 				});
 		beobachtungen = new Show();
-		layout(textArea, sendButton);
+		layout(textArea);
 	}
 
-	private void layout(RichTextArea textArea, Button sendButton) {
+	private void layout(RichTextArea textArea) {
 		final List<SectionSelectionBox> sectionSelectionBoxes = this.sectionSelection
 				.getSectionSelectionBoxes();
 		final Grid filterBox = new Grid(1, sectionSelectionBoxes.size() + 3);
@@ -89,10 +117,10 @@ public class Search extends VerticalPanel {
 		yearSelection.setSize(Utils.LISTBOX_WIDTH + Utils.PIXEL,
 				Utils.ROW_HEIGHT + Utils.PIXEL);
 		filterBox.setWidget(0, i++, yearSelection);
-		
-		sendButton.setSize(Utils.BUTTON_WIDTH + Utils.PIXEL, Utils.ROW_HEIGHT
-				+ Utils.PIXEL);
-		filterBox.setWidget(0, i, sendButton);
+
+//		sendButton.setSize(Utils.BUTTON_WIDTH + Utils.PIXEL, Utils.ROW_HEIGHT
+//				+ Utils.PIXEL);
+//		filterBox.setWidget(0, i, sendButton);
 
 		add(this.table);
 
@@ -122,27 +150,29 @@ public class Search extends VerticalPanel {
 	}
 
 	private Panel createButtonContainer() {
-		final Grid buttonContainer = new Grid(1,2);
+		final Grid buttonContainer = new Grid(1, 2);
 
 		final Button printButton = new Button(labels.print());
 		printButton.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
-				Set<GwtBeobachtung> selectedSet = new TreeSet<GwtBeobachtung>( Search.this.selectionModel
-						.getSelectedSet());
+				Set<GwtBeobachtung> selectedSet = new TreeSet<GwtBeobachtung>(
+						Search.this.selectionModel.getSelectedSet());
 				if (!selectedSet.isEmpty()) {
-					Print.it(at.lws.wnm.shared.model.Utils.createPrintHtml(selectedSet));
+					Print.it(at.lws.wnm.shared.model.Utils
+							.createPrintHtml(selectedSet));
 				}
 			}
 		});
 
-		printButton.setSize(Utils.BUTTON_WIDTH + Utils.PIXEL, Utils.ROW_HEIGHT + Utils.PIXEL);
+		printButton.setSize(Utils.BUTTON_WIDTH + Utils.PIXEL, Utils.ROW_HEIGHT
+				+ Utils.PIXEL);
 		buttonContainer.setWidget(0, 0, printButton);
 
 		final Button showButton = new Button(labels.show());
 		showButton.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
-				Set<GwtBeobachtung> selectedSet = new TreeSet<GwtBeobachtung>( Search.this.selectionModel
-						.getSelectedSet());
+				Set<GwtBeobachtung> selectedSet = new TreeSet<GwtBeobachtung>(
+						Search.this.selectionModel.getSelectedSet());
 				if (!selectedSet.isEmpty()) {
 					beobachtungen.setBeobachtungen(selectedSet);
 					beobachtungen.center();
@@ -150,24 +180,20 @@ public class Search extends VerticalPanel {
 			}
 		});
 
-		showButton.setSize(Utils.BUTTON_WIDTH + Utils.PIXEL, Utils.ROW_HEIGHT + Utils.PIXEL);
+		showButton.setSize(Utils.BUTTON_WIDTH + Utils.PIXEL, Utils.ROW_HEIGHT
+				+ Utils.PIXEL);
 		buttonContainer.setWidget(0, 1, showButton);
 
-		
 		return buttonContainer;
 	}
 
-	public class FilterButtonHandler implements ClickHandler {
-		public FilterButtonHandler() {
-		}
-
-		public void onClick(ClickEvent event) {
-			Search.this.filter.setChildKey(Search.this.nameSelection
-					.getSelectedChildKey());
-			Search.this.filter.setSectionKey(Search.this.sectionSelection
-					.getSelectedSectionKey());
-			Search.this.filter.setTimeRange(Search.this.yearSelection.getSelectedTimeRange());
-			Search.this.table.updateTable();
-		}
+	private void search() {
+		Search.this.filter.setChildKey(Search.this.nameSelection
+				.getSelectedChildKey());
+		Search.this.filter.setSectionKey(Search.this.sectionSelection
+				.getSelectedSectionKey());
+		Search.this.filter.setTimeRange(Search.this.yearSelection
+				.getSelectedTimeRange());
+		Search.this.table.updateTable();
 	}
 }

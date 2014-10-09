@@ -21,6 +21,7 @@ import at.lws.wnm.shared.model.BeobachtungsFilter;
 import at.lws.wnm.shared.model.GwtBeobachtung;
 import at.lws.wnm.shared.model.GwtBeobachtung.DurationEnum;
 import at.lws.wnm.shared.model.GwtBeobachtung.SocialEnum;
+import at.lws.wnm.shared.model.GwtChild;
 import at.lws.wnm.shared.model.GwtSection;
 
 import com.google.appengine.api.datastore.DatastoreService;
@@ -60,6 +61,7 @@ public class BeobachtungDsDao extends AbstractDsDao {
 	private final Map<String, Date> dirty = new ConcurrentHashMap<String, Date>();
 
 	private SectionDsDao sectionDao = DaoRegistry.get(SectionDsDao.class);
+	private ChildDsDao childDao = DaoRegistry.get(ChildDsDao.class);
 
 	public List<GwtBeobachtung> getBeobachtungen(BeobachtungsFilter filter,
 			Range range, User user, boolean generateSummaries) {
@@ -75,11 +77,21 @@ public class BeobachtungDsDao extends AbstractDsDao {
 
 	private List<GwtBeobachtung> getBeobachtungen(BeobachtungsFilter filter,
 			User user, boolean generateSummaries) {
-		Multimap<String, GwtBeobachtung> allBeobachtungen = getAllGwtBeobachtungen(filter
-				.getChildKey());
+
+		String childKey = filter.getChildKey();
+		GwtChild child = childDao.getChild(childKey);
+
+		if (childKey == null) {
+			throw new IllegalArgumentException("no child with key " + childKey);
+		}
+
+		Multimap<String, GwtBeobachtung> allBeobachtungen = getAllGwtBeobachtungen(childKey);
+
+		Predicate<Entry<String, GwtBeobachtung>> mapFilter = createFilter(
+				child, filter, user);
 
 		Multimap<String, GwtBeobachtung> filteredBeobachtungen = Multimaps
-				.filterEntries(allBeobachtungen, createFilter(filter, user));
+				.filterEntries(allBeobachtungen, mapFilter);
 		List<GwtBeobachtung> result = new ArrayList<GwtBeobachtung>();
 
 		if (generateSummaries) {
@@ -102,15 +114,14 @@ public class BeobachtungDsDao extends AbstractDsDao {
 		return result;
 	}
 
-	private GwtBeobachtung createSummary(Collection<GwtBeobachtung> beobachtungen,
-			String sectionKey) {
+	private GwtBeobachtung createSummary(
+			Collection<GwtBeobachtung> beobachtungen, String sectionKey) {
 
 		ResourceBundle bundle = ResourceBundle.getBundle("messages");
 
 		List<GwtBeobachtung> tmpList = getSortedList(beobachtungen);
 		GwtBeobachtung firstBeobachtung = tmpList.get(0);
-		GwtBeobachtung lastBeobachtung = tmpList
-				.get(tmpList.size() - 1);
+		GwtBeobachtung lastBeobachtung = tmpList.get(tmpList.size() - 1);
 		String sectionName = sectionDao.getSectionName(sectionKey);
 		String childName = firstBeobachtung.getChildName();
 		Date startDate = firstBeobachtung.getDate();
@@ -131,7 +142,8 @@ public class BeobachtungDsDao extends AbstractDsDao {
 
 	private List<GwtBeobachtung> getSortedList(
 			Collection<GwtBeobachtung> beobachtungen) {
-		List<GwtBeobachtung> tmpList = new ArrayList<GwtBeobachtung>(beobachtungen);
+		List<GwtBeobachtung> tmpList = new ArrayList<GwtBeobachtung>(
+				beobachtungen);
 		Collections.sort(tmpList, new Comparator<GwtBeobachtung>() {
 
 			@Override
@@ -154,7 +166,8 @@ public class BeobachtungDsDao extends AbstractDsDao {
 	}
 
 	private Predicate<Entry<String, GwtBeobachtung>> createFilter(
-			final BeobachtungsFilter filter, final User user) {
+			final GwtChild child, final BeobachtungsFilter filter,
+			final User user) {
 
 		return new Predicate<Map.Entry<String, GwtBeobachtung>>() {
 
@@ -174,10 +187,21 @@ public class BeobachtungDsDao extends AbstractDsDao {
 					return false;
 				}
 
+				Date lastDevelopementDialogueDate = child
+						.getLastDevelopementDialogueDate();
+
 				Date[] timeRange = filter.getTimeRange();
 				if (timeRange != null && timeRange.length == 2) {
+
 					Date startDate = timeRange[0];
 					Date endDate = timeRange[1];
+					if (lastDevelopementDialogueDate != null) {
+						if (endDate.before(lastDevelopementDialogueDate)) {
+							return false;
+						}
+						startDate = last(lastDevelopementDialogueDate,
+								startDate);
+					}
 
 					if (beobachtung.getDate().before(startDate)) {
 						return false;
@@ -185,9 +209,18 @@ public class BeobachtungDsDao extends AbstractDsDao {
 					if (beobachtung.getDate().after(endDate)) {
 						return false;
 					}
+				} else if (lastDevelopementDialogueDate != null) {
+					if (beobachtung.getDate().before(
+							lastDevelopementDialogueDate)) {
+						return false;
+					}
 				}
 
 				return true;
+			}
+
+			private Date last(Date date1, Date date2) {
+				return date1.before(date2) ? date2 : date1;
 			}
 		};
 	}

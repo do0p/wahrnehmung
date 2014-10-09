@@ -15,7 +15,7 @@ public class GwtChild implements Serializable, Comparable<GwtChild> {
 	private List<Date> developementDialogueDates;
 
 	public List<Date> getDevelopementDialogueDates() {
-		return developementDialogueDates;
+		return developementDialogueDates ;
 	}
 
 	public void setDevelopementDialogueDates(List<Date> developementDialogues) {
@@ -79,6 +79,10 @@ public class GwtChild implements Serializable, Comparable<GwtChild> {
 		if (developementDialogueDates != null) {
 			developementDialogueDates.remove(date);
 		}
+	}
+
+	public Date getLastDevelopementDialogueDate() {
+		return developementDialogueDates == null || developementDialogueDates.isEmpty() ? null : developementDialogueDates.get(0);
 	}
 
 }

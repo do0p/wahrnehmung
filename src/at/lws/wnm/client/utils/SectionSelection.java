@@ -258,5 +258,12 @@ public class SectionSelection {
 
 		}
 	}
+	
+	
+	public void addChangeHandler(ChangeHandler changeHanlder) {
+		for(SectionSelectionBox sectionSelectionBox : selectionBoxes) {
+			sectionSelectionBox.addChangeHandler(changeHanlder);
+		}
+	}
 
 }
