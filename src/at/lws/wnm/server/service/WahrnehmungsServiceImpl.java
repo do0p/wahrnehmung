@@ -56,9 +56,8 @@ public class WahrnehmungsServiceImpl extends RemoteServiceServlet implements
 		final User user = getUserForQuery();
 		final BeobachtungsResult result = new BeobachtungsResult();
 		if (filter.getChildKey() != null) {
-			result.setBeobachtungen(beobachtungsDao.getBeobachtungen(filter,
-					range, user));
-			result.setRowCount(beobachtungsDao.getRowCount(filter, user));
+			result.setBeobachtungen(beobachtungsDao.getBeobachtungen(filter, range, user, true));
+			result.setRowCount(beobachtungsDao.getRowCount(filter, user, true));
 		}
 
 		return result;

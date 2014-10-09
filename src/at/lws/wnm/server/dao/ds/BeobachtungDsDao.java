@@ -2,14 +2,18 @@ package at.lws.wnm.server.dao.ds;
 
 import static com.google.appengine.api.datastore.FetchOptions.Builder.withDefaults;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.ResourceBundle;
 import java.util.concurrent.ConcurrentHashMap;
 
 import at.lws.wnm.server.dao.DaoRegistry;
@@ -58,9 +62,10 @@ public class BeobachtungDsDao extends AbstractDsDao {
 	private SectionDsDao sectionDao = DaoRegistry.get(SectionDsDao.class);
 
 	public List<GwtBeobachtung> getBeobachtungen(BeobachtungsFilter filter,
-			Range range, User user) {
+			Range range, User user, boolean generateSummaries) {
 
-		List<GwtBeobachtung> beobachtungen = getBeobachtungen(filter, user);
+		List<GwtBeobachtung> beobachtungen = getBeobachtungen(filter, user,
+				generateSummaries);
 
 		Collections.sort(beobachtungen);
 
@@ -69,12 +74,72 @@ public class BeobachtungDsDao extends AbstractDsDao {
 	}
 
 	private List<GwtBeobachtung> getBeobachtungen(BeobachtungsFilter filter,
-			User user) {
+			User user, boolean generateSummaries) {
 		Multimap<String, GwtBeobachtung> allBeobachtungen = getAllGwtBeobachtungen(filter
 				.getChildKey());
 
-		List<GwtBeobachtung> result = filter(allBeobachtungen, filter, user);
+		Multimap<String, GwtBeobachtung> filteredBeobachtungen = Multimaps
+				.filterEntries(allBeobachtungen, createFilter(filter, user));
+		List<GwtBeobachtung> result = new ArrayList<GwtBeobachtung>();
+
+		if (generateSummaries) {
+			for (String sectionKey : filteredBeobachtungen.keySet()) {
+
+				Collection<GwtBeobachtung> beobachtungen = filteredBeobachtungen
+						.get(sectionKey);
+
+				if (beobachtungen.isEmpty()) {
+					continue;
+				}
+
+				GwtBeobachtung summary = createSummary(beobachtungen,
+						sectionKey);
+				result.add(summary);
+			}
+		}
+		result.addAll(new HashSet<GwtBeobachtung>(filteredBeobachtungen
+				.values()));
 		return result;
+	}
+
+	private GwtBeobachtung createSummary(Collection<GwtBeobachtung> beobachtungen,
+			String sectionKey) {
+
+		ResourceBundle bundle = ResourceBundle.getBundle("messages");
+
+		List<GwtBeobachtung> tmpList = getSortedList(beobachtungen);
+		GwtBeobachtung firstBeobachtung = tmpList.get(0);
+		GwtBeobachtung lastBeobachtung = tmpList
+				.get(tmpList.size() - 1);
+		String sectionName = sectionDao.getSectionName(sectionKey);
+		String childName = firstBeobachtung.getChildName();
+		Date startDate = firstBeobachtung.getDate();
+		Date endDate = lastBeobachtung.getDate();
+		GwtBeobachtung summary = new GwtBeobachtung();
+		summary.setChildKey(firstBeobachtung.getChildKey());
+		summary.setSectionKey(sectionKey);
+		summary.setChildName(childName);
+		summary.setSectionName(sectionName);
+		summary.setDate(new Date());
+		MessageFormat messageFormat = new MessageFormat(
+				bundle.getString("summary"), Locale.GERMAN);
+		summary.setText(messageFormat.format(new Object[] { childName,
+				sectionName, tmpList.size(), startDate, endDate }));
+		summary.setUser("System");
+		return summary;
+	}
+
+	private List<GwtBeobachtung> getSortedList(
+			Collection<GwtBeobachtung> beobachtungen) {
+		List<GwtBeobachtung> tmpList = new ArrayList<GwtBeobachtung>(beobachtungen);
+		Collections.sort(tmpList, new Comparator<GwtBeobachtung>() {
+
+			@Override
+			public int compare(GwtBeobachtung o1, GwtBeobachtung o2) {
+				return o2.compareTo(o1);
+			}
+		});
+		return tmpList;
 	}
 
 	private List<GwtBeobachtung> getRange(List<GwtBeobachtung> result,
@@ -85,17 +150,7 @@ public class BeobachtungDsDao extends AbstractDsDao {
 		if (startIndex != 0 || endIndex < result.size()) {
 			result = result.subList(startIndex, endIndex);
 		}
-		return result;
-	}
-
-	private List<GwtBeobachtung> filter(
-			Multimap<String, GwtBeobachtung> allBeobachtungen,
-			BeobachtungsFilter filter, User user) {
-		Multimap<String, GwtBeobachtung> beobachtung = Multimaps.filterEntries(
-				allBeobachtungen, createFilter(filter, user));
-		List<GwtBeobachtung> result = new ArrayList<GwtBeobachtung>(
-				new HashSet<GwtBeobachtung>(beobachtung.values()));
-		return result;
+		return new ArrayList<GwtBeobachtung>(result);
 	}
 
 	private Predicate<Entry<String, GwtBeobachtung>> createFilter(
@@ -198,8 +253,9 @@ public class BeobachtungDsDao extends AbstractDsDao {
 		dirty.put(childKey, new Date());
 	}
 
-	public int getRowCount(BeobachtungsFilter filter, User user) {
-		return getBeobachtungen(filter, user).size();
+	public int getRowCount(BeobachtungsFilter filter, User user,
+			boolean generateSummaries) {
+		return getBeobachtungen(filter, user, generateSummaries).size();
 	}
 
 	public GwtBeobachtung getBeobachtung(String beobachtungsKey) {
@@ -267,7 +323,6 @@ public class BeobachtungDsDao extends AbstractDsDao {
 		return BEOBACHTUNGS_DAO_MEMCACHE;
 	}
 
-
 	private Filter createSectionFilter(Collection<String> sectionKeys) {
 		Filter sectionFilter;
 		if (sectionKeys.size() == 1) {
@@ -287,7 +342,6 @@ public class BeobachtungDsDao extends AbstractDsDao {
 		return new Query.FilterPredicate(SECTION_KEY_FIELD,
 				FilterOperator.EQUAL, toKey(sectionKey));
 	}
-
 
 	private GwtBeobachtung toGwt(Entity entity) {
 		String childKey = toString(entity.getParent());

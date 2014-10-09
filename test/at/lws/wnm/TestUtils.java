@@ -51,9 +51,9 @@ public class TestUtils {
 	}
 
 	public static GwtBeobachtung createBeobachtung(String childKey,
-			String sectionkey, User user, Date date) {
+			String sectionkey, User user, Date date, String text) {
 		return createBeobachtung(null, childKey, sectionkey, date,
-				DurationEnum.LONG, SocialEnum.ALONE, TestUtils.TEXT, user);
+				DurationEnum.LONG, SocialEnum.ALONE, text, user);
 
 	}
 

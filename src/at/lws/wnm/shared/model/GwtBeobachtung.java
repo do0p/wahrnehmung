@@ -7,6 +7,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
 public class GwtBeobachtung implements Serializable, Comparable<GwtBeobachtung> {
 
 	private static final long serialVersionUID = -2732611746367965750L;
@@ -201,6 +204,11 @@ public class GwtBeobachtung implements Serializable, Comparable<GwtBeobachtung> 
 			}
 		}
 		return result;
+	}
+	
+	@Override
+	public String toString() {
+		return text;
 	}
 
 }
