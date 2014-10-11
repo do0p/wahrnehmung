@@ -13,6 +13,7 @@ import at.lws.wnm.client.utils.SectionSelectionBox;
 import at.lws.wnm.client.utils.Show;
 import at.lws.wnm.client.utils.Utils;
 import at.lws.wnm.client.utils.YearSelection;
+import at.lws.wnm.client.utils.YearSelection.YearSelectionResult;
 import at.lws.wnm.shared.model.Authorization;
 import at.lws.wnm.shared.model.BeobachtungsFilter;
 import at.lws.wnm.shared.model.GwtBeobachtung;
@@ -192,8 +193,15 @@ public class Search extends VerticalPanel {
 				.getSelectedChildKey());
 		Search.this.filter.setSectionKey(Search.this.sectionSelection
 				.getSelectedSectionKey());
-		Search.this.filter.setTimeRange(Search.this.yearSelection
-				.getSelectedTimeRange());
+		YearSelectionResult selectionResult = yearSelection
+				.getSelectedTimeRange();
+		if(selectionResult.isSinceLastDevelopementDialogue()){
+			filter.setSinceLastDevelopmementDialogue(true);
+			filter.setTimeRange(null);
+		} else {
+			filter.setSinceLastDevelopmementDialogue(false);
+			filter.setTimeRange(selectionResult.getTimeRange());
+		}
 		Search.this.table.updateTable();
 	}
 }

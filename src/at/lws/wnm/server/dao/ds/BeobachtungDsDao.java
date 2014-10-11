@@ -252,7 +252,7 @@ public class BeobachtungDsDao extends AbstractDsDao {
 
 					Date startDate = timeRange[0];
 					Date endDate = timeRange[1];
-					if (lastDevelopementDialogueDate != null) {
+					if (filter.isSinceLastDevelopmementDialogue() && lastDevelopementDialogueDate != null) {
 						if (endDate.before(lastDevelopementDialogueDate)) {
 							return false;
 						}
@@ -266,7 +266,7 @@ public class BeobachtungDsDao extends AbstractDsDao {
 					if (beobachtung.getDate().after(endDate)) {
 						return false;
 					}
-				} else if (lastDevelopementDialogueDate != null) {
+				} else if (filter.isSinceLastDevelopmementDialogue() && lastDevelopementDialogueDate != null) {
 					if (beobachtung.getDate().before(
 							lastDevelopementDialogueDate)) {
 						return false;

@@ -52,4 +52,5 @@ public interface Labels extends Messages {
 	String noChildSelected();
 	String noDateGiven();
 	String summary(String childName, String sectionName, int count, Date firstDate, Date lastDate);
+	String developementDialogueDate();
 }

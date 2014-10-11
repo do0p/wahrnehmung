@@ -414,7 +414,7 @@ public class EditContent extends HorizontalPanel {
 
 			GwtBeobachtung beobachtung = new GwtBeobachtung();
 			beobachtung.setKey(EditContent.this.key);
-			beobachtung.setText(text);
+			beobachtung.setText(cleanUp(text));
 			beobachtung.setChildKey(childKey);
 			beobachtung.setSectionKey(sectionKey);
 			beobachtung.setDate(date);
@@ -441,6 +441,10 @@ public class EditContent extends HorizontalPanel {
 							EditContent.this.resetForm();
 						}
 					});
+		}
+
+		private String cleanUp(String text) {
+			return (text != null && text.equals("<br>")) ? "" : text;
 		}
 	}
 }

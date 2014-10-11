@@ -15,6 +15,8 @@ public class BeobachtungsFilter implements Serializable {
 
 	private boolean showEmptyEntries;
 
+	private boolean sinceLastDevelopmementDialogue;
+
 	public String getChildKey() {
 		return childKey;
 	}
@@ -45,6 +47,14 @@ public class BeobachtungsFilter implements Serializable {
 
 	public void setShowEmptyEntries(boolean showEmptyEntries) {
 		this.showEmptyEntries = showEmptyEntries;
+	}
+
+	public void setSinceLastDevelopmementDialogue(boolean sinceLastDevelopmementDialogue) {
+		this.sinceLastDevelopmementDialogue = sinceLastDevelopmementDialogue;
+	}
+
+	public boolean isSinceLastDevelopmementDialogue() {
+		return sinceLastDevelopmementDialogue;
 	}
 
 }
