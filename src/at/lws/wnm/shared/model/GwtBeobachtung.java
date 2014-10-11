@@ -7,10 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
-
-public class GwtBeobachtung implements Serializable, Comparable<GwtBeobachtung> {
+public class GwtBeobachtung implements Serializable {
 
 	private static final long serialVersionUID = -2732611746367965750L;
 	private String text;
@@ -188,23 +185,7 @@ public class GwtBeobachtung implements Serializable, Comparable<GwtBeobachtung> 
 		return result * 17 + user.hashCode();
 	}
 
-	@Override
-	public int compareTo(GwtBeobachtung other) {
-		int result = childKey.compareTo(other.childKey);
-		if (result == 0) {
-			result = other.date.compareTo(date);
-			if (result == 0) {
-				result = sectionKey.compareTo(other.sectionKey);
-				if (result == 0) {
-					result = user.compareTo(other.user);
-					if (result == 0) {
-						result = text.compareTo(other.text);
-					}
-				}
-			}
-		}
-		return result;
-	}
+
 	
 	@Override
 	public String toString() {

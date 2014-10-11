@@ -23,6 +23,7 @@ import at.lws.wnm.shared.model.GwtBeobachtung.DurationEnum;
 import at.lws.wnm.shared.model.GwtBeobachtung.SocialEnum;
 import at.lws.wnm.shared.model.GwtChild;
 import at.lws.wnm.shared.model.GwtSection;
+import at.lws.wnm.shared.model.GwtSummary;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Entity;
@@ -58,6 +59,8 @@ public class BeobachtungDsDao extends AbstractDsDao {
 	private static int EXPECTED_SECTION_PER_CHILD = 100;
 	private static int EXPECTED_BEOBACHTUNG_PER_SECTION = 20;
 
+
+
 	private final Map<String, Date> dirty = new ConcurrentHashMap<String, Date>();
 
 	private SectionDsDao sectionDao = DaoRegistry.get(SectionDsDao.class);
@@ -69,7 +72,42 @@ public class BeobachtungDsDao extends AbstractDsDao {
 		List<GwtBeobachtung> beobachtungen = getBeobachtungen(filter, user,
 				generateSummaries);
 
-		Collections.sort(beobachtungen);
+		Collections.sort(beobachtungen, new Comparator<GwtBeobachtung>() {
+
+			@Override
+			public int compare(GwtBeobachtung o1, GwtBeobachtung o2) {
+
+				int result = 0;
+				if (o1 instanceof GwtSummary) {
+
+					if (o2 instanceof GwtSummary) {
+						result = ((GwtSummary) o2).getCount() - ((GwtSummary) o1).getCount();
+					} else {
+						result = -1;
+					}
+
+				} else if (o2 instanceof GwtSummary) {
+					result = 1;
+				}
+				if (result == 0) {
+
+					result = o2.getDate().compareTo(o1.getDate());
+					if (result == 0) {
+						result = o1.getSectionName().compareTo(
+								o2.getSectionName());
+						if (result == 0) {
+							result = o1.getUser().compareTo(o2.getUser());
+							if (result == 0) {
+								result = o1.getText().compareTo(o2.getText());
+							}
+						}
+					}
+				}
+				return result;
+
+			}
+
+		});
 
 		return getRange(beobachtungen, range);
 
@@ -109,21 +147,21 @@ public class BeobachtungDsDao extends AbstractDsDao {
 				result.add(summary);
 			}
 		}
-		Collection<GwtBeobachtung> values = filteredBeobachtungen
-				.values();
-		result.addAll(getBeobachtungenForDisplay(values, filter.isShowEmptyEntries()));
+		Collection<GwtBeobachtung> values = filteredBeobachtungen.values();
+		result.addAll(getBeobachtungenForDisplay(values,
+				filter.isShowEmptyEntries()));
 		return result;
 	}
 
 	private HashSet<GwtBeobachtung> getBeobachtungenForDisplay(
 			Collection<GwtBeobachtung> beobachtungen, boolean showEmptyEntries) {
 		HashSet<GwtBeobachtung> result = new HashSet<GwtBeobachtung>();
-		if(showEmptyEntries) {
+		if (showEmptyEntries) {
 			result.addAll(beobachtungen);
 		} else {
-			for(GwtBeobachtung beobachtung : beobachtungen) {
+			for (GwtBeobachtung beobachtung : beobachtungen) {
 				String text = beobachtung.getText();
-				if(text == null || text.isEmpty() || text.equals("<br>")) {
+				if (text == null || text.isEmpty() || text.equals("<br>")) {
 					continue;
 				}
 				result.add(beobachtung);
@@ -144,17 +182,18 @@ public class BeobachtungDsDao extends AbstractDsDao {
 		String childName = firstBeobachtung.getChildName();
 		Date startDate = firstBeobachtung.getDate();
 		Date endDate = lastBeobachtung.getDate();
-		GwtBeobachtung summary = new GwtBeobachtung();
+		GwtSummary summary = new GwtSummary();
 		summary.setChildKey(firstBeobachtung.getChildKey());
 		summary.setSectionKey(sectionKey);
 		summary.setChildName(childName);
 		summary.setSectionName(sectionName);
 		summary.setDate(new Date());
 		MessageFormat messageFormat = new MessageFormat(
-				bundle.getString("summary"), Locale.GERMAN);
-		summary.setText(messageFormat.format(new Object[] { childName,
-				sectionName, tmpList.size(), startDate, endDate }));
-		summary.setUser("System");
+				bundle.getString("summaryTemplate"), Locale.GERMAN);
+		summary.setText(messageFormat.format(new Object[] { sectionName,
+				tmpList.size(), startDate, endDate }));
+		summary.setUser(bundle.getString("summaryUser"));
+		summary.setCount(tmpList.size());
 		return summary;
 	}
 
@@ -166,7 +205,7 @@ public class BeobachtungDsDao extends AbstractDsDao {
 
 			@Override
 			public int compare(GwtBeobachtung o1, GwtBeobachtung o2) {
-				return o2.compareTo(o1);
+				return o2.getDate().compareTo(o1.getDate());
 			}
 		});
 		return tmpList;
@@ -269,9 +308,14 @@ public class BeobachtungDsDao extends AbstractDsDao {
 
 			GwtBeobachtung gwtBeobachtung = toGwt(beobachtung);
 			String sectionKey = gwtBeobachtung.getSectionKey();
+			GwtSection section = sectionDao.getSection(sectionKey);
+			if (section == null) {
+				throw new IllegalArgumentException("unknown section with key "
+						+ sectionKey);
+			}
 			sectionToBeobachtung.put(sectionKey, gwtBeobachtung);
 
-			setParentSections(sectionKey, gwtBeobachtung, sectionToBeobachtung);
+			setParentSections(section, gwtBeobachtung, sectionToBeobachtung);
 		}
 		return sectionToBeobachtung;
 	}
@@ -281,14 +325,18 @@ public class BeobachtungDsDao extends AbstractDsDao {
 		return getDatastoreService().prepare(query).asIterable();
 	}
 
-	private void setParentSections(String sectionKey,
+	private void setParentSections(GwtSection section,
 			GwtBeobachtung gwtBeobachtung,
 			Multimap<String, GwtBeobachtung> sectionToBeobachtung) {
-		GwtSection section = sectionDao.getSection(sectionKey);
 		String parentKey = section.getParentKey();
 		if (parentKey != null) {
-			sectionToBeobachtung.put(parentKey, gwtBeobachtung);
-			setParentSections(parentKey, gwtBeobachtung, sectionToBeobachtung);
+			GwtSection parentSection = sectionDao.getSection(parentKey);
+			// do not summarize in the top level
+			if (parentSection.getParentKey() != null) {
+				sectionToBeobachtung.put(parentKey, gwtBeobachtung);
+				setParentSections(parentSection, gwtBeobachtung,
+						sectionToBeobachtung);
+			}
 		}
 	}
 

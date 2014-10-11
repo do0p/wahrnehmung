@@ -119,7 +119,8 @@ public class BeobachtungsTable extends CellTable<GwtBeobachtung> {
 		};
 		Column<GwtBeobachtung, String> dateColumn = new TextColumn<GwtBeobachtung>() {
 			public String getValue(GwtBeobachtung object) {
-				return at.lws.wnm.shared.model.Utils.DATE_FORMAT.format(object.getDate());
+				return at.lws.wnm.shared.model.Utils.DATE_FORMAT.format(object
+						.getDate());
 			}
 		};
 		Column<GwtBeobachtung, String> socialColumn = new TextColumn<GwtBeobachtung>() {
@@ -147,38 +148,48 @@ public class BeobachtungsTable extends CellTable<GwtBeobachtung> {
 				new ActionCell<GwtBeobachtung>(labels.change(),
 						new ActionCell.Delegate<GwtBeobachtung>() {
 							public void execute(GwtBeobachtung object) {
+								String key = object.getKey();
+								if (key == null) {
+									return;
+								}
 								RootPanel rootPanel = RootPanel
 										.get(Utils.MAIN_ELEMENT);
 								rootPanel.clear();
-								rootPanel.add(new EditContent(authorization,object.getKey()));
+								rootPanel.add(new EditContent(authorization,
+										key));
 								History.newItem(Navigation.NEW_ENTRY, false);
 							}
 						}));
 		Column<GwtBeobachtung, GwtBeobachtung> deleteColumn = new IdentityColumn<GwtBeobachtung>(
 				new ActionCell<GwtBeobachtung>(labels.delete(),
 						new ActionCell.Delegate<GwtBeobachtung>() {
-							public void execute(final GwtBeobachtung object) {
+							public void execute(GwtBeobachtung object) {
+								final String key = object.getKey();
+								if (key == null) {
+									return;
+								}
 								BeobachtungsTable.this.decisionBox
 										.addOkClickHandler(new ClickHandler() {
 											public void onClick(ClickEvent arg0) {
-												BeobachtungsTable.this.wahrnehmungsService.deleteBeobachtung(
-														object.getKey(),
-														new AsyncCallback<Void>() {
-															public void onFailure(
-																	Throwable caught) {
-																BeobachtungsTable.this.dialogBox
-																		.setErrorMessage(caught
-																				.getLocalizedMessage());
-																BeobachtungsTable.this.dialogBox
-																		.center();
-															}
+												BeobachtungsTable.this.wahrnehmungsService
+														.deleteBeobachtung(
+																key,
+																new AsyncCallback<Void>() {
+																	public void onFailure(
+																			Throwable caught) {
+																		BeobachtungsTable.this.dialogBox
+																				.setErrorMessage(caught
+																						.getLocalizedMessage());
+																		BeobachtungsTable.this.dialogBox
+																				.center();
+																	}
 
-															public void onSuccess(
-																	Void arg0) {
-																BeobachtungsTable.this
-																		.updateTable();
-															}
-														});
+																	public void onSuccess(
+																			Void arg0) {
+																		BeobachtungsTable.this
+																				.updateTable();
+																	}
+																});
 											}
 										});
 								BeobachtungsTable.this.decisionBox.center();
