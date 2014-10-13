@@ -127,8 +127,10 @@ public class AuthorizationAdmin extends AbstractAdminTab {
 		}
 		aut.setEmail(email);
 		aut.setAdmin(adminCheckBox.getValue().booleanValue());
-		aut.setSeeAll(seeAllCheckBox.getValue().booleanValue());
+		boolean isTeacher = seeAllCheckBox.getValue().booleanValue();
+		aut.setSeeAll(isTeacher);
 		aut.setEditSections(editSectionCheckBox.getValue());
+		aut.setEditDialogueDates(isTeacher);
 
 		authorizationService.storeAuthorization(aut,
 				new ErrorReportingCallback<Void>() {

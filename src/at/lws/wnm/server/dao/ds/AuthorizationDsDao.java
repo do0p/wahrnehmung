@@ -28,6 +28,7 @@ public class AuthorizationDsDao extends AbstractDsDao {
 	public static final String ADMIN_FIELD = "admin";
 	public static final String SEE_ALL_FIELD = "seeAll";
 	public static final String EDIT_SECTIONS_FIELD = "editSections";
+	public static final String EDIT_DIALOGUE_DATES_FIELD = "editDialogueDates";
 
 	static {
 		SUPER_USER_IDS.add("dbrandl72@gmail.com");
@@ -130,6 +131,8 @@ public class AuthorizationDsDao extends AbstractDsDao {
 		authorization.setAdmin((Boolean) entity.getProperty(ADMIN_FIELD));
 		authorization.setEditSections((Boolean) entity
 				.getProperty(EDIT_SECTIONS_FIELD));
+		authorization.setEditDialogueDates((Boolean) entity
+				.getProperty(EDIT_DIALOGUE_DATES_FIELD));
 		authorization.setSeeAll((Boolean) entity.getProperty(SEE_ALL_FIELD));
 		return authorization;
 	}
@@ -142,6 +145,7 @@ public class AuthorizationDsDao extends AbstractDsDao {
 		authorization.setProperty(EMAIL_FIELD, aut.getEmail());
 		authorization.setProperty(ADMIN_FIELD, aut.isAdmin());
 		authorization.setProperty(EDIT_SECTIONS_FIELD, aut.isEditSections());
+		authorization.setProperty(EDIT_DIALOGUE_DATES_FIELD, aut.isEditDialogueDates());
 		authorization.setProperty(SEE_ALL_FIELD, aut.isSeeAll());
 		return authorization;
 	}
@@ -153,6 +157,7 @@ public class AuthorizationDsDao extends AbstractDsDao {
 		superUser.setProperty(ADMIN_FIELD, true);
 		superUser.setProperty(SEE_ALL_FIELD, true);
 		superUser.setProperty(EDIT_SECTIONS_FIELD, true);
+		superUser.setProperty(EDIT_DIALOGUE_DATES_FIELD, true);
 		return superUser;
 	}
 }

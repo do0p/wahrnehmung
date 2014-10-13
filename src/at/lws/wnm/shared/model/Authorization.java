@@ -24,6 +24,8 @@ public class Authorization implements Serializable {
 
 	private String key;
 
+	private Boolean editDialogueDates;
+
 	public boolean isLoggedIn() {
 		return loggedIn;
 	}
@@ -108,6 +110,14 @@ public class Authorization implements Serializable {
 
 	public void setKey(String key) {
 		this.key = key;
+	}
+
+	public boolean isEditDialogueDates() {
+		return editDialogueDates == null ? false : editDialogueDates.booleanValue();
+	}
+
+	public void setEditDialogueDates(Boolean editDialogueDates) {
+		this.editDialogueDates = editDialogueDates;
 	}
 
 }

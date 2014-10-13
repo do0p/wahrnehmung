@@ -25,7 +25,7 @@ public class Navigation extends HorizontalPanel {
 		setSpacing(10);
 		add(new Hyperlink(labels.create(), NEW_ENTRY));
 		add(new Hyperlink(labels.show(), LIST_ENTRY));
-		if ((authorization.isAdmin()) || (authorization.isEditSections()))
+		if ((authorization.isAdmin()) || (authorization.isEditSections()) || (authorization.isSeeAll()))
 			add(new Hyperlink(labels.configure(), ADMIN));
 	}
 
