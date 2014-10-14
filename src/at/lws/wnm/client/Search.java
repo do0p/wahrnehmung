@@ -61,7 +61,7 @@ public class Search extends VerticalPanel {
 				search();
 			}
 		});
-		this.sectionSelection = new SectionSelection(dialogBox, null);
+		this.sectionSelection = new SectionSelection(dialogBox);
 		sectionSelection.addChangeHandler(new ChangeHandler() {
 			@Override
 			public void onChange(ChangeEvent event) {

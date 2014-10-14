@@ -33,16 +33,13 @@ public class SectionSelection {
 
 	private String selectedSectionKey;
 
-	public SectionSelection(PopUp dialogBox, ChangeHandler changeHandler) {
+	public SectionSelection(PopUp dialogBox) {
 		this.dialogBox = dialogBox;
 
 		selectionBoxes = new ArrayList<SectionSelectionBox>();
-		selectionBoxes.add(createSelection("- " + labels.category() + " -",
-				changeHandler));
-		selectionBoxes.add(createSelection("- " + labels.section() + " -",
-				changeHandler));
-		selectionBoxes.add(createSelection("- " + labels.subSection() + " -",
-				changeHandler));
+		selectionBoxes.add(createSelection(labels.category()));
+		selectionBoxes.add(createSelection(labels.section()));
+		selectionBoxes.add(createSelection(labels.subSection()));
 
 		final Iterator<SectionSelectionBox> iterator = selectionBoxes
 				.iterator();
@@ -58,14 +55,9 @@ public class SectionSelection {
 		createSectionSelections();
 	}
 
-	private SectionSelectionBox createSelection(String defaultText,
-			ChangeHandler changeHandler) {
-		final SectionSelectionBox sectionSelectionBox = new SectionSelectionBox(
-				defaultText);
-		if (changeHandler != null) {
-			sectionSelectionBox.addChangeHandler(changeHandler);
-		}
-		return sectionSelectionBox;
+	private SectionSelectionBox createSelection(String defaultText) {
+		return new SectionSelectionBox("- " + 
+				defaultText + " -");
 	}
 
 	public String getSelectedSectionKey() {

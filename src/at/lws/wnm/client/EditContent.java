@@ -63,49 +63,29 @@ public class EditContent extends HorizontalPanel {
 		this.key = key;
 		init();
 		layout();
-		if (key != null)
-			loadData(key);
+		loadData();
 	}
 
-	private void loadData(String key) {
-		this.wahrnehmungService.getBeobachtung(key,
-				new AsyncCallback<GwtBeobachtung>() {
-					public void onFailure(Throwable caught) {
-						EditContent.this.dialogBox.setErrorMessage();
-						EditContent.this.dialogBox
-								.setDisableWhileShown(new FocusWidget[] { EditContent.this.sendButton });
-						EditContent.this.dialogBox.center();
-					}
-
-					public void onSuccess(GwtBeobachtung result) {
-						EditContent.this.nameSelection.setSelected(result
-								.getChildKey());
-						EditContent.this.dateBox.setValue(result.getDate());
-						EditContent.this.sectionSelection.setSelected(result
-								.getSectionKey());
-						GwtBeobachtung.DurationEnum duration = result
-								.getDuration();
-						if (duration != null) {
-							EditContent.this.durationSelection
-									.setSelectedIndex(duration.ordinal() + 1);
+	private void loadData() {
+		if (key != null) {
+			this.wahrnehmungService.getBeobachtung(key,
+					new AsyncCallback<GwtBeobachtung>() {
+						public void onFailure(Throwable caught) {
+							displayErrorMessage();
 						}
 
-						GwtBeobachtung.SocialEnum social = result.getSocial();
-						if (social != null) {
-							EditContent.this.socialSelection
-									.setSelectedIndex(social.ordinal() + 1);
+						public void onSuccess(GwtBeobachtung result) {
+							updateView(result);
 						}
-						EditContent.this.textArea.setHTML(result.getText());
-						EditContent.this.changes = false;
-						EditContent.this.sendButton.setEnabled(false);
-					}
-				});
+
+					});
+		}
 	}
 
 	private void init() {
 		ChangeHandler changeHandler = new ChangeHandler() {
 			public void onChange(ChangeEvent event) {
-				EditContent.this.markChanged();
+				markChanged();
 			}
 		};
 		this.nameSelection = new NameSelection(this.dialogBox);
@@ -117,52 +97,27 @@ public class EditContent extends HorizontalPanel {
 		this.nameAddButton.setEnabled(this.key == null);
 		this.nameAddButton.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent arg0) {
-				String selectedChildKey = EditContent.this.nameSelection
-						.getSelectedChildKey();
-				if ((selectedChildKey != null)
-						&& (!isInList(EditContent.this.additionalNames,
-								selectedChildKey.toString()))) {
-					EditContent.this.additionalNames.addItem(
-							EditContent.this.nameSelection.getValue(),
-							selectedChildKey.toString());
-					EditContent.this.nameSelection.reset();
-				}
+				addNameToList();
 			}
 
-			private boolean isInList(ListBox additionalNames, String value) {
-				for (int i = 0; i < additionalNames.getItemCount(); i++) {
-					if (additionalNames.getValue(i).equals(value)) {
-						return true;
-					}
-				}
-				return false;
-			}
 		});
 		this.nameRemoveButton = new Button(Utils.UP_ARROW);
 		this.nameRemoveButton.setEnabled(this.key == null);
 		this.nameRemoveButton.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent arg0) {
-				if (EditContent.this.additionalNames.getSelectedIndex() > 0)
-					;
-				int itemCount = EditContent.this.additionalNames.getItemCount();
-				for (int i = EditContent.this.additionalNames
-						.getSelectedIndex(); i < itemCount; i++)
-					if (EditContent.this.additionalNames.isItemSelected(i)) {
-						EditContent.this.additionalNames.removeItem(i);
-						i--;
-						itemCount--;
-					}
+				removeNameFromList();
 			}
+
 		});
 		this.dateBox.setValue(new Date());
 		this.dateBox.setFormat(Utils.DATEBOX_FORMAT);
 		this.dateBox.addValueChangeHandler(new ValueChangeHandler<Date>() {
 			public void onValueChange(ValueChangeEvent<Date> event) {
-				EditContent.this.markChanged();
+				markChanged();
 			}
 		});
-		this.sectionSelection = new SectionSelection(this.dialogBox,
-				changeHandler);
+		this.sectionSelection = new SectionSelection(this.dialogBox);
+		sectionSelection.addChangeHandler(changeHandler);
 
 		this.socialSelection.addItem("- " + labels.socialForm() + " -", "");
 		for (GwtBeobachtung.SocialEnum socialForm : GwtBeobachtung.SocialEnum
@@ -181,14 +136,14 @@ public class EditContent extends HorizontalPanel {
 
 		this.textArea.addKeyPressHandler(new KeyPressHandler() {
 			public void onKeyPress(KeyPressEvent arg0) {
-				EditContent.this.markChanged();
+				markChanged();
 			}
 		});
 		this.decisionBox = new DecisionBox();
 		this.decisionBox.setText(labels.notSavedWarning());
 		this.decisionBox.addOkClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
-				EditContent.this.resetForm();
+				resetForm();
 			}
 		});
 	}
@@ -201,6 +156,58 @@ public class EditContent extends HorizontalPanel {
 		final Panel contentContainer = createContentContainer();
 		this.add(contentContainer);
 
+	}
+
+	private void updateView(GwtBeobachtung result) {
+		nameSelection.setSelected(result.getChildKey());
+		dateBox.setValue(result.getDate());
+		sectionSelection.setSelected(result.getSectionKey());
+		textArea.setHTML(result.getText());
+		
+		GwtBeobachtung.DurationEnum duration = result.getDuration();
+		if (duration != null) {
+			durationSelection.setSelectedIndex(duration.ordinal() + 1);
+		}
+
+		GwtBeobachtung.SocialEnum social = result.getSocial();
+		if (social != null) {
+			socialSelection.setSelectedIndex(social.ordinal() + 1);
+		}
+		
+		changes = false;
+		sendButton.setEnabled(false);
+	}
+
+	private void addNameToList() {
+		String selectedChildKey = nameSelection.getSelectedChildKey();
+		if ((selectedChildKey != null)
+				&& (!isInList(additionalNames, selectedChildKey.toString()))) {
+			additionalNames.addItem(nameSelection.getValue(),
+					selectedChildKey.toString());
+			nameSelection.reset();
+		}
+	}
+
+	private void removeNameFromList() {
+		if (additionalNames.getSelectedIndex() > 0) {
+			int itemCount = additionalNames.getItemCount();
+			for (int i = additionalNames.getSelectedIndex(); i < itemCount; i++) {
+				if (additionalNames.isItemSelected(i)) {
+					additionalNames.removeItem(i);
+					i--;
+					itemCount--;
+				}
+			}
+		}
+	}
+
+	private boolean isInList(ListBox additionalNames, String value) {
+		for (int i = 0; i < additionalNames.getItemCount(); i++) {
+			if (additionalNames.getValue(i).equals(value)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public VerticalPanel createContentContainer() {
@@ -331,17 +338,24 @@ public class EditContent extends HorizontalPanel {
 		this.sendButton = new Button(labels.save());
 		sendButton.setSize(Utils.BUTTON_WIDTH + Utils.PIXEL, Utils.ROW_HEIGHT
 				+ Utils.PIXEL);
-		this.sendButton.addClickHandler(new SendbuttonHandler());
+		this.sendButton.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				sendButton.setEnabled(false);
+				sendNameToServer();
+			}
+
+		});
 
 		this.newButton = new Button(labels.cancel());
 		newButton.setSize(Utils.BUTTON_WIDTH + Utils.PIXEL, Utils.ROW_HEIGHT
 				+ Utils.PIXEL);
 		this.newButton.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
-				if (EditContent.this.changes)
-					EditContent.this.decisionBox.center();
+				if (changes)
+					decisionBox.center();
 				else
-					EditContent.this.resetForm();
+					resetForm();
 			}
 		});
 
@@ -358,93 +372,79 @@ public class EditContent extends HorizontalPanel {
 		}
 	}
 
-	private class SendbuttonHandler implements ClickHandler {
-		private SendbuttonHandler() {
+	private void sendNameToServer() {
+		String text = textArea.getHTML();
+		String name = nameSelection.getValue();
+		String childKey = nameSelection.getSelectedChildKey();
+		if (((Utils.isEmpty(name)) || (childKey == null))
+				&& (additionalNames.getItemCount() > 0)) {
+			name = additionalNames.getItemText(0);
+			childKey = additionalNames.getValue(0);
+			additionalNames.removeItem(0);
 		}
 
-		public void onClick(ClickEvent event) {
-			EditContent.this.sendButton.setEnabled(false);
-			sendNameToServer();
+		String sectionKey = sectionSelection.getSelectedSectionKey();
+		Date date = dateBox.getValue();
+
+		String errorMessage = new String();
+		if (Utils.isEmpty(name))
+			errorMessage = errorMessage + labels.noChild() + Utils.LINE_BREAK;
+		else if (childKey == null) {
+			errorMessage = errorMessage + labels.noChildWithName(name)
+					+ Utils.LINE_BREAK;
+		}
+		if (sectionKey == null) {
+			errorMessage = errorMessage + labels.noSection() + Utils.LINE_BREAK;
+		}
+		if (date == null) {
+			errorMessage = errorMessage + labels.noDate() + Utils.LINE_BREAK;
+			;
+		}
+		// if (text.isEmpty()) {
+		// errorMessage = errorMessage + labels.noObservation()
+		// + Utils.LINE_BREAK;
+		// }
+		if (!errorMessage.isEmpty()) {
+			dialogBox.setErrorMessage(errorMessage);
+			dialogBox.setDisableWhileShown(new FocusWidget[] { sendButton });
+			dialogBox.center();
+			return;
 		}
 
-		private void sendNameToServer() {
-			String text = EditContent.this.textArea.getHTML();
-			String name = EditContent.this.nameSelection.getValue();
-			String childKey = EditContent.this.nameSelection
-					.getSelectedChildKey();
-			if (((Utils.isEmpty(name)) || (childKey == null))
-					&& (EditContent.this.additionalNames.getItemCount() > 0)) {
-				name = EditContent.this.additionalNames.getItemText(0);
-				childKey = EditContent.this.additionalNames.getValue(0);
-				EditContent.this.additionalNames.removeItem(0);
-			}
+		GwtBeobachtung beobachtung = new GwtBeobachtung();
+		beobachtung.setKey(key);
+		beobachtung.setText(cleanUp(text));
+		beobachtung.setChildKey(childKey);
+		beobachtung.setSectionKey(sectionKey);
+		beobachtung.setDate(date);
+		beobachtung.setDuration(getDuration());
+		beobachtung.setSocial(getSocialForm());
 
-			String sectionKey = EditContent.this.sectionSelection
-					.getSelectedSectionKey();
-			Date date = EditContent.this.dateBox.getValue();
-
-			String errorMessage = new String();
-			if (Utils.isEmpty(name))
-				errorMessage = errorMessage + labels.noChild()
-						+ Utils.LINE_BREAK;
-			else if (childKey == null) {
-				errorMessage = errorMessage + labels.noChildWithName(name)
-						+ Utils.LINE_BREAK;
-			}
-			if (sectionKey == null) {
-				errorMessage = errorMessage + labels.noSection()
-						+ Utils.LINE_BREAK;
-			}
-			if (date == null) {
-				errorMessage = errorMessage + labels.noDate()
-						+ Utils.LINE_BREAK;
-				;
-			}
-//			if (text.isEmpty()) {
-//				errorMessage = errorMessage + labels.noObservation()
-//						+ Utils.LINE_BREAK;
-//			}
-			if (!errorMessage.isEmpty()) {
-				EditContent.this.dialogBox.setErrorMessage(errorMessage);
-				EditContent.this.dialogBox
-						.setDisableWhileShown(new FocusWidget[] { EditContent.this.sendButton });
-				EditContent.this.dialogBox.center();
-				return;
-			}
-
-			GwtBeobachtung beobachtung = new GwtBeobachtung();
-			beobachtung.setKey(EditContent.this.key);
-			beobachtung.setText(cleanUp(text));
-			beobachtung.setChildKey(childKey);
-			beobachtung.setSectionKey(sectionKey);
-			beobachtung.setDate(date);
-			beobachtung.setDuration(EditContent.this.getDuration());
-			beobachtung.setSocial(EditContent.this.getSocialForm());
-
-			for (int i = 0; i < EditContent.this.additionalNames.getItemCount(); i++) {
-				beobachtung.getAdditionalChildKeys().add(
-						EditContent.this.additionalNames.getValue(i));
-			}
-
-			EditContent.this.wahrnehmungService.storeBeobachtung(beobachtung,
-					new AsyncCallback<Void>() {
-						public void onFailure(Throwable caught) {
-							EditContent.this.dialogBox.setErrorMessage();
-							EditContent.this.dialogBox
-									.setDisableWhileShown(new FocusWidget[] { EditContent.this.sendButton });
-							EditContent.this.dialogBox.center();
-							EditContent.this.sendButton.setEnabled(true);
-						}
-
-						public void onSuccess(Void result) {
-							EditContent.this.changes = false;
-							EditContent.this.resetForm();
-						}
-					});
+		for (int i = 0; i < additionalNames.getItemCount(); i++) {
+			beobachtung.getAdditionalChildKeys().add(
+					additionalNames.getValue(i));
 		}
 
-		private String cleanUp(String text) {
-			return (text != null && text.equals("<br>")) ? "" : text;
-		}
+		wahrnehmungService.storeBeobachtung(beobachtung,
+				new AsyncCallback<Void>() {
+					public void onFailure(Throwable caught) {
+						displayErrorMessage();
+					}
+
+					public void onSuccess(Void result) {
+						changes = false;
+						resetForm();
+					}
+				});
+	}
+
+	private void displayErrorMessage() {
+		dialogBox.setErrorMessage();
+		dialogBox.setDisableWhileShown(sendButton);
+		dialogBox.center();
+	}
+
+	private String cleanUp(String text) {
+		return (text != null && text.equals("<br>")) ? "" : text;
 	}
 }
