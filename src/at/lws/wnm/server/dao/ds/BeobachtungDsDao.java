@@ -176,8 +176,8 @@ public class BeobachtungDsDao extends AbstractDsDao {
 		ResourceBundle bundle = ResourceBundle.getBundle("messages");
 
 		List<GwtBeobachtung> tmpList = getSortedList(beobachtungen);
-		GwtBeobachtung firstBeobachtung = tmpList.get(0);
-		GwtBeobachtung lastBeobachtung = tmpList.get(tmpList.size() - 1);
+		GwtBeobachtung lastBeobachtung = tmpList.get(0);
+		GwtBeobachtung firstBeobachtung = tmpList.get(tmpList.size() - 1);
 		String sectionName = sectionDao.getSectionName(sectionKey);
 		String childName = firstBeobachtung.getChildName();
 		Date startDate = firstBeobachtung.getDate();
