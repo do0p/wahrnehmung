@@ -145,4 +145,8 @@ public class Utils {
 		return int2;
 	}
 
+	public static String addDashes(String text) {
+		return "- " + text + " -";
+	}
+
 }

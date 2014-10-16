@@ -90,4 +90,9 @@ public class NameSelection extends SuggestBox {
 		setText(reverseChildMap.get(childKey));
 	}
 
+	public boolean hasSelection() {
+		String value = getValue();
+		return value != null && !value.isEmpty();
+	}
+
 }

@@ -30,13 +30,12 @@ public class ChildAdmin extends AbstractAdminTab {
 	private final TextBox lnBox;
 	private final DateBox bdBox;
 
-	// private final SaveSuccess saveSuccess;
+	private final DecisionBox decisionBox;
 
 	private final ListBox children;
 
 	private String childNo;
 
-	private DecisionBox decisionBox;
 
 	public ChildAdmin() {
 		super(true);
@@ -48,8 +47,6 @@ public class ChildAdmin extends AbstractAdminTab {
 		lnBox = new TextBox();
 		bdBox = new DateBox();
 		bdBox.setFormat(Utils.DATEBOX_FORMAT);
-
-		// saveSuccess = new SaveSuccess();
 
 		// remove comments to enable fileupload
 		// final FileUploadForm fileUpload = new

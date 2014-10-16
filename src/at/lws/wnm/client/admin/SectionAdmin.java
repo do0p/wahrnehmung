@@ -33,9 +33,9 @@ public class SectionAdmin extends AbstractAdminTab {
 	private final Tree tree;
 
 	private final List<SaveItem> saveItems = new ArrayList<SaveItem>();
+	private final DecisionBox decisionBox;
 
 	private int countDown = 0;
-	private final DecisionBox decisionBox;
 
 	public SectionAdmin() {
 		super(false);

@@ -17,12 +17,16 @@ import at.lws.wnm.shared.model.Authorization;
 import at.lws.wnm.shared.model.GwtBeobachtung;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.BlurEvent;
+import com.google.gwt.event.dom.client.BlurHandler;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyPressHandler;
+import com.google.gwt.event.dom.client.MouseOutEvent;
+import com.google.gwt.event.dom.client.MouseOutHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -43,32 +47,155 @@ public class EditContent extends HorizontalPanel {
 	private final WahrnehmungsServiceAsync wahrnehmungService = (WahrnehmungsServiceAsync) GWT
 			.create(WahrnehmungsService.class);
 
-	private final RichTextArea textArea = new RichTextArea();
-	private final DateBox dateBox = new DateBox();
-	private final ListBox durationSelection = new ListBox();
-	private final ListBox socialSelection = new ListBox();
-	private final PopUp dialogBox = new PopUp();
-	private NameSelection nameSelection;
-	private SectionSelection sectionSelection;
-	private Button sendButton;
-	private Button newButton;
+	private final RichTextArea textArea;
+	private final DateBox dateBox;
+	private final ListBox durationSelection;
+	private final ListBox socialSelection;
+	private final PopUp dialogBox;
+	private final NameSelection nameSelection;
+	private final SectionSelection sectionSelection;
+	private final Button sendButton;
+	private final Button newButton;
+	private final Button nameAddButton;
+	private final Button nameRemoveButton;
+	private final ListBox additionalNames;
+	private final DecisionBox decisionBox;
+
 	private boolean changes;
 	private String key;
-	private DecisionBox decisionBox;
-	private ListBox additionalNames;
-	private Button nameAddButton;
-	private Button nameRemoveButton;
 
 	public EditContent(Authorization authorization, String key) {
 		this.key = key;
+		textArea = new RichTextArea();
+		dateBox = new DateBox();
+		durationSelection = new ListBox();
+		socialSelection = new ListBox();
+		dialogBox = new PopUp();
+		nameSelection = new NameSelection(dialogBox);
+		additionalNames = new ListBox(true);
+		nameAddButton = new Button(Utils.DOWN_ARROW);
+		nameRemoveButton = new Button(Utils.UP_ARROW);
+		sectionSelection = new SectionSelection(dialogBox);
+		decisionBox = new DecisionBox();
+		sendButton = new Button(labels.save());
+		newButton = new Button(labels.cancel());
+
 		init();
 		layout();
 		loadData();
+		updateButtonsState();
+	}
+
+	private void init() {
+		nameSelection.getTextBox().addChangeHandler(new ChangeHandler() {
+			public void onChange(ChangeEvent event) {
+				markChanged();
+				updateButtonsState();
+			}
+		});
+
+		nameAddButton.addClickHandler(new ClickHandler() {
+			public void onClick(ClickEvent arg0) {
+				addNameToList();
+				updateButtonsState();
+			}
+
+		});
+		nameRemoveButton.addClickHandler(new ClickHandler() {
+			public void onClick(ClickEvent arg0) {
+				removeNameFromList();
+				updateButtonsState();
+			}
+
+		});
+		dateBox.setValue(new Date());
+		dateBox.setFormat(Utils.DATEBOX_FORMAT);
+		dateBox.setFireNullValues(true);
+		dateBox.addValueChangeHandler(new ValueChangeHandler<Date>() {
+			public void onValueChange(ValueChangeEvent<Date> event) {
+				markChanged();
+				updateButtonsState();
+			}
+		});
+		sectionSelection.addChangeHandler(new ChangeHandler() {
+			public void onChange(ChangeEvent event) {
+				markChanged();
+				updateButtonsState();
+			}
+		});
+
+		socialSelection.addItem(Utils.addDashes(labels.socialForm()), "");
+		for (GwtBeobachtung.SocialEnum socialForm : GwtBeobachtung.SocialEnum
+				.values()) {
+			socialSelection.addItem(socialForm.getText(), socialForm.name());
+		}
+		socialSelection.addChangeHandler(new ChangeHandler() {
+			public void onChange(ChangeEvent event) {
+				markChanged();
+				updateButtonsState();
+			}
+		});
+
+		durationSelection.addItem(Utils.addDashes(labels.duration()), "");
+		for (GwtBeobachtung.DurationEnum duration : GwtBeobachtung.DurationEnum
+				.values()) {
+			durationSelection.addItem(duration.getText(), duration.name());
+		}
+		durationSelection.addChangeHandler(new ChangeHandler() {
+			public void onChange(ChangeEvent event) {
+				markChanged();
+				updateButtonsState();
+			}
+		});
+
+		textArea.addKeyPressHandler(new KeyPressHandler() {
+			public void onKeyPress(KeyPressEvent arg0) {
+				markChanged();
+			}
+		});
+		textArea.addBlurHandler(new BlurHandler() {
+			@Override
+			public void onBlur(BlurEvent event) {
+				updateButtonsState();
+			}
+		});
+		textArea.addMouseOutHandler(new MouseOutHandler() {
+			@Override
+			public void onMouseOut(MouseOutEvent event) {
+				updateButtonsState();
+			}
+		});
+		decisionBox.setText(labels.notSavedWarning());
+		decisionBox.addOkClickHandler(new ClickHandler() {
+			public void onClick(ClickEvent event) {
+				resetForm();
+				updateButtonsState();
+			}
+		});
+		sendButton.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				sendButton.setEnabled(false);
+				sendNameToServer();
+				updateButtonsState();
+			}
+
+		});
+		newButton.addClickHandler(new ClickHandler() {
+			public void onClick(ClickEvent event) {
+				if (changes)
+					decisionBox.center();
+				else
+					resetForm();
+				updateButtonsState();
+			}
+		});
+
 	}
 
 	private void loadData() {
 		if (key != null) {
-			this.wahrnehmungService.getBeobachtung(key,
+			wahrnehmungService.getBeobachtung(key,
 					new AsyncCallback<GwtBeobachtung>() {
 						public void onFailure(Throwable caught) {
 							displayErrorMessage();
@@ -82,79 +209,13 @@ public class EditContent extends HorizontalPanel {
 		}
 	}
 
-	private void init() {
-		ChangeHandler changeHandler = new ChangeHandler() {
-			public void onChange(ChangeEvent event) {
-				markChanged();
-			}
-		};
-		this.nameSelection = new NameSelection(this.dialogBox);
-		this.nameSelection.getTextBox().addChangeHandler(changeHandler);
-
-		this.additionalNames = new ListBox(true);
-
-		this.nameAddButton = new Button(Utils.DOWN_ARROW);
-		this.nameAddButton.setEnabled(this.key == null);
-		this.nameAddButton.addClickHandler(new ClickHandler() {
-			public void onClick(ClickEvent arg0) {
-				addNameToList();
-			}
-
-		});
-		this.nameRemoveButton = new Button(Utils.UP_ARROW);
-		this.nameRemoveButton.setEnabled(this.key == null);
-		this.nameRemoveButton.addClickHandler(new ClickHandler() {
-			public void onClick(ClickEvent arg0) {
-				removeNameFromList();
-			}
-
-		});
-		this.dateBox.setValue(new Date());
-		this.dateBox.setFormat(Utils.DATEBOX_FORMAT);
-		this.dateBox.addValueChangeHandler(new ValueChangeHandler<Date>() {
-			public void onValueChange(ValueChangeEvent<Date> event) {
-				markChanged();
-			}
-		});
-		this.sectionSelection = new SectionSelection(this.dialogBox);
-		sectionSelection.addChangeHandler(changeHandler);
-
-		this.socialSelection.addItem("- " + labels.socialForm() + " -", "");
-		for (GwtBeobachtung.SocialEnum socialForm : GwtBeobachtung.SocialEnum
-				.values()) {
-			this.socialSelection.addItem(socialForm.getText(),
-					socialForm.name());
-		}
-		this.socialSelection.addChangeHandler(changeHandler);
-
-		this.durationSelection.addItem("- " + labels.duration() + " -", "");
-		for (GwtBeobachtung.DurationEnum duration : GwtBeobachtung.DurationEnum
-				.values()) {
-			this.durationSelection.addItem(duration.getText(), duration.name());
-		}
-		this.durationSelection.addChangeHandler(changeHandler);
-
-		this.textArea.addKeyPressHandler(new KeyPressHandler() {
-			public void onKeyPress(KeyPressEvent arg0) {
-				markChanged();
-			}
-		});
-		this.decisionBox = new DecisionBox();
-		this.decisionBox.setText(labels.notSavedWarning());
-		this.decisionBox.addOkClickHandler(new ClickHandler() {
-			public void onClick(ClickEvent event) {
-				resetForm();
-			}
-		});
-	}
-
 	private void layout() {
 
 		final Panel nameContainer = createNameSelectionContainer();
-		this.add(nameContainer);
+		add(nameContainer);
 
 		final Panel contentContainer = createContentContainer();
-		this.add(contentContainer);
+		add(contentContainer);
 
 	}
 
@@ -163,7 +224,7 @@ public class EditContent extends HorizontalPanel {
 		dateBox.setValue(result.getDate());
 		sectionSelection.setSelected(result.getSectionKey());
 		textArea.setHTML(result.getText());
-		
+
 		GwtBeobachtung.DurationEnum duration = result.getDuration();
 		if (duration != null) {
 			durationSelection.setSelectedIndex(duration.ordinal() + 1);
@@ -173,9 +234,8 @@ public class EditContent extends HorizontalPanel {
 		if (social != null) {
 			socialSelection.setSelectedIndex(social.ordinal() + 1);
 		}
-		
+
 		changes = false;
-		sendButton.setEnabled(false);
 	}
 
 	private void addNameToList() {
@@ -216,11 +276,9 @@ public class EditContent extends HorizontalPanel {
 		contentContainer.setSpacing(Utils.SPACING);
 
 		final Panel selectionContainer = createSelectionContainer();
-		// Utils.formatCenter(contentContainer, selectionContainer);
 		contentContainer.add(selectionContainer);
 
 		final Panel socialContainer = createSocialContainer();
-		// Utils.formatCenter(contentContainer, socialContainer);
 		contentContainer.add(socialContainer);
 
 		final Panel textArea = createTextArea();
@@ -235,15 +293,15 @@ public class EditContent extends HorizontalPanel {
 	public Grid createTextArea() {
 		int textAreaWidth = Utils.APP_WIDTH - Utils.NAMESELECTION_WIDTH - 38;
 		int textAreaHeight = Utils.APP_HEIGHT - 305;
-		this.textArea.setSize(textAreaWidth + Utils.PIXEL, textAreaHeight
+		textArea.setSize(textAreaWidth + Utils.PIXEL, textAreaHeight
 				+ Utils.PIXEL);
 
-		final RichTextToolbar toolbar = new RichTextToolbar(this.textArea);
+		final RichTextToolbar toolbar = new RichTextToolbar(textArea);
 
 		final Grid grid = new Grid(2, 1);
 		grid.setStyleName("cw-RichText");
 		grid.setWidget(0, 0, toolbar);
-		grid.setWidget(1, 0, this.textArea);
+		grid.setWidget(1, 0, textArea);
 		return grid;
 	}
 
@@ -262,7 +320,7 @@ public class EditContent extends HorizontalPanel {
 	}
 
 	public Grid createSelectionContainer() {
-		final List<SectionSelectionBox> sectionSelectionBoxes = this.sectionSelection
+		final List<SectionSelectionBox> sectionSelectionBoxes = sectionSelection
 				.getSectionSelectionBoxes();
 		final Grid selectionContainer = new Grid(1,
 				sectionSelectionBoxes.size());
@@ -285,8 +343,8 @@ public class EditContent extends HorizontalPanel {
 		nameContainer.add(nameSelection);
 
 		final Grid nameButtoContainer = new Grid(1, 2);
-		nameButtoContainer.setWidget(0, 0, this.nameAddButton);
-		nameButtoContainer.setWidget(0, 1, this.nameRemoveButton);
+		nameButtoContainer.setWidget(0, 0, nameAddButton);
+		nameButtoContainer.setWidget(0, 1, nameRemoveButton);
 		Utils.formatCenter(nameContainer, nameButtoContainer);
 
 		final int nameSelectionHeight = Utils.APP_HEIGHT - 238;
@@ -298,21 +356,19 @@ public class EditContent extends HorizontalPanel {
 	}
 
 	private void resetForm() {
-		this.nameSelection.reset();
+		nameSelection.reset();
 
-		this.durationSelection.setSelectedIndex(0);
-		this.socialSelection.setSelectedIndex(0);
-		this.textArea.setText("");
-		this.additionalNames.clear();
-		this.key = null;
-		this.nameAddButton.setEnabled(true);
-		this.nameRemoveButton.setEnabled(true);
+		durationSelection.setSelectedIndex(0);
+		socialSelection.setSelectedIndex(0);
+		textArea.setText("");
+		additionalNames.clear();
+		key = null;
 	}
 
 	private GwtBeobachtung.SocialEnum getSocialForm() {
-		int selectedIndex = this.socialSelection.getSelectedIndex();
+		int selectedIndex = socialSelection.getSelectedIndex();
 		if (selectedIndex != -1) {
-			String socialText = this.socialSelection.getValue(selectedIndex);
+			String socialText = socialSelection.getValue(selectedIndex);
 			if (!socialText.isEmpty()) {
 				return GwtBeobachtung.SocialEnum.valueOf(socialText);
 			}
@@ -321,10 +377,9 @@ public class EditContent extends HorizontalPanel {
 	}
 
 	private GwtBeobachtung.DurationEnum getDuration() {
-		int selectedIndex = this.durationSelection.getSelectedIndex();
+		int selectedIndex = durationSelection.getSelectedIndex();
 		if (selectedIndex != -1) {
-			String durationText = this.durationSelection
-					.getValue(selectedIndex);
+			String durationText = durationSelection.getValue(selectedIndex);
 			if (!durationText.isEmpty()) {
 				return GwtBeobachtung.DurationEnum.valueOf(durationText);
 			}
@@ -335,40 +390,21 @@ public class EditContent extends HorizontalPanel {
 	private Panel createButtonContainer() {
 		final Grid buttonContainer = new Grid(1, 2);
 
-		this.sendButton = new Button(labels.save());
 		sendButton.setSize(Utils.BUTTON_WIDTH + Utils.PIXEL, Utils.ROW_HEIGHT
 				+ Utils.PIXEL);
-		this.sendButton.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				sendButton.setEnabled(false);
-				sendNameToServer();
-			}
 
-		});
-
-		this.newButton = new Button(labels.cancel());
 		newButton.setSize(Utils.BUTTON_WIDTH + Utils.PIXEL, Utils.ROW_HEIGHT
 				+ Utils.PIXEL);
-		this.newButton.addClickHandler(new ClickHandler() {
-			public void onClick(ClickEvent event) {
-				if (changes)
-					decisionBox.center();
-				else
-					resetForm();
-			}
-		});
 
-		buttonContainer.setWidget(0, 0, this.sendButton);
-		buttonContainer.setWidget(0, 1, this.newButton);
+		buttonContainer.setWidget(0, 0, sendButton);
+		buttonContainer.setWidget(0, 1, newButton);
 
 		return buttonContainer;
 	}
 
 	private void markChanged() {
-		if (!this.changes) {
-			this.changes = true;
-			this.sendButton.setEnabled(true);
+		if (!changes) {
+			changes = true;
 		}
 	}
 
@@ -446,5 +482,32 @@ public class EditContent extends HorizontalPanel {
 
 	private String cleanUp(String text) {
 		return (text != null && text.equals("<br>")) ? "" : text;
+	}
+
+	private void updateButtonsState() {
+
+		nameAddButton.setEnabled(enableNameAdd());
+		nameRemoveButton.setEnabled(enableNameRemove());
+		sendButton.setEnabled(enableSend());
+		newButton.setEnabled(enableNew());
+
+	}
+
+	private boolean enableNew() {
+		return changes;
+	}
+
+	private boolean enableSend() {
+		return changes && nameSelection.hasSelection()
+				&& sectionSelection.hasSelection() && getDuration() != null
+				&& getSocialForm() != null && dateBox.getValue() != null;
+	}
+
+	private boolean enableNameRemove() {
+		return key == null && additionalNames.getItemCount() > 0;
+	}
+
+	private boolean enableNameAdd() {
+		return key == null && nameSelection.hasSelection();
 	}
 }

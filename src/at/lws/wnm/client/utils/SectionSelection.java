@@ -257,5 +257,9 @@ public class SectionSelection {
 			sectionSelectionBox.addChangeHandler(changeHanlder);
 		}
 	}
+	
+	public boolean hasSelection() {
+		return getSelectedSectionKey() != null;
+	}
 
 }
