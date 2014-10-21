@@ -1,0 +1,10 @@
+<queue-entries>
+	<queue>
+		<name>migration</name>
+		<rate>1/s</rate>
+		<retry-parameters>
+			<task-retry-limit>1</task-retry-limit>
+			<task-age-limit>2d</task-age-limit>
+		</retry-parameters>
+	</queue>
+</queue-entries>
