@@ -12,7 +12,7 @@ import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Widget;
 
 public class Navigation extends HorizontalPanel {
-	
+
 	private final Labels labels = GWT.create(Labels.class);
 
 	private static final String ADMIN = "admin";
@@ -20,12 +20,19 @@ public class Navigation extends HorizontalPanel {
 	private static final String LIST_ENTRY = "list";
 	private final Authorization authorization;
 
+	private AdminContent adminContent;
+
+	private Search search;
+
+	private EditContent editContent;
+
 	public Navigation(Authorization authorization) {
 		this.authorization = authorization;
 		setSpacing(10);
 		add(new Hyperlink(labels.create(), NEW_ENTRY));
 		add(new Hyperlink(labels.show(), LIST_ENTRY));
-		if ((authorization.isAdmin()) || (authorization.isEditSections()) || (authorization.isSeeAll()))
+		if ((authorization.isAdmin()) || (authorization.isEditSections())
+				|| (authorization.isSeeAll()))
 			add(new Hyperlink(labels.configure(), ADMIN));
 	}
 
@@ -34,15 +41,35 @@ public class Navigation extends HorizontalPanel {
 			token = NEW_ENTRY;
 		}
 		if (token.equals(NEW_ENTRY)) {
-
-			return new EditContent(this.authorization, null);
+			return getEditContent();
 		}
 		if (token.equals(LIST_ENTRY)) {
-			return new Search(this.authorization);
+			return getSearch();
 		}
 		if (token.equals(ADMIN)) {
-			return new AdminContent(this.authorization);
+			return getAdminContent();
 		}
 		return null;
+	}
+
+	private AdminContent getAdminContent() {
+		if (adminContent == null) {
+			adminContent = new AdminContent(this.authorization);
+		}
+		return adminContent;
+	}
+
+	private Search getSearch() {
+		if (search == null) {
+			search = new Search(this.authorization);
+		}
+		return search;
+	}
+
+	private EditContent getEditContent() {
+		if (editContent == null) {
+			editContent = new EditContent(this.authorization, null);
+		}
+		return editContent;
 	}
 }

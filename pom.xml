@@ -75,11 +75,6 @@
 			<version>${appengine.version}</version>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>com.google.appengine</groupId>
-			<artifactId>appengine-maven-plugin</artifactId>
-			<version>${appengine.version}</version>
-		</dependency>
 	</dependencies>
 
 	<build>
