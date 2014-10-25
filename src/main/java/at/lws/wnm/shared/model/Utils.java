@@ -68,5 +68,6 @@ public class Utils {
 	public static final DateTimeFormat DATE_FORMAT = DateTimeFormat
 	.getFormat(Utils.DATE_FORMAT_STRING);
 	public static final String DATE_FORMAT_STRING = "d.M.yy";
+	public static final String GS_BUCKET_NAME = "lws-wahrnehmung.appspot.com";
 
 }

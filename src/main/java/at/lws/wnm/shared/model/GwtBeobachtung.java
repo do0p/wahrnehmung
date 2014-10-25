@@ -9,6 +9,56 @@ import java.util.Map;
 
 public class GwtBeobachtung implements Serializable {
 
+	public static enum SocialEnum {
+		ALONE("alleine"), TWO_BY_TWO("zu zweit"), IN_GROUP("in Gruppe");
+		private static final Map<String, SocialEnum> SOCIAL_FORMS = new HashMap<String, GwtBeobachtung.SocialEnum>();
+
+		static {
+			for (SocialEnum socialForm : SocialEnum.values()) {
+				SOCIAL_FORMS.put(socialForm.text, socialForm);
+			}
+		}
+
+		private final String text;
+
+		private SocialEnum(String text) {
+			this.text = text;
+		}
+
+		public String getText() {
+			return text;
+		}
+
+		public static SocialEnum valueOfText(String text) {
+			return SOCIAL_FORMS.get(text);
+		}
+	}
+
+	public static enum DurationEnum {
+		SHORT("kurz"), MEDIUM("mittel"), LONG("lang");
+		private static final Map<String, DurationEnum> DURATIONS = new HashMap<String, GwtBeobachtung.DurationEnum>();
+
+		static {
+			for (DurationEnum socialForm : DurationEnum.values()) {
+				DURATIONS.put(socialForm.text, socialForm);
+			}
+		}
+
+		private final String text;
+
+		private DurationEnum(String text) {
+			this.text = text;
+		}
+
+		public String getText() {
+			return text;
+		}
+
+		public static DurationEnum valueOfText(String text) {
+			return DURATIONS.get(text);
+		}
+	}
+
 	private static final long serialVersionUID = -2732611746367965750L;
 	private String text;
 	private String childKey;
@@ -21,6 +71,7 @@ public class GwtBeobachtung implements Serializable {
 	private DurationEnum duration;
 	private String user;
 	private List<String> additionalChildKeys = new ArrayList<String>();
+	private List<String> imageNames = new ArrayList<String>();
 
 	public void setText(String text) {
 		this.text = text;
@@ -94,56 +145,6 @@ public class GwtBeobachtung implements Serializable {
 		this.duration = duration;
 	}
 
-	public static enum SocialEnum {
-		ALONE("alleine"), TWO_BY_TWO("zu zweit"), IN_GROUP("in Gruppe");
-		private static final Map<String, SocialEnum> SOCIAL_FORMS = new HashMap<String, GwtBeobachtung.SocialEnum>();
-
-		static {
-			for (SocialEnum socialForm : SocialEnum.values()) {
-				SOCIAL_FORMS.put(socialForm.text, socialForm);
-			}
-		}
-
-		private final String text;
-
-		private SocialEnum(String text) {
-			this.text = text;
-		}
-
-		public String getText() {
-			return text;
-		}
-
-		public static SocialEnum valueOfText(String text) {
-			return SOCIAL_FORMS.get(text);
-		}
-	}
-
-	public static enum DurationEnum {
-		SHORT("kurz"), MEDIUM("mittel"), LONG("lang");
-		private static final Map<String, DurationEnum> DURATIONS = new HashMap<String, GwtBeobachtung.DurationEnum>();
-
-		static {
-			for (DurationEnum socialForm : DurationEnum.values()) {
-				DURATIONS.put(socialForm.text, socialForm);
-			}
-		}
-
-		private final String text;
-
-		private DurationEnum(String text) {
-			this.text = text;
-		}
-
-		public String getText() {
-			return text;
-		}
-
-		public static DurationEnum valueOfText(String text) {
-			return DURATIONS.get(text);
-		}
-	}
-
 	public String getUser() {
 		return user;
 	}
@@ -154,6 +155,10 @@ public class GwtBeobachtung implements Serializable {
 
 	public List<String> getAdditionalChildKeys() {
 		return additionalChildKeys;
+	}
+
+	public List<String> getImageNames() {
+		return imageNames;
 	}
 
 	@Override
@@ -168,7 +173,8 @@ public class GwtBeobachtung implements Serializable {
 				&& ObjectUtils.equals(social, other.social)
 				&& ObjectUtils.equals(duration, other.duration)
 				&& date.equals(other.date) && user.equals(other.user)
-				&& additionalChildKeys.equals(other.additionalChildKeys);
+				&& additionalChildKeys.equals(other.additionalChildKeys)
+				&& imageNames.equals(other.imageNames);
 
 	}
 
@@ -182,11 +188,10 @@ public class GwtBeobachtung implements Serializable {
 		result = result * 17 + ObjectUtils.hashCode(duration);
 		result = result * 17 + date.hashCode();
 		result = result * 17 + additionalChildKeys.hashCode();
+		result = result * 17 + imageNames.hashCode();
 		return result * 17 + user.hashCode();
 	}
 
-
-	
 	@Override
 	public String toString() {
 		return text;

@@ -22,4 +22,6 @@ public interface WahrnehmungsService extends RemoteService {
 	
 	void deleteBeobachtung(String beobachtungsKey);
 	
+	String getFileUploadUrl();
+	
 }

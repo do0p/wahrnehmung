@@ -7,6 +7,7 @@ import java.util.List;
 import at.lws.wnm.client.service.WahrnehmungsService;
 import at.lws.wnm.client.service.WahrnehmungsServiceAsync;
 import at.lws.wnm.client.utils.DecisionBox;
+import at.lws.wnm.client.utils.FileUploadForm;
 import at.lws.wnm.client.utils.NameSelection;
 import at.lws.wnm.client.utils.PopUp;
 import at.lws.wnm.client.utils.RichTextToolbar;
@@ -39,9 +40,9 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RichTextArea;
+import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
 import com.google.gwt.user.datepicker.client.DateBox;
 
 public class EditContent extends HorizontalPanel {
@@ -63,13 +64,16 @@ public class EditContent extends HorizontalPanel {
 	private final Button nameRemoveButton;
 	private final ListBox additionalNames;
 	private final DecisionBox decisionBox;
+	private final FileUploadForm uploadForm;
 
 	private boolean changes;
 	private String key;
 
 	public EditContent(Authorization authorization, String key) {
+
 		this.key = key;
 		textArea = new RichTextArea();
+		uploadForm = new FileUploadForm();
 		dateBox = new DateBox();
 		durationSelection = new ListBox();
 		socialSelection = new ListBox();
@@ -90,6 +94,7 @@ public class EditContent extends HorizontalPanel {
 	}
 
 	private void init() {
+
 		nameSelection.addSelectionHandler(new SelectionHandler<Suggestion>() {
 			@Override
 			public void onSelection(SelectionEvent<Suggestion> event) {
@@ -180,7 +185,7 @@ public class EditContent extends HorizontalPanel {
 			@Override
 			public void onClick(ClickEvent event) {
 				sendButton.setEnabled(false);
-				sendNameToServer();
+				storeBeobachtung();
 				updateButtonsState();
 			}
 
@@ -274,7 +279,7 @@ public class EditContent extends HorizontalPanel {
 		return false;
 	}
 
-	public VerticalPanel createContentContainer() {
+	private VerticalPanel createContentContainer() {
 
 		VerticalPanel contentContainer = new VerticalPanel();
 		contentContainer.setSpacing(Utils.SPACING);
@@ -288,13 +293,15 @@ public class EditContent extends HorizontalPanel {
 		final Panel textArea = createTextArea();
 		contentContainer.add(textArea);
 
+		contentContainer.add(uploadForm);
+
 		final Panel buttonContainer = createButtonContainer();
 		Utils.formatCenter(contentContainer, buttonContainer);
 
 		return contentContainer;
 	}
 
-	public Grid createTextArea() {
+	private Grid createTextArea() {
 		int textAreaWidth = Utils.APP_WIDTH - Utils.NAMESELECTION_WIDTH - 38;
 		int textAreaHeight = Utils.APP_HEIGHT - 305;
 		textArea.setSize(textAreaWidth + Utils.PIXEL, textAreaHeight
@@ -309,7 +316,7 @@ public class EditContent extends HorizontalPanel {
 		return grid;
 	}
 
-	public Grid createSocialContainer() {
+	private Grid createSocialContainer() {
 		final Grid socialContainer = new Grid(1, 3);
 		int i = 0;
 		for (Widget widget : Arrays.asList(durationSelection, socialSelection)) {
@@ -323,7 +330,7 @@ public class EditContent extends HorizontalPanel {
 		return socialContainer;
 	}
 
-	public Grid createSelectionContainer() {
+	private Grid createSelectionContainer() {
 		final List<SectionSelectionBox> sectionSelectionBoxes = sectionSelection
 				.getSectionSelectionBoxes();
 		final Grid selectionContainer = new Grid(1,
@@ -337,7 +344,7 @@ public class EditContent extends HorizontalPanel {
 		return selectionContainer;
 	}
 
-	public VerticalPanel createNameSelectionContainer() {
+	private VerticalPanel createNameSelectionContainer() {
 
 		final VerticalPanel nameContainer = new VerticalPanel();
 		nameContainer.setSpacing(Utils.SPACING);
@@ -412,7 +419,7 @@ public class EditContent extends HorizontalPanel {
 		}
 	}
 
-	private void sendNameToServer() {
+	private void storeBeobachtung() {
 		String text = textArea.getHTML();
 		String name = nameSelection.getValue();
 		String childKey = nameSelection.getSelectedChildKey();
@@ -438,12 +445,7 @@ public class EditContent extends HorizontalPanel {
 		}
 		if (date == null) {
 			errorMessage = errorMessage + labels.noDate() + Utils.LINE_BREAK;
-			;
 		}
-		// if (text.isEmpty()) {
-		// errorMessage = errorMessage + labels.noObservation()
-		// + Utils.LINE_BREAK;
-		// }
 		if (!errorMessage.isEmpty()) {
 			dialogBox.setErrorMessage(errorMessage);
 			dialogBox.setDisableWhileShown(new FocusWidget[] { sendButton });

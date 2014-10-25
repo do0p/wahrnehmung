@@ -23,4 +23,6 @@ public interface WahrnehmungsServiceAsync {
 
 	void deleteBeobachtung(String beobachtungsKey, AsyncCallback<Void> callback);
 
+	void getFileUploadUrl(AsyncCallback<String> callback);
+
 }
