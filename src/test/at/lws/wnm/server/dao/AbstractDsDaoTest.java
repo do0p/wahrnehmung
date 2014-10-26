@@ -91,7 +91,7 @@ public abstract class AbstractDsDaoTest {
 		}
 	}
 	
-	private Key toKey(String key) {
+	protected Key toKey(String key) {
 		return KeyFactory.stringToKey(key);
 	}
 

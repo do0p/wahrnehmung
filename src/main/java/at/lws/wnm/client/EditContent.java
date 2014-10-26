@@ -233,6 +233,7 @@ public class EditContent extends HorizontalPanel {
 		dateBox.setValue(result.getDate());
 		sectionSelection.setSelected(result.getSectionKey());
 		textArea.setHTML(result.getText());
+		uploadForm.addAllFilenames(result.getFilenames());
 
 		GwtBeobachtung.DurationEnum duration = result.getDuration();
 		if (duration != null) {
@@ -461,6 +462,7 @@ public class EditContent extends HorizontalPanel {
 		beobachtung.setDate(date);
 		beobachtung.setDuration(getDuration());
 		beobachtung.setSocial(getSocialForm());
+		beobachtung.setFilenames(uploadForm.getFileNames());
 
 		for (int i = 0; i < additionalNames.getItemCount(); i++) {
 			beobachtung.getAdditionalChildKeys().add(

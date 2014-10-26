@@ -1,9 +1,12 @@
 package at.lws.wnm.server.service;
 
+import java.util.Map;
+
 import at.lws.wnm.client.service.WahrnehmungsService;
 import at.lws.wnm.server.dao.DaoRegistry;
 import at.lws.wnm.server.dao.ds.AuthorizationDsDao;
 import at.lws.wnm.server.dao.ds.BeobachtungDsDao;
+import at.lws.wnm.server.dao.ds.FileDsDao;
 import at.lws.wnm.shared.model.Authorization;
 import at.lws.wnm.shared.model.BeobachtungsFilter;
 import at.lws.wnm.shared.model.BeobachtungsResult;
@@ -27,15 +30,18 @@ public class WahrnehmungsServiceImpl extends RemoteServiceServlet implements
 
 	private static final String UPLOAD_URL = "/wahrnehmung/upload";
 	private static final long serialVersionUID = 6513086238987365801L;
+
 	private final BlobstoreService blobstoreService;
 	private final UploadOptions options;
 	private final BeobachtungDsDao beobachtungsDao;
 	private final UserService userService;
 	private final AuthorizationDsDao authorizationDao;
+	private final FileDsDao fileDao;
 
 	public WahrnehmungsServiceImpl() {
 		beobachtungsDao = DaoRegistry.get(BeobachtungDsDao.class);
 		authorizationDao = DaoRegistry.get(AuthorizationDsDao.class);
+		fileDao = DaoRegistry.get(FileDsDao.class);
 		userService = UserServiceFactory.getUserService();
 		options = UploadOptions.Builder
 				.withGoogleStorageBucketName(Utils.GS_BUCKET_NAME);
@@ -46,19 +52,21 @@ public class WahrnehmungsServiceImpl extends RemoteServiceServlet implements
 	@Override
 	public void storeBeobachtung(GwtBeobachtung beobachtung) {
 		final User currentUser = userService.getCurrentUser();
-		beobachtungsDao.storeBeobachtung(beobachtung, currentUser, null);
+		storeBeobachtung(beobachtung, currentUser, null);
 		final String masterBeobachtungsKey = beobachtung.getKey();
 		for (String additionalChildKey : beobachtung.getAdditionalChildKeys()) {
 			beobachtung.setKey(null);
 			beobachtung.setChildKey(additionalChildKey);
-			beobachtungsDao.storeBeobachtung(beobachtung, currentUser,
-					masterBeobachtungsKey);
+			storeBeobachtung(beobachtung, currentUser, masterBeobachtungsKey);
 		}
 	}
 
 	@Override
 	public GwtBeobachtung getBeobachtung(String beobachtungsKey) {
-		return beobachtungsDao.getBeobachtung(beobachtungsKey);
+		GwtBeobachtung beobachtung = beobachtungsDao
+				.getBeobachtung(beobachtungsKey);
+		addFiles(beobachtung);
+		return beobachtung;
 	}
 
 	@Override
@@ -66,6 +74,7 @@ public class WahrnehmungsServiceImpl extends RemoteServiceServlet implements
 			Range range) {
 		final User user = getUserForQuery();
 		final BeobachtungsResult result = new BeobachtungsResult();
+		addFilenames(result);
 		if (filter.getChildKey() != null) {
 			result.setBeobachtungen(beobachtungsDao.getBeobachtungen(filter,
 					range, user, true));
@@ -73,6 +82,22 @@ public class WahrnehmungsServiceImpl extends RemoteServiceServlet implements
 		}
 
 		return result;
+	}
+
+	@Override
+	public void deleteBeobachtung(String beobachtungsKey) {
+		beobachtungsDao.deleteBeobachtung(beobachtungsKey);
+		fileDao.deleteFiles(beobachtungsKey);
+	}
+
+	@Override
+	public String getFileUploadUrl() {
+		return blobstoreService.createUploadUrl(UPLOAD_URL, options);
+	}
+
+	@Override
+	public boolean fileExists(String filename) {
+		return fileDao.fileExists(filename);
 	}
 
 	private User getUserForQuery() {
@@ -83,15 +108,23 @@ public class WahrnehmungsServiceImpl extends RemoteServiceServlet implements
 		return user;
 	}
 
-	@Override
-	public void deleteBeobachtung(String beobachtungsKey) {
-		beobachtungsDao.deleteBeobachtung(beobachtungsKey);
-
+	private void addFilenames(BeobachtungsResult result) {
+		for (GwtBeobachtung beobachtung : result.getBeobachtungen()) {
+			addFiles(beobachtung);
+		}
 	}
 
-	@Override
-	public String getFileUploadUrl() {
-		return blobstoreService.createUploadUrl(UPLOAD_URL, options);
+	private void addFiles(GwtBeobachtung beobachtung) {
+		Map<String, String> filenames = fileDao.getFilenames(beobachtung
+				.getKey());
+		beobachtung.setFilenames(filenames);
+	}
+
+	private void storeBeobachtung(GwtBeobachtung beobachtung,
+			final User currentUser, final String masterBeobachtungsKey) {
+		beobachtungsDao.storeBeobachtung(beobachtung, currentUser,
+				masterBeobachtungsKey);
+		fileDao.storeFiles(beobachtung.getKey(), beobachtung.getFilenames());
 	}
 
 }

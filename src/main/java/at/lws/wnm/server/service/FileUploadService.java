@@ -31,6 +31,8 @@ public class FileUploadService extends HttpServlet {
 				writer.print(file.getFilename());
 				writer.print(":");
 				writer.println(file.getGsObjectName());
+				System.out.println(file.getGsObjectName());
+				System.out.println(blobstoreService.createGsBlobKey("/gs/lws-wahrnehmung.appspot.com/" + file.getFilename()).getKeyString());
 			}
 		}
 	}

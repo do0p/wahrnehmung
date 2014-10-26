@@ -25,4 +25,6 @@ public interface WahrnehmungsServiceAsync {
 
 	void getFileUploadUrl(AsyncCallback<String> callback);
 
+	void fileExists(String filename, AsyncCallback<Boolean> callback);
+
 }

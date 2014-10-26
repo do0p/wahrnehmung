@@ -24,4 +24,6 @@ public interface WahrnehmungsService extends RemoteService {
 	
 	String getFileUploadUrl();
 	
+	boolean fileExists(String filename);
+	
 }

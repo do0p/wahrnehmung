@@ -53,4 +53,5 @@ public interface Labels extends Messages {
 	String noDateGiven();
 	String summary(String childName, String sectionName, int count, Date firstDate, Date lastDate);
 	String developementDialogueDate();
+	String fileExistsWarning(String fileName);
 }

@@ -71,7 +71,7 @@ public class GwtBeobachtung implements Serializable {
 	private DurationEnum duration;
 	private String user;
 	private List<String> additionalChildKeys = new ArrayList<String>();
-	private List<String> imageNames = new ArrayList<String>();
+	private Map<String, String> filenames = new HashMap<String, String>();
 
 	public void setText(String text) {
 		this.text = text;
@@ -157,8 +157,12 @@ public class GwtBeobachtung implements Serializable {
 		return additionalChildKeys;
 	}
 
-	public List<String> getImageNames() {
-		return imageNames;
+	public Map<String, String> getFilenames() {
+		return filenames;
+	}
+
+	public void setFilenames(Map<String, String> filenames) {
+		this.filenames = filenames;
 	}
 
 	@Override
@@ -174,7 +178,7 @@ public class GwtBeobachtung implements Serializable {
 				&& ObjectUtils.equals(duration, other.duration)
 				&& date.equals(other.date) && user.equals(other.user)
 				&& additionalChildKeys.equals(other.additionalChildKeys)
-				&& imageNames.equals(other.imageNames);
+				&& filenames.equals(other.filenames);
 
 	}
 
@@ -188,7 +192,7 @@ public class GwtBeobachtung implements Serializable {
 		result = result * 17 + ObjectUtils.hashCode(duration);
 		result = result * 17 + date.hashCode();
 		result = result * 17 + additionalChildKeys.hashCode();
-		result = result * 17 + imageNames.hashCode();
+		result = result * 17 + filenames.hashCode();
 		return result * 17 + user.hashCode();
 	}
 

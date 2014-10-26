@@ -1,5 +1,8 @@
 package at.lws.wnm.client.utils;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import at.lws.wnm.client.Labels;
 import at.lws.wnm.client.service.WahrnehmungsService;
 import at.lws.wnm.client.service.WahrnehmungsServiceAsync;
@@ -14,25 +17,29 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Panel;
 
 public class FileUploadForm extends FormPanel {
-	
+
 	private final Labels labels = (Labels) GWT.create(Labels.class);
 	private final WahrnehmungsServiceAsync wahrnehmungService = (WahrnehmungsServiceAsync) GWT
 			.create(WahrnehmungsService.class);
-	
+
 	private final FileUpload upload;
 	private final Button button;
-	private final ListBox fileNames;
+	private final Map<String, String> filenames;
+	private final DecisionBox decisionBox;
+	private final PopUp dialogBox;
+
 	private boolean actionSet;
 
 	public FileUploadForm() {
 
 		upload = new FileUpload();
 		button = new Button(labels.save());
-		fileNames = new ListBox();
+		filenames = new HashMap<String, String>();
+		decisionBox = new DecisionBox();
+		dialogBox = new PopUp();
 
 		layout();
 
@@ -51,15 +58,44 @@ public class FileUploadForm extends FormPanel {
 		button.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				actionSet = false;
-				updateButtonState();
-				submit();
-			
+				final String filename = getFilename();
+				wahrnehmungService.fileExists(filename,
+						new AsyncCallback<Boolean>() {
+
+							@Override
+							public void onFailure(Throwable caught) {
+								dialogBox.setErrorMessage(caught.getMessage());
+							}
+
+							@Override
+							public void onSuccess(Boolean fileExists) {
+								if (fileExists) {
+									decisionBox.setText(labels
+											.fileExistsWarning(filename));
+									decisionBox
+											.addOkClickHandler(new ClickHandler() {
+												@Override
+												public void onClick(
+														ClickEvent event) {
+													submit();
+													decisionBox.hide();
+												}
+											});
+									decisionBox.center();
+								} else {
+									submit();
+								}
+							}
+						});
+
 			}
+
+			
 		});
 
 		setEncoding(FormPanel.ENCODING_MULTIPART);
 		setMethod(FormPanel.METHOD_POST);
+
 		addSubmitCompleteHandler(new SubmitCompleteHandler() {
 
 			@Override
@@ -73,11 +109,19 @@ public class FileUploadForm extends FormPanel {
 		setAction();
 	}
 
+	@Override
+	public void submit() {
+		actionSet = false;
+		updateButtonState();
+		super.submit();
+	}
+	
 	private void setAction() {
 		wahrnehmungService.getFileUploadUrl(new AsyncCallback<String>() {
 
 			@Override
-			public void onFailure(Throwable caught) {	
+			public void onFailure(Throwable caught) {
+				dialogBox.setErrorMessage(caught.getMessage());
 			}
 
 			@Override
@@ -89,7 +133,6 @@ public class FileUploadForm extends FormPanel {
 
 	private void layout() {
 		final Panel panel = new HorizontalPanel();
-		panel.add(fileNames);
 		panel.add(upload);
 		panel.add(button);
 		setWidget(panel);
@@ -99,7 +142,7 @@ public class FileUploadForm extends FormPanel {
 		String[] names = results.split("\n");
 		for (String name : names) {
 			String[] parts = name.split(":");
-			fileNames.addItem(parts[0]);
+			filenames.put(parts[0], parts[1]);
 		}
 	}
 
@@ -110,14 +153,26 @@ public class FileUploadForm extends FormPanel {
 		updateButtonState();
 	}
 
-	public ListBox getFileNames() {
-		return fileNames;
+	public Map<String, String> getFileNames() {
+		return filenames;
 	}
 
 	private void updateButtonState() {
-		boolean enabled = Utils.isNotEmpty(upload.getFilename())
-				&& actionSet;
+		boolean enabled = Utils.isNotEmpty(upload.getFilename()) && actionSet;
 		button.setEnabled(enabled);
 	}
 
+	private String getFilename() {
+		String filename = upload.getFilename();
+		int pos = filename.lastIndexOf("\\");
+		if(pos < 0) {
+			pos = filename.lastIndexOf("/");
+		}
+		return filename.substring(pos + 1);
+	}
+
+	public void addAllFilenames(Map<String, String> filenames) {
+		this.filenames.putAll(filenames);
+		
+	}
 }
