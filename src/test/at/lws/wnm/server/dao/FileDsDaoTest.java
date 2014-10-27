@@ -1,5 +1,6 @@
 package at.lws.wnm.server.dao;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,10 +15,12 @@ import at.lws.wnm.server.dao.ds.FileDsDao;
 
 public class FileDsDaoTest extends AbstractDsDaoTest {
 
-	private static final String STORAGE_FILENAME = "storageFilename";
-	private static final String FILENAME = "filename";
 	private static final String BEOBACHTUNGS_KEY = "beobachtungsKey";
 	private static final String BEOBACHTUNGS_KEY_2 = "beobachtungsKey2";
+	private static final String FILENAME = "filename";
+	private static final String FILENAME_2 = "filename2";
+	private static final String STORAGE_FILENAME = "storageFilename";
+	private static final String STORAGE_FILENAME_2 = "storageFilename2";
 	private FileDsDao fileDao;
 	private Map<String, String> filenames;
 
@@ -53,8 +56,8 @@ public class FileDsDaoTest extends AbstractDsDaoTest {
 
 		Assert.assertTrue(fileDao.fileExists(FILENAME));
 
-		assertFilenames(BEOBACHTUNGS_KEY);
 		assertFilenames(BEOBACHTUNGS_KEY_2);
+		assertFilenames(BEOBACHTUNGS_KEY);
 
 		fileDao.deleteFiles(BEOBACHTUNGS_KEY);
 
@@ -67,6 +70,35 @@ public class FileDsDaoTest extends AbstractDsDaoTest {
 		Assert.assertFalse(fileDao.fileExists(FILENAME));
 	}
 
+	@Test
+	public void safeDifferences() {
+		Assert.assertFalse(fileDao.fileExists(FILENAME));
+		Assert.assertFalse(fileDao.fileExists(FILENAME_2));
+		
+		fileDao.storeFiles(BEOBACHTUNGS_KEY, filenames);
+		
+		Assert.assertTrue(fileDao.fileExists(FILENAME));
+		Assert.assertFalse(fileDao.fileExists(FILENAME_2));
+		
+		filenames.put(FILENAME_2, STORAGE_FILENAME_2);
+		fileDao.storeFiles(BEOBACHTUNGS_KEY, filenames);
+
+		Assert.assertTrue(fileDao.fileExists(FILENAME));
+		Assert.assertTrue(fileDao.fileExists(FILENAME_2));
+		
+		filenames.remove(FILENAME);
+		fileDao.storeFiles(BEOBACHTUNGS_KEY, filenames);
+		
+		Assert.assertFalse(fileDao.fileExists(FILENAME));
+		Assert.assertTrue(fileDao.fileExists(FILENAME_2));
+		
+		fileDao.storeFiles(BEOBACHTUNGS_KEY, Collections.EMPTY_MAP);
+		
+		Assert.assertFalse(fileDao.fileExists(FILENAME));
+		Assert.assertFalse(fileDao.fileExists(FILENAME_2));
+		
+	}
+	
 	@Test
 	public void worksWithCache() {
 		fileDao.storeFiles(BEOBACHTUNGS_KEY, filenames);
