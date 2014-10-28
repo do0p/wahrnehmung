@@ -61,14 +61,14 @@ public class Navigation extends HorizontalPanel {
 
 	private Search getSearch() {
 		if (search == null) {
-			search = new Search(this.authorization);
+			search = new Search(this.authorization, this);
 		}
 		return search;
 	}
 
-	private EditContent getEditContent() {
+	public EditContent getEditContent() {
 		if (editContent == null) {
-			editContent = new EditContent(this.authorization, null);
+			editContent = new EditContent(this.authorization);
 		}
 		return editContent;
 	}

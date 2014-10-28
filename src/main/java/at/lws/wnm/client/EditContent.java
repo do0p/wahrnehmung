@@ -69,9 +69,8 @@ public class EditContent extends HorizontalPanel {
 	private boolean changes;
 	private String key;
 
-	public EditContent(Authorization authorization, String key) {
+	public EditContent(Authorization authorization) {
 
-		this.key = key;
 		textArea = new RichTextArea();
 		uploadForm = new FileUploadForm();
 		dateBox = new DateBox();
@@ -89,7 +88,6 @@ public class EditContent extends HorizontalPanel {
 
 		init();
 		layout();
-		loadData();
 		updateButtonsState();
 	}
 
@@ -199,7 +197,13 @@ public class EditContent extends HorizontalPanel {
 				updateButtonsState();
 			}
 		});
-
+		uploadForm.setChangeHandler(new ChangeHandler() {
+			@Override
+			public void onChange(ChangeEvent event) {
+				markChanged();
+				updateButtonsState();
+			}
+		});
 	}
 
 	private void loadData() {
@@ -233,7 +237,7 @@ public class EditContent extends HorizontalPanel {
 		dateBox.setValue(result.getDate());
 		sectionSelection.setSelected(result.getSectionKey());
 		textArea.setHTML(result.getText());
-		uploadForm.addAllFilenames(result.getFilenames());
+		uploadForm.setFileInfos(result.getFileInfos());
 
 		GwtBeobachtung.DurationEnum duration = result.getDuration();
 		if (duration != null) {
@@ -369,12 +373,15 @@ public class EditContent extends HorizontalPanel {
 
 	private void resetForm() {
 		nameSelection.reset();
-
+		sectionSelection.reset();
 		durationSelection.setSelectedIndex(0);
 		socialSelection.setSelectedIndex(0);
 		textArea.setText("");
 		additionalNames.clear();
+		uploadForm.reset();
 		key = null;
+		changes = false;
+		updateButtonsState();
 	}
 
 	private GwtBeobachtung.SocialEnum getSocialForm() {
@@ -462,7 +469,7 @@ public class EditContent extends HorizontalPanel {
 		beobachtung.setDate(date);
 		beobachtung.setDuration(getDuration());
 		beobachtung.setSocial(getSocialForm());
-		beobachtung.setFilenames(uploadForm.getFileNames());
+		beobachtung.setFileInfos(uploadForm.getFileInfos());
 
 		for (int i = 0; i < additionalNames.getItemCount(); i++) {
 			beobachtung.getAdditionalChildKeys().add(
@@ -502,7 +509,7 @@ public class EditContent extends HorizontalPanel {
 	}
 
 	private boolean enableNew() {
-		return changes;
+		return changes || key != null;
 	}
 
 	private boolean enableSend() {
@@ -517,5 +524,15 @@ public class EditContent extends HorizontalPanel {
 
 	private boolean enableNameAdd() {
 		return key == null && nameSelection.hasSelection();
+	}
+
+	public String getKey() {
+		return key;
+	}
+
+	public void setKey(String key) {
+		this.key = key;
+		loadData();
+		updateButtonsState();
 	}
 }

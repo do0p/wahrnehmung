@@ -6,6 +6,7 @@ import java.util.TreeSet;
 
 import at.lws.wnm.client.utils.BeobachtungsTable;
 import at.lws.wnm.client.utils.NameSelection;
+import at.lws.wnm.client.utils.Navigation;
 import at.lws.wnm.client.utils.PopUp;
 import at.lws.wnm.client.utils.Print;
 import at.lws.wnm.client.utils.SectionSelection;
@@ -50,7 +51,7 @@ public class Search extends VerticalPanel {
 	private final MultiSelectionModel<GwtBeobachtung> selectionModel;
 	private final Show beobachtungen;
 
-	public Search(Authorization authorization) {
+	public Search(Authorization authorization, Navigation navigation) {
 		PopUp dialogBox = new PopUp();
 		final RichTextArea textArea = new RichTextArea();
 		this.filter = new BeobachtungsFilter();
@@ -85,7 +86,7 @@ public class Search extends VerticalPanel {
 //		sendButton.addStyleName(Utils.SEND_BUTTON_STYLE);
 		this.selectionModel = createSelectionModel(textArea);
 		this.table = new BeobachtungsTable(authorization, this.selectionModel,
-				this.filter, dialogBox);
+				this.filter, dialogBox, navigation.getEditContent());
 		this.table
 				.addCellPreviewHandler(new CellPreviewEvent.Handler<GwtBeobachtung>() {
 					public void onCellPreview(

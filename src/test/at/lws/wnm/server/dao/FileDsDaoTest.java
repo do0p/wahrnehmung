@@ -1,17 +1,18 @@
 package at.lws.wnm.server.dao;
 
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import at.lws.wnm.server.dao.ds.FileDsDao;
+import at.lws.wnm.shared.model.GwtFileInfo;
+
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
-
-import at.lws.wnm.server.dao.ds.FileDsDao;
 
 public class FileDsDaoTest extends AbstractDsDaoTest {
 
@@ -21,15 +22,16 @@ public class FileDsDaoTest extends AbstractDsDaoTest {
 	private static final String FILENAME_2 = "filename2";
 	private static final String STORAGE_FILENAME = "storageFilename";
 	private static final String STORAGE_FILENAME_2 = "storageFilename2";
+	private static final String CONTENT_TYPE = "contentType";
 	private FileDsDao fileDao;
-	private Map<String, String> filenames;
+	private List<GwtFileInfo> filenames;
 
 	@Before
 	public void setUp() {
 
 		fileDao = DaoRegistry.get(FileDsDao.class);
-		filenames = new HashMap<String, String>();
-		filenames.put(FILENAME, STORAGE_FILENAME);
+		filenames = new ArrayList<GwtFileInfo>();
+		filenames.add(createFileInfo(FILENAME, STORAGE_FILENAME));
 
 	}
 
@@ -63,7 +65,7 @@ public class FileDsDaoTest extends AbstractDsDaoTest {
 
 		Assert.assertTrue(fileDao.fileExists(FILENAME));
 		assertFilenames(BEOBACHTUNGS_KEY_2);
-		Map<String, String> result = fileDao.getFilenames(BEOBACHTUNGS_KEY);
+		List<GwtFileInfo> result = fileDao.getFileInfos(BEOBACHTUNGS_KEY);
 		Assert.assertTrue(result.isEmpty());
 
 		fileDao.deleteFiles(BEOBACHTUNGS_KEY_2);
@@ -74,31 +76,31 @@ public class FileDsDaoTest extends AbstractDsDaoTest {
 	public void safeDifferences() {
 		Assert.assertFalse(fileDao.fileExists(FILENAME));
 		Assert.assertFalse(fileDao.fileExists(FILENAME_2));
-		
+
 		fileDao.storeFiles(BEOBACHTUNGS_KEY, filenames);
-		
+
 		Assert.assertTrue(fileDao.fileExists(FILENAME));
 		Assert.assertFalse(fileDao.fileExists(FILENAME_2));
-		
-		filenames.put(FILENAME_2, STORAGE_FILENAME_2);
+
+		filenames.add(createFileInfo(FILENAME_2, STORAGE_FILENAME_2));
 		fileDao.storeFiles(BEOBACHTUNGS_KEY, filenames);
 
 		Assert.assertTrue(fileDao.fileExists(FILENAME));
 		Assert.assertTrue(fileDao.fileExists(FILENAME_2));
-		
-		filenames.remove(FILENAME);
+
+		filenames.remove(createFileInfo(FILENAME, STORAGE_FILENAME));
 		fileDao.storeFiles(BEOBACHTUNGS_KEY, filenames);
-		
+
 		Assert.assertFalse(fileDao.fileExists(FILENAME));
 		Assert.assertTrue(fileDao.fileExists(FILENAME_2));
-		
-		fileDao.storeFiles(BEOBACHTUNGS_KEY, Collections.EMPTY_MAP);
-		
+
+		fileDao.storeFiles(BEOBACHTUNGS_KEY, Collections.EMPTY_LIST);
+
 		Assert.assertFalse(fileDao.fileExists(FILENAME));
 		Assert.assertFalse(fileDao.fileExists(FILENAME_2));
-		
+
 	}
-	
+
 	@Test
 	public void worksWithCache() {
 		fileDao.storeFiles(BEOBACHTUNGS_KEY, filenames);
@@ -150,9 +152,29 @@ public class FileDsDaoTest extends AbstractDsDaoTest {
 	}
 
 	private void assertFilenames(String beobachtungsKey) {
-		Map<String, String> result = fileDao.getFilenames(beobachtungsKey);
+		List<GwtFileInfo> result = fileDao.getFileInfos(beobachtungsKey);
 		Assert.assertEquals(1, result.size());
-		Assert.assertEquals(STORAGE_FILENAME, result.get(FILENAME));
+		GwtFileInfo fileInfo = getFileInfo(result, FILENAME);
+		Assert.assertNotNull(fileInfo);
+		Assert.assertEquals(STORAGE_FILENAME, fileInfo.getStorageFilename());
+		Assert.assertEquals(CONTENT_TYPE, fileInfo.getContentType());
+	}
+
+	private GwtFileInfo getFileInfo(List<GwtFileInfo> result, String filename) {
+		for (GwtFileInfo fileInfo : result) {
+			if (fileInfo.getFilename().equals(filename)) {
+				return fileInfo;
+			}
+		}
+		return null;
+	}
+
+	private GwtFileInfo createFileInfo(String filename, String storageFilename) {
+		GwtFileInfo fileInfo = new GwtFileInfo();
+		fileInfo.setFilename(filename);
+		fileInfo.setStorageFilename(storageFilename);
+		fileInfo.setContentType(CONTENT_TYPE);
+		return fileInfo;
 	}
 
 }

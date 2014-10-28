@@ -1,6 +1,6 @@
 package at.lws.wnm.server.service;
 
-import java.util.Map;
+import java.util.List;
 
 import at.lws.wnm.client.service.WahrnehmungsService;
 import at.lws.wnm.server.dao.DaoRegistry;
@@ -11,6 +11,7 @@ import at.lws.wnm.shared.model.Authorization;
 import at.lws.wnm.shared.model.BeobachtungsFilter;
 import at.lws.wnm.shared.model.BeobachtungsResult;
 import at.lws.wnm.shared.model.GwtBeobachtung;
+import at.lws.wnm.shared.model.GwtFileInfo;
 import at.lws.wnm.shared.model.Utils;
 
 import com.google.appengine.api.blobstore.BlobstoreService;
@@ -74,13 +75,13 @@ public class WahrnehmungsServiceImpl extends RemoteServiceServlet implements
 			Range range) {
 		final User user = getUserForQuery();
 		final BeobachtungsResult result = new BeobachtungsResult();
-		addFilenames(result);
+
 		if (filter.getChildKey() != null) {
 			result.setBeobachtungen(beobachtungsDao.getBeobachtungen(filter,
 					range, user, true));
 			result.setRowCount(beobachtungsDao.getRowCount(filter, user, true));
 		}
-
+		addFilenames(result);
 		return result;
 	}
 
@@ -115,16 +116,18 @@ public class WahrnehmungsServiceImpl extends RemoteServiceServlet implements
 	}
 
 	private void addFiles(GwtBeobachtung beobachtung) {
-		Map<String, String> filenames = fileDao.getFilenames(beobachtung
-				.getKey());
-		beobachtung.setFilenames(filenames);
+		String key = beobachtung.getKey();
+		if (key != null) {
+			List<GwtFileInfo> filenames = fileDao.getFileInfos(key);
+			beobachtung.setFileInfos(filenames);
+		}
 	}
 
 	private void storeBeobachtung(GwtBeobachtung beobachtung,
 			final User currentUser, final String masterBeobachtungsKey) {
 		beobachtungsDao.storeBeobachtung(beobachtung, currentUser,
 				masterBeobachtungsKey);
-		fileDao.storeFiles(beobachtung.getKey(), beobachtung.getFilenames());
+		fileDao.storeFiles(beobachtung.getKey(), beobachtung.getFileInfos());
 	}
 
 }

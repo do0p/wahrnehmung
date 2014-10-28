@@ -1,23 +1,31 @@
 package at.lws.wnm.client.utils;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 import at.lws.wnm.client.Labels;
 import at.lws.wnm.client.service.WahrnehmungsService;
 import at.lws.wnm.client.service.WahrnehmungsServiceAsync;
+import at.lws.wnm.shared.model.GwtFileInfo;
 
+import com.google.gwt.cell.client.ActionCell;
+import com.google.gwt.cell.client.ActionCell.Delegate;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.cellview.client.CellTable;
+import com.google.gwt.user.cellview.client.IdentityColumn;
+import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FileUpload;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.view.client.ListDataProvider;
 
 public class FileUploadForm extends FormPanel {
 
@@ -27,26 +35,65 @@ public class FileUploadForm extends FormPanel {
 
 	private final FileUpload upload;
 	private final Button button;
-	private final Map<String, String> filenames;
 	private final DecisionBox decisionBox;
 	private final PopUp dialogBox;
+	private final CellTable<GwtFileInfo> fileTable;
+	private final ListDataProvider<GwtFileInfo> dataProvider;
 
 	private boolean actionSet;
+	private ChangeHandler handler;
 
 	public FileUploadForm() {
 
+		dataProvider = new ListDataProvider<GwtFileInfo>();
 		upload = new FileUpload();
 		button = new Button(labels.save());
-		filenames = new HashMap<String, String>();
 		decisionBox = new DecisionBox();
 		dialogBox = new PopUp();
+		fileTable = new CellTable<GwtFileInfo>();
 
 		layout();
 
 		init();
 	}
 
+	@Override
+	public void reset() {
+
+		super.reset();
+		dataProvider.getList().clear();
+		updateButtonState();
+
+	}
+
 	private void init() {
+		dataProvider.addDataDisplay(fileTable);
+
+		fileTable.addColumn(new TextColumn<GwtFileInfo>() {
+
+			@Override
+			public String getValue(GwtFileInfo fileInfo) {
+				return fileInfo.getFilename();
+			}
+		});
+		fileTable.addColumn(new IdentityColumn<GwtFileInfo>(
+				new ActionCell<GwtFileInfo>(labels.show(),
+						new Delegate<GwtFileInfo>() {
+							@Override
+							public void execute(GwtFileInfo fileInfo) {
+								show(fileInfo);
+							}
+						})));
+		fileTable.addColumn(new IdentityColumn<GwtFileInfo>(
+				new ActionCell<GwtFileInfo>(labels.delete(),
+						new Delegate<GwtFileInfo>() {
+							@Override
+							public void execute(GwtFileInfo fileInfo) {
+								delete(fileInfo);
+							}
+
+						})));
+
 		upload.setName("file");
 		upload.addChangeHandler(new ChangeHandler() {
 			@Override
@@ -90,7 +137,6 @@ public class FileUploadForm extends FormPanel {
 
 			}
 
-			
 		});
 
 		setEncoding(FormPanel.ENCODING_MULTIPART);
@@ -112,10 +158,11 @@ public class FileUploadForm extends FormPanel {
 	@Override
 	public void submit() {
 		actionSet = false;
-		updateButtonState();
 		super.submit();
+		super.reset();
+		updateButtonState();
 	}
-	
+
 	private void setAction() {
 		wahrnehmungService.getFileUploadUrl(new AsyncCallback<String>() {
 
@@ -132,18 +179,44 @@ public class FileUploadForm extends FormPanel {
 	}
 
 	private void layout() {
-		final Panel panel = new HorizontalPanel();
-		panel.add(upload);
-		panel.add(button);
+		
+		final Panel uploadFields = new HorizontalPanel();
+		uploadFields.add(upload);
+		uploadFields.add(button);
+		
+		final Panel panel = new VerticalPanel();
+		panel.add(fileTable);
+		panel.add(uploadFields);
+		
 		setWidget(panel);
 	}
 
 	private void parseNames(String results) {
 		String[] names = results.split("\n");
 		for (String name : names) {
-			String[] parts = name.split(":");
-			filenames.put(parts[0], parts[1]);
+			GwtFileInfo fileInfo = createFileInfo(name);
+			if (fileInfo != null) {
+				dataProvider.getList().add(fileInfo);
+			}
 		}
+		dataProvider.flush();
+		handler.onChange(null);
+	}
+
+	private GwtFileInfo createFileInfo(String name) {
+		String[] parts = name.split(":");
+		String filename = parts[0];
+		String storageFilename = parts[1];
+		String contentType = parts[2];
+		if (Utils.isNotEmpty(filename) && Utils.isNotEmpty(storageFilename)
+				&& Utils.isNotEmpty(contentType)) {
+			GwtFileInfo fileInfo = new GwtFileInfo();
+			fileInfo.setFilename(filename);
+			fileInfo.setStorageFilename(storageFilename);
+			fileInfo.setContentType(contentType);
+			return fileInfo;
+		}
+		return null;
 	}
 
 	@Override
@@ -153,8 +226,8 @@ public class FileUploadForm extends FormPanel {
 		updateButtonState();
 	}
 
-	public Map<String, String> getFileNames() {
-		return filenames;
+	public List<GwtFileInfo> getFileInfos() {
+		return new ArrayList<GwtFileInfo>(dataProvider.getList());
 	}
 
 	private void updateButtonState() {
@@ -165,14 +238,29 @@ public class FileUploadForm extends FormPanel {
 	private String getFilename() {
 		String filename = upload.getFilename();
 		int pos = filename.lastIndexOf("\\");
-		if(pos < 0) {
+		if (pos < 0) {
 			pos = filename.lastIndexOf("/");
 		}
 		return filename.substring(pos + 1);
 	}
 
-	public void addAllFilenames(Map<String, String> filenames) {
-		this.filenames.putAll(filenames);
-		
+	public void setFileInfos(List<GwtFileInfo> fileInfos) {
+		dataProvider.getList().clear();
+		dataProvider.getList().addAll(fileInfos);
+	}
+
+	public void setChangeHandler(final ChangeHandler handler) {
+		this.handler = handler;
+	}
+
+	private void show(GwtFileInfo fileInfo) {
+		// TODO Auto-generated method stub
+
+	}
+
+	private void delete(GwtFileInfo fileInfo) {
+		dataProvider.getList().remove(fileInfo);
+		dataProvider.flush();
+		handler.onChange(null);
 	}
 }

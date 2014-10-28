@@ -24,7 +24,6 @@ import com.google.gwt.user.cellview.client.IdentityColumn;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.view.client.AsyncDataProvider;
 import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.HasData;
@@ -43,12 +42,14 @@ public class BeobachtungsTable extends CellTable<GwtBeobachtung> {
 	private final BeobachtungsFilter filter;
 	private boolean allSelected;
 	private final PopUp dialogBox;
+	private final EditContent editContent;
 
 	public BeobachtungsTable(final Authorization authorization,
 			final MultiSelectionModel<GwtBeobachtung> selectionModel,
-			final BeobachtungsFilter filter, final PopUp dialogBox) {
+			final BeobachtungsFilter filter, final PopUp dialogBox, EditContent editContent) {
 		this.filter = filter;
 		this.dialogBox = dialogBox;
+		this.editContent = editContent;
 		this.decisionBox = new DecisionBox();
 		this.decisionBox.setText(labels.observationDelWarning());
 
@@ -152,12 +153,8 @@ public class BeobachtungsTable extends CellTable<GwtBeobachtung> {
 								if (key == null) {
 									return;
 								}
-								RootPanel rootPanel = RootPanel
-										.get(Utils.MAIN_ELEMENT);
-								rootPanel.clear();
-								rootPanel.add(new EditContent(authorization,
-										key));
-								History.newItem(Navigation.NEW_ENTRY, false);
+								BeobachtungsTable.this.editContent.setKey(key);
+								History.newItem(Navigation.NEW_ENTRY, true);
 							}
 						}));
 		Column<GwtBeobachtung, GwtBeobachtung> deleteColumn = new IdentityColumn<GwtBeobachtung>(
