@@ -10,12 +10,14 @@ import at.lws.wnm.shared.model.GwtFileInfo;
 
 import com.google.gwt.cell.client.ActionCell;
 import com.google.gwt.cell.client.ActionCell.Delegate;
+import com.google.gwt.cell.client.ImageCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.cellview.client.CellTable;
+import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.IdentityColumn;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -76,14 +78,12 @@ public class FileUploadForm extends FormPanel {
 				return fileInfo.getFilename();
 			}
 		});
-		fileTable.addColumn(new IdentityColumn<GwtFileInfo>(
-				new ActionCell<GwtFileInfo>(labels.show(),
-						new Delegate<GwtFileInfo>() {
-							@Override
-							public void execute(GwtFileInfo fileInfo) {
-								show(fileInfo);
-							}
-						})));
+		fileTable.addColumn(new Column<GwtFileInfo, String>(new ImageCell()) {
+			@Override
+			public String getValue(GwtFileInfo fileInfo) {
+				return fileInfo.getImageUrl() + "=s32";
+			}
+		});
 		fileTable.addColumn(new IdentityColumn<GwtFileInfo>(
 				new ActionCell<GwtFileInfo>(labels.delete(),
 						new Delegate<GwtFileInfo>() {
@@ -179,15 +179,15 @@ public class FileUploadForm extends FormPanel {
 	}
 
 	private void layout() {
-		
+
 		final Panel uploadFields = new HorizontalPanel();
 		uploadFields.add(upload);
 		uploadFields.add(button);
-		
+
 		final Panel panel = new VerticalPanel();
 		panel.add(fileTable);
 		panel.add(uploadFields);
-		
+
 		setWidget(panel);
 	}
 
@@ -204,16 +204,20 @@ public class FileUploadForm extends FormPanel {
 	}
 
 	private GwtFileInfo createFileInfo(String name) {
-		String[] parts = name.split(":");
+		String[] parts = name.split("::");
 		String filename = parts[0];
 		String storageFilename = parts[1];
 		String contentType = parts[2];
+		String imageUrl = parts[3];
 		if (Utils.isNotEmpty(filename) && Utils.isNotEmpty(storageFilename)
 				&& Utils.isNotEmpty(contentType)) {
 			GwtFileInfo fileInfo = new GwtFileInfo();
 			fileInfo.setFilename(filename);
 			fileInfo.setStorageFilename(storageFilename);
 			fileInfo.setContentType(contentType);
+			if (imageUrl != "-") {
+				fileInfo.setImageUrl(imageUrl);
+			}
 			return fileInfo;
 		}
 		return null;

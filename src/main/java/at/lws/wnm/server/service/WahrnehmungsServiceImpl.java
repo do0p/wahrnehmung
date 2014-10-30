@@ -93,7 +93,8 @@ public class WahrnehmungsServiceImpl extends RemoteServiceServlet implements
 
 	@Override
 	public String getFileUploadUrl() {
-		return blobstoreService.createUploadUrl(UPLOAD_URL, options);
+		String uploadUrl = blobstoreService.createUploadUrl(UPLOAD_URL, options);
+		return uploadUrl;
 	}
 
 	@Override

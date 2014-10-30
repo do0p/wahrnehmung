@@ -34,6 +34,7 @@ public class FileDsDao extends AbstractDsDao {
 	private static final String FILENAME_FIELD = "filename";
 	private static final String STORAGE_FILENAME_FIELD = "storageFilename";
 	private static final String CONTENT_TYPE_FIELD = "contentType";
+	private static final String IMAGE_URL_FIELD = "imageUrl";
 	private static final String BEOBACHTUNGS_KEYS_FIELD = "beobachtungsKeys";
 
 	private GcsService gcsService = GcsServiceFactory.createGcsService();
@@ -70,6 +71,8 @@ public class FileDsDao extends AbstractDsDao {
 				.getProperty(STORAGE_FILENAME_FIELD));
 		fileInfo.setContentType((String) fileAttachement
 				.getProperty(CONTENT_TYPE_FIELD));
+		fileInfo.setImageUrl((String) fileAttachement
+				.getProperty(IMAGE_URL_FIELD));
 		return fileInfo;
 	}
 
@@ -105,8 +108,7 @@ public class FileDsDao extends AbstractDsDao {
 
 	public void storeFiles(String beobachtungsKey, List<GwtFileInfo> fileInfos) {
 
-		Map<String, Entity> fileAttachements = findFileAttachements(
-				beobachtungsKey);
+		Map<String, Entity> fileAttachements = findFileAttachements(beobachtungsKey);
 
 		if (fileInfos != null) {
 
@@ -155,6 +157,7 @@ public class FileDsDao extends AbstractDsDao {
 				fileInfo.getStorageFilename());
 		fileAttachement.setProperty(CONTENT_TYPE_FIELD,
 				fileInfo.getContentType());
+		fileAttachement.setProperty(IMAGE_URL_FIELD, fileInfo.getImageUrl());
 		return fileAttachement;
 	}
 

@@ -9,6 +9,7 @@ public class GwtFileInfo implements Serializable {
 	private String filename;
 	private String storageFilename;
 	private String contentType;
+	private String imageUrl;
 
 	public String getFilename() {
 		return filename;
@@ -47,6 +48,14 @@ public class GwtFileInfo implements Serializable {
 		}
 		GwtFileInfo other = (GwtFileInfo) obj;
 		return filename.equals(other.filename);
+	}
+
+	public String getImageUrl() {
+		return imageUrl;
+	}
+
+	public void setImageUrl(String imageUrl) {
+		this.imageUrl = imageUrl;
 	}
 
 }

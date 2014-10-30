@@ -8,7 +8,7 @@
 
 	<properties>
 		<project.build.directory>src/main/webapp/WEB-INF/classes</project.build.directory>
-		<appengine.version>1.9.13</appengine.version>
+		<appengine.dependency.version>1.9.13</appengine.dependency.version>
 		<gwt.version>2.6.1</gwt.version>
 	</properties>
 
@@ -50,7 +50,7 @@
 		<dependency>
 			<groupId>com.google.appengine</groupId>
 			<artifactId>appengine-maven-plugin</artifactId>
-			<version>${appengine.version}</version>
+			<version>${appengine.dependency.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-fileupload</groupId>
@@ -60,7 +60,7 @@
 		<dependency>
 			<groupId>com.google.appengine</groupId>
 			<artifactId>appengine-testing</artifactId>
-			<version>${appengine.version}</version>
+			<version>${appengine.dependency.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -72,7 +72,7 @@
 		<dependency>
 			<groupId>com.google.appengine</groupId>
 			<artifactId>appengine-api-stubs</artifactId>
-			<version>${appengine.version}</version>
+			<version>${appengine.dependency.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
@@ -93,7 +93,7 @@
 			<plugin>
 				<groupId>com.google.appengine</groupId>
 				<artifactId>appengine-maven-plugin</artifactId>
-				<version>${appengine.version}</version>
+				<version>${appengine.dependency.version}</version>
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
