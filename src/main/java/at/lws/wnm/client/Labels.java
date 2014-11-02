@@ -3,6 +3,7 @@ package at.lws.wnm.client;
 import java.util.Date;
 
 import com.google.gwt.i18n.client.Messages;
+import com.google.gwt.safehtml.shared.SafeHtml;
 
 public interface Labels extends Messages {
 	String children();
@@ -54,4 +55,6 @@ public interface Labels extends Messages {
 	String summary(String childName, String sectionName, int count, Date firstDate, Date lastDate);
 	String developementDialogueDate();
 	String fileExistsWarning(String fileName);
+	String under12();
+	String over12();
 }

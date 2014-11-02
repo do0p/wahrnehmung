@@ -19,6 +19,8 @@ import com.google.appengine.api.memcache.MemcacheServiceFactory;
 
 public abstract class AbstractDsDao extends AbstractDao {
 
+
+	
 	protected Filter createEqualsPredicate(String fieldName, Entity entity) {
 		return new Query.FilterPredicate(fieldName, FilterOperator.EQUAL,
 				entity.getProperty(fieldName));
@@ -49,6 +51,7 @@ public abstract class AbstractDsDao extends AbstractDao {
 	}
 
 	protected DatastoreService getDatastoreService() {
+		System.err.println("getting data from datastore");
 		return DatastoreServiceFactory.getDatastoreService();
 	}
 
@@ -71,6 +74,7 @@ public abstract class AbstractDsDao extends AbstractDao {
 
 
 	protected MemcacheService getCache() {
+//		System.err.println("getting data from cache");
 		return MemcacheServiceFactory
 				.getMemcacheService(getMemcacheServiceName());
 	}

@@ -46,7 +46,8 @@ public class BeobachtungsTable extends CellTable<GwtBeobachtung> {
 
 	public BeobachtungsTable(final Authorization authorization,
 			final MultiSelectionModel<GwtBeobachtung> selectionModel,
-			final BeobachtungsFilter filter, final PopUp dialogBox, EditContent editContent) {
+			final BeobachtungsFilter filter, final PopUp dialogBox,
+			EditContent editContent) {
 		this.filter = filter;
 		this.dialogBox = dialogBox;
 		this.editContent = editContent;
@@ -216,7 +217,10 @@ public class BeobachtungsTable extends CellTable<GwtBeobachtung> {
 		};
 		this.asyncDataProvider.addDataDisplay(this);
 
-		updateTable();
+	}
+
+	public void clear() {
+		setRowCount(0);
 	}
 
 	public void updateTable() {

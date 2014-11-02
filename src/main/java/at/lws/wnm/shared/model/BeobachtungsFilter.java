@@ -1,6 +1,7 @@
 package at.lws.wnm.shared.model;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Date;
 
 public class BeobachtungsFilter implements Serializable {
@@ -14,8 +15,20 @@ public class BeobachtungsFilter implements Serializable {
 	private Date[] timeRange;
 
 	private boolean showEmptyEntries;
+	
+	private boolean showSummaries;
 
 	private boolean sinceLastDevelopmementDialogue;
+	
+	private String user;
+
+	public String getUser() {
+		return user;
+	}
+
+	public void setUser(String user) {
+		this.user = user;
+	}
 
 	public String getChildKey() {
 		return childKey;
@@ -49,6 +62,14 @@ public class BeobachtungsFilter implements Serializable {
 		this.showEmptyEntries = showEmptyEntries;
 	}
 
+	public boolean isShowSummaries() {
+		return showSummaries;
+	}
+
+	public void setShowSummaries(boolean showSummaries) {
+		this.showSummaries = showSummaries;
+	}
+
 	public void setSinceLastDevelopmementDialogue(boolean sinceLastDevelopmementDialogue) {
 		this.sinceLastDevelopmementDialogue = sinceLastDevelopmementDialogue;
 	}
@@ -56,5 +77,60 @@ public class BeobachtungsFilter implements Serializable {
 	public boolean isSinceLastDevelopmementDialogue() {
 		return sinceLastDevelopmementDialogue;
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result
+				+ ((childKey == null) ? 0 : childKey.hashCode());
+		result = prime * result
+				+ ((sectionKey == null) ? 0 : sectionKey.hashCode());
+		result = prime * result + (showEmptyEntries ? 1231 : 1237);
+		result = prime * result + (showSummaries ? 1231 : 1237);
+		result = prime * result
+				+ (sinceLastDevelopmementDialogue ? 1231 : 1237);
+		result = prime * result + Arrays.hashCode(timeRange);
+		result = prime * result + ((user == null) ? 0 : user.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		BeobachtungsFilter other = (BeobachtungsFilter) obj;
+		if (childKey == null) {
+			if (other.childKey != null)
+				return false;
+		} else if (!childKey.equals(other.childKey))
+			return false;
+		if (sectionKey == null) {
+			if (other.sectionKey != null)
+				return false;
+		} else if (!sectionKey.equals(other.sectionKey))
+			return false;
+		if (showEmptyEntries != other.showEmptyEntries)
+			return false;
+		if (showSummaries != other.showSummaries)
+			return false;
+		if (sinceLastDevelopmementDialogue != other.sinceLastDevelopmementDialogue)
+			return false;
+		if (!Arrays.equals(timeRange, other.timeRange))
+			return false;
+		if (user == null) {
+			if (other.user != null)
+				return false;
+		} else if (!user.equals(other.user))
+			return false;
+		return true;
+	}
+
+	
+	
 
 }

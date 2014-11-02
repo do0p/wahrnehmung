@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class GwtBeobachtung implements Serializable {
+public class GwtBeobachtung implements Serializable, Comparable<GwtBeobachtung> {
 
 	public static enum SocialEnum {
 		ALONE("alleine"), TWO_BY_TWO("zu zweit"), IN_GROUP("in Gruppe");
@@ -199,6 +199,31 @@ public class GwtBeobachtung implements Serializable {
 	@Override
 	public String toString() {
 		return text;
+	}
+
+	@Override
+	public int compareTo(GwtBeobachtung other) {
+
+		if (other instanceof GwtSummary && !(this instanceof GwtSummary)) {
+			return 1;
+		}
+
+		int result = other.getDate().compareTo(getDate());
+		if (result == 0) {
+			result = getSectionName().compareTo(other.getSectionName());
+			if (result == 0) {
+				result = getChildName().compareTo(other.getChildName());
+				if (result == 0) {
+					result = getUser().compareTo(other.getUser());
+					if (result == 0) {
+						result = getText().compareTo(other.getText());
+					}
+				}
+			}
+		}
+
+		return result;
+
 	}
 
 }

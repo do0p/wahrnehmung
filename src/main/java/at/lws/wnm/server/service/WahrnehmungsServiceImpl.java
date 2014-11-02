@@ -76,11 +76,12 @@ public class WahrnehmungsServiceImpl extends RemoteServiceServlet implements
 		final User user = getUserForQuery();
 		final BeobachtungsResult result = new BeobachtungsResult();
 
-		if (filter.getChildKey() != null) {
-			result.setBeobachtungen(beobachtungsDao.getBeobachtungen(filter,
-					range, user, true));
-			result.setRowCount(beobachtungsDao.getRowCount(filter, user, true));
+		if(user != null) {
+			filter.setUser(user.getEmail());
 		}
+		result.setBeobachtungen(beobachtungsDao.getBeobachtungen(filter, range));
+		result.setRowCount(beobachtungsDao.getRowCount(filter));
+
 		addFilenames(result);
 		return result;
 	}
@@ -93,7 +94,8 @@ public class WahrnehmungsServiceImpl extends RemoteServiceServlet implements
 
 	@Override
 	public String getFileUploadUrl() {
-		String uploadUrl = blobstoreService.createUploadUrl(UPLOAD_URL, options);
+		String uploadUrl = blobstoreService
+				.createUploadUrl(UPLOAD_URL, options);
 		return uploadUrl;
 	}
 

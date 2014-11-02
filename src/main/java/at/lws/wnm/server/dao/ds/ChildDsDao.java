@@ -26,8 +26,40 @@ public class ChildDsDao extends AbstractDsDao {
 	public static final String BIRTHDAY_FIELD = "birthday";
 	public static final String LAST_DEVELOPEMENT_DIALOGUE_DATE = "lastDialogueDate";
 	public static final String DEVELOPEMENT_DIALOGUE_DATES = "dialogueDates";
+	private static final String ALL_CHILDREN = "allChildren";
+	
+	private boolean dirty = true;
 
 	public List<GwtChild> getAllChildren() {
+		
+		return getAllChildrenFromCache();
+	}
+
+	@SuppressWarnings("unchecked")
+	private List<GwtChild> getAllChildrenFromCache() {
+		List<GwtChild> allChildren;
+		
+		if(dirty)
+		{
+			allChildren = updateCacheFromDatastore();
+		} else {
+			allChildren = (List<GwtChild>) getCache().get(ALL_CHILDREN);
+			if(allChildren == null) {
+				allChildren = updateCacheFromDatastore();
+			}
+		}
+		
+		return allChildren;
+	}
+
+	private List<GwtChild> updateCacheFromDatastore() {
+		List<GwtChild> allChildren = getAllChildrenFromDatastore();
+		getCache().put(ALL_CHILDREN, allChildren);
+		dirty = false;
+		return allChildren;
+	}
+
+	private List<GwtChild> getAllChildrenFromDatastore() {
 		final Query query = new Query(CHILD_KIND).addSort(LASTNAME_FIELD)
 				.addSort(FIRSTNAME_FIELD).addSort(BIRTHDAY_FIELD);
 		return mapToGwtChildren(execute(query, withDefaults()));
@@ -53,7 +85,8 @@ public class ChildDsDao extends AbstractDsDao {
 			transaction.commit();
 			gwtChild.setKey(toString(child.getKey()));
 			insertIntoCache(child);
-
+			dirty = true;
+			
 		} finally {
 			if (transaction.isActive()) {
 				transaction.rollback();
@@ -63,6 +96,7 @@ public class ChildDsDao extends AbstractDsDao {
 
 	public void deleteChild(GwtChild child) {
 		deleteEntity(toKey(child.getKey()));
+		dirty = true;
 	}
 
 	public GwtChild getChild(String key) {

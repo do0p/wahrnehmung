@@ -59,80 +59,84 @@ public class BeobachtungDsDao extends AbstractDsDao {
 	private static int EXPECTED_SECTION_PER_CHILD = 100;
 	private static int EXPECTED_BEOBACHTUNG_PER_SECTION = 20;
 
-
-
 	private final Map<String, Date> dirty = new ConcurrentHashMap<String, Date>();
 
 	private SectionDsDao sectionDao = DaoRegistry.get(SectionDsDao.class);
 	private ChildDsDao childDao = DaoRegistry.get(ChildDsDao.class);
 
 	public List<GwtBeobachtung> getBeobachtungen(BeobachtungsFilter filter,
-			Range range, User user, boolean generateSummaries) {
+			Range range) {
 
-		List<GwtBeobachtung> beobachtungen = getBeobachtungen(filter, user,
-				generateSummaries);
+		List<GwtBeobachtung> beobachtungen = getBeobachtungen(filter);
 
-		Collections.sort(beobachtungen, new Comparator<GwtBeobachtung>() {
-
-			@Override
-			public int compare(GwtBeobachtung o1, GwtBeobachtung o2) {
-
-				int result = 0;
-				if (o1 instanceof GwtSummary) {
-
-					if (o2 instanceof GwtSummary) {
-						result = ((GwtSummary) o2).getCount() - ((GwtSummary) o1).getCount();
-					} else {
-						result = -1;
-					}
-
-				} else if (o2 instanceof GwtSummary) {
-					result = 1;
-				}
-				if (result == 0) {
-
-					result = o2.getDate().compareTo(o1.getDate());
-					if (result == 0) {
-						result = o1.getSectionName().compareTo(
-								o2.getSectionName());
-						if (result == 0) {
-							result = o1.getUser().compareTo(o2.getUser());
-							if (result == 0) {
-								result = o1.getText().compareTo(o2.getText());
-							}
-						}
-					}
-				}
-				return result;
-
-			}
-
-		});
+		Collections.sort(beobachtungen);
 
 		return getRange(beobachtungen, range);
 
 	}
 
-	private List<GwtBeobachtung> getBeobachtungen(BeobachtungsFilter filter,
-			User user, boolean generateSummaries) {
+	private List<GwtBeobachtung> getBeobachtungen(BeobachtungsFilter filter) {
 
-		String childKey = filter.getChildKey();
-		GwtChild child = childDao.getChild(childKey);
-
-		if (childKey == null) {
-			throw new IllegalArgumentException("no child with key " + childKey);
+		final List<GwtBeobachtung> result = new ArrayList<GwtBeobachtung>();
+		String origChildKey = filter.getChildKey();
+		List<String> childKeys = getChildKeys(origChildKey);
+		for (String childKey : childKeys) {
+//			System.err.println("getting data for " + childKey);
+			filter.setChildKey(childKey);
+			List<GwtBeobachtung> beobachtungen = getCachedBeobachtungen(filter,
+					childKey);
+//			System.err.println("+ " + beobachtungen.size());
+			result.addAll(beobachtungen);
+//			System.err.println("= " + result.size());
 		}
+		filter.setChildKey(origChildKey);
+		return result;
+	}
+
+	@SuppressWarnings("unchecked")
+	private List<GwtBeobachtung> getCachedBeobachtungen(
+			BeobachtungsFilter filter, String childKey) {
+		List<GwtBeobachtung> beobachtungen;
+		if (!getCache().contains(filter) || updateNeeded(childKey)) {
+			beobachtungen = getBeobachtungen(childKey, filter);
+			getCache().put(filter, beobachtungen);
+		} else {
+			beobachtungen = (List<GwtBeobachtung>) getCache().get(filter);
+		}
+
+		return beobachtungen;
+	}
+
+	private List<String> getChildKeys(String childKey) {
+
+		List<String> childKeys = new ArrayList<String>();
+		
+		if (childKey != null) {
+			childKeys.add(childKey);
+		} else {
+			Collection<GwtChild> allChildren = childDao.getAllChildren();
+			for (GwtChild child : allChildren) {
+				childKeys.add(child.getKey());
+			}
+		}
+
+		return childKeys;
+	}
+
+	private List<GwtBeobachtung> getBeobachtungen(String childKey,
+			BeobachtungsFilter filter) {
+		GwtChild child = childDao.getChild(childKey);
 
 		Multimap<String, GwtBeobachtung> allBeobachtungen = getAllGwtBeobachtungen(childKey);
 
 		Predicate<Entry<String, GwtBeobachtung>> mapFilter = createFilter(
-				child, filter, user);
+				child, filter);
 
 		Multimap<String, GwtBeobachtung> filteredBeobachtungen = Multimaps
 				.filterEntries(allBeobachtungen, mapFilter);
 		List<GwtBeobachtung> result = new ArrayList<GwtBeobachtung>();
 
-		if (generateSummaries) {
+		if (filter.isShowSummaries()) {
 			for (String sectionKey : filteredBeobachtungen.keySet()) {
 
 				Collection<GwtBeobachtung> beobachtungen = filteredBeobachtungen
@@ -223,8 +227,7 @@ public class BeobachtungDsDao extends AbstractDsDao {
 	}
 
 	private Predicate<Entry<String, GwtBeobachtung>> createFilter(
-			final GwtChild child, final BeobachtungsFilter filter,
-			final User user) {
+			final GwtChild child, final BeobachtungsFilter filter) {
 
 		return new Predicate<Map.Entry<String, GwtBeobachtung>>() {
 
@@ -233,9 +236,9 @@ public class BeobachtungDsDao extends AbstractDsDao {
 				String sectionKey = entry.getKey();
 				GwtBeobachtung beobachtung = entry.getValue();
 
+				final String user = filter.getUser();
 				if (user != null
-						&& !beobachtung.getUser().equalsIgnoreCase(
-								user.getEmail())) {
+						&& !beobachtung.getUser().equalsIgnoreCase(user)) {
 					return false;
 				}
 
@@ -252,7 +255,8 @@ public class BeobachtungDsDao extends AbstractDsDao {
 
 					Date startDate = timeRange[0];
 					Date endDate = timeRange[1];
-					if (filter.isSinceLastDevelopmementDialogue() && lastDevelopementDialogueDate != null) {
+					if (filter.isSinceLastDevelopmementDialogue()
+							&& lastDevelopementDialogueDate != null) {
 						if (endDate.before(lastDevelopementDialogueDate)) {
 							return false;
 						}
@@ -266,7 +270,8 @@ public class BeobachtungDsDao extends AbstractDsDao {
 					if (beobachtung.getDate().after(endDate)) {
 						return false;
 					}
-				} else if (filter.isSinceLastDevelopmementDialogue() && lastDevelopementDialogueDate != null) {
+				} else if (filter.isSinceLastDevelopmementDialogue()
+						&& lastDevelopementDialogueDate != null) {
 					if (beobachtung.getDate().before(
 							lastDevelopementDialogueDate)) {
 						return false;
@@ -352,9 +357,8 @@ public class BeobachtungDsDao extends AbstractDsDao {
 		dirty.put(childKey, new Date());
 	}
 
-	public int getRowCount(BeobachtungsFilter filter, User user,
-			boolean generateSummaries) {
-		return getBeobachtungen(filter, user, generateSummaries).size();
+	public int getRowCount(BeobachtungsFilter filter) {
+		return getBeobachtungen(filter).size();
 	}
 
 	public GwtBeobachtung getBeobachtung(String beobachtungsKey) {

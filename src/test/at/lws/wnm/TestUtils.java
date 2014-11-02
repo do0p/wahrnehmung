@@ -80,6 +80,12 @@ public class TestUtils {
 		filter.setTimeRange(timeRange);
 		return filter;
 	}
+	
+	public static BeobachtungsFilter createFilterWithSummaries(String childKey, String sectionKey, Date ...timeRange) {
+		BeobachtungsFilter filter = createFilter(childKey, sectionKey, timeRange);
+		filter.setShowSummaries(true);
+		return filter;
+	}
 
 	public static GwtChild createGwtChild(String key, String firstName,
 			String lastName, Date birthday, Date... dialogueDates) {
@@ -98,6 +104,7 @@ public class TestUtils {
 		final Entity child = new Entity(ChildDsDao.CHILD_KIND);
 		child.setProperty(ChildDsDao.FIRSTNAME_FIELD, firstName);
 		child.setProperty(ChildDsDao.LASTNAME_FIELD, firstName);
+		child.setProperty(ChildDsDao.BIRTHDAY_FIELD, new Date());
 		return child;
 	}
 

@@ -13,4 +13,20 @@ public class GwtSummary extends GwtBeobachtung {
 		this.count = count;
 	}
 
+	@Override
+	public int compareTo(GwtBeobachtung other) {
+
+		if (!(other instanceof GwtSummary)) {
+			return -1;
+		}
+
+		int result = ((GwtSummary) other).getCount()
+				- ((GwtSummary) this).getCount();
+
+		if (result != 0) {
+			return result;
+		}
+
+		return super.compareTo(other);
+	}
 }

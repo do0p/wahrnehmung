@@ -3,7 +3,7 @@ package at.lws.wnm.server.dao;
 import static at.lws.wnm.TestUtils.createBeobachtung;
 import static at.lws.wnm.TestUtils.createBeobachtungEntity;
 import static at.lws.wnm.TestUtils.createChildEntity;
-import static at.lws.wnm.TestUtils.createFilter;
+import static at.lws.wnm.TestUtils.createFilterWithSummaries;
 import static at.lws.wnm.TestUtils.createSectionEntity;
 import static at.lws.wnm.TestUtils.createUser;
 
@@ -99,20 +99,24 @@ public class BeobachtungDsDaoWithSummariesTest extends AbstractDsDaoTest {
 
 	@Test
 	public void testDelete() {
-		Assert.assertEquals(6, beobachtungsDao.getRowCount(
-				createFilter(child1Key, null), null, true));
+		Assert.assertEquals(
+				6,
+				beobachtungsDao.getRowCount(
+						createFilterWithSummaries(child1Key, null)));
 
 		beobachtungsDao.deleteAllFromChild(child1Key.toString());
 
-		Assert.assertEquals(0, beobachtungsDao.getRowCount(
-				createFilter(child1Key, null), null, true));
+		Assert.assertEquals(
+				0,
+				beobachtungsDao.getRowCount(
+						createFilterWithSummaries(child1Key, null)));
 	}
 
 	@Test
 	public void testGetForKey() {
 		final List<GwtBeobachtung> beobachtungen = beobachtungsDao
-				.getBeobachtungen(createFilter(child1Key, null), range, null,
-						true);
+				.getBeobachtungen(createFilterWithSummaries(child1Key, null),
+						range);
 		for (GwtBeobachtung beobachtung : beobachtungen) {
 			if (beobachtung.getKey() != null) {
 				Assert.assertEquals(beobachtung,
@@ -126,28 +130,34 @@ public class BeobachtungDsDaoWithSummariesTest extends AbstractDsDaoTest {
 
 		Assert.assertEquals(
 				6,
-				beobachtungsDao.getBeobachtungen(createFilter(child1Key, null),
-						range, null, true).size());
-		Assert.assertEquals(
-				2,
 				beobachtungsDao
-						.getBeobachtungen(createFilter(child1Key, section1Key),
-								range, null, true).size());
-		Assert.assertEquals(
-				4,
-				beobachtungsDao.getBeobachtungen(createFilter(child1Key, null),
-						range, user1, true).size());
+						.getBeobachtungen(
+								createFilterWithSummaries(child1Key, null),
+								range).size());
 		Assert.assertEquals(
 				2,
 				beobachtungsDao.getBeobachtungen(
-						createFilter(child1Key, section2Key), range, user1,
-						true).size());
+						createFilterWithSummaries(child1Key, section1Key),
+						range).size());
+		BeobachtungsFilter filter = createFilterWithSummaries(child1Key, null);
+		filter.setUser(user1.getEmail());
+		Assert.assertEquals(
+				4,
+				beobachtungsDao.getBeobachtungen(
+						filter, range).size());
+		filter = createFilterWithSummaries(child1Key, section2Key);
+		filter.setUser(user1.getEmail());
+		Assert.assertEquals(
+				2,
+				beobachtungsDao.getBeobachtungen(
+						filter,
+						range).size());
 
 		Assert.assertEquals(
 				2,
 				beobachtungsDao.getBeobachtungen(
-						createFilter(child1Key, null, new Date(NOW - HOUR), new Date(
-								NOW)), range, null, true).size());
+						createFilterWithSummaries(child1Key, null, new Date(NOW
+								- HOUR), new Date(NOW)), range).size());
 	}
 
 	@Test
@@ -163,26 +173,31 @@ public class BeobachtungDsDaoWithSummariesTest extends AbstractDsDaoTest {
 	@Test
 	public void testRange() {
 		assertEquals(beobachtungsDao.getBeobachtungen(
-				createFilter(child1Key, null), new Range(4, 2), null, true),
-				beobachtung2, beobachtung1);
+				createFilterWithSummaries(child1Key, null), new Range(4, 2)), beobachtung2, beobachtung1);
 		assertEquals(beobachtungsDao.getBeobachtungen(
-				createFilter(child1Key, null), new Range(5, 10), null, true),
-				beobachtung1);
+				createFilterWithSummaries(child1Key, null), new Range(5, 10)), beobachtung1);
 		assertEquals(beobachtungsDao.getBeobachtungen(
-				createFilter(child1Key, null), new Range(3, 1), null, true),
-				beobachtung3);
+				createFilterWithSummaries(child1Key, null), new Range(3, 1)), beobachtung3);
 	}
 
 	@Test
 	public void testRowCount() {
-		Assert.assertEquals(4, beobachtungsDao.getRowCount(
-				createFilter(child1Key, null), user1, true));
-		Assert.assertEquals(6, beobachtungsDao.getRowCount(
-				createFilter(child1Key, null), null, true));
+		BeobachtungsFilter filter = createFilterWithSummaries(child1Key, null);
+		filter.setUser(user1.getEmail());
+		Assert.assertEquals(
+				4,
+				beobachtungsDao.getRowCount(
+						filter));
+		Assert.assertEquals(
+				6,
+				beobachtungsDao.getRowCount(
+						createFilterWithSummaries(child1Key, null)));
 		Assert.assertEquals(2, beobachtungsDao.getRowCount(
-				createFilter(child1Key, section1Key), null, true));
+				createFilterWithSummaries(child1Key, section1Key)));
+		filter = createFilterWithSummaries(child1Key, section2Key);
+		filter.setUser(user1.getEmail());
 		Assert.assertEquals(2, beobachtungsDao.getRowCount(
-				createFilter(child1Key, section2Key), user1, true));
+				filter));
 	}
 
 	@Test
@@ -192,9 +207,11 @@ public class BeobachtungDsDaoWithSummariesTest extends AbstractDsDaoTest {
 		beobachtungsDao.storeBeobachtung(beobachtung, user1, null);
 		assertServicesContains(beobachtung.getKey());
 
-		final BeobachtungsFilter filter = createFilter(child1Key, section1Key);
+		final BeobachtungsFilter filter = createFilterWithSummaries(child1Key,
+				section1Key);
+		filter.setUser(user1.getEmail());
 		final List<GwtBeobachtung> beobachtungen = beobachtungsDao
-				.getBeobachtungen(filter, range, user1, true);
+				.getBeobachtungen(filter, range);
 		Assert.assertEquals(2, beobachtungen.size());
 		Assert.assertEquals(beobachtung, beobachtungen.get(1));
 	}
@@ -211,9 +228,11 @@ public class BeobachtungDsDaoWithSummariesTest extends AbstractDsDaoTest {
 		beobachtungsDao.storeBeobachtung(beobachtung2, user1, null);
 		assertServicesContains(beobachtung2.getKey());
 
-		final BeobachtungsFilter filter = createFilter(child1Key, section1Key);
+		final BeobachtungsFilter filter = createFilterWithSummaries(child1Key,
+				section1Key);
+		filter.setUser(user1.getEmail());
 		final List<GwtBeobachtung> beobachtungen = beobachtungsDao
-				.getBeobachtungen(filter, range, user1, true);
+				.getBeobachtungen(filter, range);
 		Assert.assertEquals(3, beobachtungen.size());
 		Assert.assertEquals(beobachtung1, beobachtungen.get(2));
 		Assert.assertEquals(beobachtung2, beobachtungen.get(1));

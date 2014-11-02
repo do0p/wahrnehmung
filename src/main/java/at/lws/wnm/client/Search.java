@@ -28,6 +28,7 @@ import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Panel;
@@ -48,6 +49,8 @@ public class Search extends VerticalPanel {
 	private final NameSelection nameSelection;
 	private final SectionSelection sectionSelection;
 	private final YearSelection yearSelection;
+	private final CheckBox under12;
+	private final CheckBox over12;
 	private final MultiSelectionModel<GwtBeobachtung> selectionModel;
 	private final Show beobachtungen;
 
@@ -55,6 +58,8 @@ public class Search extends VerticalPanel {
 		PopUp dialogBox = new PopUp();
 		final RichTextArea textArea = new RichTextArea();
 		this.filter = new BeobachtungsFilter();
+		under12 = new CheckBox(labels.under12());
+		over12 = new CheckBox(labels.over12());
 		this.nameSelection = new NameSelection(dialogBox);
 		nameSelection.addSelectionHandler(new SelectionHandler<Suggestion>() {
 			@Override
@@ -158,7 +163,7 @@ public class Search extends VerticalPanel {
 		printButton.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
 				Set<GwtBeobachtung> selectedSet = new TreeSet<GwtBeobachtung>(
-						Search.this.selectionModel.getSelectedSet());
+						selectionModel.getSelectedSet());
 				if (!selectedSet.isEmpty()) {
 					Print.it(at.lws.wnm.shared.model.Utils
 							.createPrintHtml(selectedSet));
@@ -174,7 +179,7 @@ public class Search extends VerticalPanel {
 		showButton.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
 				Set<GwtBeobachtung> selectedSet = new TreeSet<GwtBeobachtung>(
-						Search.this.selectionModel.getSelectedSet());
+						selectionModel.getSelectedSet());
 				if (!selectedSet.isEmpty()) {
 					beobachtungen.setBeobachtungen(selectedSet);
 					beobachtungen.center();
@@ -190,9 +195,9 @@ public class Search extends VerticalPanel {
 	}
 
 	private void search() {
-		Search.this.filter.setChildKey(Search.this.nameSelection
+		filter.setChildKey(nameSelection
 				.getSelectedChildKey());
-		Search.this.filter.setSectionKey(Search.this.sectionSelection
+		filter.setSectionKey(sectionSelection
 				.getSelectedSectionKey());
 		YearSelectionResult selectionResult = yearSelection
 				.getSelectedTimeRange();
@@ -203,6 +208,8 @@ public class Search extends VerticalPanel {
 			filter.setSinceLastDevelopmementDialogue(false);
 			filter.setTimeRange(selectionResult.getTimeRange());
 		}
-		Search.this.table.updateTable();
+		filter.setShowSummaries(nameSelection.getSelectedChildKey() != null);
+		table.clear();
+		table.updateTable();
 	}
 }
