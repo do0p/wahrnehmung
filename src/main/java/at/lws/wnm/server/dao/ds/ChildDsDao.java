@@ -178,7 +178,8 @@ public class ChildDsDao extends AbstractDsDao {
 		Collection<GwtChild> result = new ArrayList<GwtChild>();
 		Date twelveYearsAgo = getDateTwelveYearsAgo();
 		for(GwtChild child : getAllChildren()) {
-			if(!child.getBirthDay().after(twelveYearsAgo)) {
+			Date birthDay = child.getBirthDay();
+			if(birthDay != null && !birthDay.after(twelveYearsAgo)) {
 				result.add(child);
 			}
 		}
@@ -200,7 +201,8 @@ public class ChildDsDao extends AbstractDsDao {
 		Collection<GwtChild> result = new ArrayList<GwtChild>();
 		Date twelveYearsAgo = getDateTwelveYearsAgo();
 		for(GwtChild child : getAllChildren()) {
-			if(child.getBirthDay().after(twelveYearsAgo)) {
+			Date birthDay = child.getBirthDay();
+			if(birthDay != null && birthDay.after(twelveYearsAgo)) {
 				result.add(child);
 			}
 		}

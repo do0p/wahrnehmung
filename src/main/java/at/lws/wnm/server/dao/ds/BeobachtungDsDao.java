@@ -45,19 +45,22 @@ import com.google.gwt.view.client.Range;
 
 public class BeobachtungDsDao extends AbstractDsDao {
 
-	public static String BEOBACHTUNGS_DAO_MEMCACHE = "beobachtungsDao";
-	public static String BEOBACHTUNGS_GROUP_KIND = "BeobachtungsGroup";
-	public static String BEOBACHTUNGS_KEY_FIELD = "beobachtungsKey";
-	public static String BEOBACHTUNG_KIND = "BeobachtungDs";
-	public static String DATE_FIELD = "date";
-	public static String SECTION_KEY_FIELD = "sectionKey";
-	public static String USER_FIELD = "user";
-	public static String DURATION_FIELD = "duration";
-	public static String TEXT_FIELD = "text";
-	public static String SOCIAL_FIELD = "social";
+	private static final Date OLDEST_ENTRY = new Date(1406851200000l); // 1.8.2014
+	
+	public static final String BEOBACHTUNGS_DAO_MEMCACHE = "beobachtungsDao";
+	public static final String BEOBACHTUNGS_GROUP_KIND = "BeobachtungsGroup";
+	public static final String BEOBACHTUNGS_KEY_FIELD = "beobachtungsKey";
+	public static final String BEOBACHTUNG_KIND = "BeobachtungDs";
+	public static final String DATE_FIELD = "date";
+	public static final String SECTION_KEY_FIELD = "sectionKey";
+	public static final String USER_FIELD = "user";
+	public static final String DURATION_FIELD = "duration";
+	public static final String TEXT_FIELD = "text";
+	public static final String SOCIAL_FIELD = "social";
 
-	private static int EXPECTED_SECTION_PER_CHILD = 100;
-	private static int EXPECTED_BEOBACHTUNG_PER_SECTION = 20;
+	private static final int EXPECTED_SECTION_PER_CHILD = 100;
+	private static final int EXPECTED_BEOBACHTUNG_PER_SECTION = 20;
+	
 
 	private final Map<String, Date> dirty = new ConcurrentHashMap<String, Date>();
 
@@ -81,13 +84,10 @@ public class BeobachtungDsDao extends AbstractDsDao {
 		Collection<String> childKeys = getChildKeys(filter);
 		String origChildKey = filter.getChildKey();
 		for (String childKey : childKeys) {
-			// System.err.println("getting data for " + childKey);
 			filter.setChildKey(childKey);
 			List<GwtBeobachtung> beobachtungen = getCachedBeobachtungen(filter,
 					childKey);
-			// System.err.println("+ " + beobachtungen.size());
 			result.addAll(beobachtungen);
-			// System.err.println("= " + result.size());
 		}
 		filter.setChildKey(origChildKey);
 		return result;
@@ -339,6 +339,9 @@ public class BeobachtungDsDao extends AbstractDsDao {
 
 	private Iterable<Entity> queryAllBeobachtungen(String childKey) {
 		Query query = new Query(BEOBACHTUNG_KIND, toKey(childKey));
+		
+		Filter filter = new FilterPredicate(DATE_FIELD, FilterOperator.GREATER_THAN, OLDEST_ENTRY);
+		query.setFilter(filter);
 		return getDatastoreService().prepare(query).asIterable();
 	}
 
