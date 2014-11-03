@@ -96,14 +96,7 @@ public class Search extends VerticalPanel {
 				search();
 			}
 		});
-		// Button sendButton = new Button(labels.filter());
-		// sendButton.addClickHandler(new ClickHandler() {
-		// @Override
-		// public void onClick(ClickEvent event) {
-		// search();
-		// }
-		// });
-		// sendButton.addStyleName(Utils.SEND_BUTTON_STYLE);
+
 		this.selectionModel = createSelectionModel(textArea);
 		this.table = new BeobachtungsTable(authorization, this.selectionModel,
 				this.filter, dialogBox, navigation.getEditContent());
@@ -144,10 +137,6 @@ public class Search extends VerticalPanel {
 		boxes.add(under12);
 		boxes.add(over12);
 		filterBox.setWidget(1, 0, boxes);
-
-		// sendButton.setSize(Utils.BUTTON_WIDTH + Utils.PIXEL, Utils.ROW_HEIGHT
-		// + Utils.PIXEL);
-		// filterBox.setWidget(0, i, sendButton);
 
 		add(this.table);
 
@@ -237,7 +226,6 @@ public class Search extends VerticalPanel {
 		table.clear();
 		if (readyToSearch()) {
 			table.updateTable();
-//			table.flush();
 		}
 	}
 
