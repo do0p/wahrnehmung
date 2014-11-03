@@ -78,16 +78,16 @@ public class BeobachtungDsDao extends AbstractDsDao {
 	private List<GwtBeobachtung> getBeobachtungen(BeobachtungsFilter filter) {
 
 		final List<GwtBeobachtung> result = new ArrayList<GwtBeobachtung>();
+		Collection<String> childKeys = getChildKeys(filter);
 		String origChildKey = filter.getChildKey();
-		List<String> childKeys = getChildKeys(origChildKey);
 		for (String childKey : childKeys) {
-//			System.err.println("getting data for " + childKey);
+			// System.err.println("getting data for " + childKey);
 			filter.setChildKey(childKey);
 			List<GwtBeobachtung> beobachtungen = getCachedBeobachtungen(filter,
 					childKey);
-//			System.err.println("+ " + beobachtungen.size());
+			// System.err.println("+ " + beobachtungen.size());
 			result.addAll(beobachtungen);
-//			System.err.println("= " + result.size());
+			// System.err.println("= " + result.size());
 		}
 		filter.setChildKey(origChildKey);
 		return result;
@@ -107,17 +107,29 @@ public class BeobachtungDsDao extends AbstractDsDao {
 		return beobachtungen;
 	}
 
-	private List<String> getChildKeys(String childKey) {
+	private Collection<String> getChildKeys(BeobachtungsFilter filter) {
 
 		List<String> childKeys = new ArrayList<String>();
-		
-		if (childKey != null) {
-			childKeys.add(childKey);
-		} else {
+
+		if (filter.isOver12() && filter.isUnder12()) {
 			Collection<GwtChild> allChildren = childDao.getAllChildren();
 			for (GwtChild child : allChildren) {
 				childKeys.add(child.getKey());
 			}
+		} else if (filter.isOver12()) {
+			Collection<GwtChild> allChildren = childDao.getAllChildrenOver12();
+			for (GwtChild child : allChildren) {
+				childKeys.add(child.getKey());
+			}
+		} else if (filter.isUnder12()) {
+			Collection<GwtChild> allChildren = childDao.getAllChildrenUnder12();
+			for (GwtChild child : allChildren) {
+				childKeys.add(child.getKey());
+			}
+		} else if (filter.getChildKey() != null) {
+			childKeys.add(filter.getChildKey());
+		} else {
+			throw new IllegalArgumentException("no child filter defined");
 		}
 
 		return childKeys;

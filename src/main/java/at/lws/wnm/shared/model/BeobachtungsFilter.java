@@ -20,6 +20,10 @@ public class BeobachtungsFilter implements Serializable {
 
 	private boolean sinceLastDevelopmementDialogue;
 	
+	private boolean under12;
+	
+	private boolean over12;
+	
 	private String user;
 
 	public String getUser() {
@@ -76,6 +80,22 @@ public class BeobachtungsFilter implements Serializable {
 
 	public boolean isSinceLastDevelopmementDialogue() {
 		return sinceLastDevelopmementDialogue;
+	}
+
+	public boolean isUnder12() {
+		return under12;
+	}
+
+	public void setUnder12(boolean under12) {
+		this.under12 = under12;
+	}
+
+	public boolean isOver12() {
+		return over12;
+	}
+
+	public void setOver12(boolean over12) {
+		this.over12 = over12;
 	}
 
 	@Override

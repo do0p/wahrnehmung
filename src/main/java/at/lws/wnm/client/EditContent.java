@@ -298,7 +298,7 @@ public class EditContent extends HorizontalPanel {
 		final Panel textArea = createTextArea();
 		contentContainer.add(textArea);
 
-		contentContainer.add(uploadForm);
+//		contentContainer.add(uploadForm);
 
 		final Panel buttonContainer = createButtonContainer();
 		Utils.formatCenter(contentContainer, buttonContainer);

@@ -42,36 +42,34 @@ public class BeobachtungsTable extends CellTable<GwtBeobachtung> {
 	private final BeobachtungsFilter filter;
 	private boolean allSelected;
 	private final PopUp dialogBox;
-	private final EditContent editContent;
 
 	public BeobachtungsTable(final Authorization authorization,
 			final MultiSelectionModel<GwtBeobachtung> selectionModel,
 			final BeobachtungsFilter filter, final PopUp dialogBox,
-			EditContent editContent) {
+			final EditContent editContent) {
 		this.filter = filter;
 		this.dialogBox = dialogBox;
-		this.editContent = editContent;
 		this.decisionBox = new DecisionBox();
 		this.decisionBox.setText(labels.observationDelWarning());
 
 		Header<Boolean> selectAllHeader = new Header<Boolean>(new CheckboxCell(
 				true, false)) {
 			public Boolean getValue() {
-				return Boolean.valueOf(BeobachtungsTable.this.allSelected);
+				return Boolean.valueOf(allSelected);
 			}
 		};
 		selectAllHeader.setUpdater(new ValueUpdater<Boolean>() {
 			public void update(Boolean value) {
-				BeobachtungsTable.this.allSelected = value.booleanValue();
+				allSelected = value.booleanValue();
 				if (value.booleanValue()) {
-					BeobachtungsTable.this.wahrnehmungsService
+					wahrnehmungsService
 							.getBeobachtungen(filter, new Range(0,
-									BeobachtungsTable.this.getRowCount()),
+									getRowCount()),
 									new AsyncCallback<BeobachtungsResult>() {
 										public void onFailure(Throwable arg0) {
-											BeobachtungsTable.this.dialogBox
+											dialogBox
 													.setErrorMessage();
-											BeobachtungsTable.this.dialogBox
+											dialogBox
 													.center();
 										}
 
@@ -154,7 +152,7 @@ public class BeobachtungsTable extends CellTable<GwtBeobachtung> {
 								if (key == null) {
 									return;
 								}
-								BeobachtungsTable.this.editContent.setKey(key);
+								editContent.setKey(key);
 								History.newItem(Navigation.NEW_ENTRY, true);
 							}
 						}));
@@ -166,19 +164,19 @@ public class BeobachtungsTable extends CellTable<GwtBeobachtung> {
 								if (key == null) {
 									return;
 								}
-								BeobachtungsTable.this.decisionBox
+								decisionBox
 										.addOkClickHandler(new ClickHandler() {
 											public void onClick(ClickEvent arg0) {
-												BeobachtungsTable.this.wahrnehmungsService
+												wahrnehmungsService
 														.deleteBeobachtung(
 																key,
 																new AsyncCallback<Void>() {
 																	public void onFailure(
 																			Throwable caught) {
-																		BeobachtungsTable.this.dialogBox
+																		dialogBox
 																				.setErrorMessage(caught
 																						.getLocalizedMessage());
-																		BeobachtungsTable.this.dialogBox
+																		dialogBox
 																				.center();
 																	}
 
@@ -190,7 +188,7 @@ public class BeobachtungsTable extends CellTable<GwtBeobachtung> {
 																});
 											}
 										});
-								BeobachtungsTable.this.decisionBox.center();
+								decisionBox.center();
 							}
 						}));
 		setKeyboardSelectionPolicy(KeyboardSelectionPolicy.ENABLED);
@@ -212,7 +210,7 @@ public class BeobachtungsTable extends CellTable<GwtBeobachtung> {
 
 		this.asyncDataProvider = new AsyncDataProvider<GwtBeobachtung>() {
 			protected void onRangeChanged(HasData<GwtBeobachtung> display) {
-				BeobachtungsTable.this.updateTable();
+				updateTable();
 			}
 		};
 		this.asyncDataProvider.addDataDisplay(this);
@@ -225,20 +223,21 @@ public class BeobachtungsTable extends CellTable<GwtBeobachtung> {
 
 	public void updateTable() {
 		final Range visibleRange = getVisibleRange();
-
+		asyncDataProvider.updateRowCount(0, false);
 		this.wahrnehmungsService.getBeobachtungen(this.filter, visibleRange,
 				new AsyncCallback<BeobachtungsResult>() {
 					public void onSuccess(BeobachtungsResult result) {
-						BeobachtungsTable.this.asyncDataProvider.updateRowData(
+						
+						asyncDataProvider.updateRowData(
 								visibleRange.getStart(),
 								result.getBeobachtungen());
-						BeobachtungsTable.this.setRowCount(result.getRowCount());
-						BeobachtungsTable.this.redraw();
+						asyncDataProvider.updateRowCount(result.getRowCount(), true);
+//						redraw();
 					}
 
 					public void onFailure(Throwable caught) {
-						BeobachtungsTable.this.dialogBox.setErrorMessage();
-						BeobachtungsTable.this.dialogBox.center();
+						dialogBox.setErrorMessage();
+						dialogBox.center();
 					}
 				});
 	}

@@ -76,13 +76,18 @@ public class WahrnehmungsServiceImpl extends RemoteServiceServlet implements
 		final User user = getUserForQuery();
 		final BeobachtungsResult result = new BeobachtungsResult();
 
-		if(user != null) {
-			filter.setUser(user.getEmail());
-		}
-		result.setBeobachtungen(beobachtungsDao.getBeobachtungen(filter, range));
-		result.setRowCount(beobachtungsDao.getRowCount(filter));
+		if (filter.getChildKey() != null || filter.isOver12()
+				|| filter.isUnder12()) {
 
-		addFilenames(result);
+			if (user != null) {
+				filter.setUser(user.getEmail());
+			}
+			result.setBeobachtungen(beobachtungsDao.getBeobachtungen(filter,
+					range));
+			result.setRowCount(beobachtungsDao.getRowCount(filter));
+
+			addFilenames(result);
+		}
 		return result;
 	}
 

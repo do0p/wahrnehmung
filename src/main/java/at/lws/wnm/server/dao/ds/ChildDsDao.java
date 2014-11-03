@@ -4,6 +4,8 @@ import static com.google.appengine.api.datastore.FetchOptions.Builder.withDefaul
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -30,13 +32,9 @@ public class ChildDsDao extends AbstractDsDao {
 	
 	private boolean dirty = true;
 
+	@SuppressWarnings("unchecked")
 	public List<GwtChild> getAllChildren() {
 		
-		return getAllChildrenFromCache();
-	}
-
-	@SuppressWarnings("unchecked")
-	private List<GwtChild> getAllChildrenFromCache() {
 		List<GwtChild> allChildren;
 		
 		if(dirty)
@@ -174,6 +172,39 @@ public class ChildDsDao extends AbstractDsDao {
 	public static String formatChildName(Entity child) {
 		return child.getProperty(FIRSTNAME_FIELD) + " "
 				+ child.getProperty(LASTNAME_FIELD);
+	}
+
+	public Collection<GwtChild> getAllChildrenOver12() {
+		Collection<GwtChild> result = new ArrayList<GwtChild>();
+		Date twelveYearsAgo = getDateTwelveYearsAgo();
+		for(GwtChild child : getAllChildren()) {
+			if(!child.getBirthDay().after(twelveYearsAgo)) {
+				result.add(child);
+			}
+		}
+		return result;
+	}
+
+	private Date getDateTwelveYearsAgo() {
+		Calendar calendar = Calendar.getInstance();
+		calendar.clear(Calendar.HOUR);
+		calendar.clear(Calendar.MINUTE);
+		calendar.clear(Calendar.SECOND);
+		calendar.clear(Calendar.MILLISECOND);
+		calendar.roll(Calendar.YEAR, -12);
+		Date twelveYearsAgo = calendar.getTime();
+		return twelveYearsAgo;
+	}
+
+	public Collection<GwtChild> getAllChildrenUnder12() {
+		Collection<GwtChild> result = new ArrayList<GwtChild>();
+		Date twelveYearsAgo = getDateTwelveYearsAgo();
+		for(GwtChild child : getAllChildren()) {
+			if(child.getBirthDay().after(twelveYearsAgo)) {
+				result.add(child);
+			}
+		}
+		return result;
 	}
 
 }

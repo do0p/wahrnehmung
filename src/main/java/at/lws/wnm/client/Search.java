@@ -30,11 +30,12 @@ import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RichTextArea;
-import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.CellPreviewEvent;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
@@ -59,7 +60,21 @@ public class Search extends VerticalPanel {
 		final RichTextArea textArea = new RichTextArea();
 		this.filter = new BeobachtungsFilter();
 		under12 = new CheckBox(labels.under12());
+		under12.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				updateGui();
+				search();
+			}
+		});
 		over12 = new CheckBox(labels.over12());
+		over12.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				updateGui();
+				search();
+			}
+		});
 		this.nameSelection = new NameSelection(dialogBox);
 		nameSelection.addSelectionHandler(new SelectionHandler<Suggestion>() {
 			@Override
@@ -81,14 +96,14 @@ public class Search extends VerticalPanel {
 				search();
 			}
 		});
-//		Button sendButton = new Button(labels.filter());
-//		sendButton.addClickHandler(new ClickHandler() {
-//			@Override
-//			public void onClick(ClickEvent event) {
-//				search();
-//			}
-//		});
-//		sendButton.addStyleName(Utils.SEND_BUTTON_STYLE);
+		// Button sendButton = new Button(labels.filter());
+		// sendButton.addClickHandler(new ClickHandler() {
+		// @Override
+		// public void onClick(ClickEvent event) {
+		// search();
+		// }
+		// });
+		// sendButton.addStyleName(Utils.SEND_BUTTON_STYLE);
 		this.selectionModel = createSelectionModel(textArea);
 		this.table = new BeobachtungsTable(authorization, this.selectionModel,
 				this.filter, dialogBox, navigation.getEditContent());
@@ -107,7 +122,7 @@ public class Search extends VerticalPanel {
 	private void layout(RichTextArea textArea) {
 		final List<SectionSelectionBox> sectionSelectionBoxes = this.sectionSelection
 				.getSectionSelectionBoxes();
-		final Grid filterBox = new Grid(1, sectionSelectionBoxes.size() + 3);
+		final Grid filterBox = new Grid(2, sectionSelectionBoxes.size() + 3);
 		add(filterBox);
 
 		nameSelection.setSize(Utils.NAMESELECTION_WIDTH + Utils.PIXEL,
@@ -125,9 +140,14 @@ public class Search extends VerticalPanel {
 				Utils.ROW_HEIGHT + Utils.PIXEL);
 		filterBox.setWidget(0, i++, yearSelection);
 
-//		sendButton.setSize(Utils.BUTTON_WIDTH + Utils.PIXEL, Utils.ROW_HEIGHT
-//				+ Utils.PIXEL);
-//		filterBox.setWidget(0, i, sendButton);
+		Panel boxes = new HorizontalPanel();
+		boxes.add(under12);
+		boxes.add(over12);
+		filterBox.setWidget(1, 0, boxes);
+
+		// sendButton.setSize(Utils.BUTTON_WIDTH + Utils.PIXEL, Utils.ROW_HEIGHT
+		// + Utils.PIXEL);
+		// filterBox.setWidget(0, i, sendButton);
 
 		add(this.table);
 
@@ -195,21 +215,42 @@ public class Search extends VerticalPanel {
 	}
 
 	private void search() {
-		filter.setChildKey(nameSelection
-				.getSelectedChildKey());
-		filter.setSectionKey(sectionSelection
-				.getSelectedSectionKey());
+		filter.setOver12(over12.getValue());
+		filter.setUnder12(under12.getValue());
+		if (enableNameSelection()) {
+			filter.setChildKey(nameSelection.getSelectedChildKey());
+		} else {
+			filter.setChildKey(null);
+		}
+
+		filter.setSectionKey(sectionSelection.getSelectedSectionKey());
 		YearSelectionResult selectionResult = yearSelection
 				.getSelectedTimeRange();
-		if(selectionResult.isSinceLastDevelopementDialogue()){
+		if (selectionResult.isSinceLastDevelopementDialogue()) {
 			filter.setSinceLastDevelopmementDialogue(true);
 			filter.setTimeRange(null);
 		} else {
 			filter.setSinceLastDevelopmementDialogue(false);
 			filter.setTimeRange(selectionResult.getTimeRange());
 		}
-		filter.setShowSummaries(nameSelection.getSelectedChildKey() != null);
+		filter.setShowSummaries(enableNameSelection());
 		table.clear();
-		table.updateTable();
+		if (readyToSearch()) {
+			table.updateTable();
+//			table.flush();
+		}
+	}
+
+	private boolean readyToSearch() {
+		return under12.getValue() || over12.getValue()
+				|| filter.getChildKey() != null;
+	}
+
+	private void updateGui() {
+		nameSelection.setEnabled(enableNameSelection());
+	}
+
+	private boolean enableNameSelection() {
+		return !(under12.getValue() || over12.getValue());
 	}
 }
