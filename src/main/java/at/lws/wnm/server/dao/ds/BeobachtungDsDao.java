@@ -4,6 +4,7 @@ import static com.google.appengine.api.datastore.FetchOptions.Builder.withDefaul
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -45,8 +46,6 @@ import com.google.gwt.view.client.Range;
 
 public class BeobachtungDsDao extends AbstractDsDao {
 
-	private static final Date OLDEST_ENTRY = new Date(1406851200000l); // 1.8.2014
-	
 	public static final String BEOBACHTUNGS_DAO_MEMCACHE = "beobachtungsDao";
 	public static final String BEOBACHTUNGS_GROUP_KIND = "BeobachtungsGroup";
 	public static final String BEOBACHTUNGS_KEY_FIELD = "beobachtungsKey";
@@ -60,7 +59,6 @@ public class BeobachtungDsDao extends AbstractDsDao {
 
 	private static final int EXPECTED_SECTION_PER_CHILD = 100;
 	private static final int EXPECTED_BEOBACHTUNG_PER_SECTION = 20;
-	
 
 	private final Map<String, Date> dirty = new ConcurrentHashMap<String, Date>();
 
@@ -82,11 +80,17 @@ public class BeobachtungDsDao extends AbstractDsDao {
 
 		final List<GwtBeobachtung> result = new ArrayList<GwtBeobachtung>();
 		Collection<String> childKeys = getChildKeys(filter);
+		Date oldestEntry = null;
+		if (childKeys.size() > 1) {
+			oldestEntry = shortListLimit();
+			Date newestEntry = today();
+			filter.setTimeRange(oldestEntry, newestEntry);
+		}
 		String origChildKey = filter.getChildKey();
 		for (String childKey : childKeys) {
 			filter.setChildKey(childKey);
 			List<GwtBeobachtung> beobachtungen = getCachedBeobachtungen(filter,
-					childKey);
+					childKey, oldestEntry);
 			result.addAll(beobachtungen);
 		}
 		filter.setChildKey(origChildKey);
@@ -95,10 +99,10 @@ public class BeobachtungDsDao extends AbstractDsDao {
 
 	@SuppressWarnings("unchecked")
 	private List<GwtBeobachtung> getCachedBeobachtungen(
-			BeobachtungsFilter filter, String childKey) {
+			BeobachtungsFilter filter, String childKey, Date oldestEntry) {
 		List<GwtBeobachtung> beobachtungen;
 		if (!getCache().contains(filter) || updateNeeded(childKey)) {
-			beobachtungen = getBeobachtungen(childKey, filter);
+			beobachtungen = getBeobachtungen(childKey, filter, oldestEntry);
 			getCache().put(filter, beobachtungen);
 		} else {
 			beobachtungen = (List<GwtBeobachtung>) getCache().get(filter);
@@ -136,10 +140,11 @@ public class BeobachtungDsDao extends AbstractDsDao {
 	}
 
 	private List<GwtBeobachtung> getBeobachtungen(String childKey,
-			BeobachtungsFilter filter) {
+			BeobachtungsFilter filter, Date oldestEntry) {
 		GwtChild child = childDao.getChild(childKey);
 
-		Multimap<String, GwtBeobachtung> allBeobachtungen = getAllGwtBeobachtungen(childKey);
+		Multimap<String, GwtBeobachtung> allBeobachtungen = getAllGwtBeobachtungen(
+				childKey, oldestEntry);
 
 		Predicate<Entry<String, GwtBeobachtung>> mapFilter = createFilter(
 				child, filter);
@@ -301,27 +306,47 @@ public class BeobachtungDsDao extends AbstractDsDao {
 
 	@SuppressWarnings("unchecked")
 	private Multimap<String, GwtBeobachtung> getAllGwtBeobachtungen(
-			String childKey) {
+			String childKey, Date oldestEntry) {
 		MemcacheService cache = getCache();
-		if (!cache.contains(childKey) || updateNeeded(childKey)) {
-			synchronized (this) {
-				if (!cache.contains(childKey) || updateNeeded(childKey)) {
-					setUpdated(childKey);
-					Multimap<String, GwtBeobachtung> cachedEntities = getAllBeobachtungen(childKey);
-					cache.put(childKey, cachedEntities);
-				}
+		Multimap<String, GwtBeobachtung> result = null;
+
+		String key = createKey(childKey, oldestEntry);
+		if (!updateNeeded(childKey)) {
+			if (cache.contains(key)) {
+				result = (Multimap<String, GwtBeobachtung>) cache.get(key);
+			}
+			if (result == null && oldestEntry != null
+					&& cache.contains(childKey)) {
+				// if we look for a limited range and there is none, look also
+				// for a not limited
+				result = (Multimap<String, GwtBeobachtung>) cache.get(childKey);
 			}
 		}
-		return (Multimap<String, GwtBeobachtung>) cache.get(childKey);
+		if (result == null) {
+			synchronized (this) {
+
+				setUpdated(childKey);
+				result = getAllBeobachtungen(
+						childKey, oldestEntry);
+				cache.put(key, result);
+
+			}
+		}
+		return result;
 	}
 
-	private Multimap<String, GwtBeobachtung> getAllBeobachtungen(String childKey) {
+	private String createKey(String childKey, Date oldestEntry) {
+		return childKey + (oldestEntry == null ? "" : oldestEntry.getTime());
+	}
+
+	private Multimap<String, GwtBeobachtung> getAllBeobachtungen(
+			String childKey, Date oldestEntry) {
 
 		Multimap<String, GwtBeobachtung> sectionToBeobachtung = ArrayListMultimap
 				.<String, GwtBeobachtung> create(EXPECTED_SECTION_PER_CHILD,
 						EXPECTED_BEOBACHTUNG_PER_SECTION);
 
-		for (Entity beobachtung : queryAllBeobachtungen(childKey)) {
+		for (Entity beobachtung : queryAllBeobachtungen(childKey, oldestEntry)) {
 
 			GwtBeobachtung gwtBeobachtung = toGwt(beobachtung);
 			String sectionKey = gwtBeobachtung.getSectionKey();
@@ -337,12 +362,33 @@ public class BeobachtungDsDao extends AbstractDsDao {
 		return sectionToBeobachtung;
 	}
 
-	private Iterable<Entity> queryAllBeobachtungen(String childKey) {
+	private Iterable<Entity> queryAllBeobachtungen(String childKey,
+			Date oldestEntry) {
 		Query query = new Query(BEOBACHTUNG_KIND, toKey(childKey));
-		
-		Filter filter = new FilterPredicate(DATE_FIELD, FilterOperator.GREATER_THAN, OLDEST_ENTRY);
-		query.setFilter(filter);
+		if (oldestEntry != null) {
+			Filter filter = new FilterPredicate(DATE_FIELD,
+					FilterOperator.GREATER_THAN, oldestEntry);
+			query.setFilter(filter);
+		}
 		return getDatastoreService().prepare(query).asIterable();
+	}
+
+	private Date shortListLimit() {
+		return getMidnightIn(Calendar.DAY_OF_MONTH, -14);
+	}
+	
+	private Date today() {
+		return getMidnightIn(Calendar.DAY_OF_MONTH, 1);
+	}
+
+	private Date getMidnightIn(int field, int amount) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.clear(Calendar.HOUR);
+		calendar.clear(Calendar.MINUTE);
+		calendar.clear(Calendar.SECOND);
+		calendar.clear(Calendar.MILLISECOND);
+		calendar.add(field, amount);
+		return calendar.getTime();
 	}
 
 	private void setParentSections(GwtSection section,

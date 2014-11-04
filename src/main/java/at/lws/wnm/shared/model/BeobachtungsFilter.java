@@ -54,7 +54,7 @@ public class BeobachtungsFilter implements Serializable {
 		return timeRange;
 	}
 
-	public void setTimeRange(Date[] timeRange) {
+	public void setTimeRange(Date... timeRange) {
 		this.timeRange = timeRange;
 	}
 
