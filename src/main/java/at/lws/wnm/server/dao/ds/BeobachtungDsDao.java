@@ -83,8 +83,8 @@ public class BeobachtungDsDao extends AbstractDsDao {
 		Date oldestEntry = null;
 		if (childKeys.size() > 1) {
 			oldestEntry = shortListLimit();
-			Date newestEntry = today();
-			filter.setTimeRange(oldestEntry, newestEntry);
+			filter.setTimeRange(oldestEntry, today());
+			filter.setSinceLastDevelopmementDialogue(false);
 		}
 		String origChildKey = filter.getChildKey();
 		for (String childKey : childKeys) {
