@@ -34,6 +34,7 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -65,13 +66,17 @@ public class EditContent extends HorizontalPanel {
 	private final ListBox additionalNames;
 	private final DecisionBox decisionBox;
 	private final FileUploadForm uploadForm;
+	private final CheckBox countOnly;
 
 	private boolean changes;
 	private String key;
+	private RichTextToolbar toolbar;
 
 	public EditContent(Authorization authorization) {
 
+		countOnly = new CheckBox(labels.countOnly());
 		textArea = new RichTextArea();
+		toolbar = new RichTextToolbar(textArea);
 		uploadForm = new FileUploadForm();
 		dateBox = new DateBox();
 		durationSelection = new ListBox();
@@ -88,30 +93,40 @@ public class EditContent extends HorizontalPanel {
 
 		init();
 		layout();
-		updateButtonsState();
+		updateState();
 	}
 
 	private void init() {
 
+		countOnly.addClickHandler(new ClickHandler() {
+
+			@Override
+			public void onClick(ClickEvent event) {
+
+				updateState();
+			}
+		});
 		nameSelection.addSelectionHandler(new SelectionHandler<Suggestion>() {
 			@Override
 			public void onSelection(SelectionEvent<Suggestion> event) {
 				markChanged();
-				updateButtonsState();
+				updateState();
+				addNameToTextField();
 			}
+
 		});
 
 		nameAddButton.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent arg0) {
 				addNameToList();
-				updateButtonsState();
+				updateState();
 			}
 
 		});
 		nameRemoveButton.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent arg0) {
 				removeNameFromList();
-				updateButtonsState();
+				updateState();
 			}
 
 		});
@@ -121,13 +136,13 @@ public class EditContent extends HorizontalPanel {
 		dateBox.addValueChangeHandler(new ValueChangeHandler<Date>() {
 			public void onValueChange(ValueChangeEvent<Date> event) {
 				markChanged();
-				updateButtonsState();
+				updateState();
 			}
 		});
 		sectionSelection.addChangeHandler(new ChangeHandler() {
 			public void onChange(ChangeEvent event) {
 				markChanged();
-				updateButtonsState();
+				updateState();
 			}
 		});
 
@@ -139,7 +154,7 @@ public class EditContent extends HorizontalPanel {
 		socialSelection.addChangeHandler(new ChangeHandler() {
 			public void onChange(ChangeEvent event) {
 				markChanged();
-				updateButtonsState();
+				updateState();
 			}
 		});
 
@@ -151,7 +166,7 @@ public class EditContent extends HorizontalPanel {
 		durationSelection.addChangeHandler(new ChangeHandler() {
 			public void onChange(ChangeEvent event) {
 				markChanged();
-				updateButtonsState();
+				updateState();
 			}
 		});
 
@@ -163,20 +178,20 @@ public class EditContent extends HorizontalPanel {
 		textArea.addBlurHandler(new BlurHandler() {
 			@Override
 			public void onBlur(BlurEvent event) {
-				updateButtonsState();
+				updateState();
 			}
 		});
 		textArea.addMouseOutHandler(new MouseOutHandler() {
 			@Override
 			public void onMouseOut(MouseOutEvent event) {
-				updateButtonsState();
+				updateState();
 			}
 		});
 		decisionBox.setText(labels.notSavedWarning());
 		decisionBox.addOkClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
 				resetForm();
-				updateButtonsState();
+				updateState();
 			}
 		});
 		sendButton.addClickHandler(new ClickHandler() {
@@ -184,7 +199,7 @@ public class EditContent extends HorizontalPanel {
 			public void onClick(ClickEvent event) {
 				sendButton.setEnabled(false);
 				storeBeobachtung();
-				updateButtonsState();
+				updateState();
 			}
 
 		});
@@ -194,14 +209,14 @@ public class EditContent extends HorizontalPanel {
 					decisionBox.center();
 				else
 					resetForm();
-				updateButtonsState();
+				updateState();
 			}
 		});
 		uploadForm.setChangeHandler(new ChangeHandler() {
 			@Override
 			public void onChange(ChangeEvent event) {
 				markChanged();
-				updateButtonsState();
+				updateState();
 			}
 		});
 	}
@@ -255,7 +270,7 @@ public class EditContent extends HorizontalPanel {
 	private void addNameToList() {
 		String selectedChildKey = nameSelection.getSelectedChildKey();
 		if ((selectedChildKey != null)
-				&& (!isInList(additionalNames, selectedChildKey.toString()))) {
+				&& (!isInList(selectedChildKey.toString()))) {
 			additionalNames.addItem(nameSelection.getValue(),
 					selectedChildKey.toString());
 			nameSelection.reset();
@@ -275,7 +290,7 @@ public class EditContent extends HorizontalPanel {
 		}
 	}
 
-	private boolean isInList(ListBox additionalNames, String value) {
+	private boolean isInList(String value) {
 		for (int i = 0; i < additionalNames.getItemCount(); i++) {
 			if (additionalNames.getValue(i).equals(value)) {
 				return true;
@@ -289,6 +304,8 @@ public class EditContent extends HorizontalPanel {
 		VerticalPanel contentContainer = new VerticalPanel();
 		contentContainer.setSpacing(Utils.SPACING);
 
+		contentContainer.add(countOnly);
+
 		final Panel selectionContainer = createSelectionContainer();
 		contentContainer.add(selectionContainer);
 
@@ -298,7 +315,7 @@ public class EditContent extends HorizontalPanel {
 		final Panel textArea = createTextArea();
 		contentContainer.add(textArea);
 
-//		contentContainer.add(uploadForm);
+		// contentContainer.add(uploadForm);
 
 		final Panel buttonContainer = createButtonContainer();
 		Utils.formatCenter(contentContainer, buttonContainer);
@@ -311,8 +328,6 @@ public class EditContent extends HorizontalPanel {
 		int textAreaHeight = Utils.APP_HEIGHT - 305;
 		textArea.setSize(textAreaWidth + Utils.PIXEL, textAreaHeight
 				+ Utils.PIXEL);
-
-		final RichTextToolbar toolbar = new RichTextToolbar(textArea);
 
 		final Grid grid = new Grid(2, 1);
 		grid.setStyleName("cw-RichText");
@@ -381,7 +396,7 @@ public class EditContent extends HorizontalPanel {
 		uploadForm.reset();
 		key = null;
 		changes = false;
-		updateButtonsState();
+		updateState();
 	}
 
 	private GwtBeobachtung.SocialEnum getSocialForm() {
@@ -463,13 +478,19 @@ public class EditContent extends HorizontalPanel {
 
 		GwtBeobachtung beobachtung = new GwtBeobachtung();
 		beobachtung.setKey(key);
-		beobachtung.setText(cleanUp(text));
 		beobachtung.setChildKey(childKey);
 		beobachtung.setSectionKey(sectionKey);
 		beobachtung.setDate(date);
-		beobachtung.setDuration(getDuration());
-		beobachtung.setSocial(getSocialForm());
-		beobachtung.setFileInfos(uploadForm.getFileInfos());
+
+		if (!countOnly.getValue()) {
+			beobachtung.setText(cleanUp(text));
+			beobachtung.setDuration(getDuration());
+			beobachtung.setSocial(getSocialForm());
+			beobachtung.setFileInfos(uploadForm.getFileInfos());
+		}
+		else {
+			beobachtung.setText("");
+		}
 
 		for (int i = 0; i < additionalNames.getItemCount(); i++) {
 			beobachtung.getAdditionalChildKeys().add(
@@ -499,13 +520,33 @@ public class EditContent extends HorizontalPanel {
 		return (text != null && text.equals("<br>")) ? "" : text;
 	}
 
-	private void updateButtonsState() {
+	private void updateState() {
 
 		nameAddButton.setEnabled(enableNameAdd());
 		nameRemoveButton.setEnabled(enableNameRemove());
 		sendButton.setEnabled(enableSend());
 		newButton.setEnabled(enableNew());
+		textArea.setEnabled(enableTextArea());
+		toolbar.setEnabled(enableToolBar());
+		socialSelection.setEnabled(enableSocialSelection());
+		durationSelection.setEnabled(enableDurationSelection());
+//		uploadForm.setenabled
+	}
 
+	private boolean enableDurationSelection() {
+		return !countOnly.getValue();
+	}
+
+	private boolean enableSocialSelection() {
+		return !countOnly.getValue();
+	}
+
+	private boolean enableToolBar() {
+		return !countOnly.getValue();
+	}
+
+	private boolean enableTextArea() {
+		return !countOnly.getValue();
 	}
 
 	private boolean enableNew() {
@@ -514,8 +555,10 @@ public class EditContent extends HorizontalPanel {
 
 	private boolean enableSend() {
 		return changes && nameSelection.hasSelection()
-				&& sectionSelection.hasSelection() && getDuration() != null
-				&& getSocialForm() != null && dateBox.getValue() != null;
+				&& sectionSelection.hasSelection()
+				&& dateBox.getValue() != null && countOnly.getValue() ? true
+				: (getDuration() != null && getSocialForm() != null && Utils
+						.isNotEmpty(cleanUp(textArea.getText())));
 	}
 
 	private boolean enableNameRemove() {
@@ -530,9 +573,34 @@ public class EditContent extends HorizontalPanel {
 		return key;
 	}
 
+	private void addNameToTextField() {
+		String childKey = nameSelection.getSelectedChildKey();
+		if (childKey != null && !isInList(childKey)) {
+
+			String name = nameSelection.getValue();
+			name = removeBirthDate(name);
+
+			String text = textArea.getText();
+			if (Utils.isNotEmpty(cleanUp(text))) {
+				text += ", ";
+			}
+			text += name;
+			textArea.setText(text);
+		}
+
+	}
+
+	private String removeBirthDate(String name) {
+		int pos = name.indexOf('(');
+		if (pos != -1) {
+			name = name.substring(0, pos - 1);
+		}
+		return name;
+	}
+
 	public void setKey(String key) {
 		this.key = key;
 		loadData();
-		updateButtonsState();
+		updateState();
 	}
 }

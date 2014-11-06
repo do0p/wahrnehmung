@@ -177,8 +177,8 @@ public class GwtBeobachtung implements Serializable, Comparable<GwtBeobachtung> 
 				&& ObjectUtils.equals(social, other.social)
 				&& ObjectUtils.equals(duration, other.duration)
 				&& date.equals(other.date) && user.equals(other.user)
-				&& additionalChildKeys.equals(other.additionalChildKeys)
-				&& fileInfos.equals(other.fileInfos);
+				&& ObjectUtils.equals(additionalChildKeys, other.additionalChildKeys)
+				&& ObjectUtils.equals(fileInfos, other.fileInfos);
 
 	}
 
@@ -191,8 +191,8 @@ public class GwtBeobachtung implements Serializable, Comparable<GwtBeobachtung> 
 		result = result * 17 + ObjectUtils.hashCode(social);
 		result = result * 17 + ObjectUtils.hashCode(duration);
 		result = result * 17 + date.hashCode();
-		result = result * 17 + additionalChildKeys.hashCode();
-		result = result * 17 + fileInfos.hashCode();
+		result = result * 17 + ObjectUtils.hashCode(additionalChildKeys);
+		result = result * 17 + ObjectUtils.hashCode(fileInfos);
 		return result * 17 + user.hashCode();
 	}
 

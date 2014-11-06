@@ -57,4 +57,5 @@ public interface Labels extends Messages {
 	String fileExistsWarning(String fileName);
 	String under12();
 	String over12();
+	String countOnly();
 }

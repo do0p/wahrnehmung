@@ -507,4 +507,15 @@ public class RichTextToolbar extends Composite {
 //											.getSelectedIndex()));
 		}
 	}
+	
+	public void setEnabled(boolean enabled) {
+		alignleft.setEnabled(enabled);
+		alignmiddle.setEnabled(enabled);
+		alignright.setEnabled(enabled);
+		bold.setEnabled(enabled);
+		italic.setEnabled(enabled);
+		orderlist.setEnabled(enabled);
+		unorderlist.setEnabled(enabled);
+		underline.setEnabled(enabled);
+	}
 }

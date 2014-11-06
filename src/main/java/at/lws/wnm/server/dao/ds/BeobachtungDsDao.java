@@ -374,7 +374,7 @@ public class BeobachtungDsDao extends AbstractDsDao {
 	}
 
 	private Date shortListLimit() {
-		return getMidnightIn(Calendar.DAY_OF_MONTH, -14);
+		return getMidnightIn(Calendar.DAY_OF_MONTH, -21);
 	}
 	
 	private Date today() {
@@ -549,7 +549,8 @@ public class BeobachtungDsDao extends AbstractDsDao {
 		entity.setProperty(SECTION_KEY_FIELD,
 				toKey(gwtBeobachtung.getSectionKey()));
 		entity.setProperty(DATE_FIELD, gwtBeobachtung.getDate());
-		entity.setProperty(TEXT_FIELD, new Text(gwtBeobachtung.getText()));
+		String text = gwtBeobachtung.getText();
+		entity.setProperty(TEXT_FIELD, new Text(text));
 		entity.setProperty(USER_FIELD, user);
 		DurationEnum duration = gwtBeobachtung.getDuration();
 		if (duration != null) {
