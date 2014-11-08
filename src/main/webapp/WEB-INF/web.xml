@@ -1,98 +1,68 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	version="3.0"
-	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
-
-	<!-- Servlets -->
-	<servlet>
-		<servlet-name>csvUploadServlet</servlet-name>
-		<servlet-class>at.lws.wnm.server.service.CsvUploadService</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>csvUploadServlet</servlet-name>
-		<url-pattern>/wahrnehmung/csvUpload</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
-		<servlet-name>fileUploadServlet</servlet-name>
-		<servlet-class>at.lws.wnm.server.service.FileUploadService</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>fileUploadServlet</servlet-name>
-		<url-pattern>/wahrnehmung/upload</url-pattern>
-	</servlet-mapping>
-
-	<!-- <servlet> <servlet-name>migrationServlet</servlet-name> <servlet-class>at.lws.wnm.server.service.MigrationService</servlet-class> 
-		</servlet> <servlet-mapping> <servlet-name>migrationServlet</servlet-name> 
-		<url-pattern>/wahrnehmung/migration</url-pattern> </servlet-mapping> -->
-
-	<servlet>
-		<servlet-name>wahrnehmungServlet</servlet-name>
-		<servlet-class>at.lws.wnm.server.service.WahrnehmungsServiceImpl</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>wahrnehmungServlet</servlet-name>
-		<url-pattern>/wahrnehmung/store</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
-		<servlet-name>childServlet</servlet-name>
-		<servlet-class>at.lws.wnm.server.service.ChildServiceImpl</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>childServlet</servlet-name>
-		<url-pattern>/wahrnehmung/child</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
-		<servlet-name>sectionServlet</servlet-name>
-		<servlet-class>at.lws.wnm.server.service.SectionServiceImpl</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>sectionServlet</servlet-name>
-		<url-pattern>/wahrnehmung/section</url-pattern>
-	</servlet-mapping>
-
-	<!-- <servlet> <servlet-name>userServlet</servlet-name> <servlet-class>at.lws.wnm.server.service.UserServiceImpl</servlet-class> 
-		</servlet> <servlet-mapping> <servlet-name>userServlet</servlet-name> <url-pattern>/wahrnehmung/user</url-pattern> 
-		</servlet-mapping> -->
-
-	<servlet>
-		<servlet-name>authServlet</servlet-name>
-		<servlet-class>at.lws.wnm.server.service.AuthorizationServiceImpl</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>authServlet</servlet-name>
-		<url-pattern>/wahrnehmung/auth</url-pattern>
-	</servlet-mapping>
-
-	<security-constraint>
-		<web-resource-collection>
-			<web-resource-name>/*</web-resource-name>
-			<url-pattern>/*</url-pattern>
-		</web-resource-collection>
-		<user-data-constraint>
-			<transport-guarantee>CONFIDENTIAL</transport-guarantee>
-		</user-data-constraint>
-	</security-constraint>
-
-	<!-- Default page to serve -->
-	<welcome-file-list>
-		<welcome-file>Wahrnehmung.html</welcome-file>
-	</welcome-file-list>
-
-	<servlet>
-		<servlet-name>SystemServiceServlet</servlet-name>
-		<servlet-class>com.google.api.server.spi.SystemServiceServlet</servlet-class>
-		<init-param>
-			<param-name>services</param-name>
-			<param-value />
-		</init-param>
-	</servlet>
-
-	<servlet-mapping>
-		<servlet-name>SystemServiceServlet</servlet-name>
-		<url-pattern>/_ah/spi/*</url-pattern>
-	</servlet-mapping>
-
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" version="3.0">
+  <servlet>
+    <servlet-name>fileUploadServlet</servlet-name>
+    <servlet-class>at.brandl.lws.notice.server.service.FileUploadService</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>fileUploadServlet</servlet-name>
+    <url-pattern>/wahrnehmung/upload</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <servlet-name>wahrnehmungServlet</servlet-name>
+    <servlet-class>at.brandl.lws.notice.server.service.WahrnehmungsServiceImpl</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>wahrnehmungServlet</servlet-name>
+    <url-pattern>/wahrnehmung/store</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <servlet-name>childServlet</servlet-name>
+    <servlet-class>at.brandl.lws.notice.server.service.ChildServiceImpl</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>childServlet</servlet-name>
+    <url-pattern>/wahrnehmung/child</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <servlet-name>sectionServlet</servlet-name>
+    <servlet-class>at.brandl.lws.notice.server.service.SectionServiceImpl</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>sectionServlet</servlet-name>
+    <url-pattern>/wahrnehmung/section</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <servlet-name>authServlet</servlet-name>
+    <servlet-class>at.brandl.lws.notice.server.service.AuthorizationServiceImpl</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>authServlet</servlet-name>
+    <url-pattern>/wahrnehmung/auth</url-pattern>
+  </servlet-mapping>
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>/*</web-resource-name>
+      <url-pattern>/*</url-pattern>
+    </web-resource-collection>
+    <user-data-constraint>
+      <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+    </user-data-constraint>
+  </security-constraint>
+  <welcome-file-list>
+    <welcome-file>Wahrnehmung.html</welcome-file>
+  </welcome-file-list>
+  <servlet>
+    <servlet-name>SystemServiceServlet</servlet-name>
+    <servlet-class>com.google.api.server.spi.SystemServiceServlet</servlet-class>
+    <init-param>
+      <param-name>services</param-name>
+      <param-value></param-value>
+    </init-param>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>SystemServiceServlet</servlet-name>
+    <url-pattern>/_ah/spi/*</url-pattern>
+  </servlet-mapping>
+ 
 </web-app>
