@@ -489,8 +489,7 @@ public class EditContent extends HorizontalPanel {
 			beobachtung.setDuration(getDuration());
 			beobachtung.setSocial(getSocialForm());
 			beobachtung.setFileInfos(uploadForm.getFileInfos());
-		}
-		else {
+		} else {
 			beobachtung.setText("");
 		}
 
@@ -560,8 +559,9 @@ public class EditContent extends HorizontalPanel {
 	}
 
 	private boolean enableSend() {
-		return changes && nameSelection.hasSelection()
-				&& sectionSelection.hasSelection()
+		return changes
+				&& (nameSelection.hasSelection() || additionalNames
+						.getItemCount() > 0) && sectionSelection.hasSelection()
 				&& dateBox.getValue() != null && countOnly.getValue() ? true
 				: (getDuration() != null && getSocialForm() != null && Utils
 						.isNotEmpty(cleanUp(textArea.getText())));

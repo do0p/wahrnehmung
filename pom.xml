@@ -7,7 +7,7 @@
 	<version>1.0.0-SNAPSHOT</version>
 
 	<groupId>at.brandl.lws</groupId>
-	<artifactId>wahrnehmung</artifactId>
+	<artifactId>notice</artifactId>
 
 	<properties>
 		<appengine.app.version>5</appengine.app.version>

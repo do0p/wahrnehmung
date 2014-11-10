@@ -1,5 +1,6 @@
 package at.brandl.lws.notice.client;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -217,7 +218,7 @@ public class Search extends VerticalPanel {
 				.getSelectedTimeRange();
 		if (selectionResult.isSinceLastDevelopementDialogue()) {
 			filter.setSinceLastDevelopmementDialogue(true);
-			filter.setTimeRange(null);
+			filter.setTimeRange((Date)null);
 		} else {
 			filter.setSinceLastDevelopmementDialogue(false);
 			filter.setTimeRange(selectionResult.getTimeRange());
