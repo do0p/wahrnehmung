@@ -65,12 +65,12 @@ public class Utils {
 		return builder.toString().trim();
 	}
 
-	public static boolean isNotEmpty(String lastName) {
-		return lastName != null && lastName.matches(".*\\w.*");
+	public static boolean isNotEmpty(String text) {
+		return !isEmpty(text);
 	}
 
-	public static boolean isEmpty(String sectionKey) {
-		return !isNotEmpty(sectionKey);
+	public static boolean isEmpty(String text) {
+		return text == null || text.trim().isEmpty();
 	}
 
 	public static String shorten(String text, int length) {
