@@ -18,6 +18,7 @@ import at.brandl.lws.notice.shared.model.Authorization;
 import at.brandl.lws.notice.shared.model.GwtBeobachtung;
 import at.brandl.lws.notice.shared.model.GwtBeobachtung.DurationEnum;
 import at.brandl.lws.notice.shared.model.GwtBeobachtung.SocialEnum;
+import at.brandl.lws.notice.shared.validator.GwtBeobachtungValidator;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.BlurEvent;
@@ -37,7 +38,6 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ListBox;
@@ -63,7 +63,7 @@ public class EditContent extends HorizontalPanel {
 	private final SectionSelection sectionSelection;
 	private final Button sendButton;
 	private final Button newButton;
-	private final Button nameAddButton;
+	// private final Button nameAddButton;
 	private final Button nameRemoveButton;
 	private final ListBox additionalNames;
 	private final DecisionBox decisionBox;
@@ -71,10 +71,12 @@ public class EditContent extends HorizontalPanel {
 	private final CheckBox countOnly;
 
 	private boolean changes;
-	private String key;
 	private RichTextToolbar toolbar;
+	private GwtBeobachtung beobachtung;
 
 	public EditContent(Authorization authorization) {
+
+		beobachtung = new GwtBeobachtung();
 
 		countOnly = new CheckBox(labels.countOnly());
 		textArea = new RichTextArea();
@@ -85,8 +87,8 @@ public class EditContent extends HorizontalPanel {
 		socialSelection = new ListBox();
 		dialogBox = new PopUp();
 		nameSelection = new NameSelection(dialogBox);
-		additionalNames = new ListBox(true);
-		nameAddButton = new Button(Utils.DOWN_ARROW);
+		additionalNames = new ListBox();
+		// nameAddButton = new Button(Utils.DOWN_ARROW);
 		nameRemoveButton = new Button(Utils.UP_ARROW);
 		sectionSelection = new SectionSelection(dialogBox);
 		decisionBox = new DecisionBox();
@@ -100,31 +102,37 @@ public class EditContent extends HorizontalPanel {
 
 	private void init() {
 
+		beobachtung.setDate(new Date());
+
+		
 		countOnly.addClickHandler(new ClickHandler() {
 
 			@Override
 			public void onClick(ClickEvent event) {
-
+				beobachtung.setCountOnly(countOnly.getValue());
 				updateState();
 			}
 		});
+
+		additionalNames.setMultipleSelect(true);
+
 		nameSelection.addSelectionHandler(new SelectionHandler<Suggestion>() {
 			@Override
 			public void onSelection(SelectionEvent<Suggestion> event) {
 				markChanged();
-				updateState();
-				addNameToTextField();
-			}
-
-		});
-
-		nameAddButton.addClickHandler(new ClickHandler() {
-			public void onClick(ClickEvent arg0) {
 				addNameToList();
 				updateState();
 			}
 
 		});
+
+		// nameAddButton.addClickHandler(new ClickHandler() {
+		// public void onClick(ClickEvent arg0) {
+		// addNameToList();
+		// updateState();
+		// }
+		//
+		// });
 		nameRemoveButton.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent arg0) {
 				removeNameFromList();
@@ -132,17 +140,22 @@ public class EditContent extends HorizontalPanel {
 			}
 
 		});
-		dateBox.setValue(new Date());
+		
+		dateBox.setValue(beobachtung.getDate());
 		dateBox.setFormat(Utils.DATEBOX_FORMAT);
 		dateBox.setFireNullValues(true);
 		dateBox.addValueChangeHandler(new ValueChangeHandler<Date>() {
 			public void onValueChange(ValueChangeEvent<Date> event) {
+				beobachtung.setDate(dateBox.getValue());
 				markChanged();
 				updateState();
 			}
 		});
+		
 		sectionSelection.addChangeHandler(new ChangeHandler() {
 			public void onChange(ChangeEvent event) {
+				beobachtung.setSectionKey(sectionSelection
+						.getSelectedSectionKey());
 				markChanged();
 				updateState();
 			}
@@ -155,6 +168,7 @@ public class EditContent extends HorizontalPanel {
 		}
 		socialSelection.addChangeHandler(new ChangeHandler() {
 			public void onChange(ChangeEvent event) {
+				beobachtung.setSocial(getSocialForm());
 				markChanged();
 				updateState();
 			}
@@ -167,6 +181,7 @@ public class EditContent extends HorizontalPanel {
 		}
 		durationSelection.addChangeHandler(new ChangeHandler() {
 			public void onChange(ChangeEvent event) {
+				beobachtung.setDuration(getDuration());
 				markChanged();
 				updateState();
 			}
@@ -177,18 +192,23 @@ public class EditContent extends HorizontalPanel {
 				markChanged();
 			}
 		});
+		
 		textArea.addBlurHandler(new BlurHandler() {
 			@Override
 			public void onBlur(BlurEvent event) {
+				beobachtung.setText(cleanUp(textArea.getHTML()));
 				updateState();
 			}
 		});
+		
 		textArea.addMouseOutHandler(new MouseOutHandler() {
 			@Override
 			public void onMouseOut(MouseOutEvent event) {
+				beobachtung.setText(cleanUp(textArea.getHTML()));
 				updateState();
 			}
 		});
+		
 		decisionBox.setText(labels.notSavedWarning());
 		decisionBox.addOkClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
@@ -196,6 +216,7 @@ public class EditContent extends HorizontalPanel {
 				updateState();
 			}
 		});
+		
 		sendButton.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
@@ -203,40 +224,42 @@ public class EditContent extends HorizontalPanel {
 				storeBeobachtung();
 				updateState();
 			}
-
 		});
+		
 		newButton.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
-				if (changes)
+				if (changes) {
 					decisionBox.center();
-				else
+				} else {
 					resetForm();
+				}
 				updateState();
 			}
 		});
+		
 		uploadForm.setChangeHandler(new ChangeHandler() {
 			@Override
 			public void onChange(ChangeEvent event) {
+				beobachtung.setFileInfos(uploadForm.getFileInfos());
 				markChanged();
 				updateState();
 			}
 		});
 	}
 
-	private void loadData() {
-		if (key != null) {
-			wahrnehmungService.getBeobachtung(key,
-					new AsyncCallback<GwtBeobachtung>() {
-						public void onFailure(Throwable caught) {
-							displayErrorMessage();
-						}
+	private void loadData(String key) {
+		wahrnehmungService.getBeobachtung(key,
+				new AsyncCallback<GwtBeobachtung>() {
+					public void onFailure(Throwable caught) {
+						displayErrorMessage();
+					}
 
-						public void onSuccess(GwtBeobachtung result) {
-							updateView(result);
-						}
+					public void onSuccess(GwtBeobachtung result) {
+						beobachtung = result;
+						updateView();
+					}
 
-					});
-		}
+				});
 	}
 
 	private void layout() {
@@ -249,19 +272,19 @@ public class EditContent extends HorizontalPanel {
 
 	}
 
-	private void updateView(GwtBeobachtung result) {
-		nameSelection.setSelected(result.getChildKey());
-		dateBox.setValue(result.getDate());
-		sectionSelection.setSelected(result.getSectionKey());
-		textArea.setHTML(result.getText());
-		uploadForm.setFileInfos(result.getFileInfos());
+	private void updateView() {
+		nameSelection.setSelected(beobachtung.getChildKey());
+		dateBox.setValue(beobachtung.getDate());
+		sectionSelection.setSelected(beobachtung.getSectionKey());
+		textArea.setHTML(beobachtung.getText());
+		uploadForm.setFileInfos(beobachtung.getFileInfos());
 
-		GwtBeobachtung.DurationEnum duration = result.getDuration();
+		GwtBeobachtung.DurationEnum duration = beobachtung.getDuration();
 		if (duration != null) {
 			durationSelection.setSelectedIndex(duration.ordinal() + 1);
 		}
 
-		GwtBeobachtung.SocialEnum social = result.getSocial();
+		GwtBeobachtung.SocialEnum social = beobachtung.getSocial();
 		if (social != null) {
 			socialSelection.setSelectedIndex(social.ordinal() + 1);
 		}
@@ -271,34 +294,26 @@ public class EditContent extends HorizontalPanel {
 
 	private void addNameToList() {
 		String selectedChildKey = nameSelection.getSelectedChildKey();
-		if ((selectedChildKey != null)
-				&& (!isInList(selectedChildKey.toString()))) {
-			additionalNames.addItem(nameSelection.getValue(),
-					selectedChildKey.toString());
+		if (beobachtung.addChild(selectedChildKey)) {
+			String name = nameSelection.getValue();
+			addNameToTextField(name);
+			additionalNames.addItem(name, selectedChildKey.toString());
 			nameSelection.reset();
 		}
 	}
 
 	private void removeNameFromList() {
-		if (additionalNames.getSelectedIndex() > 0) {
+		if (additionalNames.getSelectedIndex() >= 0) {
 			int itemCount = additionalNames.getItemCount();
 			for (int i = additionalNames.getSelectedIndex(); i < itemCount; i++) {
 				if (additionalNames.isItemSelected(i)) {
+					beobachtung.removeChild(additionalNames.getValue(i));
 					additionalNames.removeItem(i);
 					i--;
 					itemCount--;
 				}
 			}
 		}
-	}
-
-	private boolean isInList(String value) {
-		for (int i = 0; i < additionalNames.getItemCount(); i++) {
-			if (additionalNames.getValue(i).equals(value)) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 	private VerticalPanel createContentContainer() {
@@ -339,7 +354,7 @@ public class EditContent extends HorizontalPanel {
 	}
 
 	private Grid createSocialContainer() {
-		final Grid socialContainer = new Grid(1, 3);
+		final Grid socialContainer = new Grid(1, 2);
 		int i = 0;
 		for (Widget widget : Arrays.asList(durationSelection, socialSelection)) {
 			widget.setSize(Utils.LISTBOX_WIDTH + Utils.PIXEL, Utils.ROW_HEIGHT
@@ -348,7 +363,7 @@ public class EditContent extends HorizontalPanel {
 		}
 		dateBox.setSize(Utils.DATEBOX_WIDTH + Utils.PIXEL, Utils.ROW_HEIGHT
 				- 12 + Utils.PIXEL);
-		socialContainer.setWidget(0, i, dateBox);
+	
 		return socialContainer;
 	}
 
@@ -356,13 +371,14 @@ public class EditContent extends HorizontalPanel {
 		final List<SectionSelectionBox> sectionSelectionBoxes = sectionSelection
 				.getSectionSelectionBoxes();
 		final Grid selectionContainer = new Grid(1,
-				sectionSelectionBoxes.size());
+				sectionSelectionBoxes.size()+1);
 		int i = 0;
 		for (SectionSelectionBox sectionSelectionBox : sectionSelectionBoxes) {
 			sectionSelectionBox.setSize(Utils.LISTBOX_WIDTH + Utils.PIXEL,
 					Utils.ROW_HEIGHT + Utils.PIXEL);
 			selectionContainer.setWidget(0, i++, sectionSelectionBox);
 		}
+		selectionContainer.setWidget(0, i, dateBox);
 		return selectionContainer;
 	}
 
@@ -375,10 +391,10 @@ public class EditContent extends HorizontalPanel {
 		nameSelection.setHeight(Utils.ROW_HEIGHT - 12 + Utils.PIXEL);
 		nameContainer.add(nameSelection);
 
-		final Grid nameButtoContainer = new Grid(1, 2);
-		nameButtoContainer.setWidget(0, 0, nameAddButton);
-		nameButtoContainer.setWidget(0, 1, nameRemoveButton);
-		Utils.formatCenter(nameContainer, nameButtoContainer);
+		// final Grid nameButtoContainer = new Grid(1, 2);
+		// nameButtoContainer.setWidget(0, 0, nameAddButton);
+		// nameButtoContainer.setWidget(0, 1, nameRemoveButton);
+		Utils.formatCenter(nameContainer, nameRemoveButton);
 
 		final int nameSelectionHeight = Utils.APP_HEIGHT - 238;
 		additionalNames.setSize(Utils.HUNDRED_PERCENT, nameSelectionHeight
@@ -396,8 +412,8 @@ public class EditContent extends HorizontalPanel {
 		textArea.setText("");
 		additionalNames.clear();
 		uploadForm.reset();
-		key = null;
 		changes = false;
+		beobachtung = new GwtBeobachtung();
 		updateState();
 	}
 
@@ -445,57 +461,12 @@ public class EditContent extends HorizontalPanel {
 	}
 
 	private void storeBeobachtung() {
-		String text = textArea.getHTML();
-		String name = nameSelection.getValue();
-		String childKey = nameSelection.getSelectedChildKey();
-		if (((Utils.isEmpty(name)) || (childKey == null))
-				&& (additionalNames.getItemCount() > 0)) {
-			name = additionalNames.getItemText(0);
-			childKey = additionalNames.getValue(0);
-			additionalNames.removeItem(0);
-		}
 
-		String sectionKey = sectionSelection.getSelectedSectionKey();
-		Date date = dateBox.getValue();
-
-		String errorMessage = new String();
-		if (Utils.isEmpty(name))
-			errorMessage = errorMessage + labels.noChild() + Utils.LINE_BREAK;
-		else if (childKey == null) {
-			errorMessage = errorMessage + labels.noChildWithName(name)
-					+ Utils.LINE_BREAK;
-		}
-		if (sectionKey == null) {
-			errorMessage = errorMessage + labels.noSection() + Utils.LINE_BREAK;
-		}
-		if (date == null) {
-			errorMessage = errorMessage + labels.noDate() + Utils.LINE_BREAK;
-		}
-		if (!errorMessage.isEmpty()) {
-			dialogBox.setErrorMessage(errorMessage);
-			dialogBox.setDisableWhileShown(new FocusWidget[] { sendButton });
-			dialogBox.center();
-			return;
-		}
-
-		GwtBeobachtung beobachtung = new GwtBeobachtung();
-		beobachtung.setKey(key);
-		beobachtung.setChildKey(childKey);
-		beobachtung.setSectionKey(sectionKey);
-		beobachtung.setDate(date);
-
-		if (!countOnly.getValue()) {
-			beobachtung.setText(cleanUp(text));
-			beobachtung.setDuration(getDuration());
-			beobachtung.setSocial(getSocialForm());
-			beobachtung.setFileInfos(uploadForm.getFileInfos());
-		} else {
+		if (countOnly.getValue()) {
 			beobachtung.setText("");
-		}
-
-		for (int i = 0; i < additionalNames.getItemCount(); i++) {
-			beobachtung.getAdditionalChildKeys().add(
-					additionalNames.getValue(i));
+			beobachtung.setDuration(null);
+			beobachtung.setSocial(null);
+			beobachtung.setFileInfos(null);
 		}
 
 		wahrnehmungService.storeBeobachtung(beobachtung,
@@ -523,15 +494,20 @@ public class EditContent extends HorizontalPanel {
 
 	private void updateState() {
 
-		nameAddButton.setEnabled(enableNameAdd());
+		// nameAddButton.setEnabled(enableNameAdd());
 		nameRemoveButton.setEnabled(enableNameRemove());
 		sendButton.setEnabled(enableSend());
 		newButton.setEnabled(enableNew());
 		textArea.setEnabled(enableTextArea());
+		textArea.setVisible(enableTextArea());
 		toolbar.setEnabled(enableToolBar());
+		toolbar.setVisible(enableToolBar());
 		socialSelection.setEnabled(enableSocialSelection());
+		socialSelection.setVisible(enableSocialSelection());
 		durationSelection.setEnabled(enableDurationSelection());
+		durationSelection.setVisible(enableDurationSelection());
 		uploadForm.setEnabled(enableFileUpload());
+//		uploadForm.setVisible(enableFileUpload());
 	}
 
 	private boolean enableFileUpload() {
@@ -555,45 +531,33 @@ public class EditContent extends HorizontalPanel {
 	}
 
 	private boolean enableNew() {
-		return changes || key != null;
+		return changes || beobachtung.getKey() != null;
 	}
 
 	private boolean enableSend() {
-		return changes
-				&& (nameSelection.hasSelection() || additionalNames
-						.getItemCount() > 0) && sectionSelection.hasSelection()
-				&& dateBox.getValue() != null && countOnly.getValue() ? true
-				: (getDuration() != null && getSocialForm() != null && Utils
-						.isNotEmpty(cleanUp(textArea.getText())));
+		return changes && GwtBeobachtungValidator.valid(beobachtung);
 	}
 
 	private boolean enableNameRemove() {
-		return key == null && additionalNames.getItemCount() > 0;
+		return beobachtung.getKey() == null
+				&& additionalNames.getItemCount() > 0;
 	}
 
-	private boolean enableNameAdd() {
-		return key == null && nameSelection.hasSelection();
-	}
+	// private boolean enableNameAdd() {
+	// return beobachtung.getKey() == null && nameSelection.hasSelection();
+	// }
 
-	public String getKey() {
-		return key;
-	}
+	private void addNameToTextField(String name) {
 
-	private void addNameToTextField() {
-		String childKey = nameSelection.getSelectedChildKey();
-		if (childKey != null && !isInList(childKey)) {
+		name = removeBirthDate(name);
 
-			String name = nameSelection.getValue();
-			name = removeBirthDate(name);
-
-			String text = textArea.getText();
-			if (Utils.isNotEmpty(cleanUp(text))) {
-				text += ", ";
-			}
-			text += name;
-			textArea.setText(text);
+		String text = textArea.getText();
+		if (Utils.isNotEmpty(cleanUp(text))) {
+			text += ", ";
 		}
-
+		text += name;
+		textArea.setText(text);
+		beobachtung.setText(cleanUp(textArea.getHTML()));
 	}
 
 	private String removeBirthDate(String name) {
@@ -605,8 +569,7 @@ public class EditContent extends HorizontalPanel {
 	}
 
 	public void setKey(String key) {
-		this.key = key;
-		loadData();
+		loadData(key);
 		updateState();
 	}
 }

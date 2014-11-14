@@ -13,6 +13,7 @@ import at.brandl.lws.notice.shared.model.BeobachtungsFilter;
 import at.brandl.lws.notice.shared.model.BeobachtungsResult;
 import at.brandl.lws.notice.shared.model.GwtBeobachtung;
 import at.brandl.lws.notice.shared.model.GwtFileInfo;
+import at.brandl.lws.notice.shared.validator.GwtBeobachtungValidator;
 
 import com.google.appengine.api.blobstore.BlobstoreService;
 import com.google.appengine.api.blobstore.BlobstoreServiceFactory;
@@ -52,6 +53,9 @@ public class WahrnehmungsServiceImpl extends RemoteServiceServlet implements
 
 	@Override
 	public void storeBeobachtung(GwtBeobachtung beobachtung) {
+		if(!GwtBeobachtungValidator.valid(beobachtung)) {
+			throw new IllegalArgumentException("incomplete beobachtung");
+		}
 		final User currentUser = userService.getCurrentUser();
 		storeBeobachtung(beobachtung, currentUser, null);
 		final String masterBeobachtungsKey = beobachtung.getKey();

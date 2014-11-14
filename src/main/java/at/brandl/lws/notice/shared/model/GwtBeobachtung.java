@@ -2,6 +2,7 @@ package at.brandl.lws.notice.shared.model;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -72,6 +73,7 @@ public class GwtBeobachtung implements Serializable, Comparable<GwtBeobachtung> 
 	private String user;
 	private List<String> additionalChildKeys = new ArrayList<String>();
 	private List<GwtFileInfo> fileInfos = new ArrayList<GwtFileInfo>();
+	private boolean countOnly;
 
 	public void setText(String text) {
 		this.text = text;
@@ -153,7 +155,7 @@ public class GwtBeobachtung implements Serializable, Comparable<GwtBeobachtung> 
 		this.user = user;
 	}
 
-	public List<String> getAdditionalChildKeys() {
+	public Collection<String> getAdditionalChildKeys() {
 		return additionalChildKeys;
 	}
 
@@ -176,9 +178,12 @@ public class GwtBeobachtung implements Serializable, Comparable<GwtBeobachtung> 
 				&& text.equals(other.text)
 				&& ObjectUtils.equals(social, other.social)
 				&& ObjectUtils.equals(duration, other.duration)
-				&& date.equals(other.date) && user.equals(other.user)
-				&& ObjectUtils.equals(additionalChildKeys, other.additionalChildKeys)
-				&& ObjectUtils.equals(fileInfos, other.fileInfos);
+				&& date.equals(other.date)
+				&& user.equals(other.user)
+				&& ObjectUtils.equals(additionalChildKeys,
+						other.additionalChildKeys)
+				&& ObjectUtils.equals(fileInfos, other.fileInfos)
+				&& countOnly == other.countOnly;
 
 	}
 
@@ -193,6 +198,7 @@ public class GwtBeobachtung implements Serializable, Comparable<GwtBeobachtung> 
 		result = result * 17 + date.hashCode();
 		result = result * 17 + ObjectUtils.hashCode(additionalChildKeys);
 		result = result * 17 + ObjectUtils.hashCode(fileInfos);
+		result = result * 17 + (countOnly ? 1 : 0);
 		return result * 17 + user.hashCode();
 	}
 
@@ -224,6 +230,46 @@ public class GwtBeobachtung implements Serializable, Comparable<GwtBeobachtung> 
 
 		return result;
 
+	}
+
+	public boolean addChild(String childKey) {
+
+		if (childKey == null || childKey.equals(this.childKey)
+				|| additionalChildKeys.contains(childKey)) {
+			return false;
+		}
+
+		if (this.childKey == null) {
+			this.childKey = childKey;
+		} else {
+			additionalChildKeys.add(childKey);
+		}
+		return true;
+	}
+
+	public void removeChild(String childKey) {
+		if (childKey == null) {
+			return;
+		}
+
+		if (additionalChildKeys.contains(childKey)) {
+			additionalChildKeys.remove(childKey);
+		} else if (this.childKey.equals(childKey)) {
+			this.childName = null;
+			if (additionalChildKeys.isEmpty()) {
+				this.childKey = null;
+			} else {
+				this.childKey = additionalChildKeys.remove(0);
+			}
+		}
+	}
+
+	public boolean isCountOnly() {
+		return countOnly;
+	}
+
+	public void setCountOnly(boolean countOnly) {
+		this.countOnly = countOnly;
 	}
 
 }
