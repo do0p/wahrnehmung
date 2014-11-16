@@ -175,8 +175,7 @@ public class Search extends VerticalPanel {
 				Set<GwtBeobachtung> selectedSet = new TreeSet<GwtBeobachtung>(
 						selectionModel.getSelectedSet());
 				if (!selectedSet.isEmpty()) {
-					Print.it(at.brandl.lws.notice.shared.Utils
-							.createPrintHtml(selectedSet));
+					Print.it(Utils.createPrintHtml(selectedSet));
 				}
 			}
 		});
@@ -218,7 +217,7 @@ public class Search extends VerticalPanel {
 				.getSelectedTimeRange();
 		if (selectionResult.isSinceLastDevelopementDialogue()) {
 			filter.setSinceLastDevelopmementDialogue(true);
-			filter.setTimeRange((Date)null);
+			filter.setTimeRange((Date) null);
 		} else {
 			filter.setSinceLastDevelopmementDialogue(false);
 			filter.setTimeRange(selectionResult.getTimeRange());

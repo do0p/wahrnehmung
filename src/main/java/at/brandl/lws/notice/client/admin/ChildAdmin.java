@@ -48,12 +48,7 @@ public class ChildAdmin extends AbstractAdminTab {
 		bdBox = new DateBox();
 		bdBox.setFormat(Utils.DATEBOX_FORMAT);
 
-		// remove comments to enable fileupload
-		// final FileUploadForm fileUpload = new
-		// FileUploadForm(GWT.getModuleBaseURL()+"csvUpload");
-		// data.add(fileUpload);
-
-		children = new ListBox(false);
+		children = new ListBox();
 		children.setVisibleItemCount(VISIBLE_CHILDREN);
 		
 		rebuildChildList();
@@ -105,7 +100,7 @@ public class ChildAdmin extends AbstractAdminTab {
 					public void onSuccess(List<GwtChild> result) {
 						for (GwtChild child : result) {
 							children.addItem(Utils.formatChildName(child),
-									child.getKey().toString());
+									child.getKey());
 						}
 					}
 				});
@@ -196,14 +191,14 @@ public class ChildAdmin extends AbstractAdminTab {
 
 	@Override
 	boolean enableCancel() {
-		return bdBox.getValue() != null || Utils.isNotEmpty(fnBox.getValue())
-				|| Utils.isNotEmpty(lnBox.getValue());
+		return bdBox.getValue() != null || at.brandl.lws.notice.shared.Utils.isNotEmpty(fnBox.getValue())
+				|| at.brandl.lws.notice.shared.Utils.isNotEmpty(lnBox.getValue());
 	}
 
 	@Override
 	boolean enableSave() {
-		return bdBox.getValue() != null && Utils.isNotEmpty(fnBox.getValue())
-				&& Utils.isNotEmpty(lnBox.getValue());
+		return bdBox.getValue() != null && at.brandl.lws.notice.shared.Utils.isNotEmpty(fnBox.getValue())
+				&& at.brandl.lws.notice.shared.Utils.isNotEmpty(lnBox.getValue());
 	}
 
 }

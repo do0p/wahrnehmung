@@ -10,7 +10,7 @@ public class GwtTemplate implements Serializable {
 	private String name;
 	private String template;
 
-	public String getId() {
+	public String getKey() {
 		return id;
 	}
 

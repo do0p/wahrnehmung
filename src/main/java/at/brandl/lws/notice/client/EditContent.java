@@ -13,6 +13,8 @@ import at.brandl.lws.notice.client.utils.PopUp;
 import at.brandl.lws.notice.client.utils.RichTextToolbar;
 import at.brandl.lws.notice.client.utils.SectionSelection;
 import at.brandl.lws.notice.client.utils.SectionSelectionBox;
+import at.brandl.lws.notice.client.utils.TemplateSelection;
+import at.brandl.lws.notice.client.utils.TextField;
 import at.brandl.lws.notice.client.utils.Utils;
 import at.brandl.lws.notice.shared.model.Authorization;
 import at.brandl.lws.notice.shared.model.GwtBeobachtung;
@@ -54,7 +56,6 @@ public class EditContent extends HorizontalPanel {
 	private final WahrnehmungsServiceAsync wahrnehmungService = (WahrnehmungsServiceAsync) GWT
 			.create(WahrnehmungsService.class);
 
-	private final RichTextArea textArea;
 	private final DateBox dateBox;
 	private final ListBox durationSelection;
 	private final ListBox socialSelection;
@@ -69,9 +70,10 @@ public class EditContent extends HorizontalPanel {
 	private final DecisionBox decisionBox;
 	private final FileUploadForm uploadForm;
 	private final CheckBox countOnly;
+	private final TextField textField;
+	private final TemplateSelection templateSelection;
 
 	private boolean changes;
-	private RichTextToolbar toolbar;
 	private GwtBeobachtung beobachtung;
 
 	public EditContent(Authorization authorization) {
@@ -79,8 +81,8 @@ public class EditContent extends HorizontalPanel {
 		beobachtung = new GwtBeobachtung();
 
 		countOnly = new CheckBox(labels.countOnly());
-		textArea = new RichTextArea();
-		toolbar = new RichTextToolbar(textArea);
+		templateSelection = new TemplateSelection();
+		textField = new TextField(templateSelection);
 		uploadForm = new FileUploadForm();
 		dateBox = new DateBox();
 		durationSelection = new ListBox();
@@ -187,24 +189,24 @@ public class EditContent extends HorizontalPanel {
 			}
 		});
 
-		textArea.addKeyPressHandler(new KeyPressHandler() {
+		textField.addKeyPressHandler(new KeyPressHandler() {
 			public void onKeyPress(KeyPressEvent arg0) {
 				markChanged();
 			}
 		});
 		
-		textArea.addBlurHandler(new BlurHandler() {
+		textField.addBlurHandler(new BlurHandler() {
 			@Override
 			public void onBlur(BlurEvent event) {
-				beobachtung.setText(cleanUp(textArea.getHTML()));
+				beobachtung.setText(cleanUp(textField.getText()));
 				updateState();
 			}
 		});
 		
-		textArea.addMouseOutHandler(new MouseOutHandler() {
+		textField.addMouseOutHandler(new MouseOutHandler() {
 			@Override
 			public void onMouseOut(MouseOutEvent event) {
-				beobachtung.setText(cleanUp(textArea.getHTML()));
+				beobachtung.setText(cleanUp(textField.getText()));
 				updateState();
 			}
 		});
@@ -245,6 +247,14 @@ public class EditContent extends HorizontalPanel {
 				updateState();
 			}
 		});
+		
+		templateSelection.addClickHandler(new ClickHandler() {
+			
+			@Override
+			public void onClick(ClickEvent event) {
+				textField.addText(templateSelection.getSelectedTemplate());
+			}
+		});
 	}
 
 	private void loadData(String key) {
@@ -276,7 +286,7 @@ public class EditContent extends HorizontalPanel {
 		nameSelection.setSelected(beobachtung.getChildKey());
 		dateBox.setValue(beobachtung.getDate());
 		sectionSelection.setSelected(beobachtung.getSectionKey());
-		textArea.setHTML(beobachtung.getText());
+		textField.setText(beobachtung.getText());
 		uploadForm.setFileInfos(beobachtung.getFileInfos());
 
 		GwtBeobachtung.DurationEnum duration = beobachtung.getDuration();
@@ -340,17 +350,13 @@ public class EditContent extends HorizontalPanel {
 		return contentContainer;
 	}
 
-	private Grid createTextArea() {
+	private Panel createTextArea() {
 		int textAreaWidth = Utils.APP_WIDTH - Utils.NAMESELECTION_WIDTH - 38;
 		int textAreaHeight = Utils.APP_HEIGHT - 305;
-		textArea.setSize(textAreaWidth + Utils.PIXEL, textAreaHeight
+		textField.setSize(textAreaWidth + Utils.PIXEL, textAreaHeight
 				+ Utils.PIXEL);
 
-		final Grid grid = new Grid(2, 1);
-		grid.setStyleName("cw-RichText");
-		grid.setWidget(0, 0, toolbar);
-		grid.setWidget(1, 0, textArea);
-		return grid;
+		return textField;
 	}
 
 	private Grid createSocialContainer() {
@@ -409,7 +415,7 @@ public class EditContent extends HorizontalPanel {
 		sectionSelection.reset();
 		durationSelection.setSelectedIndex(0);
 		socialSelection.setSelectedIndex(0);
-		textArea.setText("");
+		textField.setText("");
 		additionalNames.clear();
 		uploadForm.reset();
 		changes = false;
@@ -498,10 +504,8 @@ public class EditContent extends HorizontalPanel {
 		nameRemoveButton.setEnabled(enableNameRemove());
 		sendButton.setEnabled(enableSend());
 		newButton.setEnabled(enableNew());
-		textArea.setEnabled(enableTextArea());
-		textArea.setVisible(enableTextArea());
-		toolbar.setEnabled(enableToolBar());
-		toolbar.setVisible(enableToolBar());
+		textField.setEnabled(enableTextArea());
+		textField.setVisible(enableTextArea());
 		socialSelection.setEnabled(enableSocialSelection());
 		socialSelection.setVisible(enableSocialSelection());
 		durationSelection.setEnabled(enableDurationSelection());
@@ -519,10 +523,6 @@ public class EditContent extends HorizontalPanel {
 	}
 
 	private boolean enableSocialSelection() {
-		return !countOnly.getValue();
-	}
-
-	private boolean enableToolBar() {
 		return !countOnly.getValue();
 	}
 
@@ -551,13 +551,13 @@ public class EditContent extends HorizontalPanel {
 
 		name = removeBirthDate(name);
 
-		String text = textArea.getText();
-		if (Utils.isNotEmpty(cleanUp(text))) {
+		String text = textField.getText();
+		if (at.brandl.lws.notice.shared.Utils.isNotEmpty(cleanUp(text))) {
 			text += ", ";
 		}
 		text += name;
-		textArea.setText(text);
-		beobachtung.setText(cleanUp(textArea.getHTML()));
+		textField.setText(text);
+		beobachtung.setText(cleanUp(textField.getText()));
 	}
 
 	private String removeBirthDate(String name) {

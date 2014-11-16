@@ -12,4 +12,7 @@ public interface TemplateServiceAsync {
 
 	void getTemplates(AsyncCallback<List<GwtTemplate>> callback);
 
+	void storeTemplate(GwtTemplate template, AsyncCallback<Void> callback);
+
+	void deleteTemplate(GwtTemplate template, AsyncCallback<Void> callback);
 }

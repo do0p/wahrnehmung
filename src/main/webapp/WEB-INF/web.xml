@@ -33,6 +33,14 @@
     <url-pattern>/wahrnehmung/section</url-pattern>
   </servlet-mapping>
   <servlet>
+    <servlet-name>templateServlet</servlet-name>
+    <servlet-class>at.brandl.lws.notice.server.service.TemplateServiceImpl</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>templateServlet</servlet-name>
+    <url-pattern>/wahrnehmung/template</url-pattern>
+  </servlet-mapping>
+  <servlet>
     <servlet-name>authServlet</servlet-name>
     <servlet-class>at.brandl.lws.notice.server.service.AuthorizationServiceImpl</servlet-class>
   </servlet>

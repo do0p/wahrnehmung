@@ -13,4 +13,8 @@ public interface TemplateService extends RemoteService{
 	List<GwtTemplate> getTemplates();
 
 	GwtTemplate getTemplate(String id);
+	
+	void storeTemplate(GwtTemplate template);
+	
+	void deleteTemplate(GwtTemplate template);
 }

@@ -209,8 +209,8 @@ public class FileUploadForm extends FormPanel {
 		String storageFilename = parts[1];
 		String contentType = parts[2];
 		String imageUrl = parts[3];
-		if (Utils.isNotEmpty(filename) && Utils.isNotEmpty(storageFilename)
-				&& Utils.isNotEmpty(contentType)) {
+		if (at.brandl.lws.notice.shared.Utils.isNotEmpty(filename) && at.brandl.lws.notice.shared.Utils.isNotEmpty(storageFilename)
+				&& at.brandl.lws.notice.shared.Utils.isNotEmpty(contentType)) {
 			GwtFileInfo fileInfo = new GwtFileInfo();
 			fileInfo.setFilename(filename);
 			fileInfo.setStorageFilename(storageFilename);
@@ -235,7 +235,7 @@ public class FileUploadForm extends FormPanel {
 	}
 
 	private void updateButtonState() {
-		boolean enabled = Utils.isNotEmpty(upload.getFilename()) && actionSet;
+		boolean enabled = at.brandl.lws.notice.shared.Utils.isNotEmpty(upload.getFilename()) && actionSet;
 		button.setEnabled(enabled);
 	}
 
