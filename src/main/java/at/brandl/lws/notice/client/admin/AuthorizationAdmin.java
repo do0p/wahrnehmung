@@ -1,73 +1,79 @@
 package at.brandl.lws.notice.client.admin;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
 import at.brandl.lws.notice.client.service.AuthorizationService;
 import at.brandl.lws.notice.client.service.AuthorizationServiceAsync;
-import at.brandl.lws.notice.client.utils.Utils;
 import at.brandl.lws.notice.shared.model.Authorization;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 
-public class AuthorizationAdmin extends AbstractAdminTab {
+public class AuthorizationAdmin extends AbstractModelAdminTab<Authorization> {
 
 	private static final int VISIBLE_USERS = 20;
-	private final AuthorizationServiceAsync authorizationService = (AuthorizationServiceAsync) GWT
-			.create(AuthorizationService.class);
 
-	private final TextBox userBox;
-	private final CheckBox adminCheckBox;
-	private final CheckBox seeAllCheckBox;
-	private final CheckBox editSectionCheckBox;
-
-	private final ListBox users;
-	private final Map<String, Authorization> authorizations = new HashMap<String, Authorization>();
+	private TextBox userBox;
+	private CheckBox adminCheckBox;
+	private CheckBox seeAllCheckBox;
+	private CheckBox editSectionCheckBox;
 
 	public AuthorizationAdmin() {
-		super(true);
-		
+		super(true, (AuthorizationServiceAsync) GWT
+				.create(AuthorizationService.class));
+
+	}
+
+	@Override
+	protected void init() {
 		this.userBox = new TextBox();
-		this.adminCheckBox = new CheckBox(labels().admin());
-		this.seeAllCheckBox = new CheckBox(labels().teacher());
-		this.editSectionCheckBox = new CheckBox(labels().sectionAdmin());
 
-		this.users = new ListBox(false);
-		this.users.setVisibleItemCount(VISIBLE_USERS);
-		rebuildUsersList();
-
-		layout();
-
-		addButtonUpdateChangeHandler(userBox);
-		addButtonUpdateChangeHandler(adminCheckBox);
-		addButtonUpdateChangeHandler(seeAllCheckBox);
-		addButtonUpdateChangeHandler(editSectionCheckBox);
-		
-	
-		users.addClickHandler(new ClickHandler() {
+		userBox.addValueChangeHandler(new ValueChangeHandler<String>() {
 			@Override
-			public void onClick(ClickEvent event) {
-				select();
+			public void onValueChange(ValueChangeEvent<String> event) {
+				getModel().setEmail(userBox.getText());
 				updateButtonPanel();
 			}
 		});
-		
-		updateButtonPanel();
+		this.adminCheckBox = new CheckBox(labels().admin());
+
+		adminCheckBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+			@Override
+			public void onValueChange(ValueChangeEvent<Boolean> event) {
+				getModel().setAdmin(adminCheckBox.getValue());
+				updateButtonPanel();
+			}
+		});
+		this.seeAllCheckBox = new CheckBox(labels().teacher());
+
+		seeAllCheckBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+			@Override
+			public void onValueChange(ValueChangeEvent<Boolean> event) {
+				getModel().setEditDialogueDates(seeAllCheckBox.getValue());
+				getModel().setSeeAll(seeAllCheckBox.getValue());
+				updateButtonPanel();
+			}
+		});
+		this.editSectionCheckBox = new CheckBox(labels().sectionAdmin());
+		editSectionCheckBox
+				.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+					@Override
+					public void onValueChange(ValueChangeEvent<Boolean> event) {
+						getModel().setEditSections(
+								editSectionCheckBox.getValue());
+						updateButtonPanel();
+					}
+				});
 	}
 
-
-	private void layout() {
+	@Override
+	protected Widget createContentLayout() {
 		Panel rights = new VerticalPanel();
 		rights.add(this.adminCheckBox);
 		rights.add(this.seeAllCheckBox);
@@ -78,117 +84,36 @@ public class AuthorizationAdmin extends AbstractAdminTab {
 		grid.setWidget(0, 1, this.userBox);
 		grid.setWidget(1, 0, new Label(labels().rights()));
 		grid.setWidget(1, 1, rights);
-
-		VerticalPanel data = new VerticalPanel();
-		data.add(grid);
-
-		data.add(getButtonPanel());
-
-		HorizontalPanel root = new HorizontalPanel();
-		root.add(data);
-		root.add(this.users);
-		add(root);
-	}
-
-	private void rebuildUsersList() {
-		this.users.clear();
-		this.authorizations.clear();
-		this.authorizationService
-				.queryAuthorizations(new ErrorReportingCallback<Collection<Authorization>>() {
-					@Override
-					public void onSuccess(Collection<Authorization> result) {
-						for (Authorization authorization : result) {
-							users.addItem(authorization.getEmail(),
-									authorization.getUserId());
-							authorizations.put(authorization.getUserId(),
-									authorization);
-						}
-					}
-				});
+		return grid;
 	}
 
 	@Override
-	void reset() {
-		this.userBox.setText("");
-		this.adminCheckBox.setValue(Boolean.valueOf(false));
-		this.seeAllCheckBox.setValue(Boolean.valueOf(false));
-		this.editSectionCheckBox.setValue(Boolean.valueOf(false));
-
-		getButtonPanel().setSaveButtonLabel(labels().create());
+	protected int getListCount() {
+		return VISIBLE_USERS;
 	}
 
 	@Override
-	void save() {
-		Authorization aut = new Authorization();
-
-		String email = userBox.getValue();
-		if (at.brandl.lws.notice.shared.Utils.isEmpty(email)) {
-			return;
-		}
-		aut.setEmail(email);
-		aut.setAdmin(adminCheckBox.getValue().booleanValue());
-		boolean isTeacher = seeAllCheckBox.getValue().booleanValue();
-		aut.setSeeAll(isTeacher);
-		aut.setEditSections(editSectionCheckBox.getValue());
-		aut.setEditDialogueDates(isTeacher);
-
-		authorizationService.storeAuthorization(aut,
-				new ErrorReportingCallback<Void>() {
-					@Override
-					public void onSuccess(Void result) {
-						rebuildUsersList();
-						reset();
-					}
-				});
-	}
-
-	@Override
-	void delete() {
-		String email = userBox.getValue();
-		if (at.brandl.lws.notice.shared.Utils.isEmpty(email)) {
-			return;
-		}
-
-		authorizationService.deleteAuthorization(email,
-				new ErrorReportingCallback<Void>() {
-					@Override
-					public void onSuccess(Void result) {
-						rebuildUsersList();
-						reset();
-					}
-				});
-	}
-
-	private void select() {
-		int selectedIndex = users.getSelectedIndex();
-		if (selectedIndex < 0) {
-			return;
-		}
-		Authorization authorization = (Authorization) authorizations.get(users
-				.getValue(selectedIndex));
-		userBox.setText(users.getItemText(selectedIndex));
-		adminCheckBox.setValue(Boolean.valueOf(authorization.isAdmin()));
-		seeAllCheckBox.setValue(Boolean.valueOf(authorization.isSeeAll()));
-		editSectionCheckBox.setValue(Boolean.valueOf(authorization
+	protected void updateFields() {
+		userBox.setText(getModel().getEmail());
+		adminCheckBox.setValue(Boolean.valueOf(getModel().isAdmin()));
+		seeAllCheckBox.setValue(Boolean.valueOf(getModel().isSeeAll()));
+		editSectionCheckBox.setValue(Boolean.valueOf(getModel()
 				.isEditSections()));
-
-		getButtonPanel().setSaveButtonLabel(labels().change());
 	}
 
 	@Override
-	boolean enableDelete() {
-		return users.getSelectedIndex() != -1;
+	protected Authorization createModel() {
+		return new Authorization();
 	}
 
 	@Override
-	boolean enableCancel() {
-		return at.brandl.lws.notice.shared.Utils.isNotEmpty(userBox.getValue()) || adminCheckBox.getValue()
-				|| seeAllCheckBox.getValue() || editSectionCheckBox.getValue();
+	protected String getKey(Authorization authorization) {
+		return authorization.getKey();
 	}
 
 	@Override
-	boolean enableSave() {
-		return at.brandl.lws.notice.shared.Utils.isNotEmpty(userBox.getValue());
+	protected String getDisplayName(Authorization authorization) {
+		return authorization.getEmail();
 	}
 
 }

@@ -52,7 +52,6 @@ public abstract class AbstractDsDao extends AbstractDao {
 	}
 
 	protected DatastoreService getDatastoreService() {
-		System.err.println("getting data from datastore");
 		return DatastoreServiceFactory.getDatastoreService();
 	}
 
@@ -75,7 +74,6 @@ public abstract class AbstractDsDao extends AbstractDao {
 
 
 	protected MemcacheService getCache() {
-//		System.err.println("getting data from cache");
 		return MemcacheServiceFactory
 				.getMemcacheService(getMemcacheServiceName());
 	}

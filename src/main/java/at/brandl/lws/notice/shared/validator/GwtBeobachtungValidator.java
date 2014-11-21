@@ -5,7 +5,7 @@ import at.brandl.lws.notice.shared.model.GwtBeobachtung;
 
 public class GwtBeobachtungValidator {
 
-	public static boolean valid(GwtBeobachtung beobachtung) {
+	public static boolean validate(GwtBeobachtung beobachtung) {
 		
 		return beobachtung.getChildKey() != null
 				&& beobachtung.getDate() != null

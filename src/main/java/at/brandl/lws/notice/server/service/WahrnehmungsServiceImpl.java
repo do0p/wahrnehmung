@@ -53,7 +53,7 @@ public class WahrnehmungsServiceImpl extends RemoteServiceServlet implements
 
 	@Override
 	public void storeBeobachtung(GwtBeobachtung beobachtung) {
-		if(!GwtBeobachtungValidator.valid(beobachtung)) {
+		if(!GwtBeobachtungValidator.validate(beobachtung)) {
 			throw new IllegalArgumentException("incomplete beobachtung");
 		}
 		final User currentUser = userService.getCurrentUser();

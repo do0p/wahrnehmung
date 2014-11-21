@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.List;
 
 import at.brandl.lws.notice.shared.model.GwtChild;
+import at.brandl.lws.notice.shared.validator.GwtChildValidator;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Entity;
@@ -64,6 +65,10 @@ public class ChildDsDao extends AbstractDsDao {
 	}
 
 	public void storeChild(GwtChild gwtChild) throws IllegalArgumentException {
+		if(!GwtChildValidator.validate(gwtChild)) {
+			throw new IllegalArgumentException("child is not valid");
+		}
+		
 		final DatastoreService datastoreService = getDatastoreService();
 
 		final Transaction transaction = datastoreService.beginTransaction();

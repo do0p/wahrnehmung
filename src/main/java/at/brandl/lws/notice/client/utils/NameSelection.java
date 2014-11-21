@@ -41,7 +41,7 @@ public class NameSelection extends SuggestBox {
 	// }
 
 	private void updateChildList() {
-		childService.queryChildren(new AsyncCallback<List<GwtChild>>() {
+		childService.getAll(new AsyncCallback<List<GwtChild>>() {
 
 			@Override
 			public void onFailure(Throwable caught) {

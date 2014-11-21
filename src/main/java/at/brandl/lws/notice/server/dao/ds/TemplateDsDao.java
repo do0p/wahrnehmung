@@ -25,6 +25,7 @@ public class TemplateDsDao extends AbstractDsDao {
 		return TEMPLATE_MEMCACHE;
 	}
 
+	@SuppressWarnings("unchecked")
 	public List<GwtTemplate> getTemplates() {
 		List<GwtTemplate> templates;
 
@@ -97,7 +98,7 @@ public class TemplateDsDao extends AbstractDsDao {
 		GwtTemplate template = new GwtTemplate();
 		template.setName(name);
 		template.setTemplate(text.getValue());
-		template.setId(toString(entity.getKey()));
+		template.setKey(toString(entity.getKey()));
 		return template;
 	}
 

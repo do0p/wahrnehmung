@@ -262,10 +262,7 @@ public class FileUploadForm extends FormPanel {
 		button.setEnabled(enabled);
 	}
 
-	private void show(GwtFileInfo fileInfo) {
-		// TODO Auto-generated method stub
 
-	}
 
 	private void delete(GwtFileInfo fileInfo) {
 		dataProvider.getList().remove(fileInfo);

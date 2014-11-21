@@ -1,76 +1,70 @@
 package at.brandl.lws.notice.client.admin;
 
-import java.util.List;
+import java.util.Date;
 
 import at.brandl.lws.notice.client.service.ChildService;
 import at.brandl.lws.notice.client.service.ChildServiceAsync;
-import at.brandl.lws.notice.client.utils.DecisionBox;
 import at.brandl.lws.notice.client.utils.Utils;
 import at.brandl.lws.notice.shared.model.GwtChild;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.Grid;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.datepicker.client.DateBox;
 
-public class ChildAdmin extends AbstractAdminTab {
+public class ChildAdmin extends AbstractModelAdminTab<GwtChild> {
 
 	private static final int VISIBLE_CHILDREN = 20;
-	private final ChildServiceAsync childService = GWT
-			.create(ChildService.class);
 
-	private final TextBox fnBox;
-	private final TextBox lnBox;
-	private final DateBox bdBox;
-
-	private final DecisionBox decisionBox;
-
-	private final ListBox children;
-
-	private String childNo;
-
+	private TextBox fnBox;
+	private TextBox lnBox;
+	private DateBox bdBox;
 
 	public ChildAdmin() {
-		super(true);
-		
-		decisionBox = new DecisionBox();
-		decisionBox.setText(labels().childDelWarning());
-		
+		super(true, (ChildServiceAsync) GWT.create(ChildService.class));
+
+	}
+
+	@Override
+	protected void init() {
 		fnBox = new TextBox();
-		lnBox = new TextBox();
-		bdBox = new DateBox();
-		bdBox.setFormat(Utils.DATEBOX_FORMAT);
 
-		children = new ListBox();
-		children.setVisibleItemCount(VISIBLE_CHILDREN);
-		
-		rebuildChildList();
-
-		layout();
-		
-		addButtonUpdateChangeHandler(fnBox);
-		addButtonUpdateChangeHandler(lnBox);
-		addButtonUpdateChangeHandler(bdBox);
-		
-		children.addClickHandler(new ClickHandler() {
+		fnBox.addValueChangeHandler(new ValueChangeHandler<String>() {
 			@Override
-			public void onClick(ClickEvent event) {
-				select();
+			public void onValueChange(ValueChangeEvent<String> event) {
+				getModel().setFirstName(fnBox.getText());
 				updateButtonPanel();
 			}
 		});
 
-		updateButtonPanel();
+		lnBox = new TextBox();
+
+		lnBox.addValueChangeHandler(new ValueChangeHandler<String>() {
+			@Override
+			public void onValueChange(ValueChangeEvent<String> event) {
+				getModel().setLastName(lnBox.getText());
+				updateButtonPanel();
+			}
+		});
+
+		bdBox = new DateBox();
+		bdBox.setFormat(Utils.DATEBOX_FORMAT);
+		bdBox.addValueChangeHandler(new ValueChangeHandler<Date>() {
+			@Override
+			public void onValueChange(ValueChangeEvent<Date> event) {
+				getModel().setBirthDay(bdBox.getValue());
+				updateButtonPanel();
+			}
+		});
+
 	}
 
-	private void layout() {
+	@Override
+	protected Widget createContentLayout() {
 		final Grid grid = new Grid(3, 2);
 		grid.setWidget(0, 0, new Label(labels().firstName()));
 		grid.setWidget(0, 1, fnBox);
@@ -79,126 +73,39 @@ public class ChildAdmin extends AbstractAdminTab {
 		grid.setWidget(2, 0, new Label(labels().birthday()));
 		grid.setWidget(2, 1, bdBox);
 
-		final VerticalPanel data = new VerticalPanel();
-		data.add(grid);
-		data.add(getButtonPanel());
-		data.add(new HTML(Utils.LINE_BREAK + Utils.LINE_BREAK));
-
-		final HorizontalPanel root = new HorizontalPanel();
-		root.add(data);
-		root.add(children);
-
-		add(root);
-	}
-
-	private void rebuildChildList() {
-		children.clear();
-		childService
-				.queryChildren(new ErrorReportingCallback<List<GwtChild>>() {
-
-					@Override
-					public void onSuccess(List<GwtChild> result) {
-						for (GwtChild child : result) {
-							children.addItem(Utils.formatChildName(child),
-									child.getKey());
-						}
-					}
-				});
+		return grid;
 	}
 
 	@Override
-	void reset() {
-		childNo = null;
-		fnBox.setText("");
-		lnBox.setText("");
-		bdBox.setValue(null);
-
-		getButtonPanel().setSaveButtonLabel(labels().create());
+	protected int getListCount() {
+		return VISIBLE_CHILDREN;
 	}
 
 	@Override
-	void save() {
-		final GwtChild child = new GwtChild();
-		child.setKey(childNo);
-		child.setFirstName(fnBox.getValue());
-		child.setLastName(lnBox.getValue());
-		child.setBirthDay(bdBox.getValue());
-
-		childService.storeChild(child, new ErrorReportingCallback<Void>() {
-
-			@Override
-			public void onSuccess(Void result) {
-				// saveSuccess.center();
-				// saveSuccess.show();
-				rebuildChildList();
-				reset();
-			}
-
-		});
-	}
-
-	private void select() {
-		final int selectedIndex = children.getSelectedIndex();
-		if (selectedIndex < 0) {
-			return;
-		}
-		final String childKey = children.getValue(selectedIndex);
-		childService.getChild(childKey, new ErrorReportingCallback<GwtChild>() {
-
-			@Override
-			public void onSuccess(GwtChild child) {
-				childNo = child.getKey();
-				fnBox.setText(child.getFirstName());
-				lnBox.setText(child.getLastName());
-				bdBox.setValue(child.getBirthDay());
-				getButtonPanel().setSaveButtonLabel(labels().change());
-
-			}
-		});
+	protected String getDelWarning() {
+		return labels().childDelWarning();
 	}
 
 	@Override
-	void delete() {
-		if (childNo != null) {
-			final GwtChild child = new GwtChild();
-			child.setKey(childNo);
-			child.setFirstName(fnBox.getValue());
-			child.setLastName(lnBox.getValue());
-			child.setBirthDay(bdBox.getValue());
-
-			decisionBox.addOkClickHandler(new ClickHandler() {
-				@Override
-				public void onClick(ClickEvent event) {
-					childService.deleteChild(child,
-							new ErrorReportingCallback<Void>() {
-
-								@Override
-								public void onSuccess(Void result) {
-									rebuildChildList();
-									reset();
-								}
-							});
-				}
-			});
-			decisionBox.center();
-		}
+	protected void updateFields() {
+		fnBox.setText(getModel().getFirstName());
+		lnBox.setText(getModel().getLastName());
+		bdBox.setValue(getModel().getBirthDay());
 	}
 
 	@Override
-	boolean enableDelete() {
-		return children.getSelectedIndex() != -1;
+	protected GwtChild createModel() {
+		return new GwtChild();
 	}
 
 	@Override
-	boolean enableCancel() {
-		return bdBox.getValue() != null || at.brandl.lws.notice.shared.Utils.isNotEmpty(fnBox.getValue())
-				|| at.brandl.lws.notice.shared.Utils.isNotEmpty(lnBox.getValue());
+	protected String getKey(GwtChild child) {
+		return child.getKey();
 	}
 
 	@Override
-	boolean enableSave() {
-		return bdBox.getValue() != null && at.brandl.lws.notice.shared.Utils.isNotEmpty(fnBox.getValue())
-				&& at.brandl.lws.notice.shared.Utils.isNotEmpty(lnBox.getValue());
+	protected String getDisplayName(GwtChild child) {
+		return Utils.formatChildName(child);
 	}
 
 }

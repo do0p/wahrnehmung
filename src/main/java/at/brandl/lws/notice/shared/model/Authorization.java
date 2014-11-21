@@ -2,7 +2,9 @@ package at.brandl.lws.notice.shared.model;
 
 import java.io.Serializable;
 
-public class Authorization implements Serializable {
+import at.brandl.lws.notice.shared.validator.AuthorizationValidator;
+
+public class Authorization extends GwtModel  {
 
 	private static final long serialVersionUID = -5057466504583370610L;
 
@@ -55,7 +57,10 @@ public class Authorization implements Serializable {
 	}
 
 	public void setSeeAll(boolean seeAll) {
-		this.seeAll = seeAll;
+		if(seeAll != this.seeAll) {
+			setChanged(true);
+			this.seeAll = seeAll;
+		}
 	}
 
 	public String getEmail() {
@@ -63,7 +68,10 @@ public class Authorization implements Serializable {
 	}
 
 	public void setEmail(String email) {
-		this.email = email;
+		if(!equals(email ,this.email)) {
+		setChanged(true);
+			this.email = email;
+		}
 	}
 
 	public String getUserId() {
@@ -71,7 +79,10 @@ public class Authorization implements Serializable {
 	}
 
 	public void setUserId(String userId) {
-		this.userId = userId;
+		if(!equals(userId, this.userId)) {
+			setChanged(true);
+			this.userId = userId;
+		}
 	}
 
 	public boolean isAdmin() {
@@ -79,7 +90,10 @@ public class Authorization implements Serializable {
 	}
 
 	public void setAdmin(boolean admin) {
-		this.admin = admin;
+		if(admin != this.admin){
+			setChanged(true);
+			this.admin = admin;
+		}
 	}
 
 	@Override
@@ -101,7 +115,10 @@ public class Authorization implements Serializable {
 	}
 
 	public void setEditSections(Boolean editSections) {
-		this.editSections = editSections;
+		if(editSections != this.editSections) {
+			setChanged(true);
+			this.editSections = editSections;
+		}
 	}
 
 	public String getKey() {
@@ -117,7 +134,20 @@ public class Authorization implements Serializable {
 	}
 
 	public void setEditDialogueDates(Boolean editDialogueDates) {
-		this.editDialogueDates = editDialogueDates;
+if(editDialogueDates != this.editDialogueDates) {
+	setChanged(true);
+	this.editDialogueDates = editDialogueDates;
+}
+	}
+
+	@Override
+	public boolean isNew() {
+		return key == null;
+	}
+
+	@Override
+	public boolean isValid() {
+		return AuthorizationValidator.validate(this);
 	}
 
 }

@@ -10,7 +10,6 @@ import at.brandl.lws.notice.client.utils.DecisionBox;
 import at.brandl.lws.notice.client.utils.FileUploadForm;
 import at.brandl.lws.notice.client.utils.NameSelection;
 import at.brandl.lws.notice.client.utils.PopUp;
-import at.brandl.lws.notice.client.utils.RichTextToolbar;
 import at.brandl.lws.notice.client.utils.SectionSelection;
 import at.brandl.lws.notice.client.utils.SectionSelectionBox;
 import at.brandl.lws.notice.client.utils.TemplateSelection;
@@ -44,7 +43,6 @@ import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.RichTextArea;
 import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -535,7 +533,7 @@ public class EditContent extends HorizontalPanel {
 	}
 
 	private boolean enableSend() {
-		return changes && GwtBeobachtungValidator.valid(beobachtung);
+		return changes && GwtBeobachtungValidator.validate(beobachtung);
 	}
 
 	private boolean enableNameRemove() {

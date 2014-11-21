@@ -24,23 +24,23 @@ public class TemplateServiceImpl extends RemoteServiceServlet implements
 	}
 
 	@Override
-	public List<GwtTemplate> getTemplates() {
+	public List<GwtTemplate> getAll() {
 		return templateDao.getTemplates();
 	}
 
 	@Override
-	public GwtTemplate getTemplate(String id) {
+	public GwtTemplate get(String id) {
 		return templateDao.getTemplate(id);
 	}
 
 	@Override
-	public void deleteTemplate(GwtTemplate template) {
+	public void delete(GwtTemplate template) {
 		authorizationService.assertCurrentUserIsAdmin();
 		templateDao.deleteTemplate(template);
 	}
 
 	@Override
-	public void storeTemplate(GwtTemplate template) {
+	public void store(GwtTemplate template) {
 		if (!GwtTemplateValidator.validate(template)) {
 			throw new IllegalArgumentException("template is not complete");
 		}

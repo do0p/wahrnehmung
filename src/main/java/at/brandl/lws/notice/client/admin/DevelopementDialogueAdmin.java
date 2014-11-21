@@ -43,7 +43,7 @@ public class DevelopementDialogueAdmin extends AbstractAdminTab {
 		nameSelection = new NameSelection(getDialogBox());
 		dateBox = new DateBox();
 		dateBox.setFormat(Utils.DATEBOX_FORMAT);
-		dates = new ListBox(false);
+		dates = new ListBox();
 		dates.setVisibleItemCount(NUMBER_VISIBLE_DATES);
 
 		layout();
@@ -92,7 +92,7 @@ public class DevelopementDialogueAdmin extends AbstractAdminTab {
 			return;
 		}
 
-		childService.getChild(childKey, new ErrorReportingCallback<GwtChild>() {
+		childService.get(childKey, new ErrorReportingCallback<GwtChild>() {
 
 			@Override
 			public void onSuccess(GwtChild child) {

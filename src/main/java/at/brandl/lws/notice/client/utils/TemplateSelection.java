@@ -44,7 +44,7 @@ public class TemplateSelection extends HorizontalPanel {
 	}
 	
 	private void init() {
-		templateService.getTemplates(new AsyncCallback<List<GwtTemplate>>() {
+		templateService.getAll(new AsyncCallback<List<GwtTemplate>>() {
 
 			@Override
 			public void onSuccess(List<GwtTemplate> result) {

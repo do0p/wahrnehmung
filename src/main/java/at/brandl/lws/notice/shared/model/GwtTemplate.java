@@ -1,29 +1,33 @@
 package at.brandl.lws.notice.shared.model;
 
-import java.io.Serializable;
+import at.brandl.lws.notice.shared.Utils;
+import at.brandl.lws.notice.shared.validator.GwtTemplateValidator;
 
-public class GwtTemplate implements Serializable {
+public class GwtTemplate extends GwtModel {
 
 	private static final long serialVersionUID = -5601175608073078955L;
 
-	private String id;
+	private String key;
 	private String name;
 	private String template;
 
 	public String getKey() {
-		return id;
+		return key;
 	}
 
-	public void setId(String id) {
-		this.id = id;
+	public void setKey(String key) {
+		this.key = key;
 	}
 
 	public String getTemplate() {
-		return template;
+		return template == null ? "" : template;
 	}
 
 	public void setTemplate(String template) {
-		this.template = template;
+		if (!equals(template, this.template)) {
+			setChanged(true);
+			this.template = template;
+		}
 	}
 
 	public String getName() {
@@ -31,14 +35,17 @@ public class GwtTemplate implements Serializable {
 	}
 
 	public void setName(String name) {
-		this.name = name;
+		if (!equals(name, this.name)) {
+			setChanged(true);
+			this.name = name;
+		}
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		result = prime * result + ((key == null) ? 0 : key.hashCode());
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		result = prime * result
 				+ ((template == null) ? 0 : template.hashCode());
@@ -54,10 +61,10 @@ public class GwtTemplate implements Serializable {
 		if (getClass() != obj.getClass())
 			return false;
 		GwtTemplate other = (GwtTemplate) obj;
-		if (id == null) {
-			if (other.id != null)
+		if (key == null) {
+			if (other.key != null)
 				return false;
-		} else if (!id.equals(other.id))
+		} else if (!key.equals(other.key))
 			return false;
 		if (name == null) {
 			if (other.name != null)
@@ -72,6 +79,14 @@ public class GwtTemplate implements Serializable {
 		return true;
 	}
 
+	@Override
+	public boolean isNew() {
+		return Utils.isEmpty(key);
+	}
 
+	@Override
+	public boolean isValid() {
+		return GwtTemplateValidator.validate(this);
+	}
 
 }
