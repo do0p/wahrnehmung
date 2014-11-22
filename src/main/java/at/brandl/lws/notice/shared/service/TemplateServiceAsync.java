@@ -1,4 +1,4 @@
-package at.brandl.lws.notice.client.service;
+package at.brandl.lws.notice.shared.service;
 
 import at.brandl.lws.notice.shared.model.GwtTemplate;
 

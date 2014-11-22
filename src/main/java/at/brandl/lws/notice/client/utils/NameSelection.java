@@ -4,9 +4,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import at.brandl.lws.notice.client.service.ChildService;
-import at.brandl.lws.notice.client.service.ChildServiceAsync;
 import at.brandl.lws.notice.shared.model.GwtChild;
+import at.brandl.lws.notice.shared.service.ChildService;
+import at.brandl.lws.notice.shared.service.ChildServiceAsync;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;

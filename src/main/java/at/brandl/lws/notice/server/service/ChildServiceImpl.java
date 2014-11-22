@@ -3,11 +3,11 @@ package at.brandl.lws.notice.server.service;
 import java.util.Date;
 import java.util.List;
 
-import at.brandl.lws.notice.client.service.ChildService;
 import at.brandl.lws.notice.server.dao.DaoRegistry;
 import at.brandl.lws.notice.server.dao.ds.BeobachtungDsDao;
 import at.brandl.lws.notice.server.dao.ds.ChildDsDao;
 import at.brandl.lws.notice.shared.model.GwtChild;
+import at.brandl.lws.notice.shared.service.ChildService;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 

@@ -4,12 +4,12 @@ import java.util.Iterator;
 
 import at.brandl.lws.notice.client.EditContent;
 import at.brandl.lws.notice.client.Labels;
-import at.brandl.lws.notice.client.service.WahrnehmungsService;
-import at.brandl.lws.notice.client.service.WahrnehmungsServiceAsync;
 import at.brandl.lws.notice.shared.model.Authorization;
 import at.brandl.lws.notice.shared.model.BeobachtungsFilter;
 import at.brandl.lws.notice.shared.model.BeobachtungsResult;
 import at.brandl.lws.notice.shared.model.GwtBeobachtung;
+import at.brandl.lws.notice.shared.service.WahrnehmungsService;
+import at.brandl.lws.notice.shared.service.WahrnehmungsServiceAsync;
 
 import com.google.gwt.cell.client.ActionCell;
 import com.google.gwt.cell.client.CheckboxCell;

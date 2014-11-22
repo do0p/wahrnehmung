@@ -2,7 +2,6 @@ package at.brandl.lws.notice.server.service;
 
 import java.util.List;
 
-import at.brandl.lws.notice.client.service.WahrnehmungsService;
 import at.brandl.lws.notice.server.dao.DaoRegistry;
 import at.brandl.lws.notice.server.dao.ds.AuthorizationDsDao;
 import at.brandl.lws.notice.server.dao.ds.BeobachtungDsDao;
@@ -13,6 +12,7 @@ import at.brandl.lws.notice.shared.model.BeobachtungsFilter;
 import at.brandl.lws.notice.shared.model.BeobachtungsResult;
 import at.brandl.lws.notice.shared.model.GwtBeobachtung;
 import at.brandl.lws.notice.shared.model.GwtFileInfo;
+import at.brandl.lws.notice.shared.service.WahrnehmungsService;
 import at.brandl.lws.notice.shared.validator.GwtBeobachtungValidator;
 
 import com.google.appengine.api.blobstore.BlobstoreService;

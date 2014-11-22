@@ -1,9 +1,9 @@
 package at.brandl.lws.notice.client.admin;
 
-import at.brandl.lws.notice.client.service.TemplateService;
-import at.brandl.lws.notice.client.service.TemplateServiceAsync;
 import at.brandl.lws.notice.client.utils.TextField;
 import at.brandl.lws.notice.shared.model.GwtTemplate;
+import at.brandl.lws.notice.shared.service.TemplateService;
+import at.brandl.lws.notice.shared.service.TemplateServiceAsync;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.BlurEvent;

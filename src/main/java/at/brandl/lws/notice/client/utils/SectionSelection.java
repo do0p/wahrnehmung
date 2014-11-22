@@ -9,9 +9,9 @@ import java.util.List;
 import java.util.Map;
 
 import at.brandl.lws.notice.client.Labels;
-import at.brandl.lws.notice.client.service.SectionService;
-import at.brandl.lws.notice.client.service.SectionServiceAsync;
 import at.brandl.lws.notice.shared.model.GwtSection;
+import at.brandl.lws.notice.shared.service.SectionService;
+import at.brandl.lws.notice.shared.service.SectionServiceAsync;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;

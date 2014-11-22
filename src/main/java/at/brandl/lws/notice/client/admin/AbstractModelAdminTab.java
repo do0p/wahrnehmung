@@ -2,9 +2,9 @@ package at.brandl.lws.notice.client.admin;
 
 import java.util.List;
 
-import at.brandl.lws.notice.client.service.ModelServiceAsync;
 import at.brandl.lws.notice.client.utils.DecisionBox;
 import at.brandl.lws.notice.shared.model.GwtModel;
+import at.brandl.lws.notice.shared.service.ModelServiceAsync;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
