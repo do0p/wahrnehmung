@@ -1,7 +1,5 @@
 package at.brandl.lws.notice.shared.model;
 
-import java.io.Serializable;
-
 import at.brandl.lws.notice.shared.validator.AuthorizationValidator;
 
 public class Authorization extends GwtModel  {

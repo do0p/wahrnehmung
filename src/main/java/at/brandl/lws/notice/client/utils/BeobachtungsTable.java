@@ -152,7 +152,7 @@ public class BeobachtungsTable extends CellTable<GwtBeobachtung> {
 		Column<GwtBeobachtung, GwtBeobachtung> deleteColumn = new IdentityColumn<GwtBeobachtung>(
 				new ActionCell<GwtBeobachtung>(labels.delete(),
 						new ActionCell.Delegate<GwtBeobachtung>() {
-							public void execute(GwtBeobachtung object) {
+							public void execute(final GwtBeobachtung object) {
 								final String key = object.getKey();
 								if (key == null) {
 									return;
@@ -161,8 +161,8 @@ public class BeobachtungsTable extends CellTable<GwtBeobachtung> {
 										.addOkClickHandler(new ClickHandler() {
 											public void onClick(ClickEvent arg0) {
 												wahrnehmungsService
-														.deleteBeobachtung(
-																key,
+														.delete(
+																object,
 																new AsyncCallback<Void>() {
 																	public void onFailure(
 																			Throwable caught) {

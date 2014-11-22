@@ -12,18 +12,13 @@ import com.google.gwt.view.client.Range;
  * The client side stub for the RPC service.
  */
 @RemoteServiceRelativePath("store")
-public interface WahrnehmungsService extends RemoteService {
-	
-	void storeBeobachtung(GwtBeobachtung beobachtung);
+public interface WahrnehmungsService extends ModelService<GwtBeobachtung>,
+		RemoteService {
 
 	BeobachtungsResult getBeobachtungen(BeobachtungsFilter filter, Range range);
-	
-	GwtBeobachtung getBeobachtung(String beobachtungsKey);
-	
-	void deleteBeobachtung(String beobachtungsKey);
-	
+
 	String getFileUploadUrl();
-	
+
 	boolean fileExists(String filename);
-	
+
 }

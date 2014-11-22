@@ -256,7 +256,7 @@ public class EditContent extends HorizontalPanel {
 	}
 
 	private void loadData(String key) {
-		wahrnehmungService.getBeobachtung(key,
+		wahrnehmungService.get(key,
 				new AsyncCallback<GwtBeobachtung>() {
 					public void onFailure(Throwable caught) {
 						displayErrorMessage();
@@ -473,7 +473,7 @@ public class EditContent extends HorizontalPanel {
 			beobachtung.setFileInfos(null);
 		}
 
-		wahrnehmungService.storeBeobachtung(beobachtung,
+		wahrnehmungService.store(beobachtung,
 				new AsyncCallback<Void>() {
 					public void onFailure(Throwable caught) {
 						displayErrorMessage();

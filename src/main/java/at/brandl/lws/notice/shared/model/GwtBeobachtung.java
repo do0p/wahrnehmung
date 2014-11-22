@@ -1,6 +1,5 @@
 package at.brandl.lws.notice.shared.model;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -8,7 +7,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class GwtBeobachtung implements Serializable, Comparable<GwtBeobachtung> {
+import at.brandl.lws.notice.shared.Utils;
+import at.brandl.lws.notice.shared.validator.GwtBeobachtungValidator;
+
+public class GwtBeobachtung extends GwtModel implements  Comparable<GwtBeobachtung> {
 
 	public static enum SocialEnum {
 		ALONE("alleine"), TWO_BY_TWO("zu zweit"), IN_GROUP("in Gruppe");
@@ -270,6 +272,16 @@ public class GwtBeobachtung implements Serializable, Comparable<GwtBeobachtung> 
 
 	public void setCountOnly(boolean countOnly) {
 		this.countOnly = countOnly;
+	}
+
+	@Override
+	public boolean isNew() {
+		return Utils.isEmpty(key);
+	}
+
+	@Override
+	public boolean isValid() {
+		return GwtBeobachtungValidator.validate(this);
 	}
 
 }
