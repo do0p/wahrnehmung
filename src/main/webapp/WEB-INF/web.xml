@@ -41,6 +41,14 @@
     <url-pattern>/wahrnehmung/template</url-pattern>
   </servlet-mapping>
   <servlet>
+    <servlet-name>questionnaireTemplateServlet</servlet-name>
+    <servlet-class>at.brandl.lws.notice.server.service.QuestionnaireTemplateServiceImpl</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>questionnaireTemplateServlet</servlet-name>
+    <url-pattern>/wahrnehmung/questionnaireTemplate</url-pattern>
+  </servlet-mapping>  
+  <servlet>
     <servlet-name>authServlet</servlet-name>
     <servlet-class>at.brandl.lws.notice.server.service.AuthorizationServiceImpl</servlet-class>
   </servlet>
