@@ -4,8 +4,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import at.brandl.lws.notice.client.service.WahrnehmungsService;
-import at.brandl.lws.notice.client.service.WahrnehmungsServiceAsync;
 import at.brandl.lws.notice.client.utils.DecisionBox;
 import at.brandl.lws.notice.client.utils.FileUploadForm;
 import at.brandl.lws.notice.client.utils.NameSelection;
@@ -18,6 +16,8 @@ import at.brandl.lws.notice.shared.model.Authorization;
 import at.brandl.lws.notice.shared.model.GwtBeobachtung;
 import at.brandl.lws.notice.shared.model.GwtBeobachtung.DurationEnum;
 import at.brandl.lws.notice.shared.model.GwtBeobachtung.SocialEnum;
+import at.brandl.lws.notice.shared.service.WahrnehmungsService;
+import at.brandl.lws.notice.shared.service.WahrnehmungsServiceAsync;
 import at.brandl.lws.notice.shared.validator.GwtBeobachtungValidator;
 
 import com.google.gwt.core.client.GWT;

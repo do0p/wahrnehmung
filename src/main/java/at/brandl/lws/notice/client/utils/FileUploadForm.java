@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import at.brandl.lws.notice.client.Labels;
-import at.brandl.lws.notice.client.service.WahrnehmungsService;
-import at.brandl.lws.notice.client.service.WahrnehmungsServiceAsync;
 import at.brandl.lws.notice.shared.model.GwtFileInfo;
+import at.brandl.lws.notice.shared.service.WahrnehmungsService;
+import at.brandl.lws.notice.shared.service.WahrnehmungsServiceAsync;
 
 import com.google.gwt.cell.client.ActionCell;
 import com.google.gwt.cell.client.ActionCell.Delegate;

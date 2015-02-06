@@ -7,10 +7,10 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
-import at.brandl.lws.notice.client.service.SectionService;
 import at.brandl.lws.notice.server.dao.DaoRegistry;
 import at.brandl.lws.notice.server.dao.ds.SectionDsDao;
 import at.brandl.lws.notice.shared.model.GwtSection;
+import at.brandl.lws.notice.shared.service.SectionService;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 

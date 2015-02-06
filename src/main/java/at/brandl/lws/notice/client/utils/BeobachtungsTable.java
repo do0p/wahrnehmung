@@ -4,12 +4,12 @@ import java.util.Iterator;
 
 import at.brandl.lws.notice.client.EditContent;
 import at.brandl.lws.notice.client.Labels;
-import at.brandl.lws.notice.client.service.WahrnehmungsService;
-import at.brandl.lws.notice.client.service.WahrnehmungsServiceAsync;
 import at.brandl.lws.notice.shared.model.Authorization;
 import at.brandl.lws.notice.shared.model.BeobachtungsFilter;
 import at.brandl.lws.notice.shared.model.BeobachtungsResult;
 import at.brandl.lws.notice.shared.model.GwtBeobachtung;
+import at.brandl.lws.notice.shared.service.WahrnehmungsService;
+import at.brandl.lws.notice.shared.service.WahrnehmungsServiceAsync;
 
 import com.google.gwt.cell.client.ActionCell;
 import com.google.gwt.cell.client.CheckboxCell;
@@ -123,22 +123,22 @@ public class BeobachtungsTable extends CellTable<GwtBeobachtung> {
 						.getDate());
 			}
 		};
-		Column<GwtBeobachtung, String> socialColumn = new TextColumn<GwtBeobachtung>() {
-			public String getValue(GwtBeobachtung object) {
-				if (object.getSocial() != null) {
-					return object.getSocial().getText();
-				}
-				return null;
-			}
-		};
-		Column<GwtBeobachtung, String> durationColumn = new TextColumn<GwtBeobachtung>() {
-			public String getValue(GwtBeobachtung object) {
-				if (object.getDuration() != null) {
-					return object.getDuration().getText();
-				}
-				return null;
-			}
-		};
+//		Column<GwtBeobachtung, String> socialColumn = new TextColumn<GwtBeobachtung>() {
+//			public String getValue(GwtBeobachtung object) {
+//				if (object.getSocial() != null) {
+//					return object.getSocial().getText();
+//				}
+//				return null;
+//			}
+//		};
+//		Column<GwtBeobachtung, String> durationColumn = new TextColumn<GwtBeobachtung>() {
+//			public String getValue(GwtBeobachtung object) {
+//				if (object.getDuration() != null) {
+//					return object.getDuration().getText();
+//				}
+//				return null;
+//			}
+//		};
 		Column<GwtBeobachtung, String> userColumn = new TextColumn<GwtBeobachtung>() {
 			public String getValue(GwtBeobachtung object) {
 				return object.getUser();
@@ -197,8 +197,8 @@ public class BeobachtungsTable extends CellTable<GwtBeobachtung> {
 		addColumn(dateColumn, labels.date());
 		addColumn(nameColumn, labels.name());
 		addColumn(sectionColumn, labels.section());
-		addColumn(durationColumn, labels.duration());
-		addColumn(socialColumn, labels.socialForm());
+//		addColumn(durationColumn, labels.duration());
+//		addColumn(socialColumn, labels.socialForm());
 
 		addColumn(userColumn, labels.teacher());
 		addColumn(editColumn);

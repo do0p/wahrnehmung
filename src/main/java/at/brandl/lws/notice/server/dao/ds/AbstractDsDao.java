@@ -52,7 +52,6 @@ public abstract class AbstractDsDao extends AbstractDao {
 	}
 
 	protected DatastoreService getDatastoreService() {
-		System.err.println("getting data from datastore");
 		return DatastoreServiceFactory.getDatastoreService();
 	}
 

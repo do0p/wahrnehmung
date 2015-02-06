@@ -9,12 +9,16 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
 import at.brandl.lws.notice.server.dao.DaoRegistry;
@@ -28,6 +32,7 @@ import at.brandl.lws.notice.shared.model.GwtSummary;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.CompositeFilterOperator;
@@ -36,6 +41,7 @@ import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Text;
 import com.google.appengine.api.datastore.Transaction;
+import com.google.appengine.api.datastore.TransactionOptions;
 import com.google.appengine.api.memcache.MemcacheService;
 import com.google.appengine.api.users.User;
 import com.google.gwt.thirdparty.guava.common.base.Predicate;
@@ -50,6 +56,8 @@ public class BeobachtungDsDao extends AbstractDsDao {
 	public static final String BEOBACHTUNGS_GROUP_KIND = "BeobachtungsGroup";
 	public static final String BEOBACHTUNGS_KEY_FIELD = "beobachtungsKey";
 	public static final String BEOBACHTUNG_KIND = "BeobachtungDs";
+	private static final String BEOBACHTUNG_ARCHIVE_KIND = "BeobachtungArchiveDs";
+	private static final String BEOBACHTUNG_GROUP_ARCHIVE_KIND = "BeobachtungsGroupArchiveDs";
 	public static final String DATE_FIELD = "date";
 	public static final String SECTION_KEY_FIELD = "sectionKey";
 	public static final String USER_FIELD = "user";
@@ -326,8 +334,7 @@ public class BeobachtungDsDao extends AbstractDsDao {
 			synchronized (this) {
 
 				setUpdated(childKey);
-				result = getAllBeobachtungen(
-						childKey, oldestEntry);
+				result = getAllBeobachtungen(childKey, oldestEntry);
 				cache.put(key, result);
 
 			}
@@ -376,7 +383,7 @@ public class BeobachtungDsDao extends AbstractDsDao {
 	private Date shortListLimit() {
 		return getMidnightIn(Calendar.DAY_OF_MONTH, -21);
 	}
-	
+
 	private Date today() {
 		return getMidnightIn(Calendar.DAY_OF_MONTH, 1);
 	}
@@ -427,13 +434,13 @@ public class BeobachtungDsDao extends AbstractDsDao {
 	}
 
 	public boolean beobachtungenExist(Collection<String> sectionKeys,
-			DatastoreService datastoreService) {
+			DatastoreService ds) {
 		if (sectionKeys == null || sectionKeys.isEmpty()) {
 			return false;
 		}
 		Filter sectionFilter = createSectionFilter(sectionKeys);
 		Query query = new Query(BEOBACHTUNG_KIND).setFilter(sectionFilter);
-		return count(query, withDefaults(), datastoreService) > 0;
+		return count(query, withDefaults(), ds) > 0;
 	}
 
 	public synchronized void storeBeobachtung(GwtBeobachtung gwtBeobachtung,
@@ -456,15 +463,14 @@ public class BeobachtungDsDao extends AbstractDsDao {
 
 	public synchronized void deleteAllFromChild(String childKey) {
 
-		DatastoreService datastoreService = getDatastoreService();
+		DatastoreService ds = getDatastoreService();
 		Query query = new Query(BEOBACHTUNG_KIND, toKey(childKey))
 				.setKeysOnly();
-		Transaction transaction = datastoreService.beginTransaction();
+		Transaction transaction = ds.beginTransaction();
 		try {
-			Iterable<Entity> allBeobachtungen = datastoreService.prepare(query)
-					.asIterable();
+			Iterable<Entity> allBeobachtungen = ds.prepare(query).asIterable();
 			for (Entity beobachtung : allBeobachtungen) {
-				deleteEntity(beobachtung.getKey(), datastoreService);
+				deleteEntity(beobachtung.getKey(), ds);
 			}
 			transaction.commit();
 			setUpdateNeeded(childKey);
@@ -516,8 +522,10 @@ public class BeobachtungDsDao extends AbstractDsDao {
 		Date date = (Date) entity.getProperty(DATE_FIELD);
 		String text = ((Text) entity.getProperty(TEXT_FIELD)).getValue();
 		String user = ((User) entity.getProperty(USER_FIELD)).getEmail();
-		String childName = getChildDao().getChildName(childKey);
-		String sectionName = getSectionDao().getSectionName(sectionKey);
+		String childName = DaoRegistry.get(ChildDsDao.class).getChildName(
+				childKey);
+		String sectionName = DaoRegistry.get(SectionDsDao.class)
+				.getSectionName(sectionKey);
 
 		GwtBeobachtung beobachtung = new GwtBeobachtung();
 		beobachtung.setKey(toString(entity.getKey()));
@@ -563,12 +571,196 @@ public class BeobachtungDsDao extends AbstractDsDao {
 		return entity;
 	}
 
-	private ChildDsDao getChildDao() {
-		return DaoRegistry.get(ChildDsDao.class);
+	public synchronized int moveAllToArchiveBefore(Date endDate) {
+
+		Map<Key, Key> oldToNewBeobachtungen = copyAllNoticesToArchive(endDate);
+		moveAllNoticeGroupsToArchive(oldToNewBeobachtungen);
+		deleteAllNotices(oldToNewBeobachtungen.keySet());
+		return oldToNewBeobachtungen.size();
 	}
 
-	private SectionDsDao getSectionDao() {
-		return DaoRegistry.get(SectionDsDao.class);
+	private Map<Key, Key> copyAllNoticesToArchive(Date endDate) {
+
+		Map<Key, Key> oldToNew = new HashMap<Key, Key>();
+		Collection<GwtChild> children = childDao.getAllChildren();
+		for (GwtChild child : children) {
+
+			Map<Key, Key> tmpOldToNew = copyNoticesToArchive(child, endDate);
+			oldToNew.putAll(tmpOldToNew);
+		}
+
+		return oldToNew;
 	}
 
+	private void moveAllNoticeGroupsToArchive(Map<Key, Key> oldToNew) {
+
+		Set<Key> keys = new TreeSet<Key>(oldToNew.keySet());
+		Iterator<Key> iterator = keys.iterator();
+		while (iterator.hasNext()) {
+
+			Collection<Key> relatedKeys = moveNoticeGroupsToArchive(
+					iterator.next(), oldToNew);
+			if (relatedKeys.isEmpty()) {
+				continue;
+			}
+
+			iterator.remove();
+			keys.removeAll(relatedKeys);
+			iterator = keys.iterator();
+		}
+
+	}
+
+	private void deleteAllNotices(Set<Key> keySet) {
+		
+		DatastoreService ds = getDatastoreService();
+		Transaction transaction = ds.beginTransaction();
+		Iterator<Key> iterator = keySet.iterator();
+		try {
+			
+			int count = 0;
+			while (iterator.hasNext()) {
+				
+				count++;
+				deleteEntity(iterator.next(), ds);
+
+				if (count == 100) {
+					transaction.commit();
+					ds = getDatastoreService();
+					transaction = ds.beginTransaction();
+					count = 0;
+				}
+			}
+			
+			if (transaction.isActive()) {
+				transaction.commit();
+			}
+			
+		} finally {
+			if ( transaction.isActive()) {
+				System.err.println("error deleting notices");
+				transaction.rollback();
+			}
+		}
+	}
+
+	private Map<Key, Key> copyNoticesToArchive(GwtChild child, Date endDate) {
+
+		Map<Key, Key> tmpOldToNew = new HashMap<Key, Key>();
+
+		DatastoreService ds = getDatastoreService();
+		Transaction transaction = ds
+				.beginTransaction(TransactionOptions.Builder.withXG(true));
+		try {
+
+			String childKey = child.getKey();
+			Iterable<Entity> beobachtungen = getAllBeobachtungenBefore(endDate,
+					childKey, ds);
+			int copied = 0;
+			for (Entity beobachtung : beobachtungen) {
+
+				Entity archived = copyToArchive(beobachtung, ds);
+				tmpOldToNew.put(beobachtung.getKey(), archived.getKey());
+
+				copied++;
+			}
+
+			if (copied > 0) {
+				setUpdateNeeded(childKey);
+			}
+
+			System.err.println("copying " + copied + " beobachtungen of "
+					+ child.getFirstName());
+			transaction.commit();
+
+		} finally {
+			if (transaction.isActive()) {
+				System.err
+						.println("got exception while copying beobachtungen, rolling back");
+				transaction.rollback();
+			}
+		}
+
+		return tmpOldToNew;
+	}
+
+	private Collection<Key> moveNoticeGroupsToArchive(Key oldKey,
+			Map<Key, Key> oldToNew) {
+
+		DatastoreService ds = getDatastoreService();
+		List<Entity> groups = findGroups(oldKey, ds);
+		if (groups.isEmpty()) {
+			return Collections.emptyList();
+		}
+
+		Collection<Key> relatedKeys = new ArrayList<Key>();
+		Transaction transaction = ds
+				.beginTransaction(TransactionOptions.Builder.withXG(true));
+		try {
+
+			for (Entity group : groups) {
+
+				Key relatedKey = moveToArchive(group, oldToNew, ds);
+				relatedKeys.add(relatedKey);
+			}
+
+			transaction.commit();
+
+		} finally {
+			if (transaction.isActive()) {
+				System.err
+						.println("got exception while moving beobachtungen, rolling back");
+				transaction.rollback();
+			}
+		}
+
+		return relatedKeys;
+	}
+
+	private Key moveToArchive(Entity group, Map<Key, Key> oldToNew,
+			DatastoreService ds) {
+
+		copyToArchive(group, oldToNew, ds);
+		Key relatedKey = getRelatedKey(group);
+		ds.delete(group.getKey());
+		return relatedKey;
+	}
+
+	private Key getRelatedKey(Entity oldGroup) {
+		return (Key) oldGroup.getProperty(BEOBACHTUNGS_KEY_FIELD);
+	}
+
+	private void copyToArchive(Entity oldGroup, Map<Key, Key> oldToNew,
+			DatastoreService ds) {
+
+		Key relatedKey = getRelatedKey(oldGroup);
+		Key newRelatedKey = oldToNew.get(relatedKey);
+		Key newKey = oldToNew.get(oldGroup.getKey().getParent());
+
+		Entity newGroup = new Entity(BEOBACHTUNG_GROUP_ARCHIVE_KIND, newKey);
+		newGroup.setProperty(BEOBACHTUNGS_KEY_FIELD, newRelatedKey);
+		ds.put(newGroup);
+	}
+
+	private List<Entity> findGroups(Key beobachtungsKey, DatastoreService ds) {
+		Query query = new Query(BEOBACHTUNGS_GROUP_KIND, beobachtungsKey);
+		return ds.prepare(query).asList(FetchOptions.Builder.withDefaults());
+	}
+
+	private Entity copyToArchive(Entity beobachtung, DatastoreService ds) {
+
+		final Entity archived = new Entity(BEOBACHTUNG_ARCHIVE_KIND,
+				beobachtung.getParent());
+		archived.setPropertiesFrom(beobachtung);
+		ds.put(archived);
+		return archived;
+	}
+
+	private Iterable<Entity> getAllBeobachtungenBefore(Date endDate,
+			String childKey, DatastoreService ds) {
+		Query query = new Query(BEOBACHTUNG_KIND, toKey(childKey))
+				.setFilter(new FilterPredicate(DATE_FIELD,
+						FilterOperator.LESS_THAN, endDate));
+		return ds.prepare(query).asIterable();
+	}
 }

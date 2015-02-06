@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cronentries>
+
+  <cron>
+    <url>/wahrnehmung/archive</url>
+    <description>Archivierung alter Einträge</description>
+    <schedule>every day 03:00</schedule>
+    <timezone>Europe/Vienna</timezone>
+  </cron>
+  
+<!--  <cron>
+    <url>/wahrnehmung/archive</url>
+    <description>Archivierung alter Einträge</description>
+    <schedule>every 2 minutes</schedule>
+  </cron> -->
+  
+</cronentries>
