@@ -62,33 +62,27 @@ public class BeobachtungsTable extends CellTable<GwtBeobachtung> {
 			public void update(Boolean value) {
 				allSelected = value.booleanValue();
 				if (value.booleanValue()) {
-					wahrnehmungsService
-							.getBeobachtungen(filter, new Range(0,
-									getRowCount()),
-									new AsyncCallback<BeobachtungsResult>() {
-										public void onFailure(Throwable arg0) {
-											dialogBox
-													.setErrorMessage();
-											dialogBox
-													.center();
-										}
+					wahrnehmungsService.getBeobachtungen(filter, new Range(0,
+							getRowCount()),
+							new AsyncCallback<BeobachtungsResult>() {
+								public void onFailure(Throwable arg0) {
+									dialogBox.setErrorMessage();
+									dialogBox.center();
+								}
 
-										public void onSuccess(
-												BeobachtungsResult result) {
-											Iterator<GwtBeobachtung> localIterator = result
-													.getBeobachtungen()
-													.iterator();
+								public void onSuccess(BeobachtungsResult result) {
+									Iterator<GwtBeobachtung> localIterator = result
+											.getBeobachtungen().iterator();
 
-											while (localIterator.hasNext()) {
-												GwtBeobachtung contact = (GwtBeobachtung) localIterator
-														.next();
-												BeobachtungsTable.this
-														.getSelectionModel()
-														.setSelected(contact,
-																true);
-											}
-										}
-									});
+									while (localIterator.hasNext()) {
+										GwtBeobachtung contact = (GwtBeobachtung) localIterator
+												.next();
+										BeobachtungsTable.this
+												.getSelectionModel()
+												.setSelected(contact, true);
+									}
+								}
+							});
 				} else {
 					Iterator<GwtBeobachtung> localIterator = selectionModel
 							.getSelectedSet().iterator();
@@ -119,8 +113,7 @@ public class BeobachtungsTable extends CellTable<GwtBeobachtung> {
 		};
 		Column<GwtBeobachtung, String> dateColumn = new TextColumn<GwtBeobachtung>() {
 			public String getValue(GwtBeobachtung object) {
-				return at.brandl.lws.notice.shared.Utils.DATE_FORMAT.format(object
-						.getDate());
+				return Utils.DATE_FORMAT.format(object.getDate());
 			}
 		};
 //		Column<GwtBeobachtung, String> socialColumn = new TextColumn<GwtBeobachtung>() {
@@ -159,7 +152,7 @@ public class BeobachtungsTable extends CellTable<GwtBeobachtung> {
 		Column<GwtBeobachtung, GwtBeobachtung> deleteColumn = new IdentityColumn<GwtBeobachtung>(
 				new ActionCell<GwtBeobachtung>(labels.delete(),
 						new ActionCell.Delegate<GwtBeobachtung>() {
-							public void execute(GwtBeobachtung object) {
+							public void execute(final GwtBeobachtung object) {
 								final String key = object.getKey();
 								if (key == null || object.isArchived()) {
 									return;
@@ -168,8 +161,8 @@ public class BeobachtungsTable extends CellTable<GwtBeobachtung> {
 										.addOkClickHandler(new ClickHandler() {
 											public void onClick(ClickEvent arg0) {
 												wahrnehmungsService
-														.deleteBeobachtung(
-																key,
+														.delete(
+																object,
 																new AsyncCallback<Void>() {
 																	public void onFailure(
 																			Throwable caught) {
@@ -227,13 +220,13 @@ public class BeobachtungsTable extends CellTable<GwtBeobachtung> {
 		this.wahrnehmungsService.getBeobachtungen(this.filter, visibleRange,
 				new AsyncCallback<BeobachtungsResult>() {
 					public void onSuccess(BeobachtungsResult result) {
-						
+
 						asyncDataProvider.updateRowData(
 								visibleRange.getStart(),
 								result.getBeobachtungen());
-						asyncDataProvider.updateRowCount(result.getRowCount(), true);
-						
-						
+						asyncDataProvider.updateRowCount(result.getRowCount(),
+								true);
+						// redraw();
 					}
 
 					public void onFailure(Throwable caught) {

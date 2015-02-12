@@ -1,9 +1,12 @@
 package at.brandl.lws.notice.client.utils;
 
+import java.util.Collection;
 import java.util.Date;
 
+import at.brandl.lws.notice.shared.model.GwtBeobachtung;
 import at.brandl.lws.notice.shared.model.GwtChild;
 
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.CellPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment.HorizontalAlignmentConstant;
@@ -15,9 +18,13 @@ import com.google.gwt.user.datepicker.client.DateBox;
 import com.google.gwt.user.datepicker.client.DateBox.Format;
 
 public class Utils {
+
+	public static final DateTimeFormat DATE_FORMAT = DateTimeFormat
+			.getFormat(Utils.DATE_FORMAT_STRING);
+	public static final String DATE_FORMAT_STRING = "d.M.yy";
 	public static final String MAIN_ELEMENT = "content";
 	public static final String LOGOUT_ELEMENT = "logout";
-//	public static final String TITLE_ELEMENT = "title";
+	// public static final String TITLE_ELEMENT = "title";
 	public static final String NAVIGATION_ELEMENT = "navigation";
 	public static final String PIXEL = "px";
 	public static final String HUNDRED_PERCENT = "100%";
@@ -31,7 +38,7 @@ public class Utils {
 	public static final String DOWN_ARROW = "↓";
 
 	public static final Format DATEBOX_FORMAT = new DateBox.DefaultFormat(
-			at.brandl.lws.notice.shared.Utils.DATE_FORMAT);
+			DATE_FORMAT);
 	public static final int SPACING = 3;
 	public static final int BUTTON_WIDTH = 80;
 	public static final int ROW_HEIGHT = 30;
@@ -48,29 +55,21 @@ public class Utils {
 		final Date birthDay = child.getBirthDay();
 
 		final StringBuilder builder = new StringBuilder();
-		if (Utils.isNotEmpty(firstName)) {
+		if (at.brandl.lws.notice.shared.Utils.isNotEmpty(firstName)) {
 			builder.append(firstName);
 			builder.append(" ");
 		}
-		if (Utils.isNotEmpty(lastName)) {
+		if (at.brandl.lws.notice.shared.Utils.isNotEmpty(lastName)) {
 			builder.append(lastName);
 			builder.append(" ");
 		}
 		if (birthDay != null) {
 			builder.append("(");
-			builder.append(at.brandl.lws.notice.shared.Utils.DATE_FORMAT.format(birthDay));
+			builder.append(DATE_FORMAT.format(birthDay));
 			builder.append(")");
 		}
 
 		return builder.toString().trim();
-	}
-
-	public static boolean isNotEmpty(String text) {
-		return !isEmpty(text);
-	}
-
-	public static boolean isEmpty(String text) {
-		return text == null || text.trim().isEmpty();
 	}
 
 	public static String shorten(String text, int length) {
@@ -149,4 +148,62 @@ public class Utils {
 		return "- " + text + " -";
 	}
 
+	public static String createPrintHtml(GwtBeobachtung beobachtung) {
+		
+		final String childName = beobachtung.getChildName();
+		final String date = Utils.DATE_FORMAT.format(beobachtung.getDate());
+		final String duration = beobachtung.getDuration() == null ? ""
+				: beobachtung.getDuration().getText();
+		final String socialForm = beobachtung.getSocial() == null ? ""
+				: beobachtung.getSocial().getText();
+		final String author = beobachtung.getUser();
+	
+		
+		final StringBuilder one = new StringBuilder();
+		one.append("<table border=\"0\" ><tr>");
+		one.append("<td colspan=\"2\">");
+		one.append("<b>" + childName + "</b>");
+		one.append("</td></tr><tr><td>");
+		one.append("Datum:");
+		one.append("</td><td>");
+		one.append(date);
+		one.append("</td></tr><tr><td>");
+		one.append("Bereich:");
+		one.append("</td><td>");
+		one.append(beobachtung.getSectionName());
+		one.append("</td></tr><tr><td>");
+		one.append("Dauer:");
+		one.append("</td><td>");
+		one.append(duration);
+		one.append("</td></tr><tr><td>");
+		one.append("Sozialform:");
+		one.append("</td><td>");
+		one.append(socialForm);
+		one.append("</td></tr><tr><td>");
+		one.append("Begleiter:");
+		one.append("</td><td>");
+		one.append(author);
+		one.append("</td></tr><tr><td colspan=\"2\">");
+		one.append("<br/>");
+		one.append(beobachtung.getText());
+		one.append("</td></tr></table>");
+		return one.toString();
+	}
+
+	public static String createPrintHtml(Collection<GwtBeobachtung> selectedSet) {
+	
+		final StringBuilder all = new StringBuilder();
+		all.append("<div>");
+		
+		if (selectedSet != null) {
+			for (GwtBeobachtung beobachtung : selectedSet) {
+				final String one = createPrintHtml(beobachtung);
+				all.append(one);
+				all.append("<hr/>");
+			}
+		}
+		all.append("</div>");
+		
+		return all.toString();
+	}
 }

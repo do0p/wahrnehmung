@@ -26,27 +26,27 @@ public class ChildServiceImpl extends RemoteServiceServlet implements
 	}
 
 	@Override
-	public List<GwtChild> queryChildren() {
+	public List<GwtChild> getAll() {
 
 		return childDao.getAllChildren();
 
 	}
 
 	@Override
-	public void storeChild(GwtChild child) {
+	public void store(GwtChild child) {
 		authorizationService.assertCurrentUserIsAdmin();
 		childDao.storeChild(child);
 	}
 
 	@Override
-	public void deleteChild(GwtChild child) throws IllegalArgumentException {
+	public void delete(GwtChild child) throws IllegalArgumentException {
 		authorizationService.assertCurrentUserIsAdmin();
 		beobachtungsDao.deleteAllFromChild(child.getKey());
 		childDao.deleteChild(child);
 	}
 
 	@Override
-	public GwtChild getChild(String key) {
+	public GwtChild get(String key) {
 		return childDao.getChild(key);
 	}
 

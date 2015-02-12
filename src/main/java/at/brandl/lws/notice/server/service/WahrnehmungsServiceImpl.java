@@ -52,8 +52,8 @@ public class WahrnehmungsServiceImpl extends RemoteServiceServlet implements
 	}
 
 	@Override
-	public void storeBeobachtung(GwtBeobachtung beobachtung) {
-		if (!GwtBeobachtungValidator.valid(beobachtung)) {
+	public void store(GwtBeobachtung beobachtung) {
+		if(!GwtBeobachtungValidator.validate(beobachtung)) {
 			throw new IllegalArgumentException("incomplete beobachtung");
 		}
 		final User currentUser = userService.getCurrentUser();
@@ -67,7 +67,7 @@ public class WahrnehmungsServiceImpl extends RemoteServiceServlet implements
 	}
 
 	@Override
-	public GwtBeobachtung getBeobachtung(String beobachtungsKey) {
+	public GwtBeobachtung get(String beobachtungsKey) {
 		GwtBeobachtung beobachtung;
 		try {
 			beobachtung = beobachtungsDao
@@ -101,9 +101,9 @@ public class WahrnehmungsServiceImpl extends RemoteServiceServlet implements
 	}
 
 	@Override
-	public void deleteBeobachtung(String beobachtungsKey) {
-		beobachtungsDao.deleteBeobachtung(beobachtungsKey);
-		fileDao.deleteFiles(beobachtungsKey);
+	public void delete(GwtBeobachtung beobachtung) {
+		beobachtungsDao.deleteBeobachtung(beobachtung.getKey());
+		fileDao.deleteFiles(beobachtung.getKey());
 	}
 
 	@Override
@@ -145,6 +145,11 @@ public class WahrnehmungsServiceImpl extends RemoteServiceServlet implements
 		beobachtungsDao.storeBeobachtung(beobachtung, currentUser,
 				masterBeobachtungsKey);
 		fileDao.storeFiles(beobachtung.getKey(), beobachtung.getFileInfos());
+	}
+
+	@Override
+	public List<GwtBeobachtung> getAll() {
+		return getBeobachtungen(new BeobachtungsFilter(), new Range(0, Integer.MAX_VALUE)).getBeobachtungen();
 	}
 
 }

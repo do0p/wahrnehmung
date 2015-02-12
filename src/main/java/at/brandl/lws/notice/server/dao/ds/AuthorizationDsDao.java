@@ -3,8 +3,8 @@ package at.brandl.lws.notice.server.dao.ds;
 import static com.google.appengine.api.datastore.FetchOptions.Builder.withDefaults;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import at.brandl.lws.notice.shared.model.Authorization;
@@ -61,8 +61,8 @@ public class AuthorizationDsDao extends AbstractDsDao {
 		return toGwt(authorization);
 	}
 
-	public Collection<Authorization> queryAuthorizations() {
-		final Collection<Authorization> result = new ArrayList<Authorization>();
+	public List<Authorization> queryAuthorizations() {
+		final List<Authorization> result = new ArrayList<Authorization>();
 		for (Entity entity : queryAuthorizationsInternal()) {
 			result.add(toGwt(entity));
 		}
@@ -87,6 +87,10 @@ public class AuthorizationDsDao extends AbstractDsDao {
 		final String userId = createUserId(email);
 		final Key key = KeyFactory.createKey(AUTHORIZATION_KIND, userId);
 		deleteEntity(key, AUTH_DAO_MEMCACHE);
+	}
+	
+	public Authorization getAuthorization(String key) {
+		return toGwt(getCachedEntity(toKey(key), AUTH_DAO_MEMCACHE));
 	}
 
 	private String createUserId(String email) {
@@ -155,4 +159,6 @@ public class AuthorizationDsDao extends AbstractDsDao {
 		superUser.setProperty(EDIT_DIALOGUE_DATES_FIELD, true);
 		return superUser;
 	}
+
+
 }

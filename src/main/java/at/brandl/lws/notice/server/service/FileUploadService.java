@@ -39,7 +39,6 @@ public class FileUploadService extends HttpServlet {
 				String contentType = file.getContentType();
 				String gsObjectName = file.getGsObjectName();
 				String imageUrl = "-";
-				System.out.println(gsObjectName);
 				if (isImage(contentType)) {
 					BlobKey blobKey = blobstoreService
 							.createGsBlobKey(gsObjectName);
@@ -47,7 +46,6 @@ public class FileUploadService extends HttpServlet {
 							.withBlobKey(blobKey);
 					imageUrl = imageService.getServingUrl(options);
 				}
-				System.out.println(imageUrl);
 
 				writer.print(filename);
 				writer.print("::");

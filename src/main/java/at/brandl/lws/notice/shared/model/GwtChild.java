@@ -1,11 +1,13 @@
 package at.brandl.lws.notice.shared.model;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class GwtChild implements Serializable, Comparable<GwtChild> {
+import at.brandl.lws.notice.shared.Utils;
+import at.brandl.lws.notice.shared.validator.GwtChildValidator;
+
+public class GwtChild extends GwtModel implements Comparable<GwtChild> {
 
 	private static final long serialVersionUID = 5870082887319396186L;
 	private String firstName;
@@ -15,7 +17,7 @@ public class GwtChild implements Serializable, Comparable<GwtChild> {
 	private List<Date> developementDialogueDates;
 
 	public List<Date> getDevelopementDialogueDates() {
-		return developementDialogueDates ;
+		return developementDialogueDates;
 	}
 
 	public void setDevelopementDialogueDates(List<Date> developementDialogues) {
@@ -26,7 +28,8 @@ public class GwtChild implements Serializable, Comparable<GwtChild> {
 		if (developementDialogueDates == null) {
 			developementDialogueDates = new ArrayList<Date>();
 		}
-		if(!developementDialogueDates.contains(date)){
+		if (!developementDialogueDates.contains(date)) {
+			setChanged(true);
 			developementDialogueDates.add(date);
 		}
 	}
@@ -40,15 +43,24 @@ public class GwtChild implements Serializable, Comparable<GwtChild> {
 	}
 
 	public void setFirstName(String firstName) {
-		this.firstName = firstName;
+		if (!equals(firstName, this.firstName)) {
+			setChanged(true);
+			this.firstName = firstName;
+		}
 	}
 
 	public void setLastName(String lastName) {
-		this.lastName = lastName;
+		if (!equals(lastName, this.lastName)) {
+			setChanged(true);
+			this.lastName = lastName;
+		}
 	}
 
 	public void setBirthDay(Date birthDay) {
-		this.birthDay = birthDay;
+		if (!equals(birthDay, this.birthDay)) {
+			setChanged(true);
+			this.birthDay = birthDay;
+		}
 	}
 
 	public Date getBirthDay() {
@@ -82,7 +94,19 @@ public class GwtChild implements Serializable, Comparable<GwtChild> {
 	}
 
 	public Date getLastDevelopementDialogueDate() {
-		return developementDialogueDates == null || developementDialogueDates.isEmpty() ? null : developementDialogueDates.get(0);
+		return developementDialogueDates == null
+				|| developementDialogueDates.isEmpty() ? null
+				: developementDialogueDates.get(0);
+	}
+
+	@Override
+	public boolean isNew() {
+		return Utils.isEmpty(key);
+	}
+
+	@Override
+	public boolean isValid() {
+		return GwtChildValidator.validate(this);
 	}
 
 }

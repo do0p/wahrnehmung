@@ -58,5 +58,10 @@ public interface Labels extends Messages {
 	String under12();
 	String over12();
 	String countOnly();
+	String templates();
+	String template();
+	String templateDelWarning();
+	String insert();
+	String defaultDelWarning();
 	String archived();
 }

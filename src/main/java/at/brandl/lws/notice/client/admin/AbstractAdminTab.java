@@ -13,9 +13,7 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.ValueBoxBase;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.datepicker.client.DateBox;
 
@@ -63,24 +61,6 @@ abstract class AbstractAdminTab extends VerticalPanel {
 		dialogBox.setErrorMessage(message);
 		dialogBox.setDisableWhileShown(buttonPanel.getButtons());
 		dialogBox.center();
-	}
-
-	<T> void addButtonUpdateChangeHandler(ValueBoxBase<T> valueBox) {
-		valueBox.addValueChangeHandler(new ValueChangeHandler<T>() {
-			@Override
-			public void onValueChange(ValueChangeEvent<T> event) {
-				updateButtonPanel();
-			}
-		});
-	}
-
-	void addButtonUpdateChangeHandler(CheckBox checkBox) {
-		checkBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
-			@Override
-			public void onValueChange(ValueChangeEvent<Boolean> event) {
-				updateButtonPanel();
-			}
-		});
 	}
 
 	void addButtonUpdateChangeHandler(DateBox checkBox) {

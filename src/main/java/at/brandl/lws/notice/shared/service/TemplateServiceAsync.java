@@ -6,7 +6,7 @@ import at.brandl.lws.notice.shared.model.GwtTemplate;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
-public interface TemplateServiceAsync {
+public interface TemplateServiceAsync extends ModelServiceAsync<GwtTemplate> {
 
 	void getTemplate(String id, AsyncCallback<GwtTemplate> callback);
 
