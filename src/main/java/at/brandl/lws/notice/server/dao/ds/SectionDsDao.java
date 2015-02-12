@@ -31,12 +31,12 @@ public class SectionDsDao extends AbstractDsDao {
 	private volatile boolean sectionChildCacheUpdateNeeded = true;
 
 	public GwtSection getSection(String sectionKey) {
-		final Entity section = getCachedEntity(toKey(sectionKey));
+		final Entity section = getCachedEntity(toKey(sectionKey), SECTION_MEMCACHE);
 		return toGwt(section);
 	}
 	
 	public String getSectionName(String sectionKey) {
-		final Entity section = getCachedEntity(toKey(sectionKey));
+		final Entity section = getCachedEntity(toKey(sectionKey), SECTION_MEMCACHE);
 		return (String) section.getProperty(SECTION_NAME_FIELD);
 	}
 
@@ -77,7 +77,7 @@ public class SectionDsDao extends AbstractDsDao {
 			transaction.commit();
 			sectionChildCacheUpdateNeeded = true;
 			gwtSection.setKey(toString(section.getKey()));
-			insertIntoCache(section);
+			insertIntoCache(section, SECTION_MEMCACHE);
 
 		} finally {
 			if (transaction.isActive()) {
@@ -101,7 +101,7 @@ public class SectionDsDao extends AbstractDsDao {
 			}
 			for(String key : sectionKeys)
 			{
-				deleteEntity(toKey(key), datastoreService);
+				deleteEntity(toKey(key), datastoreService, SECTION_MEMCACHE);
 			}
 			transaction.commit();
 			sectionChildCacheUpdateNeeded = true;
@@ -110,11 +110,6 @@ public class SectionDsDao extends AbstractDsDao {
 				transaction.rollback();
 			}
 		}
-	}
-
-	@Override
-	protected String getMemcacheServiceName() {
-		return SECTION_MEMCACHE;
 	}
 
 	private void updateChildKeys() {

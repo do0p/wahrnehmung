@@ -124,7 +124,7 @@ public class TestUtils {
 	public static Entity createBeobachtungEntity(GwtBeobachtung gwtBeobachtung,
 			User user) {
 
-		final Entity entity = new Entity(BeobachtungDsDao.BEOBACHTUNG_KIND,
+		final Entity entity = new Entity(BeobachtungDsDao.getBeobachtungKind(false),
 				toKey(gwtBeobachtung.getChildKey()));
 
 		entity.setProperty(BeobachtungDsDao.SECTION_KEY_FIELD,

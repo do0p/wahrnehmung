@@ -74,6 +74,7 @@ public class GwtBeobachtung implements Serializable, Comparable<GwtBeobachtung> 
 	private List<String> additionalChildKeys = new ArrayList<String>();
 	private List<GwtFileInfo> fileInfos = new ArrayList<GwtFileInfo>();
 	private boolean countOnly;
+	private boolean archived;
 
 	public void setText(String text) {
 		this.text = text;
@@ -183,7 +184,7 @@ public class GwtBeobachtung implements Serializable, Comparable<GwtBeobachtung> 
 				&& ObjectUtils.equals(additionalChildKeys,
 						other.additionalChildKeys)
 				&& ObjectUtils.equals(fileInfos, other.fileInfos)
-				&& countOnly == other.countOnly;
+				&& archived == other.archived && countOnly == other.countOnly;
 
 	}
 
@@ -199,6 +200,7 @@ public class GwtBeobachtung implements Serializable, Comparable<GwtBeobachtung> 
 		result = result * 17 + ObjectUtils.hashCode(additionalChildKeys);
 		result = result * 17 + ObjectUtils.hashCode(fileInfos);
 		result = result * 17 + (countOnly ? 1 : 0);
+		result = result * 17 + (archived ? 1 : 0);
 		return result * 17 + user.hashCode();
 	}
 
@@ -270,6 +272,15 @@ public class GwtBeobachtung implements Serializable, Comparable<GwtBeobachtung> 
 
 	public void setCountOnly(boolean countOnly) {
 		this.countOnly = countOnly;
+	}
+
+	public void setArchived(boolean archived) {
+		this.archived = archived;
+
+	}
+
+	public boolean isArchived() {
+		return archived;
 	}
 
 }

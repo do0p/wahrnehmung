@@ -25,6 +25,8 @@ public class BeobachtungsFilter implements Serializable {
 	private boolean over12;
 	
 	private String user;
+	
+	private boolean archived;
 
 	public String getUser() {
 		return user;
@@ -112,6 +114,7 @@ public class BeobachtungsFilter implements Serializable {
 				+ (sinceLastDevelopmementDialogue ? 1231 : 1237);
 		result = prime * result + Arrays.hashCode(timeRange);
 		result = prime * result + ((user == null) ? 0 : user.hashCode());
+		result = prime * result + (archived ? 1 : 0);
 		return result;
 	}
 
@@ -124,6 +127,8 @@ public class BeobachtungsFilter implements Serializable {
 		if (getClass() != obj.getClass())
 			return false;
 		BeobachtungsFilter other = (BeobachtungsFilter) obj;
+		if(archived != other.archived) 
+			return false;
 		if (childKey == null) {
 			if (other.childKey != null)
 				return false;
@@ -148,6 +153,14 @@ public class BeobachtungsFilter implements Serializable {
 		} else if (!user.equals(other.user))
 			return false;
 		return true;
+	}
+
+	public boolean isArchived() {
+		return archived;
+	}
+
+	public void setArchived(boolean archived) {
+		this.archived = archived;
 	}
 
 	

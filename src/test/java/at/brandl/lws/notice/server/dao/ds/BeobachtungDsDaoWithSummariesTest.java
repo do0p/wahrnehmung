@@ -114,7 +114,7 @@ public class BeobachtungDsDaoWithSummariesTest extends AbstractDsDaoTest {
 		for (GwtBeobachtung beobachtung : beobachtungen) {
 			if (beobachtung.getKey() != null) {
 				Assert.assertEquals(beobachtung,
-						beobachtungsDao.getBeobachtung(beobachtung.getKey()));
+						beobachtungsDao.getBeobachtung(beobachtung.getKey(), false));
 			}
 		}
 	}
@@ -236,13 +236,13 @@ public class BeobachtungDsDaoWithSummariesTest extends AbstractDsDaoTest {
 	public void worksWithCache() {
 		final String key = beobachtung1.getKey();
 
-		GwtBeobachtung beobachtung = beobachtungsDao.getBeobachtung(key);
+		GwtBeobachtung beobachtung = beobachtungsDao.getBeobachtung(key, false);
 		assertServicesContains(key);
 		Assert.assertNotNull(beobachtung);
 
 		removeFromDatastore(key);
 
-		beobachtung = beobachtungsDao.getBeobachtung(key);
+		beobachtung = beobachtungsDao.getBeobachtung(key, false);
 		assertCacheContains(key);
 		Assert.assertNotNull(beobachtung);
 
@@ -255,13 +255,13 @@ public class BeobachtungDsDaoWithSummariesTest extends AbstractDsDaoTest {
 	public void worksWithoutCache() {
 		final String key = beobachtung1.getKey();
 
-		GwtBeobachtung beobachtung = beobachtungsDao.getBeobachtung(key);
+		GwtBeobachtung beobachtung = beobachtungsDao.getBeobachtung(key, false);
 		assertServicesContains(key);
 		Assert.assertNotNull(beobachtung);
 
 		removeFromCache(key);
 
-		beobachtung = beobachtungsDao.getBeobachtung(key);
+		beobachtung = beobachtungsDao.getBeobachtung(key, false);
 		assertServicesContains(key);
 		Assert.assertNotNull(beobachtung);
 
@@ -273,7 +273,7 @@ public class BeobachtungDsDaoWithSummariesTest extends AbstractDsDaoTest {
 
 	@Override
 	protected String getMemCacheServiceName() {
-		return BeobachtungDsDao.BEOBACHTUNGS_DAO_MEMCACHE;
+		return BeobachtungDsDao.getCacheName(false);
 	}
 
 	private void assertEquals(List<GwtBeobachtung> beobachtungen,

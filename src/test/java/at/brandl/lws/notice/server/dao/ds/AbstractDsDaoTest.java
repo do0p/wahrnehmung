@@ -30,11 +30,16 @@ public abstract class AbstractDsDaoTest {
 	@Before
 	public void begin() {
 		helper = new LocalServiceTestHelper(
-				new LocalDatastoreServiceTestConfig(),
+				createDsConfig(),
 				new LocalMemcacheServiceTestConfig());
 		helper.setUp();
 		cache = MemcacheServiceFactory.getMemcacheService(getMemCacheServiceName());
 		datastore = DatastoreServiceFactory.getDatastoreService();
+	}
+
+
+	protected LocalDatastoreServiceTestConfig createDsConfig() {
+		return new LocalDatastoreServiceTestConfig();
 	}
 
 	

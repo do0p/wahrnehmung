@@ -53,7 +53,7 @@ public class WahrnehmungsServiceImpl extends RemoteServiceServlet implements
 
 	@Override
 	public void storeBeobachtung(GwtBeobachtung beobachtung) {
-		if(!GwtBeobachtungValidator.valid(beobachtung)) {
+		if (!GwtBeobachtungValidator.valid(beobachtung)) {
 			throw new IllegalArgumentException("incomplete beobachtung");
 		}
 		final User currentUser = userService.getCurrentUser();
@@ -68,8 +68,13 @@ public class WahrnehmungsServiceImpl extends RemoteServiceServlet implements
 
 	@Override
 	public GwtBeobachtung getBeobachtung(String beobachtungsKey) {
-		GwtBeobachtung beobachtung = beobachtungsDao
-				.getBeobachtung(beobachtungsKey);
+		GwtBeobachtung beobachtung;
+		try {
+			beobachtung = beobachtungsDao
+					.getBeobachtung(beobachtungsKey, false);
+		} catch (IllegalArgumentException e) {
+			beobachtung = beobachtungsDao.getBeobachtung(beobachtungsKey, true);
+		}
 		addFiles(beobachtung);
 		return beobachtung;
 	}

@@ -53,6 +53,7 @@ public class Search extends VerticalPanel {
 	private final YearSelection yearSelection;
 	private final CheckBox under12;
 	private final CheckBox over12;
+	private final CheckBox archived;
 	private final MultiSelectionModel<GwtBeobachtung> selectionModel;
 	private final Show beobachtungen;
 
@@ -76,6 +77,14 @@ public class Search extends VerticalPanel {
 				search();
 			}
 		});
+		archived = new CheckBox(labels.archived());
+		archived.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				updateGui();
+				search();
+			}
+		});		
 		this.nameSelection = new NameSelection(dialogBox);
 		nameSelection.addSelectionHandler(new SelectionHandler<Suggestion>() {
 			@Override
@@ -137,6 +146,7 @@ public class Search extends VerticalPanel {
 		Panel boxes = new HorizontalPanel();
 		boxes.add(under12);
 		boxes.add(over12);
+		boxes.add(archived);
 		filterBox.setWidget(1, 0, boxes);
 
 		add(this.table);
@@ -207,6 +217,7 @@ public class Search extends VerticalPanel {
 	private void search() {
 		filter.setOver12(over12.getValue());
 		filter.setUnder12(under12.getValue());
+		filter.setArchived(archived.getValue());
 		if (enableNameSelection()) {
 			filter.setChildKey(nameSelection.getSelectedChildKey());
 		} else {

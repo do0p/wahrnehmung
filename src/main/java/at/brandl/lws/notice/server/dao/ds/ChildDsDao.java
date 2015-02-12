@@ -41,7 +41,7 @@ public class ChildDsDao extends AbstractDsDao {
 		{
 			allChildren = updateCacheFromDatastore();
 		} else {
-			allChildren = (List<GwtChild>) getCache().get(ALL_CHILDREN);
+			allChildren = (List<GwtChild>) getCache(CHILD_DAO_MEMCACHE).get(ALL_CHILDREN);
 			if(allChildren == null) {
 				allChildren = updateCacheFromDatastore();
 			}
@@ -52,7 +52,7 @@ public class ChildDsDao extends AbstractDsDao {
 
 	private List<GwtChild> updateCacheFromDatastore() {
 		List<GwtChild> allChildren = getAllChildrenFromDatastore();
-		getCache().put(ALL_CHILDREN, allChildren);
+		getCache(CHILD_DAO_MEMCACHE).put(ALL_CHILDREN, allChildren);
 		dirty = false;
 		return allChildren;
 	}
@@ -82,7 +82,7 @@ public class ChildDsDao extends AbstractDsDao {
 			datastoreService.put(child);
 			transaction.commit();
 			gwtChild.setKey(toString(child.getKey()));
-			insertIntoCache(child);
+			insertIntoCache(child, CHILD_DAO_MEMCACHE);
 			dirty = true;
 			
 		} finally {
@@ -93,21 +93,16 @@ public class ChildDsDao extends AbstractDsDao {
 	}
 
 	public void deleteChild(GwtChild child) {
-		deleteEntity(toKey(child.getKey()));
+		deleteEntity(toKey(child.getKey()), CHILD_DAO_MEMCACHE);
 		dirty = true;
 	}
 
 	public GwtChild getChild(String key) {
-		return toGwt(getCachedEntity(toKey(key)));
+		return toGwt(getCachedEntity(toKey(key), CHILD_DAO_MEMCACHE));
 	}
 
 	public String getChildName(String childKey) {
-		return formatChildName(getCachedEntity(toKey(childKey)));
-	}
-
-	@Override
-	protected String getMemcacheServiceName() {
-		return CHILD_DAO_MEMCACHE;
+		return formatChildName(getCachedEntity(toKey(childKey), CHILD_DAO_MEMCACHE));
 	}
 
 	private boolean exists(Entity child, DatastoreService datastoreService) {

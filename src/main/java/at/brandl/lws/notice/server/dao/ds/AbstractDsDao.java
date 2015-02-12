@@ -1,7 +1,5 @@
 package at.brandl.lws.notice.server.dao.ds;
 
-
-
 import at.brandl.lws.notice.server.dao.AbstractDao;
 
 import com.google.appengine.api.datastore.DatastoreService;
@@ -19,8 +17,6 @@ import com.google.appengine.api.memcache.MemcacheServiceFactory;
 
 public abstract class AbstractDsDao extends AbstractDao {
 
-
-	
 	protected Filter createEqualsPredicate(String fieldName, Entity entity) {
 		return new Query.FilterPredicate(fieldName, FilterOperator.EQUAL,
 				entity.getProperty(fieldName));
@@ -38,28 +34,28 @@ public abstract class AbstractDsDao extends AbstractDao {
 		return KeyFactory.stringToKey(key);
 	}
 
-	protected void insertIntoCache(Entity entity) {
+	protected void insertIntoCache(Entity entity, String cacheName) {
 		Key key = entity.getKey();
-		getCache().put(key, entity);
+		getCache(cacheName).put(key, entity);
 	}
 
-	protected void deleteFromCache(Key key) {
-		getCache().delete(key);
+	protected void deleteFromCache(Key key, String cacheName) {
+		getCache(cacheName).delete(key);
 	}
 
-	protected Entity getFromCache(Key key) {
-		return (Entity) getCache().get(key);
+	protected Entity getFromCache(Key key, String cacheName) {
+		return (Entity) getCache(cacheName).get(key);
 	}
 
 	protected DatastoreService getDatastoreService() {
 		return DatastoreServiceFactory.getDatastoreService();
 	}
 
-	protected Entity getCachedEntity(Key key) {
-		Entity entity = getFromCache(key);
+	protected Entity getCachedEntity(Key key, String cacheName) {
+		Entity entity = getFromCache(key, cacheName);
 		if (entity == null) {
 			entity = getEntity(key);
-			insertIntoCache(entity);
+			insertIntoCache(entity, cacheName);
 		}
 		return entity;
 	}
@@ -72,20 +68,19 @@ public abstract class AbstractDsDao extends AbstractDao {
 		}
 	}
 
-
-	protected MemcacheService getCache() {
-//		System.err.println("getting data from cache");
+	protected MemcacheService getCache(String cacheName) {
+		// System.err.println("getting data from cache");
 		return MemcacheServiceFactory
-				.getMemcacheService(getMemcacheServiceName());
+				.getMemcacheService(cacheName);
 	}
 
-	protected void deleteEntity(Key key) {
-		deleteEntity(key, getDatastoreService());
+	protected void deleteEntity(Key key, String cacheName) {
+		deleteEntity(key, getDatastoreService(), cacheName);
 	}
-	
-	protected void deleteEntity(Key key, DatastoreService datastoreService) {
+
+	protected void deleteEntity(Key key, DatastoreService datastoreService, String cacheName) {
 		datastoreService.delete(key);
-		deleteFromCache(key);
+		deleteFromCache(key, cacheName);
 	}
 
 	protected Iterable<Entity> execute(Query query, FetchOptions fetchOptions) {
@@ -105,9 +100,6 @@ public abstract class AbstractDsDao extends AbstractDao {
 			DatastoreService datastoreService) {
 		return datastoreService.prepare(query).countEntities(fetchOptions);
 	}
-	
-	protected abstract String getMemcacheServiceName();
-
 
 
 }

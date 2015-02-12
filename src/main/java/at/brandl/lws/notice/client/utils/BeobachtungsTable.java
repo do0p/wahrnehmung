@@ -149,7 +149,7 @@ public class BeobachtungsTable extends CellTable<GwtBeobachtung> {
 						new ActionCell.Delegate<GwtBeobachtung>() {
 							public void execute(GwtBeobachtung object) {
 								String key = object.getKey();
-								if (key == null) {
+								if (key == null || object.isArchived()) {
 									return;
 								}
 								editContent.setKey(key);
@@ -161,7 +161,7 @@ public class BeobachtungsTable extends CellTable<GwtBeobachtung> {
 						new ActionCell.Delegate<GwtBeobachtung>() {
 							public void execute(GwtBeobachtung object) {
 								final String key = object.getKey();
-								if (key == null) {
+								if (key == null || object.isArchived()) {
 									return;
 								}
 								decisionBox
@@ -232,7 +232,8 @@ public class BeobachtungsTable extends CellTable<GwtBeobachtung> {
 								visibleRange.getStart(),
 								result.getBeobachtungen());
 						asyncDataProvider.updateRowCount(result.getRowCount(), true);
-//						redraw();
+						
+						
 					}
 
 					public void onFailure(Throwable caught) {

@@ -14,17 +14,12 @@ public class TemplateDsDao extends AbstractDsDao {
 	public static final String TEMPLATE_TEXT_FIELD = "templateText";
 	public static final String TEMPLATE_MEMCACHE = "template";
 	
-	@Override
-	protected String getMemcacheServiceName() {
-		return TEMPLATE_MEMCACHE;
-	}
-
 	public List<GwtTemplate> getTemplates() {
 		return null;
 	}
 
 	public GwtTemplate getTemplate(String id) {
-		return toGwt(getCachedEntity(toKey(id)));
+		return toGwt(getCachedEntity(toKey(id), TEMPLATE_MEMCACHE));
 	}
 
 	private Entity toEntity(GwtTemplate template) {

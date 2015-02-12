@@ -40,11 +40,6 @@ public class FileDsDao extends AbstractDsDao {
 	private GcsService gcsService = GcsServiceFactory.createGcsService();
 	private Map<String, Date> dirty = new ConcurrentHashMap<String, Date>();
 
-	@Override
-	protected String getMemcacheServiceName() {
-		return FILE_DAO_MEMCACHE;
-	}
-
 	public boolean fileExists(String filename) {
 		return getFileAttachement(filename) != null;
 	}
@@ -166,7 +161,7 @@ public class FileDsDao extends AbstractDsDao {
 		final Transaction transaction = datastoreService.beginTransaction();
 		try {
 			Key key = fileAttachement.getKey();
-			deleteFromCache(key);
+			deleteFromCache(key, FILE_DAO_MEMCACHE);
 			datastoreService.delete(key);
 			transaction.commit();
 
@@ -192,7 +187,7 @@ public class FileDsDao extends AbstractDsDao {
 
 	private Map<String, Entity> findFileAttachements(String beobachtungsKey) {
 
-		MemcacheService cache = getCache();
+		MemcacheService cache = getCache(FILE_DAO_MEMCACHE);
 		if (!cache.contains(beobachtungsKey) || updateNeeded(beobachtungsKey)) {
 			synchronized (this) {
 				if (!cache.contains(beobachtungsKey)
@@ -211,7 +206,7 @@ public class FileDsDao extends AbstractDsDao {
 	private Map<String, Entity> getFileAttachements(Collection<Key> keys) {
 		final Map<String, Entity> fileAttachements = new HashMap<String, Entity>();
 		for (Key key : keys) {
-			Entity fileAttachement = getCachedEntity(key);
+			Entity fileAttachement = getCachedEntity(key, FILE_DAO_MEMCACHE);
 			String filename = (String) fileAttachement
 					.getProperty(FILENAME_FIELD);
 			fileAttachements.put(filename, fileAttachement);
@@ -244,7 +239,7 @@ public class FileDsDao extends AbstractDsDao {
 		try {
 			datastoreService.put(fileAttachement);
 			transaction.commit();
-			insertIntoCache(fileAttachement);
+			insertIntoCache(fileAttachement, FILE_DAO_MEMCACHE);
 
 		} finally {
 			if (transaction.isActive()) {
@@ -256,7 +251,7 @@ public class FileDsDao extends AbstractDsDao {
 
 	private Entity getFileAttachement(String filename) {
 		try {
-			return getCachedEntity(KeyFactory.createKey(FILE_KIND, filename));
+			return getCachedEntity(KeyFactory.createKey(FILE_KIND, filename), FILE_DAO_MEMCACHE);
 		} catch (IllegalArgumentException e) {
 			return null;
 		}

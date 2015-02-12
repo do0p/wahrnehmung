@@ -45,7 +45,7 @@ public class AuthorizationDsDao extends AbstractDsDao {
 
 		final String userId = createUserId(user);
 		final Key key = KeyFactory.createKey(AUTHORIZATION_KIND, userId);
-		Entity authorization = getFromCache(key);
+		Entity authorization = getFromCache(key, AUTH_DAO_MEMCACHE);
 		if (authorization == null) {
 			if (SUPER_USER_IDS.contains(userId)) {
 				authorization = createSuperUser(key, userId);
@@ -56,7 +56,7 @@ public class AuthorizationDsDao extends AbstractDsDao {
 					authorization = null;
 				}
 			}
-			getCache().put(key, authorization);
+			getCache(AUTH_DAO_MEMCACHE).put(key, authorization);
 		}
 		return toGwt(authorization);
 	}
@@ -80,18 +80,13 @@ public class AuthorizationDsDao extends AbstractDsDao {
 		final Entity authorization = toEntity(aut);
 		aut.setKey(KeyFactory.keyToString(authorization.getKey()));
 		getDatastoreService().put(authorization);
-		insertIntoCache(authorization);
+		insertIntoCache(authorization, AUTH_DAO_MEMCACHE);
 	}
 
 	public void deleteAuthorization(String email) {
 		final String userId = createUserId(email);
 		final Key key = KeyFactory.createKey(AUTHORIZATION_KIND, userId);
-		deleteEntity(key);
-	}
-
-	@Override
-	protected String getMemcacheServiceName() {
-		return AUTH_DAO_MEMCACHE;
+		deleteEntity(key, AUTH_DAO_MEMCACHE);
 	}
 
 	private String createUserId(String email) {
@@ -100,13 +95,13 @@ public class AuthorizationDsDao extends AbstractDsDao {
 
 	private void initCache() {
 		for (Entity entity : queryAuthorizationsInternal()) {
-			insertIntoCache(entity);
+			insertIntoCache(entity, AUTH_DAO_MEMCACHE);
 		}
 
 		for (String superUserId : SUPER_USER_IDS) {
 			final Key key = KeyFactory.createKey(AUTHORIZATION_KIND,
 					superUserId);
-			insertIntoCache(createSuperUser(key, superUserId));
+			insertIntoCache(createSuperUser(key, superUserId), AUTH_DAO_MEMCACHE);
 		}
 	}
 
