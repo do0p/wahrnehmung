@@ -2,7 +2,6 @@ package at.brandl.lws.notice.client.admin;
 
 import java.util.Date;
 
-import at.brandl.lws.notice.client.utils.DecisionBox;
 import at.brandl.lws.notice.client.utils.Utils;
 import at.brandl.lws.notice.shared.model.GwtChild;
 import at.brandl.lws.notice.shared.service.ChildService;
