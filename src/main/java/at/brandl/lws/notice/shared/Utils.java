@@ -2,7 +2,7 @@ package at.brandl.lws.notice.shared;
 
 import java.util.Collection;
 
-import at.brandl.lws.notice.shared.model.GwtBeobachtung;
+import at.brandl.lws.notice.model.GwtBeobachtung;
 
 import com.google.gwt.i18n.client.DateTimeFormat;
 

@@ -6,16 +6,16 @@ import java.util.Date;
 import org.junit.Assert;
 import org.junit.Test;
 
+import at.brandl.lws.notice.model.Authorization;
+import at.brandl.lws.notice.model.BeobachtungsFilter;
+import at.brandl.lws.notice.model.GwtBeobachtung;
+import at.brandl.lws.notice.model.GwtBeobachtung.DurationEnum;
+import at.brandl.lws.notice.model.GwtBeobachtung.SocialEnum;
+import at.brandl.lws.notice.model.GwtChild;
+import at.brandl.lws.notice.model.GwtSection;
 import at.brandl.lws.notice.server.dao.ds.BeobachtungDsDao;
 import at.brandl.lws.notice.server.dao.ds.ChildDsDao;
 import at.brandl.lws.notice.server.dao.ds.SectionDsDao;
-import at.brandl.lws.notice.shared.model.Authorization;
-import at.brandl.lws.notice.shared.model.BeobachtungsFilter;
-import at.brandl.lws.notice.shared.model.GwtBeobachtung;
-import at.brandl.lws.notice.shared.model.GwtBeobachtung.DurationEnum;
-import at.brandl.lws.notice.shared.model.GwtBeobachtung.SocialEnum;
-import at.brandl.lws.notice.shared.model.GwtChild;
-import at.brandl.lws.notice.shared.model.GwtSection;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;

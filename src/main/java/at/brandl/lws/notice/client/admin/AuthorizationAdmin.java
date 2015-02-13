@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import at.brandl.lws.notice.client.utils.Utils;
-import at.brandl.lws.notice.shared.model.Authorization;
+import at.brandl.lws.notice.model.Authorization;
 import at.brandl.lws.notice.shared.service.AuthorizationService;
 import at.brandl.lws.notice.shared.service.AuthorizationServiceAsync;
 

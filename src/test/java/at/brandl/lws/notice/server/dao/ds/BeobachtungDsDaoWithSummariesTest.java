@@ -1,5 +1,10 @@
 package at.brandl.lws.notice.server.dao.ds;
-import static at.brandl.lws.notice.TestUtils.*;
+import static at.brandl.lws.notice.TestUtils.createBeobachtung;
+import static at.brandl.lws.notice.TestUtils.createBeobachtungEntity;
+import static at.brandl.lws.notice.TestUtils.createChildEntity;
+import static at.brandl.lws.notice.TestUtils.createFilterWithSummaries;
+import static at.brandl.lws.notice.TestUtils.createSectionEntity;
+import static at.brandl.lws.notice.TestUtils.createUser;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -10,9 +15,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import at.brandl.lws.notice.TestUtils;
+import at.brandl.lws.notice.model.BeobachtungsFilter;
+import at.brandl.lws.notice.model.GwtBeobachtung;
 import at.brandl.lws.notice.server.dao.DaoRegistry;
-import at.brandl.lws.notice.shared.model.BeobachtungsFilter;
-import at.brandl.lws.notice.shared.model.GwtBeobachtung;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.users.User;

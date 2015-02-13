@@ -4,10 +4,10 @@ import java.util.Iterator;
 
 import at.brandl.lws.notice.client.EditContent;
 import at.brandl.lws.notice.client.Labels;
-import at.brandl.lws.notice.shared.model.Authorization;
-import at.brandl.lws.notice.shared.model.BeobachtungsFilter;
-import at.brandl.lws.notice.shared.model.BeobachtungsResult;
-import at.brandl.lws.notice.shared.model.GwtBeobachtung;
+import at.brandl.lws.notice.model.Authorization;
+import at.brandl.lws.notice.model.BeobachtungsFilter;
+import at.brandl.lws.notice.model.BeobachtungsResult;
+import at.brandl.lws.notice.model.GwtBeobachtung;
 import at.brandl.lws.notice.shared.service.WahrnehmungsService;
 import at.brandl.lws.notice.shared.service.WahrnehmungsServiceAsync;
 

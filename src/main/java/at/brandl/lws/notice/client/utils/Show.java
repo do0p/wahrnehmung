@@ -3,7 +3,7 @@ package at.brandl.lws.notice.client.utils;
 import java.util.Collection;
 
 import at.brandl.lws.notice.client.Labels;
-import at.brandl.lws.notice.shared.model.GwtBeobachtung;
+import at.brandl.lws.notice.model.GwtBeobachtung;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;

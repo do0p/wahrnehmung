@@ -2,7 +2,7 @@ package at.brandl.lws.notice.shared.service;
 
 import java.util.Collection;
 
-import at.brandl.lws.notice.shared.model.Authorization;
+import at.brandl.lws.notice.model.Authorization;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 

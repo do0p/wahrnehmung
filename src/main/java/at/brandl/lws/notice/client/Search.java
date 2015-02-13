@@ -16,9 +16,9 @@ import at.brandl.lws.notice.client.utils.Show;
 import at.brandl.lws.notice.client.utils.Utils;
 import at.brandl.lws.notice.client.utils.YearSelection;
 import at.brandl.lws.notice.client.utils.YearSelection.YearSelectionResult;
-import at.brandl.lws.notice.shared.model.Authorization;
-import at.brandl.lws.notice.shared.model.BeobachtungsFilter;
-import at.brandl.lws.notice.shared.model.GwtBeobachtung;
+import at.brandl.lws.notice.model.Authorization;
+import at.brandl.lws.notice.model.BeobachtungsFilter;
+import at.brandl.lws.notice.model.GwtBeobachtung;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;

@@ -2,7 +2,7 @@ package at.brandl.lws.notice.server.dao.ds;
 
 import java.util.List;
 
-import at.brandl.lws.notice.shared.model.GwtTemplate;
+import at.brandl.lws.notice.model.GwtTemplate;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Text;

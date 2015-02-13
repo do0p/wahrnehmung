@@ -1,8 +1,8 @@
 package at.brandl.lws.notice.shared.service;
 
-import at.brandl.lws.notice.shared.model.BeobachtungsFilter;
-import at.brandl.lws.notice.shared.model.BeobachtungsResult;
-import at.brandl.lws.notice.shared.model.GwtBeobachtung;
+import at.brandl.lws.notice.model.BeobachtungsFilter;
+import at.brandl.lws.notice.model.BeobachtungsResult;
+import at.brandl.lws.notice.model.GwtBeobachtung;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.view.client.Range;

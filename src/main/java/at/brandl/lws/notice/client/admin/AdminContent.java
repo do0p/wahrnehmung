@@ -2,7 +2,7 @@ package at.brandl.lws.notice.client.admin;
 
 import at.brandl.lws.notice.client.Labels;
 import at.brandl.lws.notice.client.utils.Utils;
-import at.brandl.lws.notice.shared.model.Authorization;
+import at.brandl.lws.notice.model.Authorization;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.TabPanel;

@@ -2,9 +2,9 @@ package at.brandl.lws.notice.server.service;
 
 import java.util.Collection;
 
+import at.brandl.lws.notice.model.Authorization;
 import at.brandl.lws.notice.server.dao.DaoRegistry;
 import at.brandl.lws.notice.server.dao.ds.AuthorizationDsDao;
-import at.brandl.lws.notice.shared.model.Authorization;
 import at.brandl.lws.notice.shared.service.AuthorizationService;
 
 import com.google.appengine.api.users.UserService;

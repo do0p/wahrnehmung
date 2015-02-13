@@ -21,14 +21,14 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
+import at.brandl.lws.notice.model.BeobachtungsFilter;
+import at.brandl.lws.notice.model.GwtBeobachtung;
+import at.brandl.lws.notice.model.GwtBeobachtung.DurationEnum;
+import at.brandl.lws.notice.model.GwtBeobachtung.SocialEnum;
+import at.brandl.lws.notice.model.GwtChild;
+import at.brandl.lws.notice.model.GwtSection;
+import at.brandl.lws.notice.model.GwtSummary;
 import at.brandl.lws.notice.server.dao.DaoRegistry;
-import at.brandl.lws.notice.shared.model.BeobachtungsFilter;
-import at.brandl.lws.notice.shared.model.GwtBeobachtung;
-import at.brandl.lws.notice.shared.model.GwtBeobachtung.DurationEnum;
-import at.brandl.lws.notice.shared.model.GwtBeobachtung.SocialEnum;
-import at.brandl.lws.notice.shared.model.GwtChild;
-import at.brandl.lws.notice.shared.model.GwtSection;
-import at.brandl.lws.notice.shared.model.GwtSummary;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Entity;

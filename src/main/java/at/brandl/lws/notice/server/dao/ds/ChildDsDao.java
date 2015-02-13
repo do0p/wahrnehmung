@@ -10,7 +10,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import at.brandl.lws.notice.shared.model.GwtChild;
+import at.brandl.lws.notice.model.GwtChild;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Entity;

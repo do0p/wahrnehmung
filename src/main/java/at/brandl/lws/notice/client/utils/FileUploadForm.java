@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import at.brandl.lws.notice.client.Labels;
-import at.brandl.lws.notice.shared.model.GwtFileInfo;
+import at.brandl.lws.notice.model.GwtFileInfo;
 import at.brandl.lws.notice.shared.service.WahrnehmungsService;
 import at.brandl.lws.notice.shared.service.WahrnehmungsServiceAsync;
 

@@ -1,6 +1,6 @@
 package at.brandl.lws.notice.shared.validator;
 
-import at.brandl.lws.notice.shared.model.GwtBeobachtung;
+import at.brandl.lws.notice.model.GwtBeobachtung;
 
 public class GwtBeobachtungValidator {
 

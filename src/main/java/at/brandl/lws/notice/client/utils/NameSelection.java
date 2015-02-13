@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import at.brandl.lws.notice.shared.model.GwtChild;
+import at.brandl.lws.notice.model.GwtChild;
 import at.brandl.lws.notice.shared.service.ChildService;
 import at.brandl.lws.notice.shared.service.ChildServiceAsync;
 

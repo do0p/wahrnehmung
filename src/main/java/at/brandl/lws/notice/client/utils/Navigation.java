@@ -4,7 +4,7 @@ import at.brandl.lws.notice.client.EditContent;
 import at.brandl.lws.notice.client.Labels;
 import at.brandl.lws.notice.client.Search;
 import at.brandl.lws.notice.client.admin.AdminContent;
-import at.brandl.lws.notice.shared.model.Authorization;
+import at.brandl.lws.notice.model.Authorization;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.HorizontalPanel;

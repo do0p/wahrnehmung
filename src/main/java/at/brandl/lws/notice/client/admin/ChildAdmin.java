@@ -4,7 +4,7 @@ import java.util.List;
 
 import at.brandl.lws.notice.client.utils.DecisionBox;
 import at.brandl.lws.notice.client.utils.Utils;
-import at.brandl.lws.notice.shared.model.GwtChild;
+import at.brandl.lws.notice.model.GwtChild;
 import at.brandl.lws.notice.shared.service.ChildService;
 import at.brandl.lws.notice.shared.service.ChildServiceAsync;
 

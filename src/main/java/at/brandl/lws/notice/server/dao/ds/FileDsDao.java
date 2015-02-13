@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import at.brandl.lws.notice.model.GwtFileInfo;
 import at.brandl.lws.notice.shared.Utils;
-import at.brandl.lws.notice.shared.model.GwtFileInfo;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Entity;

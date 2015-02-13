@@ -11,8 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import at.brandl.lws.notice.model.GwtSection;
 import at.brandl.lws.notice.server.dao.DaoRegistry;
-import at.brandl.lws.notice.shared.model.GwtSection;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Entity;

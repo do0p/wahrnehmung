@@ -8,6 +8,13 @@
     <timezone>Europe/Vienna</timezone>
   </cron>
   
+  <cron>
+    <url>/wahrnehmung/archive</url>
+    <description>Archivierung alter Einträge</description>
+    <schedule>every day 03:30</schedule>
+    <timezone>Europe/Vienna</timezone>
+  </cron>
+  
 <!--  <cron>
     <url>/wahrnehmung/archive</url>
     <description>Archivierung alter Einträge</description>

@@ -2,16 +2,16 @@ package at.brandl.lws.notice.server.service;
 
 import java.util.List;
 
+import at.brandl.lws.notice.model.Authorization;
+import at.brandl.lws.notice.model.BeobachtungsFilter;
+import at.brandl.lws.notice.model.BeobachtungsResult;
+import at.brandl.lws.notice.model.GwtBeobachtung;
+import at.brandl.lws.notice.model.GwtFileInfo;
 import at.brandl.lws.notice.server.dao.DaoRegistry;
 import at.brandl.lws.notice.server.dao.ds.AuthorizationDsDao;
 import at.brandl.lws.notice.server.dao.ds.BeobachtungDsDao;
 import at.brandl.lws.notice.server.dao.ds.FileDsDao;
 import at.brandl.lws.notice.shared.Utils;
-import at.brandl.lws.notice.shared.model.Authorization;
-import at.brandl.lws.notice.shared.model.BeobachtungsFilter;
-import at.brandl.lws.notice.shared.model.BeobachtungsResult;
-import at.brandl.lws.notice.shared.model.GwtBeobachtung;
-import at.brandl.lws.notice.shared.model.GwtFileInfo;
 import at.brandl.lws.notice.shared.service.WahrnehmungsService;
 import at.brandl.lws.notice.shared.validator.GwtBeobachtungValidator;
 

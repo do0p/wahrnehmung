@@ -2,9 +2,9 @@ package at.brandl.lws.notice.server.service;
 
 import java.util.List;
 
+import at.brandl.lws.notice.model.GwtTemplate;
 import at.brandl.lws.notice.server.dao.DaoRegistry;
 import at.brandl.lws.notice.server.dao.ds.TemplateDsDao;
-import at.brandl.lws.notice.shared.model.GwtTemplate;
 import at.brandl.lws.notice.shared.service.TemplateService;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;

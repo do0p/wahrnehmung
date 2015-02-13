@@ -2,7 +2,7 @@ package at.brandl.lws.notice.client.utils;
 
 import java.util.Date;
 
-import at.brandl.lws.notice.shared.model.GwtChild;
+import at.brandl.lws.notice.model.GwtChild;
 
 import com.google.gwt.user.client.ui.CellPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
