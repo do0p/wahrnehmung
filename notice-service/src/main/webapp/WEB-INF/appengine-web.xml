@@ -42,16 +42,10 @@
   
   <module>notice-service</module>
 
- <!--  <instance-class>B4</instance-class>
+  <instance-class>B4</instance-class>
   <basic-scaling>
     <max-instances>1</max-instances>
     <idle-timeout>10m</idle-timeout>
   </basic-scaling> 
-   <instance-class>F4</instance-class>
-  <automatic-scaling>
-    <max-idle-instances>1</max-idle-instances>
-    <min-pending-latency>30ms</min-pending-latency>
-  </automatic-scaling>
-  -->
-
+  
 </appengine-web-app>
