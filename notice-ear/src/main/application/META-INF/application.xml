@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!-- This is the application.xml file intended for use with gradle, if you 
+	find it in your maven project, then that's a problem most likely. -->
+<application xmlns="http://java.sun.com/xml/ns/javaee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/application_6.xsd"
+	version="6">
+	<display-name>appengine-modules-ear</display-name>
+
+	<module>
+		<web>
+			<web-uri>notice-7</web-uri>
+			<context-root>notice</context-root>
+		</web>
+	</module>
+	<module>
+		<web>
+			<web-uri>notice-service-7</web-uri>
+			<context-root>notice-service</context-root>
+		</web>
+	</module>
+	
+	<library-directory>lib</library-directory>
+</application>
