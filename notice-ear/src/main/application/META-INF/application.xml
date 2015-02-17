@@ -9,13 +9,13 @@
 
 	<module>
 		<web>
-			<web-uri>notice-7</web-uri>
+			<web-uri>notice-${project.version}</web-uri>
 			<context-root>notice</context-root>
 		</web>
 	</module>
 	<module>
 		<web>
-			<web-uri>notice-service-7</web-uri>
+			<web-uri>notice-service-${project.version}</web-uri>
 			<context-root>notice-service</context-root>
 		</web>
 	</module>

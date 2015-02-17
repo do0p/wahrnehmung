@@ -13,13 +13,6 @@
 	<artifactId>notice</artifactId>
 	<packaging>war</packaging>
 
-	<properties>
-		<appengine.app.version>5</appengine.app.version>
-		<appengine.target.version>1.9.15</appengine.target.version>
-		<gwt.target.version>2.7.0-rc1</gwt.target.version>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-	</properties>
-
 	<dependencies>
 		<!-- Compile/runtime dependencies -->
 		<dependency>
