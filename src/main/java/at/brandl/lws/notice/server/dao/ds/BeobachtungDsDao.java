@@ -29,6 +29,7 @@ import at.brandl.lws.notice.shared.model.GwtSummary;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.CompositeFilterOperator;
 import com.google.appengine.api.datastore.Query.Filter;
@@ -326,8 +327,7 @@ public class BeobachtungDsDao extends AbstractDsDao {
 			synchronized (this) {
 
 				setUpdated(childKey);
-				result = getAllBeobachtungen(
-						childKey, oldestEntry);
+				result = getAllBeobachtungen(childKey, oldestEntry);
 				cache.put(key, result);
 
 			}
@@ -347,17 +347,21 @@ public class BeobachtungDsDao extends AbstractDsDao {
 						EXPECTED_BEOBACHTUNG_PER_SECTION);
 
 		for (Entity beobachtung : queryAllBeobachtungen(childKey, oldestEntry)) {
+			try {
+				GwtBeobachtung gwtBeobachtung = toGwt(beobachtung);
+				String sectionKey = gwtBeobachtung.getSectionKey();
+				GwtSection section = sectionDao.getSection(sectionKey);
+				if (section == null) {
+					throw new IllegalArgumentException(
+							"unknown section with key " + sectionKey);
+				}
+				sectionToBeobachtung.put(sectionKey, gwtBeobachtung);
 
-			GwtBeobachtung gwtBeobachtung = toGwt(beobachtung);
-			String sectionKey = gwtBeobachtung.getSectionKey();
-			GwtSection section = sectionDao.getSection(sectionKey);
-			if (section == null) {
-				throw new IllegalArgumentException("unknown section with key "
-						+ sectionKey);
+				setParentSections(section, gwtBeobachtung, sectionToBeobachtung);
+			} catch (RuntimeException e) {
+				System.err.println("got exception mapping beobachtung "
+						+ KeyFactory.keyToString(beobachtung.getKey()) + ": " +  e.getMessage());
 			}
-			sectionToBeobachtung.put(sectionKey, gwtBeobachtung);
-
-			setParentSections(section, gwtBeobachtung, sectionToBeobachtung);
 		}
 		return sectionToBeobachtung;
 	}
@@ -376,7 +380,7 @@ public class BeobachtungDsDao extends AbstractDsDao {
 	private Date shortListLimit() {
 		return getMidnightIn(Calendar.DAY_OF_MONTH, -21);
 	}
-	
+
 	private Date today() {
 		return getMidnightIn(Calendar.DAY_OF_MONTH, 1);
 	}
@@ -515,7 +519,14 @@ public class BeobachtungDsDao extends AbstractDsDao {
 		String social = (String) entity.getProperty(SOCIAL_FIELD);
 		Date date = (Date) entity.getProperty(DATE_FIELD);
 		String text = ((Text) entity.getProperty(TEXT_FIELD)).getValue();
-		String user = ((User) entity.getProperty(USER_FIELD)).getEmail();
+		User user = (User) entity.getProperty(USER_FIELD);
+		String email;
+		if (user != null) {
+			email = user.getEmail();
+		} else {
+			System.err.println("beobachtung " + KeyFactory.keyToString(entity.getKey()) + " has no user");
+			email = "Anonym";
+		}
 		String childName = getChildDao().getChildName(childKey);
 		String sectionName = getSectionDao().getSectionName(sectionKey);
 
@@ -525,7 +536,7 @@ public class BeobachtungDsDao extends AbstractDsDao {
 		beobachtung.setSectionKey(sectionKey);
 		beobachtung.setDate(date);
 		beobachtung.setText(text);
-		beobachtung.setUser(user);
+		beobachtung.setUser(email);
 		beobachtung.setChildName(childName);
 		beobachtung.setSectionName(sectionName);
 		if (duration != null) {
