@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>at.brandl.lws.notice</groupId>
-	<artifactId>appengine-modules-sample-java</artifactId>
+	<artifactId>parent</artifactId>
 	<version>7</version>
 	<packaging>pom</packaging>
 
