@@ -414,6 +414,7 @@ public class EditContent extends HorizontalPanel {
 		uploadForm.reset();
 		changes = false;
 		beobachtung = new GwtBeobachtung();
+		beobachtung.setDate(dateBox.getValue());
 		updateState();
 	}
 
