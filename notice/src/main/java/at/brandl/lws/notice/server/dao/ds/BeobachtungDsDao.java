@@ -111,11 +111,13 @@ public class BeobachtungDsDao extends AbstractDsDao {
 			BeobachtungsFilter filter, String childKey, Date oldestEntry) {
 		List<GwtBeobachtung> beobachtungen;
 		boolean archived = filter.isArchived();
-		if (!getCache(getCacheName(archived)).contains(filter) || updateNeeded(childKey)) {
+		if (!getCache(getCacheName(archived)).contains(filter)
+				|| updateNeeded(childKey)) {
 			beobachtungen = getBeobachtungen(childKey, filter, oldestEntry);
 			getCache(getCacheName(archived)).put(filter, beobachtungen);
 		} else {
-			beobachtungen = (List<GwtBeobachtung>) getCache(getCacheName(archived)).get(filter);
+			beobachtungen = (List<GwtBeobachtung>) getCache(
+					getCacheName(archived)).get(filter);
 		}
 
 		return beobachtungen;
@@ -355,26 +357,31 @@ public class BeobachtungDsDao extends AbstractDsDao {
 				.<String, GwtBeobachtung> create(EXPECTED_SECTION_PER_CHILD,
 						EXPECTED_BEOBACHTUNG_PER_SECTION);
 
-		for (Entity beobachtung : queryAllBeobachtungen(childKey, oldestEntry, archived)) {
+		for (Entity beobachtung : queryAllBeobachtungen(childKey, oldestEntry,
+				archived)) {
+			try {
+				GwtBeobachtung gwtBeobachtung = toGwt(beobachtung);
+				gwtBeobachtung.setArchived(archived);
+				String sectionKey = gwtBeobachtung.getSectionKey();
+				GwtSection section = sectionDao.getSection(sectionKey);
+				if (section == null) {
+					throw new IllegalArgumentException(
+							"unknown section with key " + sectionKey);
+				}
+				sectionToBeobachtung.put(sectionKey, gwtBeobachtung);
 
-			GwtBeobachtung gwtBeobachtung = toGwt(beobachtung);
-			gwtBeobachtung.setArchived(archived);
-			String sectionKey = gwtBeobachtung.getSectionKey();
-			GwtSection section = sectionDao.getSection(sectionKey);
-			if (section == null) {
-				throw new IllegalArgumentException("unknown section with key "
-						+ sectionKey);
+				setParentSections(section, gwtBeobachtung, sectionToBeobachtung);
+			} catch (RuntimeException e) {
+				System.err.println("got exception while mapping notice "
+						+ toString(beobachtung.getKey()) + ": " + e.getMessage());
 			}
-			sectionToBeobachtung.put(sectionKey, gwtBeobachtung);
-
-			setParentSections(section, gwtBeobachtung, sectionToBeobachtung);
 		}
 		return sectionToBeobachtung;
 	}
 
 	private Iterable<Entity> queryAllBeobachtungen(String childKey,
 			Date oldestEntry, boolean archived) {
-		Query query = new Query( getBeobachtungKind(archived), toKey(childKey));
+		Query query = new Query(getBeobachtungKind(archived), toKey(childKey));
 		if (oldestEntry != null) {
 			Filter filter = new FilterPredicate(DATE_FIELD,
 					FilterOperator.GREATER_THAN, oldestEntry);
@@ -432,8 +439,10 @@ public class BeobachtungDsDao extends AbstractDsDao {
 		return getBeobachtungen(filter).size();
 	}
 
-	public GwtBeobachtung getBeobachtung(String beobachtungsKey, boolean archived) {
-		return toGwt(getCachedEntity(toKey(beobachtungsKey), getCacheName(archived)));
+	public GwtBeobachtung getBeobachtung(String beobachtungsKey,
+			boolean archived) {
+		return toGwt(getCachedEntity(toKey(beobachtungsKey),
+				getCacheName(archived)));
 	}
 
 	public boolean beobachtungenExist(Collection<String> sectionKeys,
@@ -442,7 +451,8 @@ public class BeobachtungDsDao extends AbstractDsDao {
 			return false;
 		}
 		Filter sectionFilter = createSectionFilter(sectionKeys);
-		Query query = new Query(getBeobachtungKind(archived)).setFilter(sectionFilter);
+		Query query = new Query(getBeobachtungKind(archived))
+				.setFilter(sectionFilter);
 		return count(query, withDefaults(), ds) > 0;
 	}
 
@@ -519,7 +529,15 @@ public class BeobachtungDsDao extends AbstractDsDao {
 		String social = (String) entity.getProperty(SOCIAL_FIELD);
 		Date date = (Date) entity.getProperty(DATE_FIELD);
 		String text = ((Text) entity.getProperty(TEXT_FIELD)).getValue();
-		String user = ((User) entity.getProperty(USER_FIELD)).getEmail();
+		User user = (User) entity.getProperty(USER_FIELD);
+		String userEmail;
+		if (user != null) {
+			userEmail = user.getEmail();
+		} else {
+			userEmail = "Anonym";
+			System.err.println("no user for notice "
+					+ toString(entity.getKey()));
+		}
 		String childName = DaoRegistry.get(ChildDsDao.class).getChildName(
 				childKey);
 		String sectionName = DaoRegistry.get(SectionDsDao.class)
@@ -531,7 +549,7 @@ public class BeobachtungDsDao extends AbstractDsDao {
 		beobachtung.setSectionKey(sectionKey);
 		beobachtung.setDate(date);
 		beobachtung.setText(text);
-		beobachtung.setUser(user);
+		beobachtung.setUser(userEmail);
 		beobachtung.setChildName(childName);
 		beobachtung.setSectionName(sectionName);
 		if (duration != null) {
@@ -543,7 +561,8 @@ public class BeobachtungDsDao extends AbstractDsDao {
 		return beobachtung;
 	}
 
-	private Entity toEntity(GwtBeobachtung gwtBeobachtung, User user, boolean archived) {
+	private Entity toEntity(GwtBeobachtung gwtBeobachtung, User user,
+			boolean archived) {
 		String key = gwtBeobachtung.getKey();
 		Entity entity;
 		if (key == null) {
@@ -610,15 +629,16 @@ public class BeobachtungDsDao extends AbstractDsDao {
 	}
 
 	private void deleteAllNotices(Set<Key> keySet) {
-		
+
 		DatastoreService ds = getDatastoreService();
-		Transaction transaction = ds.beginTransaction(TransactionOptions.Builder.withXG(true));
+		Transaction transaction = ds
+				.beginTransaction(TransactionOptions.Builder.withXG(true));
 		Iterator<Key> iterator = keySet.iterator();
 		try {
-			
+
 			int count = 0;
 			while (iterator.hasNext()) {
-				
+
 				count++;
 				deleteEntity(iterator.next(), ds, getCacheName(false));
 
@@ -629,13 +649,13 @@ public class BeobachtungDsDao extends AbstractDsDao {
 					count = 0;
 				}
 			}
-			
+
 			if (transaction.isActive()) {
 				transaction.commit();
 			}
-			
+
 		} finally {
-			if ( transaction.isActive()) {
+			if (transaction.isActive()) {
 				System.err.println("error deleting notices");
 				transaction.rollback();
 			}
@@ -668,8 +688,8 @@ public class BeobachtungDsDao extends AbstractDsDao {
 				System.err.println("copying " + copied + " beobachtungen of "
 						+ child.getFirstName());
 				transaction.commit();
-			} 
-			
+			}
+
 			System.err.println("copied " + copied + " beobachtungen of "
 					+ child.getFirstName());
 
@@ -765,7 +785,8 @@ public class BeobachtungDsDao extends AbstractDsDao {
 	}
 
 	public static String getCacheName(boolean archived) {
-		return archived ? BEOBACHTUNGS_ARCHIVE_DAO_MEMCACHE : BEOBACHTUNGS_DAO_MEMCACHE;
+		return archived ? BEOBACHTUNGS_ARCHIVE_DAO_MEMCACHE
+				: BEOBACHTUNGS_DAO_MEMCACHE;
 	}
 
 	public static String getBeobachtungKind(boolean archived) {
@@ -774,7 +795,8 @@ public class BeobachtungDsDao extends AbstractDsDao {
 
 	public boolean beobachtungenExist(Collection<String> sectionKeys,
 			DatastoreService datastoreService) {
-		return beobachtungenExist(sectionKeys, datastoreService, false) || beobachtungenExist(sectionKeys, datastoreService, true);
+		return beobachtungenExist(sectionKeys, datastoreService, false)
+				|| beobachtungenExist(sectionKeys, datastoreService, true);
 	}
 
 }
