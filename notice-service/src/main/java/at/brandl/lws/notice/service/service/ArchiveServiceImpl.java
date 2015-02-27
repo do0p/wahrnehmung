@@ -10,8 +10,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import at.brandl.lws.notice.service.dao.DaoRegistry;
-import at.brandl.lws.notice.service.dao.ds.BeobachtungDsDao;
+import at.brandl.lws.notice.service.dao.ds.NoticeArchiveDsDao;
 
 public class ArchiveServiceImpl extends HttpServlet {
 	
@@ -21,7 +20,7 @@ public class ArchiveServiceImpl extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		BeobachtungDsDao beobachtungsDao = DaoRegistry.get(BeobachtungDsDao.class);
+		NoticeArchiveDsDao beobachtungsDao = new NoticeArchiveDsDao();
 		Date endDate = calcEndLastSchoolYear();
 		int moved = beobachtungsDao.moveAllToArchiveBefore(endDate);
 		System.err.println("moved " + moved + " beobachtungen");

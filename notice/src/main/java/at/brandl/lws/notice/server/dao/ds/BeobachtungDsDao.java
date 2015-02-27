@@ -29,6 +29,11 @@ import at.brandl.lws.notice.model.GwtChild;
 import at.brandl.lws.notice.model.GwtSection;
 import at.brandl.lws.notice.model.GwtSummary;
 import at.brandl.lws.notice.server.dao.DaoRegistry;
+import at.brandl.lws.notice.shared.util.Constants.ArchiveNotice;
+import at.brandl.lws.notice.shared.util.Constants.ArchiveNoticeGroup;
+import at.brandl.lws.notice.shared.util.Constants.Notice;
+import at.brandl.lws.notice.shared.util.Constants.Notice.Cache;
+import at.brandl.lws.notice.shared.util.Constants.NoticeGroup;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Entity;
@@ -51,20 +56,6 @@ import com.google.gwt.thirdparty.guava.common.collect.Multimaps;
 import com.google.gwt.view.client.Range;
 
 public class BeobachtungDsDao extends AbstractDsDao {
-
-	private static final String BEOBACHTUNGS_ARCHIVE_DAO_MEMCACHE = "beobachtungsArchiveDao";
-	private static final String BEOBACHTUNGS_DAO_MEMCACHE = "beobachtungsDao";
-	public static final String BEOBACHTUNGS_GROUP_KIND = "BeobachtungsGroup";
-	public static final String BEOBACHTUNGS_KEY_FIELD = "beobachtungsKey";
-	private static final String BEOBACHTUNG_KIND = "BeobachtungDs";
-	private static final String BEOBACHTUNG_ARCHIVE_KIND = "BeobachtungArchiveDs";
-	private static final String BEOBACHTUNG_GROUP_ARCHIVE_KIND = "BeobachtungsGroupArchiveDs";
-	public static final String DATE_FIELD = "date";
-	public static final String SECTION_KEY_FIELD = "sectionKey";
-	public static final String USER_FIELD = "user";
-	public static final String DURATION_FIELD = "duration";
-	public static final String TEXT_FIELD = "text";
-	public static final String SOCIAL_FIELD = "social";
 
 	private static final int EXPECTED_SECTION_PER_CHILD = 100;
 	private static final int EXPECTED_BEOBACHTUNG_PER_SECTION = 20;
@@ -383,7 +374,7 @@ public class BeobachtungDsDao extends AbstractDsDao {
 			Date oldestEntry, boolean archived) {
 		Query query = new Query(getBeobachtungKind(archived), toKey(childKey));
 		if (oldestEntry != null) {
-			Filter filter = new FilterPredicate(DATE_FIELD,
+			Filter filter = new FilterPredicate(Notice.DATE,
 					FilterOperator.GREATER_THAN, oldestEntry);
 			query.setFilter(filter);
 		}
@@ -464,9 +455,9 @@ public class BeobachtungDsDao extends AbstractDsDao {
 		insertIntoCache(beobachtung, getCacheName(false));
 		setUpdateNeeded(gwtBeobachtung.getChildKey());
 		if (masterBeobachtungsKey != null) {
-			Entity beobachtungsGroup = new Entity(BEOBACHTUNGS_GROUP_KIND,
+			Entity beobachtungsGroup = new Entity(NoticeGroup.KIND,
 					toKey(masterBeobachtungsKey));
-			beobachtungsGroup.setProperty(BEOBACHTUNGS_KEY_FIELD,
+			beobachtungsGroup.setProperty(NoticeGroup.BEOBACHTUNG,
 					beobachtung.getKey());
 			getDatastoreService().put(beobachtungsGroup);
 		}
@@ -517,19 +508,19 @@ public class BeobachtungDsDao extends AbstractDsDao {
 	}
 
 	private FilterPredicate createSectionFilter(String sectionKey) {
-		return new Query.FilterPredicate(SECTION_KEY_FIELD,
+		return new Query.FilterPredicate(Notice.SECTION,
 				FilterOperator.EQUAL, toKey(sectionKey));
 	}
 
 	private GwtBeobachtung toGwt(Entity entity) {
 		String childKey = toString(entity.getParent());
 		String sectionKey = toString((Key) entity
-				.getProperty(SECTION_KEY_FIELD));
-		String duration = (String) entity.getProperty(DURATION_FIELD);
-		String social = (String) entity.getProperty(SOCIAL_FIELD);
-		Date date = (Date) entity.getProperty(DATE_FIELD);
-		String text = ((Text) entity.getProperty(TEXT_FIELD)).getValue();
-		User user = (User) entity.getProperty(USER_FIELD);
+				.getProperty(Notice.SECTION));
+		String duration = (String) entity.getProperty(Notice.DURATION);
+		String social = (String) entity.getProperty(Notice.SOCIAL);
+		Date date = (Date) entity.getProperty(Notice.DATE);
+		String text = ((Text) entity.getProperty(Notice.TEXT)).getValue();
+		User user = (User) entity.getProperty(Notice.USER);
 		String userEmail;
 		if (user != null) {
 			userEmail = user.getEmail();
@@ -571,19 +562,19 @@ public class BeobachtungDsDao extends AbstractDsDao {
 		} else {
 			entity = new Entity(toKey(key));
 		}
-		entity.setProperty(SECTION_KEY_FIELD,
+		entity.setProperty(Notice.SECTION,
 				toKey(gwtBeobachtung.getSectionKey()));
-		entity.setProperty(DATE_FIELD, gwtBeobachtung.getDate());
+		entity.setProperty(Notice.DATE, gwtBeobachtung.getDate());
 		String text = gwtBeobachtung.getText();
-		entity.setProperty(TEXT_FIELD, new Text(text));
-		entity.setProperty(USER_FIELD, user);
+		entity.setProperty(Notice.TEXT, new Text(text));
+		entity.setProperty(Notice.USER, user);
 		DurationEnum duration = gwtBeobachtung.getDuration();
 		if (duration != null) {
-			entity.setProperty(DURATION_FIELD, duration.name());
+			entity.setProperty(Notice.DURATION, duration.name());
 		}
 		SocialEnum social = gwtBeobachtung.getSocial();
 		if (social != null) {
-			entity.setProperty(SOCIAL_FIELD, social.name());
+			entity.setProperty(Notice.SOCIAL, social.name());
 		}
 		return entity;
 	}
@@ -747,7 +738,7 @@ public class BeobachtungDsDao extends AbstractDsDao {
 	}
 
 	private Key getRelatedKey(Entity oldGroup) {
-		return (Key) oldGroup.getProperty(BEOBACHTUNGS_KEY_FIELD);
+		return (Key) oldGroup.getProperty(NoticeGroup.BEOBACHTUNG);
 	}
 
 	private void copyToArchive(Entity oldGroup, Map<Key, Key> oldToNew,
@@ -757,19 +748,19 @@ public class BeobachtungDsDao extends AbstractDsDao {
 		Key newRelatedKey = oldToNew.get(relatedKey);
 		Key newKey = oldToNew.get(oldGroup.getKey().getParent());
 
-		Entity newGroup = new Entity(BEOBACHTUNG_GROUP_ARCHIVE_KIND, newKey);
-		newGroup.setProperty(BEOBACHTUNGS_KEY_FIELD, newRelatedKey);
+		Entity newGroup = new Entity(ArchiveNoticeGroup.KIND, newKey);
+		newGroup.setProperty(NoticeGroup.BEOBACHTUNG, newRelatedKey);
 		ds.put(newGroup);
 	}
 
 	private List<Entity> findGroups(Key beobachtungsKey, DatastoreService ds) {
-		Query query = new Query(BEOBACHTUNGS_GROUP_KIND, beobachtungsKey);
+		Query query = new Query(NoticeGroup.KIND, beobachtungsKey);
 		return ds.prepare(query).asList(FetchOptions.Builder.withDefaults());
 	}
 
 	private Entity copyToArchive(Entity beobachtung, DatastoreService ds) {
 
-		final Entity archived = new Entity(BEOBACHTUNG_ARCHIVE_KIND,
+		final Entity archived = new Entity(ArchiveNotice.KIND,
 				beobachtung.getParent());
 		archived.setPropertiesFrom(beobachtung);
 		ds.put(archived);
@@ -779,18 +770,18 @@ public class BeobachtungDsDao extends AbstractDsDao {
 	private Iterable<Entity> getAllBeobachtungenBefore(Date endDate,
 			String childKey, DatastoreService ds) {
 		Query query = new Query(getBeobachtungKind(false), toKey(childKey))
-				.setFilter(new FilterPredicate(DATE_FIELD,
+				.setFilter(new FilterPredicate(Notice.DATE,
 						FilterOperator.LESS_THAN, endDate));
 		return ds.prepare(query).asIterable();
 	}
 
 	public static String getCacheName(boolean archived) {
-		return archived ? BEOBACHTUNGS_ARCHIVE_DAO_MEMCACHE
-				: BEOBACHTUNGS_DAO_MEMCACHE;
+		return archived ? at.brandl.lws.notice.shared.util.Constants.ArchiveNotice.Cache.NAME
+				: Cache.NAME;
 	}
 
 	public static String getBeobachtungKind(boolean archived) {
-		return archived ? BEOBACHTUNG_ARCHIVE_KIND : BEOBACHTUNG_KIND;
+		return archived ? ArchiveNotice.KIND : Notice.KIND;
 	}
 
 	public boolean beobachtungenExist(Collection<String> sectionKeys,

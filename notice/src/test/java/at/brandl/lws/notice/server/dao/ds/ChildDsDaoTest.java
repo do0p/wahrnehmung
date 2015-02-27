@@ -12,6 +12,7 @@ import org.junit.Test;
 import at.brandl.lws.notice.TestUtils;
 import at.brandl.lws.notice.model.GwtChild;
 import at.brandl.lws.notice.server.dao.DaoRegistry;
+import at.brandl.lws.notice.shared.util.Constants.Child.Cache;
 
 public class ChildDsDaoTest extends AbstractDsDaoTest {
 
@@ -122,7 +123,7 @@ public class ChildDsDaoTest extends AbstractDsDaoTest {
 
 	@Override
 	protected String getMemCacheServiceName() {
-		return ChildDsDao.CHILD_DAO_MEMCACHE;
+		return Cache.NAME;
 	}
 
 	private void assertChild(GwtChild child, String expectedFn,

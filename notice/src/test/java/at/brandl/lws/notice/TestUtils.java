@@ -14,8 +14,10 @@ import at.brandl.lws.notice.model.GwtBeobachtung.SocialEnum;
 import at.brandl.lws.notice.model.GwtChild;
 import at.brandl.lws.notice.model.GwtSection;
 import at.brandl.lws.notice.server.dao.ds.BeobachtungDsDao;
-import at.brandl.lws.notice.server.dao.ds.ChildDsDao;
 import at.brandl.lws.notice.server.dao.ds.SectionDsDao;
+import at.brandl.lws.notice.shared.util.Constants;
+import at.brandl.lws.notice.shared.util.Constants.Child;
+import at.brandl.lws.notice.shared.util.Constants.Notice;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
@@ -101,10 +103,10 @@ public class TestUtils {
 	}
 
 	public static Entity createChildEntity(String firstName, String lastName) {
-		final Entity child = new Entity(ChildDsDao.CHILD_KIND);
-		child.setProperty(ChildDsDao.FIRSTNAME_FIELD, firstName);
-		child.setProperty(ChildDsDao.LASTNAME_FIELD, firstName);
-		child.setProperty(ChildDsDao.BIRTHDAY_FIELD, new Date());
+		final Entity child = new Entity(Constants.Child.KIND);
+		child.setProperty(Child.FIRSTNAME, firstName);
+		child.setProperty(Child.LASTNAME, firstName);
+		child.setProperty(Child.BIRTHDAY, new Date());
 		return child;
 	}
 
@@ -127,20 +129,20 @@ public class TestUtils {
 		final Entity entity = new Entity(BeobachtungDsDao.getBeobachtungKind(false),
 				toKey(gwtBeobachtung.getChildKey()));
 
-		entity.setProperty(BeobachtungDsDao.SECTION_KEY_FIELD,
+		entity.setProperty(Notice.SECTION,
 				toKey(gwtBeobachtung.getSectionKey()));
-		entity.setProperty(BeobachtungDsDao.DATE_FIELD,
+		entity.setProperty(Constants.Notice.DATE,
 				gwtBeobachtung.getDate());
-		entity.setProperty(BeobachtungDsDao.TEXT_FIELD,
+		entity.setProperty(Notice.TEXT,
 				new Text(gwtBeobachtung.getText()));
-		entity.setProperty(BeobachtungDsDao.USER_FIELD, user);
+		entity.setProperty(Notice.USER, user);
 		final DurationEnum duration = gwtBeobachtung.getDuration();
 		if (duration != null) {
-			entity.setProperty(BeobachtungDsDao.DURATION_FIELD, duration.name());
+			entity.setProperty(Notice.DURATION, duration.name());
 		}
 		final SocialEnum social = gwtBeobachtung.getSocial();
 		if (social != null) {
-			entity.setProperty(BeobachtungDsDao.SOCIAL_FIELD, social.name());
+			entity.setProperty(Notice.SOCIAL, social.name());
 		}
 		return entity;
 	}

@@ -11,6 +11,8 @@ import java.util.Date;
 import java.util.List;
 
 import at.brandl.lws.notice.model.GwtChild;
+import at.brandl.lws.notice.shared.util.Constants.Child;
+import at.brandl.lws.notice.shared.util.Constants.Child.Cache;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Entity;
@@ -21,15 +23,6 @@ import com.google.appengine.api.datastore.Transaction;
 
 public class ChildDsDao extends AbstractDsDao {
 
-	public static final String CHILD_DAO_MEMCACHE = "childDao";
-	public static final String CHILD_KIND = "ChildDs";
-	public static final String FIRSTNAME_FIELD = "firstname";
-	public static final String LASTNAME_FIELD = "lastname";
-	public static final String BIRTHDAY_FIELD = "birthday";
-	public static final String LAST_DEVELOPEMENT_DIALOGUE_DATE = "lastDialogueDate";
-	public static final String DEVELOPEMENT_DIALOGUE_DATES = "dialogueDates";
-	private static final String ALL_CHILDREN = "allChildren";
-	
 	private boolean dirty = true;
 
 	@SuppressWarnings("unchecked")
@@ -41,7 +34,7 @@ public class ChildDsDao extends AbstractDsDao {
 		{
 			allChildren = updateCacheFromDatastore();
 		} else {
-			allChildren = (List<GwtChild>) getCache(CHILD_DAO_MEMCACHE).get(ALL_CHILDREN);
+			allChildren = (List<GwtChild>) getCache(Cache.NAME).get(Cache.ALL_CHILDREN);
 			if(allChildren == null) {
 				allChildren = updateCacheFromDatastore();
 			}
@@ -52,14 +45,14 @@ public class ChildDsDao extends AbstractDsDao {
 
 	private List<GwtChild> updateCacheFromDatastore() {
 		List<GwtChild> allChildren = getAllChildrenFromDatastore();
-		getCache(CHILD_DAO_MEMCACHE).put(ALL_CHILDREN, allChildren);
+		getCache(Cache.NAME).put(Cache.ALL_CHILDREN, allChildren);
 		dirty = false;
 		return allChildren;
 	}
 
 	private List<GwtChild> getAllChildrenFromDatastore() {
-		final Query query = new Query(CHILD_KIND).addSort(LASTNAME_FIELD)
-				.addSort(FIRSTNAME_FIELD).addSort(BIRTHDAY_FIELD);
+		final Query query = new Query(Child.KIND).addSort(Child.LASTNAME)
+				.addSort(Child.FIRSTNAME).addSort(Child.BIRTHDAY);
 		return mapToGwtChildren(execute(query, withDefaults()));
 	}
 
@@ -82,7 +75,7 @@ public class ChildDsDao extends AbstractDsDao {
 			datastoreService.put(child);
 			transaction.commit();
 			gwtChild.setKey(toString(child.getKey()));
-			insertIntoCache(child, CHILD_DAO_MEMCACHE);
+			insertIntoCache(child, Cache.NAME);
 			dirty = true;
 			
 		} finally {
@@ -93,30 +86,30 @@ public class ChildDsDao extends AbstractDsDao {
 	}
 
 	public void deleteChild(GwtChild child) {
-		deleteEntity(toKey(child.getKey()), CHILD_DAO_MEMCACHE);
+		deleteEntity(toKey(child.getKey()), Cache.NAME);
 		dirty = true;
 	}
 
 	public GwtChild getChild(String key) {
-		return toGwt(getCachedEntity(toKey(key), CHILD_DAO_MEMCACHE));
+		return toGwt(getCachedEntity(toKey(key), Cache.NAME));
 	}
 
 	public String getChildName(String childKey) {
-		return formatChildName(getCachedEntity(toKey(childKey), CHILD_DAO_MEMCACHE));
+		return formatChildName(getCachedEntity(toKey(childKey), Cache.NAME));
 	}
 
 	private boolean exists(Entity child, DatastoreService datastoreService) {
 		final Filter filter = createChildFilter(child);
-		final Query query = new Query(CHILD_KIND).setFilter(filter);
+		final Query query = new Query(Child.KIND).setFilter(filter);
 		return count(query, withDefaults(), datastoreService) > 0;
 	}
 
 	private Filter createChildFilter(Entity child) {
 		final Filter firstnamePredicate = createEqualsPredicate(
-				FIRSTNAME_FIELD, child);
-		final Filter lastnamePredicate = createEqualsPredicate(LASTNAME_FIELD,
+				Child.FIRSTNAME, child);
+		final Filter lastnamePredicate = createEqualsPredicate(Child.LASTNAME,
 				child);
-		final Filter birthdayPredicate = createEqualsPredicate(BIRTHDAY_FIELD,
+		final Filter birthdayPredicate = createEqualsPredicate(Child.BIRTHDAY,
 				child);
 		return new Query.CompositeFilter(CompositeFilterOperator.AND,
 				Arrays.asList(firstnamePredicate, lastnamePredicate,
@@ -135,10 +128,10 @@ public class ChildDsDao extends AbstractDsDao {
 	private GwtChild toGwt(Entity child) {
 		final GwtChild gwtChild = new GwtChild();
 		gwtChild.setKey(toString(child.getKey()));
-		gwtChild.setFirstName((String) child.getProperty(FIRSTNAME_FIELD));
-		gwtChild.setLastName((String) child.getProperty(LASTNAME_FIELD));
-		gwtChild.setBirthDay((Date) child.getProperty(BIRTHDAY_FIELD));
-		gwtChild.setDevelopementDialogueDates((List<Date>) child.getProperty(DEVELOPEMENT_DIALOGUE_DATES));
+		gwtChild.setFirstName((String) child.getProperty(Child.FIRSTNAME));
+		gwtChild.setLastName((String) child.getProperty(Child.LASTNAME));
+		gwtChild.setBirthDay((Date) child.getProperty(Child.BIRTHDAY));
+		gwtChild.setDevelopementDialogueDates((List<Date>) child.getProperty(Child.DEVELOPEMENT_DIALOGUE_DATES));
 		return gwtChild;
 	}
 
@@ -146,27 +139,27 @@ public class ChildDsDao extends AbstractDsDao {
 		final String key = gwtChild.getKey();
 		final Entity child;
 		if (key == null) {
-			child = new Entity(CHILD_KIND);
+			child = new Entity(Child.KIND);
 		} else {
 			child = new Entity(toKey(key));
 		}
-		child.setProperty(FIRSTNAME_FIELD, gwtChild.getFirstName());
-		child.setProperty(LASTNAME_FIELD, gwtChild.getLastName());
-		child.setProperty(BIRTHDAY_FIELD, gwtChild.getBirthDay());
+		child.setProperty(Child.FIRSTNAME, gwtChild.getFirstName());
+		child.setProperty(Child.LASTNAME, gwtChild.getLastName());
+		child.setProperty(Child.BIRTHDAY, gwtChild.getBirthDay());
 		List<Date> developementDialogueDates = gwtChild
 				.getDevelopementDialogueDates();
 		if (developementDialogueDates != null
 				&& !developementDialogueDates.isEmpty()) {
 			Collections.sort(developementDialogueDates);
-			child.setProperty(DEVELOPEMENT_DIALOGUE_DATES, developementDialogueDates);
-			child.setProperty(LAST_DEVELOPEMENT_DIALOGUE_DATE, developementDialogueDates.get(developementDialogueDates.size() - 1));
+			child.setProperty(Child.DEVELOPEMENT_DIALOGUE_DATES, developementDialogueDates);
+			child.setProperty(Child.LAST_DEVELOPEMENT_DIALOGUE_DATE, developementDialogueDates.get(developementDialogueDates.size() - 1));
 		}
 		return child;
 	}
 
 	public static String formatChildName(Entity child) {
-		return child.getProperty(FIRSTNAME_FIELD) + " "
-				+ child.getProperty(LASTNAME_FIELD);
+		return child.getProperty(Child.FIRSTNAME) + " "
+				+ child.getProperty(Child.LASTNAME);
 	}
 
 	public Collection<GwtChild> getAllChildrenOver12() {
