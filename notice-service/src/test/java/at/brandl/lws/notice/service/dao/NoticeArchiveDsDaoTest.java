@@ -1,15 +1,17 @@
-package at.brandl.lws.notice.server.dao.ds;
+package at.brandl.lws.notice.service.dao;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import at.brandl.lws.notice.service.dao.ds.NoticeArchiveDsDao;
 import at.brandl.lws.notice.shared.util.Constants.ArchiveNotice;
 import at.brandl.lws.notice.shared.util.Constants.ArchiveNoticeGroup;
 import at.brandl.lws.notice.shared.util.Constants.Child;
@@ -55,23 +57,61 @@ public class NoticeArchiveDsDaoTest {
 	}
 
 	@Test
-	public void testArchiv()  {
+	public void testArchiveNotice()  {
 
-		datastore.put(createNotice(new Date(NOW)));
-		datastore.put(createNotice(new Date(NOW - HOUR)));
-		datastore.put(createNotice(new Date(NOW - 2 * HOUR)));
+		Key noticeKey = datastore.put(createNotice(new Date(NOW)));
+		
+		archiveDao.moveNoticeToArchive(noticeKey);
+
+		assertCountInDatastore(0, Notice.KIND);
+		assertCountInDatastore(1, ArchiveNotice.KIND);
+	}
+	
+	@Test
+	public void testArchiveGroup()  {
+
 		Key first = datastore.put(createNotice(new Date(NOW - 3 * HOUR)));
 		Key second = datastore.put(createNotice(new Date(NOW - 3 * HOUR)));
 		Iterable<Entity> groups = createGroup(first, second);
 		datastore.put(groups);
 		
-		int count = archiveDao.moveAllToArchiveBefore(new Date(NOW - HOUR));
+		int count = archiveDao.moveGroupsToArchive(first);
 
-		Assert.assertEquals(3, count);
-		assertCountInDatastore(2, Notice.KIND);
+		Assert.assertEquals(2, count);
+		assertCountInDatastore(0, Notice.KIND);
 		assertCountInDatastore(count, ArchiveNotice.KIND);
 		assertCountInDatastore(0, NoticeGroup.KIND);
 		assertCountInDatastore(1, ArchiveNoticeGroup.KIND);
+	}
+	
+	@Test
+	public void testGetAllNotices()  {
+
+		Key key1 = datastore.put(createNotice(new Date(NOW)));
+		Key key2 = datastore.put(createNotice(new Date(NOW - HOUR)));
+		Key key3 = datastore.put(createNotice(new Date(NOW - 2 * HOUR)));
+		
+		Set<Key> keys = archiveDao.getAllNoticeKeysBefore(new Date(NOW-HOUR));
+
+		Assert.assertEquals(1, keys.size());
+		Assert.assertFalse(keys.contains(key1));
+		Assert.assertFalse(keys.contains(key2));
+		Assert.assertTrue(keys.contains(key3));
+	}
+	
+	@Test
+	public void testGetAllNoticeGroupKeys()  {
+
+
+		Key first = datastore.put(createNotice(new Date(NOW - 3 * HOUR)));
+		Key second = datastore.put(createNotice(new Date(NOW - 3 * HOUR)));
+		Iterable<Entity> groups = createGroup(first, second);
+		datastore.put(groups);
+		
+		Set<Key> parentKeys = archiveDao.getAllGroupParentKeys(new HashSet<Key>(Arrays.asList(first, second)));
+
+		Assert.assertEquals(1, parentKeys.size());
+		Assert.assertTrue(parentKeys.contains(first));
 	}
 
 	private Iterable<Entity> createGroup(Key ...keys) {
