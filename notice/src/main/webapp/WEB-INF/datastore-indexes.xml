@@ -14,5 +14,9 @@
     <datastore-index kind="BeobachtungDs" ancestor="true" source="auto" >
         <property name="date" direction="desc"/>
     </datastore-index>
+    
+    <datastore-index kind="BeobachtungArchiveDs" ancestor="true" source="manual">
+        <property name="date" direction="asc"/>
+    </datastore-index>
 
 </datastore-indexes>
