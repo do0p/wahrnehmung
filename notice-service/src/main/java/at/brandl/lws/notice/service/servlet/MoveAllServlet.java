@@ -17,7 +17,9 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.QueueFactory;
+import com.google.appengine.api.taskqueue.TaskAlreadyExistsException;
 import com.google.appengine.api.taskqueue.TaskOptions;
+import com.google.appengine.api.taskqueue.TaskOptions.Method;
 
 public class MoveAllServlet extends HttpServlet {
 
@@ -39,28 +41,33 @@ public class MoveAllServlet extends HttpServlet {
 	int archive(Date date) {
 		int count = 0;
 		NoticeArchiveDsDao archiveDao = new NoticeArchiveDsDao();
-		
-	
+
 		Set<Key> allNoticeKeys = archiveDao.getAllNoticeKeysBefore(date);
 		Set<Key> allGroups = archiveDao.getAllGroupParentKeys(allNoticeKeys);
-		
+
 		count += createTasks(allGroups, "/moveGroups");
 		count += createTasks(allNoticeKeys, "/moveNotice");
 		return count;
 	}
 
 	private int createTasks(Set<Key> keys, String taskUrl) {
-		
+
 		System.err.println("Creating " + keys.size() + " tasks for " + taskUrl);
 		int count = 0;
 		Queue queue = QueueFactory.getDefaultQueue();
 		for (Key noticeKey : keys) {
 
 			String keyToString = KeyFactory.keyToString(noticeKey);
-			TaskOptions moveNotice = TaskOptions.Builder.withUrl(taskUrl)
-					.param(KEY_PARAM, keyToString).taskName(keyToString);
-			queue.add(moveNotice);
-			count++;
+			try {
+				TaskOptions moveNotice = TaskOptions.Builder.withUrl(taskUrl)
+						.param(KEY_PARAM, keyToString)
+						.method(Method.GET);
+				queue.add(moveNotice);
+				count++;
+			} catch (TaskAlreadyExistsException e) {
+				System.err.println("task with name " + keyToString + " already exists.");
+				// thats fine, go one
+			}
 		}
 		System.err.println("Created " + count + " tasks for " + taskUrl);
 		return count;
