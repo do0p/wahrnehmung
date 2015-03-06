@@ -32,7 +32,7 @@ public class NoticeArchiveDsDao {
 
 	public Set<Key> getAllNoticeKeysBefore(Date endDate) {
 
-		System.err.println("Fetching all notices from Datastore");
+		System.out.println("Fetching all notices from Datastore");
 		Set<Key> result = new HashSet<Key>();
 		Query query = new Query(Notice.KIND).setFilter(
 				new FilterPredicate(Notice.DATE, FilterOperator.LESS_THAN,
@@ -46,7 +46,7 @@ public class NoticeArchiveDsDao {
 
 	public Set<Key> getAllGroupParentKeys(Set<Key> keySet) {
 
-		System.err.println("Fetching all groups from Datastore");
+		System.out.println("Fetching all groups from Datastore");
 		Query query = new Query(NoticeGroup.KIND).setKeysOnly();
 		Iterable<Entity> groups = execute(query);
 		return filterKeys(groups, keySet);
@@ -77,7 +77,7 @@ public class NoticeArchiveDsDao {
 	public int moveGroupsToArchive(Key parentNoticeKey) {
 
 		int tmpCount = 0;
-		System.err.println("Moving group of notice "
+		System.out.println("Moving group of notice "
 				+ KeyFactory.keyToString(parentNoticeKey));
 		DatastoreService ds = DatastoreServiceFactory.getDatastoreService();
 		Transaction transaction = ds
@@ -185,7 +185,7 @@ public class NoticeArchiveDsDao {
 	private void copyGroupToArchive(Entity group, Key newNoticeParentKey,
 			Key newNoticeKey, DatastoreService ds) {
 
-		System.err.println("Moving group "
+		System.out.println("Moving group "
 				+ KeyFactory.keyToString(group.getKey()));
 		Entity newGroup = new Entity(ArchiveNoticeGroup.KIND,
 				newNoticeParentKey);

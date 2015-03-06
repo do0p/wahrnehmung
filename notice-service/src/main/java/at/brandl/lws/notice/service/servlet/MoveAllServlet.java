@@ -17,7 +17,6 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.QueueFactory;
-import com.google.appengine.api.taskqueue.TaskAlreadyExistsException;
 import com.google.appengine.api.taskqueue.TaskOptions;
 import com.google.appengine.api.taskqueue.TaskOptions.Method;
 
@@ -31,8 +30,8 @@ public class MoveAllServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 
-		System.err.println("Creating move tasks");
 		Date date = calcEndLastSchoolYear();
+		System.err.println("Archiving all notices and groups before " + date);
 		int count = archive(date);
 
 		System.err.println("Queued " + count + " tasks");
@@ -45,32 +44,33 @@ public class MoveAllServlet extends HttpServlet {
 		Set<Key> allNoticeKeys = archiveDao.getAllNoticeKeysBefore(date);
 		Set<Key> allGroups = archiveDao.getAllGroupParentKeys(allNoticeKeys);
 
+		System.err.println("Archiving " + allGroups.size() + " groups");
 		count += createTasks(allGroups, "/moveGroups");
+
+		System.err.println("Archiving " + allNoticeKeys.size() + " notices");
 		count += createTasks(allNoticeKeys, "/moveNotice");
+
 		return count;
 	}
 
 	private int createTasks(Set<Key> keys, String taskUrl) {
 
-		System.err.println("Creating " + keys.size() + " tasks for " + taskUrl);
 		int count = 0;
 		Queue queue = QueueFactory.getDefaultQueue();
-		for (Key noticeKey : keys) {
+		for (Key key : keys) {
 
-			String keyToString = KeyFactory.keyToString(noticeKey);
-			try {
-				TaskOptions moveNotice = TaskOptions.Builder.withUrl(taskUrl)
-						.param(KEY_PARAM, keyToString)
-						.method(Method.GET);
-				queue.add(moveNotice);
-				count++;
-			} catch (TaskAlreadyExistsException e) {
-				System.err.println("task with name " + keyToString + " already exists.");
-				// thats fine, go one
-			}
+			queue.add(createTask(taskUrl, key));
+			count++;
 		}
-		System.err.println("Created " + count + " tasks for " + taskUrl);
 		return count;
+	}
+
+	private TaskOptions createTask(String taskUrl, Key noticeKey) {
+
+		String keyToString = KeyFactory.keyToString(noticeKey);
+		TaskOptions moveNotice = TaskOptions.Builder.withUrl(taskUrl)
+				.param(KEY_PARAM, keyToString).method(Method.GET);
+		return moveNotice;
 	}
 
 	private Date calcEndLastSchoolYear() {
