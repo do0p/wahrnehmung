@@ -120,13 +120,14 @@ public class NoticeArchiveDsDaoTest {
 		
 		assertCountInDatastore(0, Notice.KIND);
 		assertCountInDatastore(2, ArchiveNotice.KIND);
+		assertCountInDatastore(2, MigrationKeyMapping.KIND);
 		
 		Iterable<Entity> groups = createGroup(first, second);
 		datastore.put(groups);
 
 		int count = archiveDao.moveGroupsToArchive(first);
 
-		Assert.assertEquals(0, count);
+		Assert.assertEquals(1, count);
 
 		assertCountInDatastore(0, NoticeGroup.KIND);
 		assertCountInDatastore(1, ArchiveNoticeGroup.KIND);
@@ -144,50 +145,7 @@ public class NoticeArchiveDsDaoTest {
 		Assert.assertEquals(archivedGroup.getKey(), keyMappingGroup.getProperty(MigrationKeyMapping.NEW_KEY));
 	}
 	
-	@Test
-	public void testArchiveGroup() {
-
-		Key first = datastore.put(createNotice(new Date(NOW - 3 * HOUR)));
-		Key second = datastore.put(createNotice(new Date(NOW - 3 * HOUR)));
-		Iterable<Entity> groups = createGroup(first, second);
-		datastore.put(groups);
-
-		int count = archiveDao.moveGroupsToArchive(first);
-
-		Assert.assertEquals(2, count);
-		assertCountInDatastore(0, Notice.KIND);
-		assertCountInDatastore(count, ArchiveNotice.KIND);
-		assertCountInDatastore(0, NoticeGroup.KIND);
-		assertCountInDatastore(1, ArchiveNoticeGroup.KIND);
-		assertCountInDatastore(3, MigrationKeyMapping.KIND);
-
-		List<Entity> archivedNoticeList = query(new Query(ArchiveNotice.KIND));
-		Assert.assertEquals(2, archivedNoticeList.size());
-
-		List<Entity> archivedGroupList = query(new Query(ArchiveNoticeGroup.KIND));
-		Assert.assertEquals(1, archivedGroupList.size());
-		Entity archivedGroup = archivedGroupList.get(0);
-
-		List<Entity> keyMappingList = query(archiveDao.createQuery(first,
-				KeyMappingType.ARCHIVE_NOTICE));
-		Assert.assertEquals(1, keyMappingList.size());
-		Entity keyMappingFirst = keyMappingList.get(0);
-
-		keyMappingList = query(archiveDao.createQuery(second,
-				KeyMappingType.ARCHIVE_NOTICE));
-		Assert.assertEquals(1, keyMappingList.size());
-		Entity keyMappingSecond = keyMappingList.get(0);
-
-		keyMappingList = query(archiveDao.createQuery(groups.iterator().next()
-				.getKey(), KeyMappingType.ARCHIVE_GROUP));
-		Assert.assertEquals(1, keyMappingList.size());
-		Entity keyMappingGroup = keyMappingList.get(0);
-
-		Assert.assertTrue(listContains(archivedNoticeList, keyMappingFirst.getProperty(MigrationKeyMapping.NEW_KEY)));
-		Assert.assertTrue(listContains(archivedNoticeList, keyMappingSecond.getProperty(MigrationKeyMapping.NEW_KEY)));
-		Assert.assertEquals(archivedGroup.getKey(), keyMappingGroup.getProperty(MigrationKeyMapping.NEW_KEY));
-	}
-
+	
 
 	@Test
 	public void testGetAllNotices() {
@@ -220,17 +178,6 @@ public class NoticeArchiveDsDaoTest {
 		Assert.assertTrue(parentKeys.contains(first));
 	}
 	
-	private boolean listContains(List<Entity> entities,
-			Object key) {
-		for(Entity entity : entities) {
-			if(entity.getKey().equals(key)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-
 	private List<Entity> query(Query query) {
 		return datastore.prepare(query).asList(
 				FetchOptions.Builder.withDefaults());

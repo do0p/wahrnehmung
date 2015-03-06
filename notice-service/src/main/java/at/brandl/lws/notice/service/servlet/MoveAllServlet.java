@@ -44,11 +44,11 @@ public class MoveAllServlet extends HttpServlet {
 		Set<Key> allNoticeKeys = archiveDao.getAllNoticeKeysBefore(date);
 		Set<Key> allGroups = archiveDao.getAllGroupParentKeys(allNoticeKeys);
 
-		System.err.println("Archiving " + allGroups.size() + " groups");
-		count += createTasks(allGroups, "/moveGroups");
-
 		System.err.println("Archiving " + allNoticeKeys.size() + " notices");
 		count += createTasks(allNoticeKeys, "/moveNotice");
+		
+		System.err.println("Archiving " + allGroups.size() + " groups");
+		count += createTasks(allGroups, "/moveGroups");
 
 		return count;
 	}
