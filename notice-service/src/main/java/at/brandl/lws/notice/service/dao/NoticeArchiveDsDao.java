@@ -1,11 +1,15 @@
 package at.brandl.lws.notice.service.dao;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 import at.brandl.lws.notice.shared.util.Constants.ArchiveNotice;
 import at.brandl.lws.notice.shared.util.Constants.ArchiveNoticeGroup;
+import at.brandl.lws.notice.shared.util.Constants.MigrationKeyMapping;
+import at.brandl.lws.notice.shared.util.Constants.MigrationKeyMapping.KeyMappingType;
 import at.brandl.lws.notice.shared.util.Constants.Notice;
 import at.brandl.lws.notice.shared.util.Constants.NoticeGroup;
 
@@ -16,6 +20,9 @@ import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.CompositeFilter;
+import com.google.appengine.api.datastore.Query.CompositeFilterOperator;
+import com.google.appengine.api.datastore.Query.Filter;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Transaction;
@@ -77,22 +84,35 @@ public class NoticeArchiveDsDao {
 				.beginTransaction(TransactionOptions.Builder.withXG(true));
 		try {
 			Key newParentNoticeKey = moveNoticeToArchive(parentNoticeKey, ds);
-			tmpCount++;
+			if (newParentNoticeKey == null) {
+				newParentNoticeKey = getFromKeyMapping(parentNoticeKey,
+						KeyMappingType.ARCHIVE_NOTICE, ds);
+			} else {
+				tmpCount++;
+
+			}
+			if (newParentNoticeKey == null) {
+				throw new IllegalStateException("no notice found for "
+						+ KeyFactory.keyToString(parentNoticeKey));
+			}
 			Iterable<Entity> groups = execute(new Query(NoticeGroup.KIND,
 					parentNoticeKey));
 			for (Entity group : groups) {
-				if (newParentNoticeKey != null) {
-					Key noticeKey = (Key) group
-							.getProperty(NoticeGroup.BEOBACHTUNG);
-					Key newNoticeKey = moveNoticeToArchive(noticeKey, ds);
-					if (newNoticeKey != null) {
-						copyGroupToArchive(group, newParentNoticeKey,
-								newNoticeKey, ds);
-						tmpCount++;
-					}
-
+				Key noticeKey = (Key) group
+						.getProperty(NoticeGroup.BEOBACHTUNG);
+				Key newNoticeKey = moveNoticeToArchive(noticeKey, ds);
+				if (newNoticeKey == null) {
+					newNoticeKey = getFromKeyMapping(noticeKey,
+							KeyMappingType.ARCHIVE_NOTICE, ds);
+				} else {
+					tmpCount++;
 				}
-				ds.delete(group.getKey());
+				if (newNoticeKey == null) {
+					throw new IllegalStateException("no notice found for "
+							+ KeyFactory.keyToString(noticeKey));
+				}
+				copyGroupToArchive(group, newParentNoticeKey, newNoticeKey, ds);
+
 			}
 			transaction.commit();
 		} finally {
@@ -105,21 +125,52 @@ public class NoticeArchiveDsDao {
 		return tmpCount;
 	}
 
-	private Key moveNoticeToArchive(Key noticeKey, DatastoreService ds) {
+	private Key getFromKeyMapping(Key oldKey, KeyMappingType type,
+			DatastoreService ds) {
 
-		System.err
+		Iterable<Entity> result = ds.prepare(createQuery(oldKey, type))
+				.asIterable();
+		Iterator<Entity> iterator = result.iterator();
+		if (iterator.hasNext()) {
+
+			Entity mapping = iterator.next();
+			return (Key) mapping.getProperty(MigrationKeyMapping.NEW_KEY);
+		}
+		return null;
+	}
+
+	Query createQuery(Key oldKey, KeyMappingType type) {
+
+		Filter typeFilter = new FilterPredicate(MigrationKeyMapping.TYPE,
+				FilterOperator.EQUAL, type.toString());
+		Filter keyFilter = new FilterPredicate(MigrationKeyMapping.OLD_KEY,
+				FilterOperator.EQUAL, oldKey);
+		Filter filter = new CompositeFilter(CompositeFilterOperator.AND,
+				Arrays.asList(typeFilter, keyFilter));
+		return new Query(MigrationKeyMapping.KIND).setFilter(filter);
+	}
+
+	Key moveNoticeToArchive(Key noticeKey, DatastoreService ds) {
+
+		System.out
 				.println("Moving notice " + KeyFactory.keyToString(noticeKey));
 		Entity notice = getNotice(noticeKey);
 		if (notice == null) {
 			return null;
 		}
 
-		final Entity archived = new Entity(ArchiveNotice.KIND,
-				noticeKey.getParent());
+		Entity archived = new Entity(ArchiveNotice.KIND, noticeKey.getParent());
 		archived.setPropertiesFrom(notice);
 		ds.put(archived);
+
+		Key newKey = archived.getKey();
+		Entity keyMapping = createKeyMapping(noticeKey, newKey,
+				KeyMappingType.ARCHIVE_NOTICE);
+		ds.put(keyMapping);
+
 		ds.delete(noticeKey);
-		return archived.getKey();
+
+		return newKey;
 	}
 
 	private Entity getNotice(Key noticeKey) {
@@ -140,6 +191,12 @@ public class NoticeArchiveDsDao {
 				newNoticeParentKey);
 		newGroup.setProperty(NoticeGroup.BEOBACHTUNG, newNoticeKey);
 		ds.put(newGroup);
+
+		Entity keyMapping = createKeyMapping(group.getKey(), newGroup.getKey(),
+				KeyMappingType.ARCHIVE_GROUP);
+		ds.put(keyMapping);
+
+		ds.delete(group.getKey());
 	}
 
 	private Iterable<Entity> execute(Query query) {
@@ -158,6 +215,16 @@ public class NoticeArchiveDsDao {
 			}
 		}
 		return keys;
+	}
+
+	private Entity createKeyMapping(Key oldKey, Key newKey, KeyMappingType type) {
+
+		Entity mapping = new Entity(MigrationKeyMapping.KIND);
+		mapping.setProperty(MigrationKeyMapping.TYPE, type.toString());
+		mapping.setProperty(MigrationKeyMapping.OLD_KEY, oldKey);
+		mapping.setProperty(MigrationKeyMapping.NEW_KEY, newKey);
+
+		return mapping;
 	}
 
 }

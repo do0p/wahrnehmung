@@ -55,4 +55,15 @@ public class Constants {
 		public static final String KIND = "BeobachtungsGroupArchiveDs";
 	}
 
+	public static class MigrationKeyMapping {
+		
+		public static final String KIND = "MigrationKeyMapping";
+		public static final String TYPE = "type";
+		public static final String OLD_KEY = "old";
+		public static final String NEW_KEY = "new";
+		
+		public static enum KeyMappingType {
+			ARCHIVE_NOTICE, ARCHIVE_GROUP
+		}
+	}
 }
