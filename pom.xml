@@ -5,7 +5,7 @@
 
 	<groupId>at.brandl.lws.notice</groupId>
 	<artifactId>parent</artifactId>
-	<version>7</version>
+	<version>8</version>
 	<packaging>pom</packaging>
 
 	<name>Notice parent</name>
@@ -23,7 +23,7 @@
 		<module>notice</module>
 		<module>notice-service</module>
 		<module>notice-ear</module>
-	</modules>
+	</modules> 
 
 	<dependencyManagement>
 		<dependencies>

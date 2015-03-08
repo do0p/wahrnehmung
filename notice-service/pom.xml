@@ -5,8 +5,9 @@
 
 	<parent>
 		<groupId>at.brandl.lws.notice</groupId>
-		<artifactId>appengine-modules-sample-java</artifactId>
-		<version>7</version>
+		<artifactId>parent</artifactId>
+		<version>8</version>
+		<relativePath>../</relativePath>
 	</parent>
 
 	<artifactId>notice-service</artifactId>
