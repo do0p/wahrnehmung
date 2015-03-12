@@ -159,6 +159,31 @@ public class BeobachtungDsDaoTest extends AbstractDsDaoTest {
 				Arrays.asList(section3Key), getDatastore()));
 
 	}
+	
+	@Test(expected=IllegalArgumentException.class)
+	public void searchAllWithoutFilter() {
+		BeobachtungsFilter filter = new BeobachtungsFilter();
+		List<GwtBeobachtung> beobachtungen = beobachtungsDao.getBeobachtungen(filter, range);
+		Assert.assertTrue(beobachtungen.isEmpty());
+		
+	}
+
+	@Test(expected=IllegalArgumentException.class)
+	public void searchInFirstLevelSection() {
+		BeobachtungsFilter filter = new BeobachtungsFilter();
+		filter.setSectionKey(section3Key);
+		List<GwtBeobachtung> beobachtungen = beobachtungsDao.getBeobachtungen(filter, range);
+		Assert.assertEquals(2, beobachtungen.size());
+	}
+	
+	@Test
+	public void searchInSecondLevelSection() {
+		BeobachtungsFilter filter = new BeobachtungsFilter();
+		filter.setSectionKey(section1Key);
+		List<GwtBeobachtung> beobachtungen = beobachtungsDao.getBeobachtungen(filter, range);
+		Assert.assertEquals(2, beobachtungen.size());
+		assertEquals(beobachtungen, beobachtung4, beobachtung2);
+	}
 
 	@Test
 	public void testRange() {

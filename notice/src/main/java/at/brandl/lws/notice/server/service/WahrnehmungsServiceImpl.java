@@ -86,7 +86,7 @@ public class WahrnehmungsServiceImpl extends RemoteServiceServlet implements
 		final BeobachtungsResult result = new BeobachtungsResult();
 
 		if (filter.getChildKey() != null || filter.isOver12()
-				|| filter.isUnder12()) {
+				|| filter.isUnder12() || filter.getSectionKey() != null) {
 
 			if (user != null) {
 				filter.setUser(user.getEmail());

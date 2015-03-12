@@ -243,7 +243,7 @@ public class Search extends VerticalPanel {
 
 	private boolean readyToSearch() {
 		return under12.getValue() || over12.getValue()
-				|| filter.getChildKey() != null;
+				|| filter.getChildKey() != null || sectionSelection.getSelectedSectionKeyLevel() > 0;
 	}
 
 	private void updateGui() {

@@ -125,6 +125,15 @@ public class BeobachtungDsDaoWithSummariesTest extends AbstractDsDaoTest {
 	}
 
 	@Test
+	public void searchInSecondLevelSection() {
+		BeobachtungsFilter filter = new BeobachtungsFilter();
+		filter.setShowSummaries(true);
+		filter.setSectionKey(section1Key);
+		List<GwtBeobachtung> beobachtungen = beobachtungsDao.getBeobachtungen(filter, range);
+		Assert.assertEquals(4, beobachtungen.size());
+	}
+	
+	@Test
 	public void testGetForFilter() {
 
 		Assert.assertEquals(

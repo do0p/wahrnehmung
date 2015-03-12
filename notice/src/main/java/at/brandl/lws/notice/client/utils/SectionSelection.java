@@ -70,6 +70,17 @@ public class SectionSelection {
 		}
 		return null;
 	}
+	
+	public int getSelectedSectionKeyLevel() {
+		int size = selectionBoxes.size();
+		for (int i = size - 1; i > -1; i--) {
+			final String value = selectionBoxes.get(i).getSelectedValue();
+			if (value != null) {
+				return i;
+			}
+		}
+		return -1;
+	}
 
 	private void createSectionSelections() {
 		sectionService.querySections(new AsyncCallback<List<GwtSection>>() {

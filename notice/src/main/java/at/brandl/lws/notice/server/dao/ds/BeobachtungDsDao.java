@@ -4,6 +4,7 @@ import static com.google.appengine.api.datastore.FetchOptions.Builder.withDefaul
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
@@ -39,7 +40,9 @@ import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Query.CompositeFilter;
 import com.google.appengine.api.datastore.Query.CompositeFilterOperator;
 import com.google.appengine.api.datastore.Query.Filter;
 import com.google.appengine.api.datastore.Query.FilterOperator;
@@ -73,7 +76,6 @@ public class BeobachtungDsDao extends AbstractDsDao {
 		Collections.sort(beobachtungen);
 
 		return getRange(beobachtungen, range);
-
 	}
 
 	private List<GwtBeobachtung> getBeobachtungen(BeobachtungsFilter filter) {
@@ -82,8 +84,10 @@ public class BeobachtungDsDao extends AbstractDsDao {
 		Collection<String> childKeys = getChildKeys(filter);
 		Date oldestEntry = null;
 		if (childKeys.size() > 1) {
-			oldestEntry = shortListLimit();
-			filter.setTimeRange(oldestEntry, today());
+			oldestEntry = getOldestEntry(filter);
+			if (oldestEntry != null) {
+				filter.setTimeRange(oldestEntry, today());
+			}
 			filter.setSinceLastDevelopmementDialogue(false);
 		}
 		String origChildKey = filter.getChildKey();
@@ -95,6 +99,10 @@ public class BeobachtungDsDao extends AbstractDsDao {
 		}
 		filter.setChildKey(origChildKey);
 		return result;
+	}
+
+	private Date getOldestEntry(BeobachtungsFilter filter) {
+		return hasSecondLevelSection(filter) ? null : shortListLimit();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -118,7 +126,8 @@ public class BeobachtungDsDao extends AbstractDsDao {
 
 		List<String> childKeys = new ArrayList<String>();
 
-		if (filter.isOver12() && filter.isUnder12()) {
+		if ((filter.isOver12() && filter.isUnder12())
+				|| (filter.getChildKey() == null && hasSecondLevelSection(filter))) {
 			Collection<GwtChild> allChildren = childDao.getAllChildren();
 			for (GwtChild child : allChildren) {
 				childKeys.add(child.getKey());
@@ -142,12 +151,26 @@ public class BeobachtungDsDao extends AbstractDsDao {
 		return childKeys;
 	}
 
+	private boolean hasSecondLevelSection(BeobachtungsFilter filter) {
+
+		String sectionKey = filter.getSectionKey();
+		if (sectionKey == null) {
+			return false;
+		}
+		GwtSection section = sectionDao.getSection(sectionKey);
+		if (section == null) {
+			System.err.println("no section found for key " + sectionKey);
+			return false;
+		}
+		return section.getParentKey() != null;
+	}
+
 	private List<GwtBeobachtung> getBeobachtungen(String childKey,
 			BeobachtungsFilter filter, Date oldestEntry) {
 		GwtChild child = childDao.getChild(childKey);
 
 		Multimap<String, GwtBeobachtung> allBeobachtungen = getAllGwtBeobachtungen(
-				childKey, oldestEntry, filter.isArchived());
+				childKey, filter.getSectionKey(), oldestEntry, filter.isArchived());
 
 		Predicate<Entry<String, GwtBeobachtung>> mapFilter = createFilter(
 				child, filter);
@@ -309,16 +332,17 @@ public class BeobachtungDsDao extends AbstractDsDao {
 
 	@SuppressWarnings("unchecked")
 	private Multimap<String, GwtBeobachtung> getAllGwtBeobachtungen(
-			String childKey, Date oldestEntry, boolean archived) {
+			String childKey, String sectionKey, Date oldestEntry,
+			boolean archived) {
 		MemcacheService cache = getCache(getCacheName(archived));
 		Multimap<String, GwtBeobachtung> result = null;
 
-		String key = createKey(childKey, oldestEntry);
+		String key = createKey(childKey, sectionKey, oldestEntry);
 		if (!updateNeeded(childKey)) {
 			if (cache.contains(key)) {
 				result = (Multimap<String, GwtBeobachtung>) cache.get(key);
 			}
-			if (result == null && oldestEntry != null
+			if (result == null && (oldestEntry != null || sectionKey != null)
 					&& cache.contains(childKey)) {
 				// if we look for a limited range and there is none, look also
 				// for a not limited
@@ -329,7 +353,8 @@ public class BeobachtungDsDao extends AbstractDsDao {
 			synchronized (this) {
 
 				setUpdated(childKey);
-				result = getAllBeobachtungen(childKey, oldestEntry, archived);
+				result = getAllBeobachtungen(childKey, sectionKey, oldestEntry,
+						archived);
 				cache.put(key, result);
 
 			}
@@ -337,23 +362,24 @@ public class BeobachtungDsDao extends AbstractDsDao {
 		return result;
 	}
 
-	private String createKey(String childKey, Date oldestEntry) {
-		return childKey + (oldestEntry == null ? "" : oldestEntry.getTime());
+	private String createKey(String childKey, String sectionKey, Date oldestEntry) {
+		return childKey + (oldestEntry == null ? "" : oldestEntry.getTime()) + (sectionKey == null ? "" : sectionKey);
 	}
 
 	private Multimap<String, GwtBeobachtung> getAllBeobachtungen(
-			String childKey, Date oldestEntry, boolean archived) {
+			String childKey, String sectionKey, Date oldestEntry,
+			boolean archived) {
 
 		Multimap<String, GwtBeobachtung> sectionToBeobachtung = ArrayListMultimap
 				.<String, GwtBeobachtung> create(EXPECTED_SECTION_PER_CHILD,
 						EXPECTED_BEOBACHTUNG_PER_SECTION);
 
-		for (Entity beobachtung : queryAllBeobachtungen(childKey, oldestEntry,
-				archived)) {
+		for (Entity beobachtung : queryAllBeobachtungen(childKey, sectionKey,
+				oldestEntry, archived)) {
 			try {
 				GwtBeobachtung gwtBeobachtung = toGwt(beobachtung);
 				gwtBeobachtung.setArchived(archived);
-				String sectionKey = gwtBeobachtung.getSectionKey();
+				sectionKey = gwtBeobachtung.getSectionKey();
 				GwtSection section = sectionDao.getSection(sectionKey);
 				if (section == null) {
 					throw new IllegalArgumentException(
@@ -364,21 +390,41 @@ public class BeobachtungDsDao extends AbstractDsDao {
 				setParentSections(section, gwtBeobachtung, sectionToBeobachtung);
 			} catch (RuntimeException e) {
 				System.err.println("got exception while mapping notice "
-						+ toString(beobachtung.getKey()) + ": " + e.getMessage());
+						+ toString(beobachtung.getKey()) + ": "
+						+ e.getMessage());
 			}
 		}
 		return sectionToBeobachtung;
 	}
 
 	private Iterable<Entity> queryAllBeobachtungen(String childKey,
-			Date oldestEntry, boolean archived) {
+			String sectionKey, Date oldestEntry, boolean archived) {
 		Query query = new Query(getBeobachtungKind(archived), toKey(childKey));
-		if (oldestEntry != null) {
-			Filter filter = new FilterPredicate(Notice.DATE,
-					FilterOperator.GREATER_THAN, oldestEntry);
+		Filter filter = createFilter(sectionKey, oldestEntry);
+		if (filter != null) {
 			query.setFilter(filter);
 		}
 		return getDatastoreService().prepare(query).asIterable();
+	}
+
+	private Filter createFilter(String sectionKey, Date oldestEntry) {
+		Filter filter = null;
+		if (oldestEntry != null) {
+			filter = new FilterPredicate(Notice.DATE,
+					FilterOperator.GREATER_THAN, oldestEntry);
+		}
+		Filter sectionFilter = null;
+		if (sectionKey != null) {
+			sectionFilter = new FilterPredicate(Notice.SECTION,
+					FilterOperator.EQUAL, KeyFactory.stringToKey(sectionKey));
+			if (filter == null) {
+				filter = sectionFilter;
+			} else {
+				filter = new CompositeFilter(CompositeFilterOperator.AND,
+						Arrays.asList(filter, sectionFilter));
+			}
+		}
+		return filter;
 	}
 
 	private Date shortListLimit() {
@@ -508,14 +554,13 @@ public class BeobachtungDsDao extends AbstractDsDao {
 	}
 
 	private FilterPredicate createSectionFilter(String sectionKey) {
-		return new Query.FilterPredicate(Notice.SECTION,
-				FilterOperator.EQUAL, toKey(sectionKey));
+		return new Query.FilterPredicate(Notice.SECTION, FilterOperator.EQUAL,
+				toKey(sectionKey));
 	}
 
 	private GwtBeobachtung toGwt(Entity entity) {
 		String childKey = toString(entity.getParent());
-		String sectionKey = toString((Key) entity
-				.getProperty(Notice.SECTION));
+		String sectionKey = toString((Key) entity.getProperty(Notice.SECTION));
 		String duration = (String) entity.getProperty(Notice.DURATION);
 		String social = (String) entity.getProperty(Notice.SOCIAL);
 		Date date = (Date) entity.getProperty(Notice.DATE);
