@@ -10,7 +10,6 @@ test-output/
 /atlassian-ide-plugin.xml
 .idea
 .DS_Store
-.classpath
 .settings
 .project
 temp-testng-customsuite.xml

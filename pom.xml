@@ -89,12 +89,12 @@
 	<build>
 
 		<plugins>
-<!-- 			<plugin>
+<!--  			<plugin>
 				<groupId>com.google.appengine</groupId>
 				<artifactId>appengine-maven-plugin</artifactId>
 				<version>${appengine.target.version}</version>
-			</plugin>
- -->
+			</plugin> -->
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
