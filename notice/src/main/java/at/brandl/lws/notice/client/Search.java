@@ -54,6 +54,7 @@ public class Search extends VerticalPanel {
 	private final CheckBox under12;
 	private final CheckBox over12;
 	private final CheckBox archived;
+	private final CheckBox summaries;
 	private final MultiSelectionModel<GwtBeobachtung> selectionModel;
 	private final Show beobachtungen;
 
@@ -79,6 +80,14 @@ public class Search extends VerticalPanel {
 		});
 		archived = new CheckBox(labels.archived());
 		archived.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				updateGui();
+				search();
+			}
+		});	
+		summaries = new CheckBox(labels.summaries());
+		summaries.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
 				updateGui();
@@ -123,11 +132,12 @@ public class Search extends VerticalPanel {
 	}
 
 	private void layout(RichTextArea textArea) {
+		VerticalPanel controls = new VerticalPanel();
+		add(controls);
 		final List<SectionSelectionBox> sectionSelectionBoxes = this.sectionSelection
 				.getSectionSelectionBoxes();
-		final Grid filterBox = new Grid(2, sectionSelectionBoxes.size() + 3);
-		add(filterBox);
-
+		final Grid filterBox = new Grid(1, sectionSelectionBoxes.size() + 3);
+		controls.add(filterBox);
 		nameSelection.setSize(Utils.NAMESELECTION_WIDTH + Utils.PIXEL,
 				Utils.ROW_HEIGHT - 12 + Utils.PIXEL);
 		int i = 0;
@@ -147,7 +157,8 @@ public class Search extends VerticalPanel {
 		boxes.add(under12);
 		boxes.add(over12);
 		boxes.add(archived);
-		filterBox.setWidget(1, 0, boxes);
+		boxes.add(summaries);
+		controls .add(boxes);
 
 		add(this.table);
 
@@ -218,6 +229,7 @@ public class Search extends VerticalPanel {
 		filter.setOver12(over12.getValue());
 		filter.setUnder12(under12.getValue());
 		filter.setArchived(archived.getValue());
+		filter.setShowSummaries(summaries.getValue());
 		if (enableNameSelection()) {
 			filter.setChildKey(nameSelection.getSelectedChildKey());
 		} else {
@@ -234,7 +246,6 @@ public class Search extends VerticalPanel {
 			filter.setSinceLastDevelopmementDialogue(false);
 			filter.setTimeRange(selectionResult.getTimeRange());
 		}
-		filter.setShowSummaries(enableNameSelection());
 		table.clear();
 		if (readyToSearch()) {
 			table.updateTable();
