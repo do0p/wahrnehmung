@@ -1,6 +1,8 @@
 package at.brandl.lws.notice.service.dao;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -25,10 +27,67 @@ import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.Filter;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
+import com.google.appengine.api.datastore.Text;
 import com.google.appengine.api.datastore.Transaction;
-import com.google.appengine.repackaged.com.google.common.base.StringUtil;
+import com.google.appengine.api.memcache.MemcacheService;
+import com.google.appengine.api.memcache.MemcacheServiceFactory;
 
 public class NoticeArchiveDsDao {
+
+	private static class EntityComparator implements Comparator<Entity> {
+
+		@Override
+		public int compare(Entity o1, Entity o2) {
+
+			// text
+			int result = compare(o1, o2, Notice.TEXT);
+			// date
+			if (result == 0) {
+				result = compare(o1, o2, Notice.DATE);
+			}
+			// section
+			if (result == 0) {
+				result = compare(o1, o2, Notice.SECTION);
+			}
+			// duration
+			if (result == 0) {
+				result = compare(o1, o2, Notice.DURATION);
+			}
+			// social
+			if (result == 0) {
+				result = compare(o1, o2, Notice.SOCIAL);
+			}
+			return result;
+		}
+
+		private int compare(Entity o1, Entity o2, String propKey) {
+			Comparable prop1;
+			Object prop2;
+			if (o1.getProperty(propKey) instanceof Text) {
+				prop1 = ((Text) o1.getProperty(propKey)).getValue();
+				prop2 = ((Text) o2.getProperty(propKey)).getValue();
+			} else {
+				prop1 = (Comparable) o1.getProperty(propKey);
+				prop2 = o2.getProperty(propKey);
+			}
+			return compare(prop1, prop2);
+		}
+
+		private int compare(Comparable obj1, Object obj2) {
+			int result = 0;
+			if (obj1 == null) {
+				if (obj2 == null) {
+					result = 0;
+				}
+				result = 1;
+			} else if (obj2 == null) {
+				result = -1;
+			} else {
+				result = obj1.compareTo(obj2);
+			}
+			return result;
+		}
+	}
 
 	public Set<Key> getAllNoticeKeysBefore(Date endDate) {
 
@@ -112,7 +171,7 @@ public class NoticeArchiveDsDao {
 				transaction.rollback();
 			}
 		}
-		if(!failure.isEmpty()) {
+		if (!failure.isEmpty()) {
 			throw new IllegalStateException("no notice found for "
 					+ join(failure));
 		}
@@ -123,12 +182,12 @@ public class NoticeArchiveDsDao {
 	private String join(List<Key> failure) {
 		StringBuilder result = new StringBuilder();
 		Iterator<Key> iterator = failure.iterator();
-		
+
 		boolean hasNext = iterator.hasNext();
-		while(hasNext) {
+		while (hasNext) {
 			result.append(KeyFactory.keyToString(iterator.next()));
 			hasNext = iterator.hasNext();
-			if(hasNext) {
+			if (hasNext) {
 				result.append(", ");
 			}
 		}
@@ -231,6 +290,52 @@ public class NoticeArchiveDsDao {
 		mapping.setProperty(MigrationKeyMapping.NEW_KEY, newKey);
 
 		return mapping;
+	}
+
+	public Iterable<Entity> getAllNoticesSorted(Key childKey, boolean archived) {
+
+		String kind = archived ? ArchiveNotice.KIND : Notice.KIND;
+		Iterable<Entity> notices = execute(new Query(kind, childKey), 100);
+
+		List<Entity> sortedNotices = new ArrayList<Entity>();
+		for (Entity notice : notices) {
+			sortedNotices.add(notice);
+		}
+		Collections.sort(sortedNotices, new EntityComparator());
+
+		return sortedNotices;
+	}
+
+	public Set<Key> getAllGroupedKeys(boolean archived) {
+		MemcacheService cache = MemcacheServiceFactory.getMemcacheService();
+		String cacheKey = archived ? "archivedgroupkeys" : "groupkeys";
+		Set<Key> allKeys = (Set<Key>) cache.get(cacheKey);
+		if (allKeys == null) {
+			synchronized (this) {
+				allKeys = (Set<Key>) cache.get(cacheKey);
+				if (allKeys == null) {
+					allKeys = getAllGroupKeysFromDs(archived);
+					cache.put(cacheKey, allKeys);
+				}
+			}
+		}
+		return allKeys;
+	}
+
+	private Set<Key> getAllGroupKeysFromDs(boolean archived) {
+		Set<Key> allKeys = new HashSet<Key>();
+		String kind = archived ? ArchiveNoticeGroup.KIND : NoticeGroup.KIND;
+		Iterable<Entity> allGroups = execute(new Query(kind), 100);
+		for (Entity group : allGroups) {
+			allKeys.add(group.getParent());
+			allKeys.add((Key) group.getProperty(NoticeGroup.BEOBACHTUNG));
+		}
+		return allKeys;
+	}
+
+	public void deleteNotice(Key key) {
+
+		DatastoreServiceFactory.getDatastoreService().delete(key);
 	}
 
 }

@@ -104,7 +104,6 @@ public class EditContent extends HorizontalPanel {
 
 		beobachtung.setDate(new Date());
 
-		
 		countOnly.addClickHandler(new ClickHandler() {
 
 			@Override
@@ -140,7 +139,7 @@ public class EditContent extends HorizontalPanel {
 			}
 
 		});
-		
+
 		dateBox.setValue(beobachtung.getDate());
 		dateBox.setFormat(Utils.DATEBOX_FORMAT);
 		dateBox.setFireNullValues(true);
@@ -151,7 +150,7 @@ public class EditContent extends HorizontalPanel {
 				updateState();
 			}
 		});
-		
+
 		sectionSelection.addChangeHandler(new ChangeHandler() {
 			public void onChange(ChangeEvent event) {
 				beobachtung.setSectionKey(sectionSelection
@@ -192,7 +191,7 @@ public class EditContent extends HorizontalPanel {
 				markChanged();
 			}
 		});
-		
+
 		textArea.addBlurHandler(new BlurHandler() {
 			@Override
 			public void onBlur(BlurEvent event) {
@@ -200,7 +199,7 @@ public class EditContent extends HorizontalPanel {
 				updateState();
 			}
 		});
-		
+
 		textArea.addMouseOutHandler(new MouseOutHandler() {
 			@Override
 			public void onMouseOut(MouseOutEvent event) {
@@ -208,7 +207,7 @@ public class EditContent extends HorizontalPanel {
 				updateState();
 			}
 		});
-		
+
 		decisionBox.setText(labels.notSavedWarning());
 		decisionBox.addOkClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
@@ -216,7 +215,7 @@ public class EditContent extends HorizontalPanel {
 				updateState();
 			}
 		});
-		
+
 		sendButton.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
@@ -225,7 +224,7 @@ public class EditContent extends HorizontalPanel {
 				updateState();
 			}
 		});
-		
+
 		newButton.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
 				if (changes) {
@@ -236,7 +235,7 @@ public class EditContent extends HorizontalPanel {
 				updateState();
 			}
 		});
-		
+
 		uploadForm.setChangeHandler(new ChangeHandler() {
 			@Override
 			public void onChange(ChangeEvent event) {
@@ -296,7 +295,12 @@ public class EditContent extends HorizontalPanel {
 		String selectedChildKey = nameSelection.getSelectedChildKey();
 		if (beobachtung.addChild(selectedChildKey)) {
 			String name = nameSelection.getValue();
-			addNameToTextField(name);
+			if (additionalNames.getItemCount() == 1) {
+				addNameToTextField(additionalNames.getItemText(0));
+			}
+			if (additionalNames.getItemCount() > 0) {
+				addNameToTextField(name);
+			}
 			additionalNames.addItem(name, selectedChildKey.toString());
 			nameSelection.reset();
 		}
@@ -363,7 +367,7 @@ public class EditContent extends HorizontalPanel {
 		}
 		dateBox.setSize(Utils.DATEBOX_WIDTH + Utils.PIXEL, Utils.ROW_HEIGHT
 				- 12 + Utils.PIXEL);
-	
+
 		return socialContainer;
 	}
 
@@ -371,7 +375,7 @@ public class EditContent extends HorizontalPanel {
 		final List<SectionSelectionBox> sectionSelectionBoxes = sectionSelection
 				.getSectionSelectionBoxes();
 		final Grid selectionContainer = new Grid(1,
-				sectionSelectionBoxes.size()+1);
+				sectionSelectionBoxes.size() + 1);
 		int i = 0;
 		for (SectionSelectionBox sectionSelectionBox : sectionSelectionBoxes) {
 			sectionSelectionBox.setSize(Utils.LISTBOX_WIDTH + Utils.PIXEL,
@@ -405,8 +409,13 @@ public class EditContent extends HorizontalPanel {
 	}
 
 	private void resetForm() {
-		nameSelection.reset();
 		sectionSelection.reset();
+		dateBox.setValue(new Date());
+		clearForNext();
+	}
+
+	private void clearForNext() {
+		nameSelection.reset();
 		durationSelection.setSelectedIndex(0);
 		socialSelection.setSelectedIndex(0);
 		textArea.setText("");
@@ -415,6 +424,7 @@ public class EditContent extends HorizontalPanel {
 		changes = false;
 		beobachtung = new GwtBeobachtung();
 		beobachtung.setDate(dateBox.getValue());
+		beobachtung.setSectionKey(sectionSelection.getSelectedSectionKey());
 		updateState();
 	}
 
@@ -478,7 +488,7 @@ public class EditContent extends HorizontalPanel {
 
 					public void onSuccess(Void result) {
 						changes = false;
-						resetForm();
+						clearForNext();
 					}
 				});
 	}
@@ -498,7 +508,7 @@ public class EditContent extends HorizontalPanel {
 		// nameAddButton.setEnabled(enableNameAdd());
 		nameRemoveButton.setEnabled(enableNameRemove());
 		sendButton.setEnabled(enableSend());
-		newButton.setEnabled(enableNew());
+		newButton.setEnabled(true);
 		textArea.setEnabled(enableTextArea());
 		textArea.setVisible(enableTextArea());
 		toolbar.setEnabled(enableToolBar());
@@ -508,7 +518,7 @@ public class EditContent extends HorizontalPanel {
 		durationSelection.setEnabled(enableDurationSelection());
 		durationSelection.setVisible(enableDurationSelection());
 		uploadForm.setEnabled(enableFileUpload());
-//		uploadForm.setVisible(enableFileUpload());
+		// uploadForm.setVisible(enableFileUpload());
 	}
 
 	private boolean enableFileUpload() {
@@ -529,10 +539,6 @@ public class EditContent extends HorizontalPanel {
 
 	private boolean enableTextArea() {
 		return !countOnly.getValue();
-	}
-
-	private boolean enableNew() {
-		return changes || beobachtung.getKey() != null;
 	}
 
 	private boolean enableSend() {

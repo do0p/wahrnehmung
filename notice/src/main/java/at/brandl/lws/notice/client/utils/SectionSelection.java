@@ -233,7 +233,9 @@ public class SectionSelection {
 	}
 
 	public void reset() {
-		selectionBoxes.get(0).setSelectedIndex(0);
+		for(SectionSelectionBox box : selectionBoxes) {
+			box.setSelectedIndex(0);
+		}
 	}
 
 	public List<SectionSelectionBox> getSectionSelectionBoxes() {

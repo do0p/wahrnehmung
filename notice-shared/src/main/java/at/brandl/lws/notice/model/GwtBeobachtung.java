@@ -176,7 +176,7 @@ public class GwtBeobachtung implements Serializable, Comparable<GwtBeobachtung> 
 		final GwtBeobachtung other = (GwtBeobachtung) obj;
 		return childKey.equals(other.childKey)
 				&& sectionKey.equals(other.sectionKey)
-				&& text.equals(other.text)
+				&& ObjectUtils.equals(text,other.text)
 				&& ObjectUtils.equals(social, other.social)
 				&& ObjectUtils.equals(duration, other.duration)
 				&& date.equals(other.date)
