@@ -30,6 +30,44 @@
 		<url-pattern>/moveNotice</url-pattern>
 	</servlet-mapping>
 
+	<servlet>
+		<servlet-name>cleanUpServlet</servlet-name>
+		<servlet-class>at.brandl.lws.notice.service.servlet.CleanUpServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>cleanUpServlet</servlet-name>
+		<url-pattern>/cleanUp</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>removeDuplicateNoticesServlet</servlet-name>
+		<servlet-class>at.brandl.lws.notice.service.servlet.RemoveDuplicateNotices</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>removeDuplicateNoticesServlet</servlet-name>
+		<url-pattern>/removeDuplicateNotices</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>removeDuplicateGroupsServlet</servlet-name>
+		<servlet-class>at.brandl.lws.notice.service.servlet.RemoveDuplicateGroups</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>removeDuplicateGroupsServlet</servlet-name>
+		<url-pattern>/removeDuplicateGroups</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>removeOrphanedGroupsServlet</servlet-name>
+		<servlet-class>at.brandl.lws.notice.service.servlet.RemoveOrphanedGroups</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>removeOrphanedGroupsServlet</servlet-name>
+		<url-pattern>/removeOrphanedGroups</url-pattern>
+	</servlet-mapping>
+	
+	
+	
 	<security-constraint>
 		<web-resource-collection>
 			<web-resource-name>/*</web-resource-name>

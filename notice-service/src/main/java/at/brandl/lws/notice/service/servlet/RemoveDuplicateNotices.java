@@ -6,8 +6,11 @@ import static com.google.appengine.api.datastore.KeyFactory.stringToKey;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -29,44 +32,109 @@ import com.google.appengine.api.datastore.Text;
 
 public class RemoveDuplicateNotices extends HttpServlet {
 
-	private static final boolean ARCHIVED = true;
+	static class EntityComparator implements Comparator<Entity> {
+
+		@Override
+		public int compare(Entity o1, Entity o2) {
+
+			// text
+			int result = compare(o1, o2, Notice.TEXT);
+			// date
+			if (result == 0) {
+				result = compare(o1, o2, Notice.DATE);
+			}
+			// section
+			if (result == 0) {
+				result = compare(o1, o2, Notice.SECTION);
+			}
+			// duration
+			if (result == 0) {
+				result = compare(o1, o2, Notice.DURATION);
+			}
+			// social
+			if (result == 0) {
+				result = compare(o1, o2, Notice.SOCIAL);
+			}
+			return result;
+		}
+
+		private <T extends Comparable<T>> int compare(Entity o1, Entity o2,
+				String propKey) {
+
+			T prop1;
+			T prop2;
+			if (o1.getProperty(propKey) instanceof Text) {
+				prop1 = (T) ((Text) o1.getProperty(propKey)).getValue();
+			} else {
+				prop1 = (T) o1.getProperty(propKey);
+			}
+
+			if (o2.getProperty(propKey) instanceof Text) {
+
+				prop2 = (T) ((Text) o2.getProperty(propKey)).getValue();
+			} else {
+				prop2 = (T) o2.getProperty(propKey);
+			}
+
+			return compare(prop1, prop2);
+		}
+
+		private <T> int compare(Comparable<T> obj1, T obj2) {
+			int result = 0;
+			if (obj1 == null) {
+				if (obj2 == null) {
+					result = 0;
+				} else {
+					result = 1;
+				}
+			} else if (obj2 == null) {
+				result = -1;
+			} else {
+				result = obj1.compareTo(obj2);
+			}
+			return result;
+		}
+	}
+
 	private static final long serialVersionUID = -7318489147891141902L;
-	private Set<Key> allGroupedKeys;
+	private Collection<Key> allGroupedKeys;
 	private NoticeArchiveDsDao noticeDao;
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 
-		Key childKey = stringToKey(req.getParameter(MoveAllServlet.KEY_PARAM));
-
-		boolean archived = ARCHIVED;
+		Key childKey = stringToKey(req.getParameter(CleanUpServlet.KEY_PARAM));
+		boolean archived = Boolean.parseBoolean(req
+				.getParameter(CleanUpServlet.ARCHIVED_PARAM));
 
 		Iterable<Entity> allNotices = getAllNotices(childKey, archived);
 		Map<Key, Collection<Key>> duples = findDuples(allNotices, archived);
-		int countDuples = countDuples(duples);
-		System.err.println("found " + countDuples + " duples for key " + childKey);
+
 		int count = 0;
-		for (Entry<Key, Collection<Key>> duple : duples.entrySet()) {
-			for (Key key : duple.getValue()) {
-//				delete(key);
+		for (Collection<Key> dupleKeys : duples.values()) {
+			for (Key key : dupleKeys) {
+				delete(key);
 				count++;
 			}
 		}
-		System.err.println("deleted " + count + " duples for key " + childKey);
-	}
-
-	private int countDuples(Map<Key, Collection<Key>> duples) {
-
-		int count = 0;
-		for (Entry<Key, Collection<Key>> duple : duples.entrySet()) {
-			count += duple.getValue().size();
+		if (count > 0) {
+			System.err.println("deleted " + count + " duplicate notices for child "
+					+ childKey);
 		}
-		return count;
 	}
 
 	private Iterable<Entity> getAllNotices(Key childKey, boolean archived) {
-		return getNoticeDao().getAllNoticesSorted(childKey, archived);
+
+		Iterable<Entity> notices = getNoticeDao().getAllNoticesForChild(
+				childKey, archived);
+		List<Entity> sortedNotices = new ArrayList<Entity>();
+		for (Entity notice : notices) {
+			sortedNotices.add(notice);
+		}
+		Collections.sort(sortedNotices, new EntityComparator());
+
+		return sortedNotices;
 	}
 
 	private NoticeArchiveDsDao getNoticeDao() {
@@ -80,7 +148,7 @@ public class RemoveDuplicateNotices extends HttpServlet {
 		return noticeDao;
 	}
 
-	private Map<Key, Collection<Key>> findDuples(Iterable<Entity> allNotices,
+	Map<Key, Collection<Key>> findDuples(Iterable<Entity> allNotices,
 			boolean archived) {
 		Map<Key, Collection<Key>> dupleMap = new HashMap<Key, Collection<Key>>();
 		GwtBeobachtung lastNotice = null;
@@ -128,7 +196,7 @@ public class RemoveDuplicateNotices extends HttpServlet {
 		return allGroupedKeys.contains(key);
 	}
 
-	private Set<Key> getAllGroupedKeys(boolean archived) {
+	private Collection<Key> getAllGroupedKeys(boolean archived) {
 
 		return getNoticeDao().getAllGroupedKeys(archived);
 	}

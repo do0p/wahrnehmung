@@ -1,13 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <cronentries>
 
-   <cron>
+  <cron>
     <url>/archive</url>
     <description>Archivierung alter Einträge</description>
     <schedule>every day 03:00</schedule>
     <timezone>Europe/Vienna</timezone>
     <target>notice-service</target>
   </cron>
-
+  
+  <cron>
+    <url>/cleanUp</url>
+    <description>Entfernen von Duplikaten</description>
+    <schedule>every saturday 03:00</schedule>
+    <timezone>Europe/Vienna</timezone>
+    <target>notice-service</target>
+  </cron>
   
 </cronentries>

@@ -2,9 +2,9 @@ package at.brandl.lws.notice.service.servlet;
 
 import java.io.IOException;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.Set;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -41,8 +41,8 @@ public class MoveAllServlet extends HttpServlet {
 		int count = 0;
 		NoticeArchiveDsDao archiveDao = new NoticeArchiveDsDao();
 
-		Set<Key> allNoticeKeys = archiveDao.getAllNoticeKeysBefore(date);
-		Set<Key> allGroups = archiveDao.getAllGroupParentKeys(allNoticeKeys);
+		Collection<Key> allNoticeKeys = archiveDao.getAllNoticeKeysBefore(date);
+		Collection<Key> allGroups = archiveDao.getAllGroupParentKeys(allNoticeKeys);
 
 		System.err.println("Archiving " + allNoticeKeys.size() + " notices");
 		count += createTasks(allNoticeKeys, "/moveNotice");
@@ -53,7 +53,7 @@ public class MoveAllServlet extends HttpServlet {
 		return count;
 	}
 
-	private int createTasks(Set<Key> keys, String taskUrl) {
+	private int createTasks(Collection<Key> keys, String taskUrl) {
 
 		int count = 0;
 		Queue queue = QueueFactory.getDefaultQueue();
