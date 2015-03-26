@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import at.brandl.lws.notice.model.ObjectUtils;
 import at.brandl.lws.notice.service.dao.NoticeArchiveDsDao;
 import at.brandl.lws.notice.shared.util.Constants.NoticeGroup;
 
@@ -68,7 +69,21 @@ public class RemoveDuplicateGroups extends HttpServlet {
 
 				Key key1 = (Key) o1.getProperty(NoticeGroup.BEOBACHTUNG);
 				Key key2 = (Key) o2.getProperty(NoticeGroup.BEOBACHTUNG);
+
+				if (isNull(key1)) {
+					if (isNull(key2)) {
+						return 0;
+					}
+					return 1;
+				}
+				if (isNull(key2)) {
+					return -1;
+				}
 				return key1.compareTo(key2);
+			}
+
+			private boolean isNull(Key key) {
+				return key == null || !key.isComplete();
 			}
 		});
 
@@ -113,7 +128,7 @@ public class RemoveDuplicateGroups extends HttpServlet {
 		if (lastGroup == null) {
 			return false;
 		}
-		return getNoticeKey(group).equals(getNoticeKey(lastGroup));
+		return ObjectUtils.equals(getNoticeKey(group), getNoticeKey(lastGroup));
 	}
 
 	private Key getNoticeKey(Entity entity) {

@@ -20,14 +20,15 @@ public class RemoveOrphanedGroups extends HttpServlet {
 
 	private static final long serialVersionUID = -7318489147891141902L;
 	private NoticeArchiveDsDao noticeDao;
-	private Collection<Key> allNoticeKeys;
+	private volatile Collection<Key> allNoticeKeys;
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 
 		Key groupKey = stringToKey(req.getParameter(CleanUpServlet.KEY_PARAM));
-		boolean archived = Boolean.parseBoolean(req.getParameter(CleanUpServlet.ARCHIVED_PARAM));
+		boolean archived = Boolean.parseBoolean(req
+				.getParameter(CleanUpServlet.ARCHIVED_PARAM));
 
 		Entity group = getGroup(groupKey);
 		if (isOrphaned(group, archived)) {
@@ -46,6 +47,7 @@ public class RemoveOrphanedGroups extends HttpServlet {
 	}
 
 	private Entity getGroup(Key groupKey) {
+
 		return getNoticeDao().getGroup(groupKey);
 	}
 
@@ -63,14 +65,13 @@ public class RemoveOrphanedGroups extends HttpServlet {
 	private boolean noticeExists(Key key, boolean archived) {
 
 		if (allNoticeKeys == null) {
-			allNoticeKeys = getAllNoticeKeys(archived);
+			synchronized (this) {
+				if (allNoticeKeys == null) {
+					allNoticeKeys = getNoticeDao().getAllNoticeKeys(archived);
+				}
+			}
 		}
-		return allNoticeKeys.contains(key);
-	}
-
-	private Collection<Key> getAllNoticeKeys(boolean archived) {
-
-		return getNoticeDao().getAllNoticeKeys(archived);
+		return archived;
 	}
 
 	private void delete(Key key) {

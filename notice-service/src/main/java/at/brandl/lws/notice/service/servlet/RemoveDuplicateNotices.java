@@ -97,7 +97,7 @@ public class RemoveDuplicateNotices extends HttpServlet {
 	}
 
 	private static final long serialVersionUID = -7318489147891141902L;
-	private Collection<Key> allGroupedKeys;
+	private volatile Collection<Key> allGroupedKeys;
 	private NoticeArchiveDsDao noticeDao;
 
 	@Override
@@ -119,8 +119,8 @@ public class RemoveDuplicateNotices extends HttpServlet {
 			}
 		}
 		if (count > 0) {
-			System.err.println("deleted " + count + " duplicate notices for child "
-					+ childKey);
+			System.err.println("deleted " + count
+					+ " duplicate notices for child " + childKey);
 		}
 	}
 
@@ -189,16 +189,20 @@ public class RemoveDuplicateNotices extends HttpServlet {
 		return dupleMap;
 	}
 
+	/**
+	 * @param key
+	 * @param archived
+	 * @return
+	 */
 	private boolean isInGroup(Key key, boolean archived) {
 		if (allGroupedKeys == null) {
-			allGroupedKeys = getAllGroupedKeys(archived);
+			synchronized (this) {
+				if (allGroupedKeys == null) {
+					allGroupedKeys = getNoticeDao().getAllGroupedKeys(archived);
+				}
+			}
 		}
 		return allGroupedKeys.contains(key);
-	}
-
-	private Collection<Key> getAllGroupedKeys(boolean archived) {
-
-		return getNoticeDao().getAllGroupedKeys(archived);
 	}
 
 	private void delete(Key key) {
@@ -230,5 +234,9 @@ public class RemoveDuplicateNotices extends HttpServlet {
 			beobachtung.setSocial(SocialEnum.valueOf(social));
 		}
 		return beobachtung;
+	}
+
+	void setAllGroupedKeys(Collection<Key> allGroupedKeys) {
+		this.allGroupedKeys = allGroupedKeys;
 	}
 }

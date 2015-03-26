@@ -113,9 +113,8 @@ public class RemoveDuplicateNoticesTest {
 				pair(DURATION, LONG.name()), pair(SOCIAL, ALONE.name())));
 		Iterable<Entity> allNotices = Arrays.asList(duple1, duple2, duple3);
 
-		MemcacheServiceFactory.getMemcacheService().put("archivedgroupkeys",
-				new HashSet<Key>(Arrays.asList(duple2.getKey())));
-
+		servlet.setAllGroupedKeys(Arrays.asList(duple2.getKey()));
+		
 		Map<Key, Collection<Key>> duples = servlet.findDuples(allNotices, true);
 
 		Assert.assertEquals(1, duples.size());

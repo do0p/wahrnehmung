@@ -139,8 +139,8 @@ public class NoticeArchiveDsDao {
 	private Key getFromKeyMapping(Key oldKey, KeyMappingType type,
 			DatastoreService ds) {
 
-		Iterable<Entity> result = ds.prepare(createKeyMappingQuery(oldKey, type))
-				.asIterable();
+		Iterable<Entity> result = ds.prepare(
+				createKeyMappingQuery(oldKey, type)).asIterable();
 		Iterator<Entity> iterator = result.iterator();
 		if (iterator.hasNext()) {
 
@@ -242,23 +242,6 @@ public class NoticeArchiveDsDao {
 
 	public Collection<Key> getAllGroupedKeys(boolean archived) {
 
-		MemcacheService cache = MemcacheServiceFactory.getMemcacheService();
-		String cacheKey = archived ? "archivedgroupkeys" : "groupkeys";
-		Set<Key> allKeys = (Set<Key>) cache.get(cacheKey);
-		if (allKeys == null) {
-			synchronized (this) {
-				allKeys = (Set<Key>) cache.get(cacheKey);
-				if (allKeys == null) {
-					allKeys = getAllGroupKeysFromDs(archived);
-					cache.put(cacheKey, allKeys);
-				}
-			}
-		}
-		return allKeys;
-	}
-
-	private Set<Key> getAllGroupKeysFromDs(boolean archived) {
-
 		Set<Key> allKeys = new HashSet<Key>();
 		Iterable<Entity> allGroups = getAllGroups(archived);
 		for (Entity group : allGroups) {
@@ -283,23 +266,6 @@ public class NoticeArchiveDsDao {
 	}
 
 	public Collection<Key> getAllNoticeKeys(boolean archived) {
-
-		MemcacheService cache = MemcacheServiceFactory.getMemcacheService();
-		String cacheKey = archived ? "archivednoticekeys" : "noticekeys";
-		Set<Key> allKeys = (Set<Key>) cache.get(cacheKey);
-		if (allKeys == null) {
-			synchronized (this) {
-				allKeys = (Set<Key>) cache.get(cacheKey);
-				if (allKeys == null) {
-					allKeys = getAllNoticeKeysFromDs(archived);
-					cache.put(cacheKey, allKeys);
-				}
-			}
-		}
-		return allKeys;
-	}
-
-	private Set<Key> getAllNoticeKeysFromDs(boolean archived) {
 
 		Set<Key> allKeys = new HashSet<Key>();
 		String kind = archived ? ArchiveNotice.KIND : Notice.KIND;
