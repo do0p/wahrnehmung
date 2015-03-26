@@ -5,7 +5,7 @@
 
 	<groupId>at.brandl.lws.notice</groupId>
 	<artifactId>parent</artifactId>
-	<version>12</version>
+	<version>13</version>
 	<packaging>pom</packaging>
 
 	<name>Notice parent</name>
@@ -13,7 +13,7 @@
 	<properties>
 		<appengine.app.version>${project.version}</appengine.app.version>
 		<appengine.app.id>wahrnehmung-test</appengine.app.id>
-		<appengine.target.version>1.9.17</appengine.target.version>
+		<appengine.target.version>1.9.18</appengine.target.version>
 		<gwt.target.version>2.7.0-rc1</gwt.target.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
