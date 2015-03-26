@@ -62,6 +62,13 @@ public class Search extends VerticalPanel {
 		PopUp dialogBox = new PopUp();
 		final RichTextArea textArea = new RichTextArea();
 		this.filter = new BeobachtungsFilter();
+		this.nameSelection = new NameSelection(dialogBox);
+		nameSelection.addSelectionHandler(new SelectionHandler<Suggestion>() {
+			@Override
+			public void onSelection(SelectionEvent<Suggestion> event) {
+				search();
+			}
+		});
 		under12 = new CheckBox(labels.under12());
 		under12.addClickHandler(new ClickHandler() {
 			@Override
@@ -82,6 +89,7 @@ public class Search extends VerticalPanel {
 		archived.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
+				nameSelection.setIncludeArchived(archived.getValue());
 				updateGui();
 				search();
 			}
@@ -94,13 +102,6 @@ public class Search extends VerticalPanel {
 				search();
 			}
 		});		
-		this.nameSelection = new NameSelection(dialogBox);
-		nameSelection.addSelectionHandler(new SelectionHandler<Suggestion>() {
-			@Override
-			public void onSelection(SelectionEvent<Suggestion> event) {
-				search();
-			}
-		});
 		this.sectionSelection = new SectionSelection(dialogBox);
 		sectionSelection.addChangeHandler(new ChangeHandler() {
 			@Override

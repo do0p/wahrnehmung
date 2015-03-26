@@ -3,6 +3,7 @@ package at.brandl.lws.notice.client.utils;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import at.brandl.lws.notice.model.GwtChild;
 import at.brandl.lws.notice.shared.service.ChildService;
@@ -19,9 +20,10 @@ public class NameSelection extends SuggestBox {
 
 	private final ChildServiceAsync childService = GWT
 			.create(ChildService.class);
-	private final Map<String, String> childMap = new HashMap<String, String>();
+	private final Map<String, GwtChild> childMap = new HashMap<>();
 	private final Map<String, String> reverseChildMap = new HashMap<String, String>();
 	private boolean updated;
+	private boolean includeArchived;
 
 	private String selectedChildKey;
 
@@ -32,7 +34,11 @@ public class NameSelection extends SuggestBox {
 	}
 
 	public String getSelectedChildKey() {
-		return childMap.get(getValue());
+		GwtChild child = childMap.get(getValue());
+		if (child == null) {
+			return null;
+		}
+		return child.getKey();
 	}
 
 	// public void refresh()
@@ -51,20 +57,19 @@ public class NameSelection extends SuggestBox {
 
 			@Override
 			public void onSuccess(List<GwtChild> result) {
-				final MultiWordSuggestOracle oracle = (MultiWordSuggestOracle) getSuggestOracle();
-				oracle.clear();
 				childMap.clear();
 				reverseChildMap.clear();
 				for (GwtChild child : result) {
 					final String formattedChildName = Utils
 							.formatChildName(child);
-					childMap.put(formattedChildName, child.getKey());
+					childMap.put(formattedChildName, child);
 					reverseChildMap.put(child.getKey(), formattedChildName);
-					oracle.add(formattedChildName);
 				}
+
+				updateOracle();
+
 				updated = true;
-				if(selectedChildKey != null)
-				{
+				if (selectedChildKey != null) {
 					setSelectedInternal(selectedChildKey);
 					selectedChildKey = null;
 				}
@@ -93,6 +98,24 @@ public class NameSelection extends SuggestBox {
 	public boolean hasSelection() {
 		String value = getValue();
 		return value != null && !value.isEmpty();
+	}
+
+	public void setIncludeArchived(boolean includeArchived) {
+		this.includeArchived = includeArchived;
+		updateOracle();
+	}
+
+	private void updateOracle() {
+		final MultiWordSuggestOracle oracle = (MultiWordSuggestOracle) getSuggestOracle();
+		oracle.clear();
+		for (Entry<String, GwtChild> childEntry : childMap.entrySet()) {
+			GwtChild child = childEntry.getValue();
+			if (includeArchived || child.getArchived() == null
+					|| !child.getArchived()) {
+				oracle.add(childEntry.getKey());
+			}
+		}
+
 	}
 
 }

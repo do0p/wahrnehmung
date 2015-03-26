@@ -13,6 +13,7 @@ public class GwtChild implements Serializable, Comparable<GwtChild> {
 	private Date birthDay;
 	private String key;
 	private List<Date> developementDialogueDates;
+	private Boolean archived;
 
 	public List<Date> getDevelopementDialogueDates() {
 		return developementDialogueDates;
@@ -61,6 +62,14 @@ public class GwtChild implements Serializable, Comparable<GwtChild> {
 
 	public void setKey(String key) {
 		this.key = key;
+	}
+
+	public Boolean getArchived() {
+		return archived;
+	}
+
+	public void setArchived(Boolean archived) {
+		this.archived = archived;
 	}
 
 	public void removeDevelopementDialogueDate(Date date) {

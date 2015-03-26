@@ -11,6 +11,7 @@ import at.brandl.lws.notice.shared.service.ChildServiceAsync;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -29,6 +30,7 @@ public class ChildAdmin extends AbstractAdminTab {
 	private final TextBox fnBox;
 	private final TextBox lnBox;
 	private final DateBox bdBox;
+	private final CheckBox archivedBox;
 
 	private final DecisionBox decisionBox;
 
@@ -46,6 +48,7 @@ public class ChildAdmin extends AbstractAdminTab {
 		fnBox = new TextBox();
 		lnBox = new TextBox();
 		bdBox = new DateBox();
+		archivedBox = new CheckBox();
 		bdBox.setFormat(Utils.DATEBOX_FORMAT);
 
 		// remove comments to enable fileupload
@@ -76,13 +79,15 @@ public class ChildAdmin extends AbstractAdminTab {
 	}
 
 	private void layout() {
-		final Grid grid = new Grid(3, 2);
+		final Grid grid = new Grid(4, 2);
 		grid.setWidget(0, 0, new Label(labels().firstName()));
 		grid.setWidget(0, 1, fnBox);
 		grid.setWidget(1, 0, new Label(labels().lastName()));
 		grid.setWidget(1, 1, lnBox);
 		grid.setWidget(2, 0, new Label(labels().birthday()));
 		grid.setWidget(2, 1, bdBox);
+		grid.setWidget(3, 0, new Label(labels().archived()));
+		grid.setWidget(3, 1, archivedBox);
 
 		final VerticalPanel data = new VerticalPanel();
 		data.add(grid);
@@ -117,6 +122,7 @@ public class ChildAdmin extends AbstractAdminTab {
 		fnBox.setText("");
 		lnBox.setText("");
 		bdBox.setValue(null);
+		archivedBox.setValue(false);
 
 		getButtonPanel().setSaveButtonLabel(labels().create());
 	}
@@ -128,6 +134,7 @@ public class ChildAdmin extends AbstractAdminTab {
 		child.setFirstName(fnBox.getValue());
 		child.setLastName(lnBox.getValue());
 		child.setBirthDay(bdBox.getValue());
+		child.setArchived(archivedBox.getValue());
 
 		childService.storeChild(child, new ErrorReportingCallback<Void>() {
 
@@ -156,6 +163,7 @@ public class ChildAdmin extends AbstractAdminTab {
 				fnBox.setText(child.getFirstName());
 				lnBox.setText(child.getLastName());
 				bdBox.setValue(child.getBirthDay());
+				archivedBox.setValue(child.getArchived());
 				getButtonPanel().setSaveButtonLabel(labels().change());
 
 			}

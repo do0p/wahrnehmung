@@ -131,6 +131,7 @@ public class ChildDsDao extends AbstractDsDao {
 		gwtChild.setFirstName((String) child.getProperty(Child.FIRSTNAME));
 		gwtChild.setLastName((String) child.getProperty(Child.LASTNAME));
 		gwtChild.setBirthDay((Date) child.getProperty(Child.BIRTHDAY));
+		gwtChild.setArchived((Boolean) child.getProperty(Child.ARCHIVED));
 		gwtChild.setDevelopementDialogueDates((List<Date>) child.getProperty(Child.DEVELOPEMENT_DIALOGUE_DATES));
 		return gwtChild;
 	}
@@ -146,6 +147,7 @@ public class ChildDsDao extends AbstractDsDao {
 		child.setProperty(Child.FIRSTNAME, gwtChild.getFirstName());
 		child.setProperty(Child.LASTNAME, gwtChild.getLastName());
 		child.setProperty(Child.BIRTHDAY, gwtChild.getBirthDay());
+		child.setProperty(Child.ARCHIVED, gwtChild.getArchived());
 		List<Date> developementDialogueDates = gwtChild
 				.getDevelopementDialogueDates();
 		if (developementDialogueDates != null

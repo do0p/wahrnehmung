@@ -34,6 +34,7 @@ public class Constants {
 		public static final String FIRSTNAME = "firstname";
 		public static final String LASTNAME = "lastname";
 		public static final String BIRTHDAY = "birthday";
+		public static final String ARCHIVED = "archived";
 		public static final String LAST_DEVELOPEMENT_DIALOGUE_DATE = "lastDialogueDate";
 		public static final String DEVELOPEMENT_DIALOGUE_DATES = "dialogueDates";
 		
