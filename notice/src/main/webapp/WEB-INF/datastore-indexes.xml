@@ -1,0 +1,22 @@
+<datastore-indexes autoGenerate="true">
+
+    <datastore-index kind="ChildDs" ancestor="false" source="auto" >
+        <property name="lastname" direction="asc"/>
+        <property name="firstname" direction="asc"/>
+        <property name="birthday" direction="asc"/>
+    </datastore-index>
+
+    <datastore-index kind="BeobachtungDs" ancestor="true" source="auto" >
+        <property name="sectionKey" direction="asc"/>
+        <property name="date" direction="desc"/>
+    </datastore-index>
+
+    <datastore-index kind="BeobachtungDs" ancestor="true" source="auto" >
+        <property name="date" direction="desc"/>
+    </datastore-index>
+    
+    <datastore-index kind="BeobachtungArchiveDs" ancestor="true" source="manual">
+        <property name="date" direction="asc"/>
+    </datastore-index>
+
+</datastore-indexes>

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://java.sun.com/xml/ns/javaee"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+	version="3.0">
+	<servlet>
+		<servlet-name>archiveServlet</servlet-name>
+		<servlet-class>at.brandl.lws.notice.service.servlet.MoveAllServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>archiveServlet</servlet-name>
+		<url-pattern>/archive</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>moveGroupsServlet</servlet-name>
+		<servlet-class>at.brandl.lws.notice.service.servlet.MoveGroupsServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>moveGroupsServlet</servlet-name>
+		<url-pattern>/moveGroups</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>moveNoticeServlet</servlet-name>
+		<servlet-class>at.brandl.lws.notice.service.servlet.MoveNoticeServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>moveNoticeServlet</servlet-name>
+		<url-pattern>/moveNotice</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>cleanUpServlet</servlet-name>
+		<servlet-class>at.brandl.lws.notice.service.servlet.CleanUpServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>cleanUpServlet</servlet-name>
+		<url-pattern>/cleanUp</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>removeDuplicateNoticesServlet</servlet-name>
+		<servlet-class>at.brandl.lws.notice.service.servlet.RemoveDuplicateNotices</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>removeDuplicateNoticesServlet</servlet-name>
+		<url-pattern>/removeDuplicateNotices</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>removeDuplicateGroupsServlet</servlet-name>
+		<servlet-class>at.brandl.lws.notice.service.servlet.RemoveDuplicateGroups</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>removeDuplicateGroupsServlet</servlet-name>
+		<url-pattern>/removeDuplicateGroups</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+		<servlet-name>removeOrphanedGroupsServlet</servlet-name>
+		<servlet-class>at.brandl.lws.notice.service.servlet.RemoveOrphanedGroups</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>removeOrphanedGroupsServlet</servlet-name>
+		<url-pattern>/removeOrphanedGroups</url-pattern>
+	</servlet-mapping>
+	
+	
+	
+	<security-constraint>
+		<web-resource-collection>
+			<web-resource-name>/*</web-resource-name>
+			<url-pattern>/*</url-pattern>
+		</web-resource-collection>
+		<user-data-constraint>
+			<transport-guarantee>CONFIDENTIAL</transport-guarantee>
+		</user-data-constraint>
+	</security-constraint>
+
+	<servlet>
+		<servlet-name>SystemServiceServlet</servlet-name>
+		<servlet-class>com.google.api.server.spi.SystemServiceServlet</servlet-class>
+		<init-param>
+			<param-name>services</param-name>
+			<param-value></param-value>
+		</init-param>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>SystemServiceServlet</servlet-name>
+		<url-pattern>/_ah/spi/*</url-pattern>
+	</servlet-mapping>
+
+</web-app>

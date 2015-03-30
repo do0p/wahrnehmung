@@ -1,0 +1,36 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>at.brandl.lws.notice</groupId>
+		<artifactId>parent</artifactId>
+		<version>13</version>
+		<relativePath>../</relativePath>
+	</parent>
+
+	<artifactId>notice-shared</artifactId>
+	<build>
+		<plugins>
+
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>gwt-maven-plugin</artifactId>
+				<version>${gwt.target.version}</version>
+				<executions>
+					<execution>
+						<configuration>
+							<module>at.brandl.lws.notice.NoticeShared</module>
+						</configuration>
+						<goals>
+							<goal>compile</goal>
+							<goal>test</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+
+	</build>
+
+</project>
