@@ -14,9 +14,9 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
+import at.brandl.lws.notice.model.GwtAnswerTemplate;
 import at.brandl.lws.notice.model.GwtMultipleChoiceAnswerTemplate;
 import at.brandl.lws.notice.model.GwtMultipleChoiceOption;
-import at.brandl.lws.notice.model.GwtMultipleChoiceQuestion;
 import at.brandl.lws.notice.model.GwtQuestion;
 import at.brandl.lws.notice.model.GwtQuestionGroup;
 import at.brandl.lws.notice.model.GwtQuestionnaire;
@@ -213,7 +213,7 @@ public class FormParserTest {
 		template.addOption(option2);
 		template.addOption(option3);
 
-		GwtMultipleChoiceQuestion question = new GwtMultipleChoiceQuestion();
+		GwtQuestion question = new GwtQuestion();
 		question.setLabel(QUESTION_LABEL1);
 		question.setTemplate(template);
 
@@ -240,8 +240,10 @@ public class FormParserTest {
 		assertEquals(13, groups.size());
 		
 		formText = parser.toString(form);
-		form = parser.parse(formText);
-		assertEquals(formText, parser.toString(form));
+		GwtQuestionnaire formNew = parser.parse(formText);
+		
+		assertEquals(form, formNew);
+		assertEquals(formText, parser.toString(formNew));
 	}
 
 	private String readFromFile(String fileName) {
@@ -272,12 +274,10 @@ public class FormParserTest {
 
 		assertNotNull(question);
 		assertEquals(questionLabel, question.getLabel());
-		assertTrue(question instanceof GwtMultipleChoiceQuestion);
-		GwtMultipleChoiceQuestion mquestion = (GwtMultipleChoiceQuestion) question;
-		GwtMultipleChoiceAnswerTemplate template = mquestion.getTemplate();
+		GwtAnswerTemplate template = question.getTemplate();
 		assertNotNull(template);
-
-		List<GwtMultipleChoiceOption> options = template.getOptions();
+		assertTrue(template instanceof GwtMultipleChoiceAnswerTemplate);
+		List<GwtMultipleChoiceOption> options = ((GwtMultipleChoiceAnswerTemplate)template).getOptions();
 		assertNotNull(options);
 		assertEquals(3, options.size());
 

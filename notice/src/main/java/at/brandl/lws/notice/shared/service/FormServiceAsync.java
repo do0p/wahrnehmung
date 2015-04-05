@@ -6,6 +6,6 @@ public interface FormServiceAsync {
 
 	void getFormAsString(AsyncCallback<String> callback);
 
-	void storeFormAsString(String formText, AsyncCallback<Void> callback);
+	void storeFormAsString(String formText, AsyncCallback<String> callback);
 	
 }

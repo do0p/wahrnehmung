@@ -66,4 +66,44 @@ public class Constants {
 			ARCHIVE_NOTICE, ARCHIVE_GROUP
 		}
 	}
+	
+	public static class Questionnaire {
+		
+		public static final String KIND = "QuestionnaireDs";
+		public static final String TITLE = "title";
+		public static final String SECTION = "sectionKey";
+		
+		public static class Cache {
+			
+			public static final String NAME = "questionnaire";
+		}
+	}
+	
+	public static class QuestionGroup {
+		
+		public static final String KIND = "QuestionGroupDs";
+		public static final String TITLE = "title";
+		public static final String ORDER = "order";
+	}
+	
+	public static class Question {
+		
+		public static final String KIND = "QuestionDs";
+		public static final String LABEL = "label";
+		public static final String ORDER = "order";
+	}
+	
+	public static class AnswerTemplate {
+		
+		public static final String KIND = "AnswerTemplateDs";
+		public static final String Type = "type";
+	}
+	
+	public static class MultipleChoiceOption {
+		
+		public static final String KIND = "MultipleChoiceOptionDs";
+		public static final String LABEL = "label";
+		public static final String VALUE = "value";
+		public static final String ORDER = "order";
+	}
 }

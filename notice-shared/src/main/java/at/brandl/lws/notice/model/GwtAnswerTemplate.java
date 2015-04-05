@@ -1,7 +1,9 @@
 package at.brandl.lws.notice.model;
 
-public interface GwtAnswerTemplate {
+import java.io.Serializable;
 
+public interface GwtAnswerTemplate extends Serializable{
 
+	String getKey();
 
 }

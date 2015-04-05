@@ -1,21 +1,17 @@
 package at.brandl.lws.notice.client.admin;
 
-import at.brandl.lws.notice.client.admin.AbstractAdminTab.ErrorReportingCallback;
-import at.brandl.lws.notice.model.GwtQuestionnaire;
 import at.brandl.lws.notice.shared.service.FormService;
 import at.brandl.lws.notice.shared.service.FormServiceAsync;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.TextArea;
 
 public class QuestionnaireAdmin extends AbstractAdminTab {
 
-	private final FormServiceAsync formService = GWT
-			.create(FormService.class);
-	
+	private final FormServiceAsync formService = GWT.create(FormService.class);
+
 	private TextArea textBox;
-	
+
 	QuestionnaireAdmin() {
 		super(false);
 
@@ -28,7 +24,13 @@ public class QuestionnaireAdmin extends AbstractAdminTab {
 
 	@Override
 	void save() {
-		formService.storeFormAsString(textBox.getText(), new ErrorReportingCallback<Void>());
+		formService.storeFormAsString(textBox.getText(),
+				new ErrorReportingCallback<String>() {
+					@Override
+					public void onSuccess(String result) {
+						textBox.setText(result);
+					}
+				});
 	}
-	
+
 }

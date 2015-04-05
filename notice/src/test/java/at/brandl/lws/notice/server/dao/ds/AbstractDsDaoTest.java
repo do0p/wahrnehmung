@@ -26,30 +26,27 @@ public abstract class AbstractDsDaoTest {
 		return datastore;
 	}
 
-
 	@Before
 	public void begin() {
-		helper = new LocalServiceTestHelper(
-				createDsConfig(),
+		helper = new LocalServiceTestHelper(createDsConfig(),
 				new LocalMemcacheServiceTestConfig());
 		helper.setUp();
-		cache = MemcacheServiceFactory.getMemcacheService(getMemCacheServiceName());
+		cache = MemcacheServiceFactory
+				.getMemcacheService(getMemCacheServiceName());
 		datastore = DatastoreServiceFactory.getDatastoreService();
 	}
-
 
 	protected LocalDatastoreServiceTestConfig createDsConfig() {
 		return new LocalDatastoreServiceTestConfig();
 	}
 
-	
 	@After
 	public void end() {
 		helper.tearDown();
 	}
 
 	protected abstract String getMemCacheServiceName();
-	
+
 	protected void assertCacheEqualsDataStore(String key) {
 		final Entity cacheObj = (Entity) cache.get(toKey(key));
 		try {
@@ -61,22 +58,27 @@ public abstract class AbstractDsDaoTest {
 		}
 	}
 
-
 	protected void removeFromCache(String key) {
 		cache.delete(toKey(key));
 	}
 
+	protected void removeFromCacheStringKey(String key) {
+		cache.delete(key);
+	}
 
 	protected void removeFromDatastore(String key) {
 		datastore.delete(toKey(key));
 	}
 
-
 	protected void assertCacheContains(String key) {
 		Assert.assertNotNull(cache.get(toKey(key)));
-	}	
-	
-	protected void assertDatastoreContains(String key){
+	}
+
+	protected void assertCacheContainsStringKey(String key) {
+		Assert.assertNotNull(cache.get(key));
+	}
+
+	protected void assertDatastoreContains(String key) {
 		try {
 			Assert.assertNotNull(datastore.get(toKey(key)));
 		} catch (EntityNotFoundException e) {
@@ -86,27 +88,28 @@ public abstract class AbstractDsDaoTest {
 
 	protected void assertCacheContainsNot(String key) {
 		Assert.assertNull(cache.get(toKey(key)));
-	}	
-	
-	protected void assertDatastoreContainsNot(String key){
+	}
+
+	protected void assertCacheContainsNotStringKey(String key) {
+		Assert.assertNull(cache.get(key));
+	}
+
+	protected void assertDatastoreContainsNot(String key) {
 		try {
 			Assert.assertNull(datastore.get(toKey(key)));
 		} catch (EntityNotFoundException e) {
 			// success
 		}
 	}
-	
+
 	protected Key toKey(String key) {
 		return KeyFactory.stringToKey(key);
 	}
 
-
 	protected void assertServicesContainsNot(final String key) {
 		assertCacheContainsNot(key);
 		assertDatastoreContainsNot(key);
-		assertCacheEqualsDataStore(key);
 	}
-
 
 	protected void assertServicesContains(final String key) {
 		assertDatastoreContains(key);
@@ -114,10 +117,8 @@ public abstract class AbstractDsDaoTest {
 		assertCacheEqualsDataStore(key);
 	}
 
-
 	protected void insertIntoDatastore(Entity entity) {
 		datastore.put(entity);
 	}
-	
-	
+
 }

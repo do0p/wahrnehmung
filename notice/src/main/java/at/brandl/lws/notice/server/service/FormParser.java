@@ -10,7 +10,6 @@ import java.util.regex.Pattern;
 import at.brandl.lws.notice.model.GwtAnswerTemplate;
 import at.brandl.lws.notice.model.GwtMultipleChoiceAnswerTemplate;
 import at.brandl.lws.notice.model.GwtMultipleChoiceOption;
-import at.brandl.lws.notice.model.GwtMultipleChoiceQuestion;
 import at.brandl.lws.notice.model.GwtQuestion;
 import at.brandl.lws.notice.model.GwtQuestionGroup;
 import at.brandl.lws.notice.model.GwtQuestionnaire;
@@ -96,9 +95,11 @@ public class FormParser {
 
 		appendQuestionLabel(formText, question.getLabel());
 
-		if (question instanceof GwtMultipleChoiceQuestion) {
-			GwtMultipleChoiceQuestion mQuestion = (GwtMultipleChoiceQuestion) question;
-			appendMultipleChoiceTemplate(formText, mQuestion.getTemplate());
+		GwtAnswerTemplate template = question.getTemplate();
+
+		if (template instanceof GwtMultipleChoiceAnswerTemplate) {
+			appendMultipleChoiceTemplate(formText,
+					(GwtMultipleChoiceAnswerTemplate) template);
 		}
 
 		formText.append(NL);
@@ -206,12 +207,9 @@ public class FormParser {
 
 		scanner.skip(QUESTION_MARK_PATTERN);
 
-		String label = parseQuestionLabel(scanner);
-		GwtAnswerTemplate answerTemplate = parseAnswerTemplate(scanner);
-
-		GwtQuestion question = createQuestion(label, answerTemplate);
-		question.setLabel(label);
-
+		GwtQuestion question = new GwtQuestion();
+		question.setLabel(parseQuestionLabel(scanner));
+		question.setTemplate(parseAnswerTemplate(scanner));
 		return question;
 	}
 
@@ -265,20 +263,6 @@ public class FormParser {
 		option.setLabel(scanner.next().trim());
 		option.setValue(scanner.next().trim());
 		return option;
-	}
-
-	private GwtQuestion createQuestion(String label,
-			GwtAnswerTemplate answerTemplate) {
-
-		if (answerTemplate instanceof GwtMultipleChoiceAnswerTemplate) {
-			GwtMultipleChoiceQuestion question = new GwtMultipleChoiceQuestion();
-			question.setTemplate(answerTemplate);
-			question.setLabel(label);
-			return question;
-		}
-
-		throw new IllegalArgumentException(
-				"unsupported type of answerTemplate: " + answerTemplate);
 	}
 
 }

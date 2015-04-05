@@ -27,10 +27,16 @@ public abstract class AbstractDsDao extends AbstractDao {
 	}
 
 	protected String toString(Key key) {
+		if(key == null) {
+			return null;
+		}
 		return KeyFactory.keyToString(key);
 	}
 
 	protected Key toKey(String key) {
+		if(key == null) {
+			return null;
+		}
 		return KeyFactory.stringToKey(key);
 	}
 
