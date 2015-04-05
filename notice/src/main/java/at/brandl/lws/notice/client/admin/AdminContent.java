@@ -27,6 +27,9 @@ public class AdminContent extends TabPanel {
 			add(new DevelopementDialogueAdmin(),
 					labels.developementDialogueDates());
 		}
+		if (authorization.isAdmin()) {
+			add(new QuestionnaireAdmin(), labels.forms());
+		}
 		if (authorization.isAdmin() || authorization.isEditSections() || authorization.isEditDialogueDates()) {
 			selectTab(0);
 		}

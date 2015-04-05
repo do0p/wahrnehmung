@@ -1,0 +1,74 @@
+Mathematische Grundlagen
+- Alle Grundrechnungsarten mit Material
+? Addition :: habe ich kennengelernt:k | bin ich im Üben:u | fühle ich mich sicher:s
+? Subtraktion :: habe ich kennengelernt:k | bin ich im Üben:u | fühle ich mich sicher:s
+? Multiplikation :: habe ich kennengelernt:k | bin ich im Üben:u | fühle ich mich sicher:s
+? Einmaleins :: habe ich kennengelernt:k | bin ich im Üben:u | fühle ich mich sicher:s
+? Division :: habe ich kennengelernt:k | bin ich im Üben:u | fühle ich mich sicher:s
+-
+- Alle Grundrechnungsarten - schriftlich
+? Addition :: habe ich kennengelernt:k | bin ich im Üben:u | fühle ich mich sicher:s
+? Subtraktion :: habe ich kennengelernt:k | bin ich im Üben:u | fühle ich mich sicher:s
+? Multiplikation :: habe ich kennengelernt:k | bin ich im Üben:u | fühle ich mich sicher:s
+? Einmaleins :: habe ich kennengelernt:k | bin ich im Üben:u | fühle ich mich sicher:s
+? Division :: habe ich kennengelernt:k | bin ich im Üben:u | fühle ich mich sicher:s
+-
+- Brüche
+? Die Grundrechnungsarten x + - :: habe ich kennengelernt:k | bin ich im Üben:u | fühle ich mich sicher:s
+? Kürzen und Erweitern :: habe ich kennengelernt:k | bin ich im Üben:u | fühle ich mich sicher:s
+? ggT und kgV :: habe ich kennengelernt:k | bin ich im Üben:u | fühle ich mich sicher:s
+-
+- Dezimalbrüche
+? Alle Grundrechnungsarten :: habe ich kennengelernt:k | bin ich im Üben:u | fühle ich mich sicher:s
+? Quadrieren :: habe ich kennengelernt:k | bin ich im Üben:u | fühle ich mich sicher:s
+? Wurzelziehen :: habe ich kennengelernt:k | bin ich im Üben:u | fühle ich mich sicher:s
+? Positive und Negative Zahlen :: habe ich kennengelernt:k | bin ich im Üben:u | fühle ich mich sicher:s
+-
+- Rechengesetze
+? Vorrangregeln :: habe ich kennengelernt:k | bin ich im Üben:u | fühle ich mich sicher:s
+? Vorzeichen :: habe ich kennengelernt:k | bin ich im Üben:u | fühle ich mich sicher:s
+? Klammern :: habe ich kennengelernt:k | bin ich im Üben:u | fühle ich mich sicher:s
+-
+-
+? Mengenlehre :: habe ich kennengelernt:k | bin ich im Üben:u | fühle ich mich sicher:s
+? Prozentrechnen :: habe ich kennengelernt:k | bin ich im Üben:u | fühle ich mich sicher:s
+? Maßeinheiten (Kennen und Umwandeln) :: habe ich kennengelernt:k | bin ich im Üben:u | fühle ich mich sicher:s
+-
+- Textrechnungen
+? Schlussrechnungen :: habe ich kennengelernt:k | bin ich im Üben:u | fühle ich mich sicher:s
+-
+- Gleichungen
+? mit 1 Unbekannten :: habe ich kennengelernt:k | bin ich im Üben:u | fühle ich mich sicher:s
+? mit 2 Unbekannten :: habe ich kennengelernt:k | bin ich im Üben:u | fühle ich mich sicher:s
+? Bruchgleichungen :: habe ich kennengelernt:k | bin ich im Üben:u | fühle ich mich sicher:s
+? Textgleichungen :: habe ich kennengelernt:k | bin ich im Üben:u | fühle ich mich sicher:s
+-
+-
+? Funktionen :: habe ich kennengelernt:k | bin ich im Üben:u | fühle ich mich sicher:s
+? Koordinatensystem und Diagramme :: habe ich kennengelernt:k | bin ich im Üben:u | fühle ich mich sicher:s
+? Statistik :: habe ich kennengelernt:k | bin ich im Üben:u | fühle ich mich sicher:s
+-
+- Geometrische Körper und Formen
+? Erkennen und Beschreiben :: habe ich kennengelernt:k | bin ich im Üben:u | fühle ich mich sicher:s
+? Bauen und Konstruieren :: habe ich kennengelernt:k | bin ich im Üben:u | fühle ich mich sicher:s
+? Winkel :: habe ich kennengelernt:k | bin ich im Üben:u | fühle ich mich sicher:s
+? Äquivalenz, Kongruenz und Ähnlichkeit :: habe ich kennengelernt:k | bin ich im Üben:u | fühle ich mich sicher:s
+-
+- Flächen- und Volumsberechnung
+? Herleiten der Formeln :: habe ich kennengelernt:k | bin ich im Üben:u | fühle ich mich sicher:s
+? Berechnen :: habe ich kennengelernt:k | bin ich im Üben:u | fühle ich mich sicher:s
+? Besonderheiten der Dreiecke (Inkreis, Umkreis, Schwerpunkt etc.) :: habe ich kennengelernt:k | bin ich im Üben:u | fühle ich mich sicher:s
+? Besonderheiten des Kreises (Pi, Umfang, Fläche) :: habe ich kennengelernt:k | bin ich im Üben:u | fühle ich mich sicher:s
+-
+-
+? Pythagoras :: habe ich kennengelernt:k | bin ich im Üben:u | fühle ich mich sicher:s
+-
+- Terme
+? Bruchterme :: habe ich kennengelernt:k | bin ich im Üben:u | fühle ich mich sicher:s
+? Addition :: habe ich kennengelernt:k | bin ich im Üben:u | fühle ich mich sicher:s
+? Subtraktion :: habe ich kennengelernt:k | bin ich im Üben:u | fühle ich mich sicher:s
+? Multiplikation :: habe ich kennengelernt:k | bin ich im Üben:u | fühle ich mich sicher:s
+? Division :: habe ich kennengelernt:k | bin ich im Üben:u | fühle ich mich sicher:s
+? Potenzieren :: habe ich kennengelernt:k | bin ich im Üben:u | fühle ich mich sicher:s
+? Bi- und Trinomische Struktur :: habe ich kennengelernt:k | bin ich im Üben:u | fühle ich mich sicher:s
+-
