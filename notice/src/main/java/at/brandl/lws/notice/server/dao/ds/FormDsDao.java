@@ -1,6 +1,7 @@
 package at.brandl.lws.notice.server.dao.ds;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import at.brandl.lws.notice.model.GwtAnswerTemplate;
@@ -23,25 +24,44 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Transaction;
+import com.google.appengine.api.memcache.MemcacheService;
 
 public class FormDsDao extends AbstractDsDao {
 
+	private static final String ALL_FORMS = "allForms";
 	private static final String MULTIPLE_CHOICE = "multipleChoice";
+	private boolean dirty;
 
+	public List<GwtQuestionnaire> getAllQuestionnaires() {
+
+		if (dirty || !getCache().contains(ALL_FORMS)) {
+
+			List<GwtQuestionnaire> questionnaires = new ArrayList<GwtQuestionnaire>();
+			DatastoreService ds = getDatastoreService();
+			PreparedQuery query = ds.prepare(new Query(Questionnaire.KIND)
+					.addSort(Questionnaire.CREATE_DATE));
+			for (Entity form : query.asIterable()) {
+				questionnaires.add(getQuestionnaire(ds, form));
+			}
+
+			getCache().put(ALL_FORMS, questionnaires);
+		}
+
+		return (List<GwtQuestionnaire>) getCache().get(ALL_FORMS);
+	}
+	
 	public GwtQuestionnaire getQuestionnaire(String key) {
 
-		GwtQuestionnaire questionnaire = (GwtQuestionnaire) getCache(Cache.NAME)
-				.get(key);
+		GwtQuestionnaire questionnaire = (GwtQuestionnaire) getCache().get(key);
 		if (questionnaire == null) {
 
 			try {
 				final DatastoreService ds = getDatastoreService();
 
 				Entity form = ds.get(toKey(key));
-				questionnaire = toGwtQuestionnaire(form);
-				questionnaire.setGroups(getGroups(form.getKey(), ds));
+				questionnaire = getQuestionnaire(ds, form);
 
-				getCache(Cache.NAME).put(key, questionnaire);
+				getCache().put(key, questionnaire);
 
 			} catch (EntityNotFoundException e) {
 				throw new IllegalArgumentException("no form with key " + key, e);
@@ -60,13 +80,22 @@ public class FormDsDao extends AbstractDsDao {
 			storeForm(gwtForm, datastoreService);
 
 			transaction.commit();
-			getCache(Cache.NAME).put(gwtForm.getKey(), gwtForm);
+			getCache().put(gwtForm.getKey(), gwtForm);
+			dirty = true;
 
 		} finally {
 			if (transaction.isActive()) {
 				transaction.rollback();
 			}
 		}
+	}
+
+	private GwtQuestionnaire getQuestionnaire(final DatastoreService ds,
+			Entity form) {
+		
+		GwtQuestionnaire questionnaire = toGwtQuestionnaire(form);
+		questionnaire.setGroups(getGroups(form.getKey(), ds));
+		return questionnaire;
 	}
 
 	private List<GwtQuestionGroup> getGroups(Key parent,
@@ -128,6 +157,7 @@ public class FormDsDao extends AbstractDsDao {
 	private void storeForm(GwtQuestionnaire gwtForm, final DatastoreService ds) {
 
 		Entity form = toEntity(gwtForm);
+		form.setProperty(Questionnaire.CREATE_DATE, new Date());
 		ds.put(form);
 		Key formKey = form.getKey();
 		gwtForm.setKey(toString(formKey));
@@ -291,6 +321,12 @@ public class FormDsDao extends AbstractDsDao {
 		option.setValue((String) entity.getProperty(MultipleChoiceOption.VALUE));
 		option.setKey(toString(entity.getKey()));
 		return option;
+	}
+
+
+
+	private MemcacheService getCache() {
+		return getCache(Cache.NAME);
 	}
 
 }

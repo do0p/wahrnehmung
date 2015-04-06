@@ -3,8 +3,6 @@ package at.brandl.lws.notice.client;
 import java.util.Date;
 
 import com.google.gwt.i18n.client.Messages;
-import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.user.client.ui.IsWidget;
 
 public interface Labels extends Messages {
 	String children();
@@ -62,4 +60,5 @@ public interface Labels extends Messages {
 	String archived();
 	String summaries();
 	String forms();
+	String questionnaire();
 }

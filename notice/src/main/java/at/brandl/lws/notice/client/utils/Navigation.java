@@ -2,6 +2,7 @@ package at.brandl.lws.notice.client.utils;
 
 import at.brandl.lws.notice.client.EditContent;
 import at.brandl.lws.notice.client.Labels;
+import at.brandl.lws.notice.client.Questionnaire;
 import at.brandl.lws.notice.client.Search;
 import at.brandl.lws.notice.client.admin.AdminContent;
 import at.brandl.lws.notice.model.Authorization;
@@ -17,19 +18,20 @@ public class Navigation extends HorizontalPanel {
 
 	private static final String ADMIN = "admin";
 	static final String NEW_ENTRY = "new";
+	private static final String FORM_ENTRY = "form";
 	private static final String LIST_ENTRY = "list";
 	private final Authorization authorization;
 
 	private AdminContent adminContent;
-
 	private Search search;
-
 	private EditContent editContent;
+	private Questionnaire questionnaire;
 
 	public Navigation(Authorization authorization) {
 		this.authorization = authorization;
 		setSpacing(10);
 		add(new Hyperlink(labels.create(), NEW_ENTRY));
+		add(new Hyperlink(labels.questionnaire(), FORM_ENTRY));
 		add(new Hyperlink(labels.show(), LIST_ENTRY));
 		if ((authorization.isAdmin()) || (authorization.isEditSections())
 				|| (authorization.isSeeAll()))
@@ -42,6 +44,9 @@ public class Navigation extends HorizontalPanel {
 		}
 		if (token.equals(NEW_ENTRY)) {
 			return getEditContent();
+		}
+		if (token.equals(FORM_ENTRY)) {
+			return getFormContent();
 		}
 		if (token.equals(LIST_ENTRY)) {
 			return getSearch();
@@ -71,5 +76,12 @@ public class Navigation extends HorizontalPanel {
 			editContent = new EditContent(this.authorization);
 		}
 		return editContent;
+	}
+	
+	public Questionnaire getFormContent() {
+		if (questionnaire == null) {
+			questionnaire = new Questionnaire(this.authorization);
+		}
+		return questionnaire;
 	}
 }
