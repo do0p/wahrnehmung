@@ -18,5 +18,22 @@
     <datastore-index kind="BeobachtungArchiveDs" ancestor="true" source="manual">
         <property name="date" direction="asc"/>
     </datastore-index>
+    
+    <datastore-index kind="QuestionGroupDs" ancestor="true" source="manual">
+        <property name="order" direction="asc"/>
+    </datastore-index>
+    
+    <datastore-index kind="QuestionDs" ancestor="true" source="manual">
+        <property name="order" direction="asc"/>
+    </datastore-index>
 
+    <datastore-index kind="MultipleChoiceOptionDs" ancestor="true" source="manual">
+        <property name="order" direction="asc"/>
+    </datastore-index>
+    
+    <datastore-index kind="QuestionnaireDs" ancestor="false" source="manual">
+        <property name="createDate" direction="asc"/>
+    </datastore-index>
+    
+    
 </datastore-indexes>

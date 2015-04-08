@@ -235,7 +235,10 @@ public class Questionnaire extends VerticalPanel implements ChangeListener, Read
 	private void updateQuestionnairePanel() {
 
 		GwtQuestionnaire selectedForm = formSelection.getSelectedForm();
-
+		if(selectedForm == null) {
+			return;
+		}
+		
 		String questionnaireKey = selectedForm.getKey();
 		GwtQuestionnaireAnswers answers = allAnswers.get(questionnaireKey);
 		if (answers == null) {
@@ -243,6 +246,7 @@ public class Questionnaire extends VerticalPanel implements ChangeListener, Read
 			answers.setQuestionnaireKey(questionnaireKey);
 			answers.setChildKey(childKey);
 		}
+		
 		questionnairePanel.setQuestionnaire(selectedForm, answers);
 	}
 
