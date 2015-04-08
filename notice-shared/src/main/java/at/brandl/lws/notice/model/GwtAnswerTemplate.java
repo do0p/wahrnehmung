@@ -6,4 +6,6 @@ public interface GwtAnswerTemplate extends Serializable{
 
 	String getKey();
 
+	GwtAnswer createAnswer();
+
 }

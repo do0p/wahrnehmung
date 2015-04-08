@@ -30,12 +30,12 @@ public class Navigation extends HorizontalPanel {
 	public Navigation(Authorization authorization) {
 		this.authorization = authorization;
 		setSpacing(10);
-		add(new Hyperlink(labels.create(), NEW_ENTRY));
+		add(new Hyperlink(labels.notice(), NEW_ENTRY));
 		add(new Hyperlink(labels.questionnaire(), FORM_ENTRY));
-		add(new Hyperlink(labels.show(), LIST_ENTRY));
+		add(new Hyperlink(labels.search(), LIST_ENTRY));
 		if ((authorization.isAdmin()) || (authorization.isEditSections())
 				|| (authorization.isSeeAll()))
-			add(new Hyperlink(labels.configure(), ADMIN));
+			add(new Hyperlink(labels.configuration(), ADMIN));
 	}
 
 	public Widget getContent(String token) {

@@ -41,6 +41,7 @@ public class Utils {
 	public static final int APP_HEIGHT = 700; // must be at least 350
 	public static final int NAMESELECTION_WIDTH = 200;
 	public static final int BUTTON_CONTAINER_WIDTH = 170;
+	public static final int QUESTIONNAIRE_WIDTH = 600;
 
 	public static String formatChildName(GwtChild child) {
 		final String firstName = child.getFirstName();

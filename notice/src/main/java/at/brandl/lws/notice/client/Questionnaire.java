@@ -1,21 +1,24 @@
 package at.brandl.lws.notice.client;
 
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
+import at.brandl.lws.notice.client.utils.ChangeListener;
 import at.brandl.lws.notice.client.utils.DecisionBox;
-import at.brandl.lws.notice.client.utils.FormFactory;
 import at.brandl.lws.notice.client.utils.FormSelection;
 import at.brandl.lws.notice.client.utils.NameSelection;
 import at.brandl.lws.notice.client.utils.PopUp;
 import at.brandl.lws.notice.client.utils.QuestionnairePanel;
+import at.brandl.lws.notice.client.utils.ReadyListener;
 import at.brandl.lws.notice.client.utils.Utils;
 import at.brandl.lws.notice.model.Authorization;
-import at.brandl.lws.notice.model.GwtQuestion;
-import at.brandl.lws.notice.model.GwtQuestionGroup;
+import at.brandl.lws.notice.model.GwtAnswer;
 import at.brandl.lws.notice.model.GwtQuestionnaire;
 import at.brandl.lws.notice.model.GwtQuestionnaireAnswers;
-import at.brandl.lws.notice.shared.service.FormService;
-import at.brandl.lws.notice.shared.service.FormServiceAsync;
+import at.brandl.lws.notice.shared.service.QuestionnaireService;
+import at.brandl.lws.notice.shared.service.QuestionnaireServiceAsync;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -24,22 +27,22 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
-import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.datepicker.client.DateBox;
 
-public class Questionnaire extends VerticalPanel {
+public class Questionnaire extends VerticalPanel implements ChangeListener, ReadyListener {
 
 	private final Labels labels = (Labels) GWT.create(Labels.class);
-	private final FormServiceAsync formService = (FormServiceAsync) GWT
-			.create(FormService.class);
+	private final QuestionnaireServiceAsync questionnaireService = (QuestionnaireServiceAsync) GWT
+			.create(QuestionnaireService.class);
 
 	private final DateBox dateBox;
 	private final PopUp dialogBox;
@@ -49,38 +52,42 @@ public class Questionnaire extends VerticalPanel {
 	private final Button newButton;
 	// private final Button nameAddButton;
 	private final DecisionBox decisionBox;
+	private final QuestionnairePanel questionnairePanel;
+	private final CheckBox archived;
 
+	private final Map<String, GwtQuestionnaireAnswers> allAnswers = new HashMap<String, GwtQuestionnaireAnswers>();
+
+	private boolean ready;
+	private String childKey;
 	private boolean changes;
-	private GwtQuestionnaire questionnaire;
-	private GwtQuestionnaireAnswers answers;
-	private QuestionnairePanel questionnairePanel;
-	private FormFactory formFactory;
+	private boolean formSelectionReady;
 
 	public Questionnaire(Authorization authorization) {
 
-		questionnaire = new GwtQuestionnaire();
-		answers = new GwtQuestionnaireAnswers();
-
-		dateBox = new DateBox();
 		dialogBox = new PopUp();
-		nameSelection = new NameSelection(dialogBox);
-		formSelection = new FormSelection(dialogBox);
 		decisionBox = new DecisionBox();
+		nameSelection = new NameSelection(dialogBox);
+		formSelection = new FormSelection(dialogBox, this);
+		dateBox = new DateBox();
 		sendButton = new Button(labels.save());
 		newButton = new Button(labels.cancel());
-		questionnairePanel = new QuestionnairePanel(new FormFactory());
+		questionnairePanel = new QuestionnairePanel(this);
+		archived = new CheckBox(labels.archived());
+		
 
 		init();
-		layout();
 		updateState();
+		layout();
 	}
 
 	private void init() {
 
 		nameSelection.addSelectionHandler(new SelectionHandler<Suggestion>() {
+
 			@Override
 			public void onSelection(SelectionEvent<Suggestion> event) {
-				markChanged();
+
+				reload();
 				updateState();
 			}
 
@@ -90,8 +97,8 @@ public class Questionnaire extends VerticalPanel {
 
 			@Override
 			public void onChange(ChangeEvent event) {
-				questionnairePanel.setQuestionnaire(formSelection.getSelectedForm());
-				markChanged();
+
+				updateQuestionnairePanel();
 				updateState();
 			}
 		});
@@ -99,16 +106,18 @@ public class Questionnaire extends VerticalPanel {
 		dateBox.setValue(new Date());
 		dateBox.setFormat(Utils.DATEBOX_FORMAT);
 		dateBox.setFireNullValues(true);
-		dateBox.addValueChangeHandler(new ValueChangeHandler<Date>() {
-			public void onValueChange(ValueChangeEvent<Date> event) {
-				markChanged();
-				updateState();
-			}
-		});
 
+		archived.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				nameSelection.setIncludeArchived(archived.getValue());
+			}
+		});	
+		
 		decisionBox.setText(labels.notSavedWarning());
 		decisionBox.addOkClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
+
 				resetForm();
 				updateState();
 			}
@@ -117,9 +126,10 @@ public class Questionnaire extends VerticalPanel {
 		sendButton.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
+
 				sendButton.setEnabled(false);
-				storeBeobachtung();
-				updateState();
+				storeAnswers();
+				disableAll();
 			}
 		});
 
@@ -133,29 +143,111 @@ public class Questionnaire extends VerticalPanel {
 				updateState();
 			}
 		});
-
 	}
 
 	private void layout() {
 
+		setSpacing(Utils.SPACING);
+		
+		nameSelection.setSize(Utils.NAMESELECTION_WIDTH + Utils.PIXEL,
+				Utils.ROW_HEIGHT - 12 + Utils.PIXEL);
+		formSelection.setSize(Utils.NAMESELECTION_WIDTH + Utils.PIXEL,
+				Utils.ROW_HEIGHT + Utils.PIXEL);
+		dateBox.setSize(Utils.DATEBOX_WIDTH + Utils.PIXEL, Utils.ROW_HEIGHT
+				- 12 + Utils.PIXEL);
+		
 		Panel panel = new ScrollPanel(questionnairePanel);
+		panel.setSize(Utils.QUESTIONNAIRE_WIDTH + Utils.PIXEL, Utils.APP_HEIGHT
+				- 300 + Utils.PIXEL);
 		panel.setStyleName("questionnaireScrollPanel", true);
-	
-		add(nameSelection);
-		add(formSelection);
+
+		HorizontalPanel selections = new HorizontalPanel();
+		selections.setSpacing(Utils.SPACING);
+		selections.add(nameSelection);
+		selections.add(formSelection);
+		selections.add(dateBox);
+
+		VerticalPanel controls = new VerticalPanel();
+		add(controls);
+		
+		controls.add(selections);
+		controls.add(archived);
+		
 		add(panel);
 
 		final Panel buttonContainer = createButtonContainer();
 		Utils.formatCenter(this, buttonContainer);
-
 	}
 
 	private void resetForm() {
-		dateBox.setValue(new Date());
 
+		childKey = null;
+		allAnswers.clear();
+		nameSelection.reset();
+		formSelection.reset();
+		dateBox.setValue(new Date());
+		questionnairePanel.reset();
+		changes = false;
+		ready = false;
+		formSelectionReady = false;
+	}
+
+	private void reload() {
+		String selectedChildKey = nameSelection.getSelectedChildKey();
+		if (selectedChildKey != null) {
+			
+			childKey = selectedChildKey;
+			allAnswers.clear();
+			formSelection.reset();
+			questionnairePanel.reset();
+			changes = false;
+			ready = false;
+			formSelectionReady = false;
+			fetchQuestionnaireAnswers();
+			formSelection.setChildKey(childKey);
+		}
+	}
+
+	private void fetchQuestionnaireAnswers() {
+
+		questionnaireService.getQuestionnaireAnswers(childKey,
+				new AsyncCallback<Collection<GwtQuestionnaireAnswers>>() {
+
+					@Override
+					public void onSuccess(
+							Collection<GwtQuestionnaireAnswers> result) {
+
+						for (GwtQuestionnaireAnswers answers : result) {
+							allAnswers.put(answers.getQuestionnaireKey(),
+									answers);
+						}
+						ready = true;
+						updateState();
+					}
+
+					@Override
+					public void onFailure(Throwable caught) {
+						displayErrorMessage();
+					}
+				});
+	}
+
+	private void updateQuestionnairePanel() {
+
+		GwtQuestionnaire selectedForm = formSelection.getSelectedForm();
+
+		String questionnaireKey = selectedForm.getKey();
+		GwtQuestionnaireAnswers answers = allAnswers.get(questionnaireKey);
+		if (answers == null) {
+			answers = new GwtQuestionnaireAnswers();
+			answers.setQuestionnaireKey(questionnaireKey);
+			answers.setChildKey(childKey);
+		}
+		questionnairePanel.setQuestionnaire(selectedForm, answers);
 	}
 
 	private Panel createButtonContainer() {
+
 		final Grid buttonContainer = new Grid(1, 2);
 
 		sendButton.setSize(Utils.BUTTON_WIDTH + Utils.PIXEL, Utils.ROW_HEIGHT
@@ -170,44 +262,88 @@ public class Questionnaire extends VerticalPanel {
 		return buttonContainer;
 	}
 
-	private void markChanged() {
-		if (!changes) {
-			changes = true;
+	private void storeAnswers() {
+
+		if (changes) {
+			final GwtQuestionnaireAnswers answers = questionnairePanel.getAnswers();
+			Date date = dateBox.getValue();
+			if (date == null) {
+				date = new Date();
+			}
+			for (GwtAnswer answer : answers.getAnswers()) {
+				if (answer.isUpdated()) {
+					answer.setDate(date);
+				}
+			}
+
+			questionnaireService.storeQuestionnaireAnswers(answers,
+					new AsyncCallback<GwtQuestionnaireAnswers>() {
+
+						@Override
+						public void onFailure(Throwable caught) {
+							displayErrorMessage();
+						}
+
+						@Override
+						public void onSuccess(GwtQuestionnaireAnswers answers) {
+							changes = false;
+							allAnswers.put(answers.getQuestionnaireKey(), answers);
+							questionnairePanel.setAnswers(answers);
+							updateState();
+						}
+					});
 		}
 	}
 
-	private void storeBeobachtung() {
-
+	private void disableAll() {
+		nameSelection.setEnabled(false);
+		formSelection.setEnabled(false);
+		sendButton.setEnabled(false);
+		newButton.setEnabled(false);
+		
 	}
 
 	private void displayErrorMessage() {
+
 		dialogBox.setErrorMessage();
 		dialogBox.setDisableWhileShown(sendButton);
 		dialogBox.center();
 	}
 
-	private String cleanUp(String text) {
-		return (text != null && text.equals("<br>")) ? "" : text;
-	}
-
 	private void updateState() {
 
-		// nameAddButton.setEnabled(enableNameAdd());
+		nameSelection.setEnabled(true);
+		formSelection.setEnabled(enableFormSelection());
 		sendButton.setEnabled(enableSend());
 		newButton.setEnabled(true);
 	}
 
-	private boolean enableSend() {
-		// return changes && GwtBeobachtungValidator.valid(beobachtung);
-		return true;
+	private boolean enableFormSelection() {
+
+		return childKey != null && ready && formSelectionReady;
 	}
 
-	private String removeBirthDate(String name) {
-		int pos = name.indexOf('(');
-		if (pos != -1) {
-			name = name.substring(0, pos - 1);
+	private boolean enableSend() {
+
+		return changes;
+	}
+
+	@Override
+	public void notifyChange() {
+
+		if (!changes) {
+			changes = true;
+			updateState();
 		}
-		return name;
+	}
+
+	@Override
+	public void notifyReady() {
+		
+		if (!formSelectionReady) {
+			formSelectionReady = true;
+			updateState();
+		}
 	}
 
 }

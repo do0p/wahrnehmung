@@ -1,6 +1,7 @@
 package at.brandl.lws.notice.server.dao.ds;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -10,6 +11,7 @@ import at.brandl.lws.notice.model.GwtMultipleChoiceOption;
 import at.brandl.lws.notice.model.GwtQuestion;
 import at.brandl.lws.notice.model.GwtQuestionGroup;
 import at.brandl.lws.notice.model.GwtQuestionnaire;
+import at.brandl.lws.notice.shared.util.Constants;
 import at.brandl.lws.notice.shared.util.Constants.AnswerTemplate;
 import at.brandl.lws.notice.shared.util.Constants.MultipleChoiceOption;
 import at.brandl.lws.notice.shared.util.Constants.Question;
@@ -29,7 +31,6 @@ import com.google.appengine.api.memcache.MemcacheService;
 public class FormDsDao extends AbstractDsDao {
 
 	private static final String ALL_FORMS = "allForms";
-	private static final String MULTIPLE_CHOICE = "multipleChoice";
 	private boolean dirty;
 
 	public List<GwtQuestionnaire> getAllQuestionnaires() {
@@ -213,7 +214,7 @@ public class FormDsDao extends AbstractDsDao {
 			GwtMultipleChoiceAnswerTemplate gwtMultipleChoiceTemplate,
 			Key parent, final DatastoreService ds) {
 
-		Entity template = toEntity(MULTIPLE_CHOICE, parent);
+		Entity template = toEntity(Constants.MULTIPLE_CHOICE, parent);
 		ds.put(template);
 		Key templateKey = template.getKey();
 		gwtMultipleChoiceTemplate.setKey(toString(templateKey));
@@ -304,7 +305,7 @@ public class FormDsDao extends AbstractDsDao {
 	private GwtAnswerTemplate toGwtAnswerTemplate(Entity entity) {
 
 		String type = (String) entity.getProperty(AnswerTemplate.Type);
-		if (MULTIPLE_CHOICE.equals(type)) {
+		if (Constants.MULTIPLE_CHOICE.equals(type)) {
 
 			GwtMultipleChoiceAnswerTemplate template = new GwtMultipleChoiceAnswerTemplate();
 			template.setKey(toString(entity.getKey()));

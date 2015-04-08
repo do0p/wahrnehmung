@@ -2,7 +2,9 @@ package at.brandl.lws.notice.model;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class GwtQuestionnaire implements Serializable {
 
@@ -10,6 +12,7 @@ public class GwtQuestionnaire implements Serializable {
 	private String title;
 	private String sectionKey;
 	private List<GwtQuestionGroup> groups = new ArrayList<GwtQuestionGroup>();
+	private Map<String, GwtQuestion> questions = new HashMap<String, GwtQuestion>();
 	private String key;
 
 	public String getTitle() {
@@ -33,12 +36,24 @@ public class GwtQuestionnaire implements Serializable {
 	}
 
 	public void setGroups(List<GwtQuestionGroup> groups) {
-		this.groups = groups;
+		
+		this.groups.clear();
+		for(GwtQuestionGroup group : groups) {
+			addQuestionGroup(group);
+		}
 	}
 
 	public void addQuestionGroup(GwtQuestionGroup group) {
+		
 		groups.add(group);
+		addQuestions(group);
+	}
 
+	private void addQuestions(GwtQuestionGroup group) {
+		
+		for(GwtQuestion question : group.getQuestions()) {
+			questions.put(question.getKey(), question);
+		}
 	}
 
 	public String getKey() {
@@ -71,6 +86,11 @@ public class GwtQuestionnaire implements Serializable {
 		result = result * 17 + ObjectUtils.hashCode(groups);
 		result = result * 17 + ObjectUtils.hashCode(title);
 		return result;
+	}
+
+	public GwtQuestion getQuestion(String questionKey) {
+
+		return questions.get(questionKey);
 	}
 
 }

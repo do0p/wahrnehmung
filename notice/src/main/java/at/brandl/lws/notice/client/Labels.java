@@ -33,7 +33,6 @@ public interface Labels extends Messages {
 	String duration();
 	String socialForm();
 	String show();
-	String configure();
 	String serverError();
 	String close();
 	String notSavedWarning();
@@ -61,4 +60,8 @@ public interface Labels extends Messages {
 	String summaries();
 	String forms();
 	String questionnaire();
+	String notice();
+	String search();
+	String configuration();
+	String chooseAForm();
 }

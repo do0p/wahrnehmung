@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import at.brandl.lws.notice.client.Labels;
 import at.brandl.lws.notice.model.GwtQuestionnaire;
 import at.brandl.lws.notice.shared.service.FormService;
 import at.brandl.lws.notice.shared.service.FormServiceAsync;
@@ -16,16 +17,23 @@ public class FormSelection extends ListBox {
 
 	private final PopUp dialogBox;
 
+	private final Labels labels = (Labels) GWT.create(Labels.class);
 	private final FormServiceAsync formService = (FormServiceAsync) GWT
 			.create(FormService.class);
 	private Map<String, GwtQuestionnaire> forms = new HashMap<String, GwtQuestionnaire>();
 
-	public FormSelection(PopUp dialogBox) {
+
+	private String childKey;
+
+	private ReadyListener readyListener;
+
+	public FormSelection(PopUp dialogBox, ReadyListener readyListener) {
 		this.dialogBox = dialogBox;
-		updateFormMap();
+		this.readyListener = readyListener;
 	}
 
 	public GwtQuestionnaire getSelectedForm() {
+		
 		final int index = getSelectedIndex();
 		if (index != -1) {
 			return forms.get(getValue(index));
@@ -35,7 +43,7 @@ public class FormSelection extends ListBox {
 
 	private void updateFormMap() {
 
-		formService.getAllForms(new AsyncCallback<List<GwtQuestionnaire>>() {
+		formService.getAllForms(childKey, new AsyncCallback<List<GwtQuestionnaire>>() {
 
 			@Override
 			public void onFailure(Throwable caught) {
@@ -47,15 +55,27 @@ public class FormSelection extends ListBox {
 			public void onSuccess(List<GwtQuestionnaire> result) {
 				forms.clear();
 				clear();
-				addItem("- select form -");
+				addItem("- "+labels.chooseAForm()+" -");
 				for (GwtQuestionnaire form : result) {
 					forms.put(form.getTitle(), form);
 					addItem(form.getTitle());
 				}
+				readyListener.notifyReady();
 			}
 		});
-		
+	}
 
+
+	public void setChildKey(String childKey) {
+
+		this.childKey = childKey;
+		updateFormMap();
+	}
+
+	public void reset() {
+		
+		setSelectedIndex(0);
+		childKey = null;
 	}
 
 }

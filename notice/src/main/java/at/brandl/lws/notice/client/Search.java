@@ -159,7 +159,7 @@ public class Search extends VerticalPanel {
 		boxes.add(over12);
 		boxes.add(archived);
 		boxes.add(summaries);
-		controls .add(boxes);
+		controls.add(boxes);
 
 		add(this.table);
 

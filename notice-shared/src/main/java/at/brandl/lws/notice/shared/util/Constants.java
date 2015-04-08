@@ -11,17 +11,17 @@ public class Constants {
 		public static final String DURATION = "duration";
 		public static final String TEXT = "text";
 		public static final String SOCIAL = "social";
-		
+
 		public static class Cache {
 
 			public static final String NAME = "beobachtungsDao";
 		}
 	}
-	
+
 	public static class ArchiveNotice {
 
 		public static final String KIND = "BeobachtungArchiveDs";
-		
+
 		public static class Cache {
 
 			public static final String NAME = "beobachtungsArchiveDao";
@@ -37,74 +37,97 @@ public class Constants {
 		public static final String ARCHIVED = "archived";
 		public static final String LAST_DEVELOPEMENT_DIALOGUE_DATE = "lastDialogueDate";
 		public static final String DEVELOPEMENT_DIALOGUE_DATES = "dialogueDates";
-		
+
 		public static class Cache {
 
 			public static final String NAME = "childDao";
 			public static final String ALL_CHILDREN = "allChildren";
 		}
 	}
-	
+
 	public static class NoticeGroup {
 
 		public static final String KIND = "BeobachtungsGroup";
 		public static final String BEOBACHTUNG = "beobachtungsKey";
 	}
-	
+
 	public static class ArchiveNoticeGroup {
 
 		public static final String KIND = "BeobachtungsGroupArchiveDs";
 	}
 
 	public static class MigrationKeyMapping {
-		
+
 		public static final String KIND = "MigrationKeyMapping";
 		public static final String TYPE = "type";
 		public static final String NEW_KEY = "new";
-		
+
 		public static enum KeyMappingType {
 			ARCHIVE_NOTICE, ARCHIVE_GROUP
 		}
 	}
-	
+
 	public static class Questionnaire {
-		
+
 		public static final String KIND = "QuestionnaireDs";
 		public static final String TITLE = "title";
 		public static final String SECTION = "sectionKey";
 		public static final String CREATE_DATE = "createDate";
-		
+
 		public static class Cache {
-			
+
 			public static final String NAME = "questionnaire";
 		}
 	}
-	
+
 	public static class QuestionGroup {
-		
+
 		public static final String KIND = "QuestionGroupDs";
 		public static final String TITLE = "title";
 		public static final String ORDER = "order";
 	}
-	
+
 	public static class Question {
-		
+
 		public static final String KIND = "QuestionDs";
 		public static final String LABEL = "label";
 		public static final String ORDER = "order";
 	}
-	
+
 	public static class AnswerTemplate {
-		
+
 		public static final String KIND = "AnswerTemplateDs";
 		public static final String Type = "type";
 	}
-	
+
 	public static class MultipleChoiceOption {
-		
+
 		public static final String KIND = "MultipleChoiceOptionDs";
 		public static final String LABEL = "label";
 		public static final String VALUE = "value";
 		public static final String ORDER = "order";
 	}
+
+	public static class QuestionnaireAnswers {
+
+		public static final String KIND = "QuestionnaireAnswersDs";
+		public static final String QUESTIONNAIRE_KEY = "questionnaireKey";
+
+		public static class Cache {
+
+			public static final String NAME = "questionnaireAnswers";
+		}
+	}
+
+	public static class QuestionnaireAnswer {
+
+		public static final String KIND = "QuestionnaireAnswerDs";
+		public static final String QUESTION_KEY = "questionKey";
+		public static final String DATE = "date";
+		public static final String USER = "user";
+		public static final String VALUE = "value";
+		public static final String TYPE = "type";
+	}
+
+	public static final String MULTIPLE_CHOICE = "multipleChoice";
 }

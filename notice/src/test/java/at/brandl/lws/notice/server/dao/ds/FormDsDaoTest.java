@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -15,6 +16,8 @@ import at.brandl.lws.notice.server.service.FormParser;
 import at.brandl.lws.notice.shared.util.Constants.Questionnaire.Cache;
 
 public class FormDsDaoTest extends AbstractDsDaoTest {
+
+	private static final String TITLE = "title";
 
 	private static final String NL = System.lineSeparator();
 
@@ -80,6 +83,25 @@ public class FormDsDaoTest extends AbstractDsDaoTest {
 		Assert.assertEquals(form, storedForm);
 	}
 
+	@Test
+	public void getOldestFormFirst() {
+		
+		GwtQuestionnaire form1 = new GwtQuestionnaire();
+		GwtQuestionnaire form2 = new GwtQuestionnaire();
+		form1.setTitle(TITLE );
+		form2.setTitle(TITLE);
+		formDao.storeQuestionnaire(form1);
+		formDao.storeQuestionnaire(form2);
+		String form1Key = form1.getKey();
+		String form2Key = form2.getKey();
+		Assert.assertNotEquals(form1Key, form2Key);
+		
+		List<GwtQuestionnaire> allQuestionnaires = formDao.getAllQuestionnaires();
+		Assert.assertEquals(2, allQuestionnaires.size());
+		Assert.assertEquals(form1Key, allQuestionnaires.get(0).getKey());
+		Assert.assertEquals(form2Key, allQuestionnaires.get(1).getKey());
+	}
+	
 	@Override
 	protected String getMemCacheServiceName() {
 		return Cache.NAME;

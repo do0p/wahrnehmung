@@ -34,8 +34,16 @@
     <url-pattern>/wahrnehmung/section</url-pattern>
   </servlet-mapping>
   <servlet>
-    <servlet-name>questionnaireServlet</servlet-name>
+    <servlet-name>formServlet</servlet-name>
     <servlet-class>at.brandl.lws.notice.server.service.FormServiceImpl</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>formServlet</servlet-name>
+    <url-pattern>/wahrnehmung/form</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <servlet-name>questionnaireServlet</servlet-name>
+    <servlet-class>at.brandl.lws.notice.server.service.QuestionnaireServiceImpl</servlet-class>
   </servlet>
   <servlet-mapping>
     <servlet-name>questionnaireServlet</servlet-name>

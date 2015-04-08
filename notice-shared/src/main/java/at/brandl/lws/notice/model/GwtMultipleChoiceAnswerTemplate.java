@@ -46,4 +46,10 @@ public class GwtMultipleChoiceAnswerTemplate implements GwtAnswerTemplate{
 	public int hashCode() {
 		return ObjectUtils.hashCode(options);
 	}
+
+	@Override
+	public GwtAnswer createAnswer() {
+		
+		return new GwtMultipleChoiceAnswer();
+	}
 }
