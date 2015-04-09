@@ -1,7 +1,6 @@
 package at.brandl.lws.notice.server.dao.ds;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -48,7 +47,9 @@ public class FormDsDao extends AbstractDsDao {
 			getCache().put(ALL_FORMS, questionnaires);
 		}
 
-		return (List<GwtQuestionnaire>) getCache().get(ALL_FORMS);
+		@SuppressWarnings("unchecked")
+		List<GwtQuestionnaire> allForms = (List<GwtQuestionnaire>) getCache().get(ALL_FORMS);
+		return allForms;
 	}
 	
 	public GwtQuestionnaire getQuestionnaire(String key) {

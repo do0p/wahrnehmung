@@ -30,6 +30,7 @@ public class QuestionnaireDsDao extends AbstractDsDao {
 
 	public Collection<GwtQuestionnaireAnswers> getAllAnswers(String childKey) {
 
+		@SuppressWarnings("unchecked")
 		Collection<GwtQuestionnaireAnswers> result = (Collection<GwtQuestionnaireAnswers>) getCache()
 				.get(childKey);
 		if (result == null || isDirty(childKey)) {
@@ -68,6 +69,8 @@ public class QuestionnaireDsDao extends AbstractDsDao {
 					boolean stored = storeAnswer(answer, answersKey, user, ds);
 					if (!stored) {
 						iterator.remove();
+					} else {
+						answer.setUpdated(false);
 					}
 				}
 			}

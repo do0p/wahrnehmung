@@ -52,4 +52,31 @@ public abstract class GwtAnswer implements Serializable {
 	
 		return "Answer for question: " + questionKey;
 	}
+	
+	@Override
+	public int hashCode() {
+		int result = 37;
+		result = result * 17 + ObjectUtils.hashCode(date);
+		result = result * 17 + ObjectUtils.hashCode(questionKey);
+		return result;
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+
+		if(this == obj) {
+			return true;
+		}
+		
+		if(!(obj instanceof GwtAnswer)) {
+			return false;
+		}
+		
+		GwtAnswer other = (GwtAnswer) obj;
+		
+		boolean result = ObjectUtils.equals(questionKey, other.questionKey);
+		result &= ObjectUtils.equals(date, other.date);
+		
+		return result;
+	}
 }

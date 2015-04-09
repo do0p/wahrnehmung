@@ -70,4 +70,32 @@ public class GwtQuestionnaireAnswers implements Serializable {
 		builder.append(answers.toString());
 		return builder.toString();
 	}
+	
+	@Override
+	public int hashCode() {
+		int result = 37;
+		result = result * 17 + ObjectUtils.hashCode(childKey);
+		result = result * 17 + ObjectUtils.hashCode(questionnaireKey);
+		result = result * 17 + ObjectUtils.hashCode(answers);
+		return result;
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+
+		if(this == obj) {
+			return true;
+		}
+		
+		if(!(obj instanceof GwtQuestionnaireAnswers)) {
+			return false;
+		}
+		
+		GwtQuestionnaireAnswers other = (GwtQuestionnaireAnswers) obj;
+		boolean result = ObjectUtils.equals(childKey, other.childKey);
+		result &= ObjectUtils.equals(questionnaireKey, other.questionnaireKey);
+		result &= ObjectUtils.equals(answers, other.answers);
+		
+		return result;
+	}
 }

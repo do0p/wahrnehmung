@@ -2,6 +2,7 @@ package at.brandl.lws.notice.server.dao.ds;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 
 import org.junit.Assert;
@@ -27,22 +28,24 @@ public class QuestionnaireDsDaoTest extends AbstractDsDaoTest {
 
 	private String childKey;
 	private String questionnaireKey;
-	private String questionKey;
+	private String questionKey1;
+	private String questionKey2;
 
 	@Before
 	public void setUp() {
 		questionnaireDao = DaoRegistry.get(QuestionnaireDsDao.class);
 		childKey = KeyFactory.createKeyString(Child.KIND, 1);
-		questionnaireKey = KeyFactory.createKeyString(
-				Questionnaire.KIND, 1);
-		questionKey = KeyFactory.createKeyString(Question.KIND, 1);
+		questionnaireKey = KeyFactory.createKeyString(Questionnaire.KIND, 1);
+		questionKey1 = KeyFactory.createKeyString(Question.KIND, 1);
+		questionKey2 = KeyFactory.createKeyString(Question.KIND, 2);
 		answers = createQuestionnaireAnswers();
 	}
 
 	protected LocalDatastoreServiceTestConfig createDsConfig() {
-		return new LocalDatastoreServiceTestConfig().setApplyAllHighRepJobPolicy();
+		return new LocalDatastoreServiceTestConfig()
+				.setApplyAllHighRepJobPolicy();
 	}
-	
+
 	@Test
 	public void insertAndRead() {
 
@@ -50,68 +53,125 @@ public class QuestionnaireDsDaoTest extends AbstractDsDaoTest {
 
 		Collection<GwtQuestionnaireAnswers> allAnswers = questionnaireDao
 				.getAllAnswers(childKey);
-		Assert.assertNotNull(allAnswers);
 
+		Assert.assertNotNull(allAnswers);
 		Assert.assertEquals(1, allAnswers.size());
+		GwtQuestionnaireAnswers storedAnswers = allAnswers.iterator().next();
+
+		Assert.assertEquals(answers, storedAnswers);
 	}
 
-	// @Test
-	// public void worksWithCache() {
-	//
-	// questionnaireDao.storeQuestionnaire(answers);
-	// String key = answers.getKey();
-	//
-	// assertCacheContainsStringKey(key);
-	// assertDatastoreContains(key);
-	// removeFromDatastore(key);
-	// assertDatastoreContainsNot(key);
-	//
-	// GwtQuestionnaire storedForm = questionnaireDao.getQuestionnaire(key);
-	// Assert.assertNotNull(storedForm);
-	//
-	// Assert.assertEquals(answers, storedForm);
-	//
-	// removeFromCacheStringKey(key);
-	// assertCacheContainsNotStringKey(key);
-	// }
-	//
-	// @Test
-	// public void worksWithoutCache() {
-	//
-	// questionnaireDao.storeQuestionnaire(answers);
-	// String key = answers.getKey();
-	//
-	// assertCacheContainsStringKey(key);
-	// assertDatastoreContains(key);
-	// removeFromCacheStringKey(key);
-	// assertCacheContainsNotStringKey(key);
-	//
-	// GwtQuestionnaire storedForm = questionnaireDao.getQuestionnaire(key);
-	// assertCacheContainsStringKey(key);
-	// Assert.assertNotNull(storedForm);
-	//
-	// Assert.assertEquals(answers, storedForm);
-	// }
-	//
-	// @Test
-	// public void getOldestFormFirst() {
-	//
-	// GwtQuestionnaire form1 = new GwtQuestionnaire();
-	// GwtQuestionnaire form2 = new GwtQuestionnaire();
-	// form1.setTitle(TITLE );
-	// form2.setTitle(TITLE);
-	// questionnaireDao.storeQuestionnaire(form1);
-	// questionnaireDao.storeQuestionnaire(form2);
-	// String form1Key = form1.getKey();
-	// String form2Key = form2.getKey();
-	// Assert.assertNotEquals(form1Key, form2Key);
-	//
-	// List<GwtQuestionnaire> allQuestionnaires =
-	// questionnaireDao.getAllQuestionnaires();
-	// Assert.assertEquals(2, allQuestionnaires.size());
-	// Assert.assertEquals(form1Key, allQuestionnaires.get(0).getKey());
-	// Assert.assertEquals(form2Key, allQuestionnaires.get(1).getKey());
-	// }
+	@Test
+	public void insert() {
+
+		assertUpdated(answers, true);
+		GwtQuestionnaireAnswers storedAnswers = questionnaireDao.storeAnswers(
+				answers, null);
+		Assert.assertEquals(answers, storedAnswers);
+		assertUpdated(storedAnswers, false);
+
+	}
+
+	@Test
+	public void notUpdatedIgnored() {
+
+		GwtAnswer answer = createAnswer(questionKey2, false);
+		answers.addAnswer(answer);
+
+		questionnaireDao.storeAnswers(answers, null);
+
+		Collection<GwtQuestionnaireAnswers> allAnswers = questionnaireDao
+				.getAllAnswers(childKey);
+
+		GwtQuestionnaireAnswers storedAnswers = allAnswers.iterator().next();
+
+		Assert.assertEquals(1, storedAnswers.getAnswers().size());
+		Assert.assertNotNull(storedAnswers.getAnswer(questionKey1));
+		Assert.assertNull(storedAnswers.getAnswer(questionKey2));
+	}
+
+	@Test
+	public void delete() {
+
+		GwtAnswer answer = createAnswer(questionKey2, true);
+		answers.addAnswer(answer);
+
+		questionnaireDao.storeAnswers(answers, null);
+		Collection<GwtQuestionnaireAnswers> allAnswers = questionnaireDao
+				.getAllAnswers(childKey);
+
+		GwtQuestionnaireAnswers storedAnswers = allAnswers.iterator().next();
+		Assert.assertEquals(2, storedAnswers.getAnswers().size());
+
+		GwtAnswer answer2 = storedAnswers.getAnswer(questionKey2);
+		answer2.setValue(Collections.emptyList());
+		answer2.setUpdated(true);
+		questionnaireDao.storeAnswers(storedAnswers, null);
+		allAnswers = questionnaireDao.getAllAnswers(childKey);
+
+		storedAnswers = allAnswers.iterator().next();
+		Assert.assertEquals(1, storedAnswers.getAnswers().size());
+		GwtAnswer answer1 = storedAnswers.getAnswer(questionKey1);
+		answer1.setValue(Collections.emptyList());
+		answer1.setUpdated(true);
+		questionnaireDao.storeAnswers(storedAnswers, null);
+		allAnswers = questionnaireDao.getAllAnswers(childKey);
+
+		Assert.assertTrue(allAnswers.isEmpty());
+
+	}
+
+	private void assertUpdated(GwtQuestionnaireAnswers answers, boolean updated) {
+
+		for (GwtAnswer answer : answers.getAnswers()) {
+			Assert.assertEquals(updated, answer.isUpdated());
+		}
+	}
+
+	@Test
+	public void worksWithCache() {
+
+		questionnaireDao.storeAnswers(answers, null);
+		String key = answers.getKey();
+
+		Collection<GwtQuestionnaireAnswers> allAnswers = questionnaireDao
+				.getAllAnswers(childKey);
+
+		assertCacheContainsStringKey(childKey);
+		assertDatastoreContains(key);
+		removeFromDatastore(key);
+		assertDatastoreContainsNot(key);
+
+		allAnswers = questionnaireDao.getAllAnswers(childKey);
+		Assert.assertFalse(allAnswers.isEmpty());
+
+		Assert.assertEquals(answers, allAnswers.iterator().next());
+
+		removeFromCacheStringKey(childKey);
+		assertCacheContainsNotStringKey(childKey);
+	}
+
+	@Test
+	public void worksWithoutCache() {
+
+		questionnaireDao.storeAnswers(answers, null);
+		String key = answers.getKey();
+
+		Collection<GwtQuestionnaireAnswers> allAnswers = questionnaireDao
+				.getAllAnswers(childKey);
+
+		assertCacheContainsStringKey(childKey);
+		assertDatastoreContains(key);
+		removeFromCacheStringKey(childKey);
+		assertCacheContainsNotStringKey(childKey);
+
+		allAnswers = questionnaireDao.getAllAnswers(childKey);
+		Assert.assertFalse(allAnswers.isEmpty());
+
+		Assert.assertEquals(answers, allAnswers.iterator().next());
+		assertCacheContainsStringKey(childKey);
+
+	}
 
 	@Override
 	protected String getMemCacheServiceName() {
@@ -120,11 +180,7 @@ public class QuestionnaireDsDaoTest extends AbstractDsDaoTest {
 
 	private GwtQuestionnaireAnswers createQuestionnaireAnswers() {
 
-		GwtAnswer answer = new GwtMultipleChoiceAnswer();
-		answer.setQuestionKey(questionKey);
-		answer.setDate(new Date());
-		answer.setValue(Arrays.asList("a"));
-		answer.setUpdated(true);
+		GwtAnswer answer = createAnswer(questionKey1, true);
 
 		GwtQuestionnaireAnswers answers = new GwtQuestionnaireAnswers();
 		answers.setQuestionnaireKey(questionnaireKey);
@@ -132,6 +188,15 @@ public class QuestionnaireDsDaoTest extends AbstractDsDaoTest {
 		answers.addAnswer(answer);
 
 		return answers;
+	}
+
+	private GwtAnswer createAnswer(String questionKey2, boolean updated) {
+		GwtAnswer answer = new GwtMultipleChoiceAnswer();
+		answer.setQuestionKey(questionKey2);
+		answer.setDate(new Date());
+		answer.setValue(Arrays.asList("a"));
+		answer.setUpdated(updated);
+		return answer;
 	}
 
 }
