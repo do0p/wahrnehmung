@@ -4,17 +4,21 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import at.brandl.lws.notice.client.utils.ChangeListener;
 import at.brandl.lws.notice.client.utils.DecisionBox;
 import at.brandl.lws.notice.client.utils.FormSelection;
 import at.brandl.lws.notice.client.utils.NameSelection;
 import at.brandl.lws.notice.client.utils.PopUp;
+import at.brandl.lws.notice.client.utils.Print;
 import at.brandl.lws.notice.client.utils.QuestionnairePanel;
 import at.brandl.lws.notice.client.utils.ReadyListener;
 import at.brandl.lws.notice.client.utils.Utils;
 import at.brandl.lws.notice.model.Authorization;
 import at.brandl.lws.notice.model.GwtAnswer;
+import at.brandl.lws.notice.model.GwtBeobachtung;
 import at.brandl.lws.notice.model.GwtQuestionnaire;
 import at.brandl.lws.notice.model.GwtQuestionnaireAnswers;
 import at.brandl.lws.notice.shared.service.QuestionnaireService;
@@ -50,6 +54,7 @@ public class Questionnaire extends VerticalPanel implements ChangeListener, Read
 	private final FormSelection formSelection;
 	private final Button sendButton;
 	private final Button newButton;
+	private final Button printButton;
 	// private final Button nameAddButton;
 	private final DecisionBox decisionBox;
 	private final QuestionnairePanel questionnairePanel;
@@ -71,6 +76,7 @@ public class Questionnaire extends VerticalPanel implements ChangeListener, Read
 		dateBox = new DateBox();
 		sendButton = new Button(labels.save());
 		newButton = new Button(labels.cancel());
+		printButton = new Button(labels.print());
 		questionnairePanel = new QuestionnairePanel(this);
 		archived = new CheckBox(labels.archived());
 		
@@ -142,6 +148,17 @@ public class Questionnaire extends VerticalPanel implements ChangeListener, Read
 				}
 				updateState();
 			}
+		});
+		
+		
+		printButton.addClickHandler(new ClickHandler() {
+			public void onClick(ClickEvent event) {
+				
+				if (questionnaireIsShown()) {
+					Print.it(questionnairePanel);
+				}
+			}
+
 		});
 	}
 
@@ -252,16 +269,20 @@ public class Questionnaire extends VerticalPanel implements ChangeListener, Read
 
 	private Panel createButtonContainer() {
 
-		final Grid buttonContainer = new Grid(1, 2);
+		final Grid buttonContainer = new Grid(1, 3);
 
 		sendButton.setSize(Utils.BUTTON_WIDTH + Utils.PIXEL, Utils.ROW_HEIGHT
 				+ Utils.PIXEL);
 
 		newButton.setSize(Utils.BUTTON_WIDTH + Utils.PIXEL, Utils.ROW_HEIGHT
 				+ Utils.PIXEL);
-
+		
+		printButton.setSize(Utils.BUTTON_WIDTH + Utils.PIXEL, Utils.ROW_HEIGHT
+				+ Utils.PIXEL);
+		
 		buttonContainer.setWidget(0, 0, sendButton);
 		buttonContainer.setWidget(0, 1, newButton);
+		buttonContainer.setWidget(0, 2, printButton);
 
 		return buttonContainer;
 	}
@@ -320,8 +341,15 @@ public class Questionnaire extends VerticalPanel implements ChangeListener, Read
 		formSelection.setEnabled(enableFormSelection());
 		sendButton.setEnabled(enableSend());
 		newButton.setEnabled(true);
+		printButton.setEnabled(questionnaireIsShown());
 	}
 
+
+	private boolean questionnaireIsShown() {
+	
+		return questionnairePanel.iterator().hasNext();
+	}
+	
 	private boolean enableFormSelection() {
 
 		return childKey != null && ready && formSelectionReady;

@@ -10,9 +10,7 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RemoteServiceRelativePath("form")
 public interface FormService extends RemoteService {
 
-	String storeFormAsString(String formText);
-	
-	String getFormAsString();
-	
+	GwtQuestionnaire storeFormAsString(String formText, String sectionKey);
+
 	List<GwtQuestionnaire> getAllForms(String childKey);
 }

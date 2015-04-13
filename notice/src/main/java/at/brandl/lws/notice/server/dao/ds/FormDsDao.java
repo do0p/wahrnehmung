@@ -240,7 +240,7 @@ public class FormDsDao extends AbstractDsDao {
 
 		Entity form = new Entity(Questionnaire.KIND);
 		form.setProperty(Questionnaire.TITLE, gwtForm.getTitle());
-		form.setProperty(Questionnaire.SECTION, gwtForm.getSection());
+		form.setProperty(Questionnaire.SECTION, toKey(gwtForm.getSection()));
 		return form;
 	}
 

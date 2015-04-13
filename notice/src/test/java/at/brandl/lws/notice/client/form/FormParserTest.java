@@ -21,6 +21,7 @@ import at.brandl.lws.notice.model.GwtQuestion;
 import at.brandl.lws.notice.model.GwtQuestionGroup;
 import at.brandl.lws.notice.model.GwtQuestionnaire;
 import at.brandl.lws.notice.server.service.FormParser;
+import at.brandl.lws.notice.shared.service.FormPrinter;
 
 public class FormParserTest {
 

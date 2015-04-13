@@ -8,9 +8,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public interface FormServiceAsync {
 
-	void getFormAsString(AsyncCallback<String> callback);
-
-	void storeFormAsString(String formText, AsyncCallback<String> callback);
+	void storeFormAsString(String formText, String sectionKey, AsyncCallback<GwtQuestionnaire> callback);
 
 	void getAllForms(String childKey, AsyncCallback<List<GwtQuestionnaire>> callback);
 	
