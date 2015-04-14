@@ -13,6 +13,7 @@ import at.brandl.lws.notice.model.GwtQuestionnaireAnswers;
 import at.brandl.lws.notice.shared.util.Constants;
 import at.brandl.lws.notice.shared.util.Constants.QuestionnaireAnswer;
 import at.brandl.lws.notice.shared.util.Constants.QuestionnaireAnswers;
+import at.brandl.lws.notice.shared.validator.GwtQuestionnaireAnswersValidator;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Entity;
@@ -51,6 +52,10 @@ public class QuestionnaireDsDao extends AbstractDsDao {
 
 	public GwtQuestionnaireAnswers storeAnswers(GwtQuestionnaireAnswers answers, User user) {
 
+		if(!GwtQuestionnaireAnswersValidator.valid(answers)) {
+			throw new IllegalArgumentException("invalid answers " + answers);
+		}
+		
 		DatastoreService ds = getDatastoreService();
 
 		final Transaction transaction = ds.beginTransaction(TransactionOptions.Builder.withXG(true));

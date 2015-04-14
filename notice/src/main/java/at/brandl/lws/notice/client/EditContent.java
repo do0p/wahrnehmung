@@ -559,7 +559,7 @@ public class EditContent extends HorizontalPanel {
 		name = removeBirthDate(name);
 
 		String text = textArea.getText();
-		if (Utils.isNotEmpty(cleanUp(text))) {
+		if (at.brandl.lws.notice.shared.Utils.isNotEmpty(cleanUp(text))) {
 			text += ", ";
 		}
 		text += name;

@@ -197,8 +197,7 @@ public class Search extends VerticalPanel {
 				Set<GwtBeobachtung> selectedSet = new TreeSet<GwtBeobachtung>(
 						selectionModel.getSelectedSet());
 				if (!selectedSet.isEmpty()) {
-					Print.it(at.brandl.lws.notice.shared.Utils
-							.createPrintHtml(selectedSet));
+					Print.it(Utils.createPrintHtml(selectedSet));
 				}
 			}
 		});

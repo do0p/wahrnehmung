@@ -221,7 +221,7 @@ public class SectionAdmin extends AbstractAdminTab {
 						new AsyncVoidCallBack());
 			} else {
 				final String value = saveItem.getValue();
-				if (Utils.isEmpty(value)) {
+				if (at.brandl.lws.notice.shared.Utils.isEmpty(value)) {
 					countDown--;
 					continue;
 				}

@@ -4,8 +4,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 
 import at.brandl.lws.notice.client.utils.ChangeListener;
 import at.brandl.lws.notice.client.utils.DecisionBox;
@@ -18,11 +16,11 @@ import at.brandl.lws.notice.client.utils.ReadyListener;
 import at.brandl.lws.notice.client.utils.Utils;
 import at.brandl.lws.notice.model.Authorization;
 import at.brandl.lws.notice.model.GwtAnswer;
-import at.brandl.lws.notice.model.GwtBeobachtung;
 import at.brandl.lws.notice.model.GwtQuestionnaire;
 import at.brandl.lws.notice.model.GwtQuestionnaireAnswers;
 import at.brandl.lws.notice.shared.service.QuestionnaireService;
 import at.brandl.lws.notice.shared.service.QuestionnaireServiceAsync;
+import at.brandl.lws.notice.shared.validator.GwtQuestionnaireAnswersValidator;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -42,7 +40,8 @@ import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.datepicker.client.DateBox;
 
-public class Questionnaire extends VerticalPanel implements ChangeListener, ReadyListener {
+public class Questionnaire extends VerticalPanel implements ChangeListener,
+		ReadyListener {
 
 	private final Labels labels = (Labels) GWT.create(Labels.class);
 	private final QuestionnaireServiceAsync questionnaireService = (QuestionnaireServiceAsync) GWT
@@ -79,7 +78,6 @@ public class Questionnaire extends VerticalPanel implements ChangeListener, Read
 		printButton = new Button(labels.print());
 		questionnairePanel = new QuestionnairePanel(this);
 		archived = new CheckBox(labels.archived());
-		
 
 		init();
 		updateState();
@@ -118,8 +116,8 @@ public class Questionnaire extends VerticalPanel implements ChangeListener, Read
 			public void onClick(ClickEvent event) {
 				nameSelection.setIncludeArchived(archived.getValue());
 			}
-		});	
-		
+		});
+
 		decisionBox.setText(labels.notSavedWarning());
 		decisionBox.addOkClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
@@ -149,11 +147,10 @@ public class Questionnaire extends VerticalPanel implements ChangeListener, Read
 				updateState();
 			}
 		});
-		
-		
+
 		printButton.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
-				
+
 				if (questionnaireIsShown()) {
 					Print.it(questionnairePanel);
 				}
@@ -165,14 +162,14 @@ public class Questionnaire extends VerticalPanel implements ChangeListener, Read
 	private void layout() {
 
 		setSpacing(Utils.SPACING);
-		
+
 		nameSelection.setSize(Utils.NAMESELECTION_WIDTH + Utils.PIXEL,
 				Utils.ROW_HEIGHT - 12 + Utils.PIXEL);
 		formSelection.setSize(Utils.NAMESELECTION_WIDTH + Utils.PIXEL,
 				Utils.ROW_HEIGHT + Utils.PIXEL);
 		dateBox.setSize(Utils.DATEBOX_WIDTH + Utils.PIXEL, Utils.ROW_HEIGHT
 				- 12 + Utils.PIXEL);
-		
+
 		Panel panel = new ScrollPanel(questionnairePanel);
 		panel.setSize(Utils.QUESTIONNAIRE_WIDTH + Utils.PIXEL, Utils.APP_HEIGHT
 				- 300 + Utils.PIXEL);
@@ -186,10 +183,10 @@ public class Questionnaire extends VerticalPanel implements ChangeListener, Read
 
 		VerticalPanel controls = new VerticalPanel();
 		add(controls);
-		
+
 		controls.add(selections);
 		controls.add(archived);
-		
+
 		add(panel);
 
 		final Panel buttonContainer = createButtonContainer();
@@ -212,7 +209,7 @@ public class Questionnaire extends VerticalPanel implements ChangeListener, Read
 	private void reload() {
 		String selectedChildKey = nameSelection.getSelectedChildKey();
 		if (selectedChildKey != null) {
-			
+
 			childKey = selectedChildKey;
 			allAnswers.clear();
 			formSelection.reset();
@@ -252,10 +249,10 @@ public class Questionnaire extends VerticalPanel implements ChangeListener, Read
 	private void updateQuestionnairePanel() {
 
 		GwtQuestionnaire selectedForm = formSelection.getSelectedForm();
-		if(selectedForm == null) {
+		if (selectedForm == null) {
 			return;
 		}
-		
+
 		String questionnaireKey = selectedForm.getKey();
 		GwtQuestionnaireAnswers answers = allAnswers.get(questionnaireKey);
 		if (answers == null) {
@@ -263,7 +260,7 @@ public class Questionnaire extends VerticalPanel implements ChangeListener, Read
 			answers.setQuestionnaireKey(questionnaireKey);
 			answers.setChildKey(childKey);
 		}
-		
+
 		questionnairePanel.setQuestionnaire(selectedForm, answers);
 	}
 
@@ -276,10 +273,10 @@ public class Questionnaire extends VerticalPanel implements ChangeListener, Read
 
 		newButton.setSize(Utils.BUTTON_WIDTH + Utils.PIXEL, Utils.ROW_HEIGHT
 				+ Utils.PIXEL);
-		
+
 		printButton.setSize(Utils.BUTTON_WIDTH + Utils.PIXEL, Utils.ROW_HEIGHT
 				+ Utils.PIXEL);
-		
+
 		buttonContainer.setWidget(0, 0, sendButton);
 		buttonContainer.setWidget(0, 1, newButton);
 		buttonContainer.setWidget(0, 2, printButton);
@@ -289,35 +286,43 @@ public class Questionnaire extends VerticalPanel implements ChangeListener, Read
 
 	private void storeAnswers() {
 
-		if (changes) {
-			final GwtQuestionnaireAnswers answers = questionnairePanel.getAnswers();
-			Date date = dateBox.getValue();
-			if (date == null) {
-				date = new Date();
-			}
-			for (GwtAnswer answer : answers.getAnswers()) {
-				if (answer.isUpdated()) {
-					answer.setDate(date);
-				}
-			}
-
-			questionnaireService.storeQuestionnaireAnswers(answers,
-					new AsyncCallback<GwtQuestionnaireAnswers>() {
-
-						@Override
-						public void onFailure(Throwable caught) {
-							displayErrorMessage();
-						}
-
-						@Override
-						public void onSuccess(GwtQuestionnaireAnswers answers) {
-							changes = false;
-							allAnswers.put(answers.getQuestionnaireKey(), answers);
-							questionnairePanel.setAnswers(answers);
-							updateState();
-						}
-					});
+		if (!changes) {
+			return;
 		}
+
+		final GwtQuestionnaireAnswers answers = questionnairePanel.getAnswers();
+		
+		Date date = dateBox.getValue();
+		if (date == null) {
+			date = new Date();
+		}
+		
+		for (GwtAnswer answer : answers.getAnswers()) {
+			if (answer.isUpdated()) {
+				answer.setDate(date);
+			}
+		}
+
+		if (!GwtQuestionnaireAnswersValidator.valid(answers)) {
+			return;
+		}
+		
+		questionnaireService.storeQuestionnaireAnswers(answers,
+				new AsyncCallback<GwtQuestionnaireAnswers>() {
+
+					@Override
+					public void onFailure(Throwable caught) {
+						displayErrorMessage();
+					}
+
+					@Override
+					public void onSuccess(GwtQuestionnaireAnswers answers) {
+						changes = false;
+						allAnswers.put(answers.getQuestionnaireKey(), answers);
+						questionnairePanel.setAnswers(answers);
+						updateState();
+					}
+				});
 	}
 
 	private void disableAll() {
@@ -325,7 +330,7 @@ public class Questionnaire extends VerticalPanel implements ChangeListener, Read
 		formSelection.setEnabled(false);
 		sendButton.setEnabled(false);
 		newButton.setEnabled(false);
-		
+
 	}
 
 	private void displayErrorMessage() {
@@ -344,12 +349,11 @@ public class Questionnaire extends VerticalPanel implements ChangeListener, Read
 		printButton.setEnabled(questionnaireIsShown());
 	}
 
-
 	private boolean questionnaireIsShown() {
-	
+
 		return questionnairePanel.iterator().hasNext();
 	}
-	
+
 	private boolean enableFormSelection() {
 
 		return childKey != null && ready && formSelectionReady;
@@ -371,7 +375,7 @@ public class Questionnaire extends VerticalPanel implements ChangeListener, Read
 
 	@Override
 	public void notifyReady() {
-		
+
 		if (!formSelectionReady) {
 			formSelectionReady = true;
 			updateState();

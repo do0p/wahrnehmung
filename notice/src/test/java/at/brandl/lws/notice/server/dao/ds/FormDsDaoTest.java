@@ -15,6 +15,9 @@ import at.brandl.lws.notice.server.dao.DaoRegistry;
 import at.brandl.lws.notice.server.service.FormParser;
 import at.brandl.lws.notice.shared.util.Constants.Questionnaire.Cache;
 
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
+
 public class FormDsDaoTest extends AbstractDsDaoTest {
 
 	private static final String TITLE = "title";
@@ -24,8 +27,11 @@ public class FormDsDaoTest extends AbstractDsDaoTest {
 	private FormDsDao formDao;
 	private GwtQuestionnaire form;
 
+	private Key sectionKey ;
+
 	@Before
 	public void setUp() {
+		sectionKey = KeyFactory.createKey(SectionDsDao.SECTION_KIND, 1);
 		form = createQuestionnaire();
 		formDao = DaoRegistry.get(FormDsDao.class);
 	}
@@ -87,9 +93,13 @@ public class FormDsDaoTest extends AbstractDsDaoTest {
 	public void getOldestFormFirst() {
 		
 		GwtQuestionnaire form1 = new GwtQuestionnaire();
-		GwtQuestionnaire form2 = new GwtQuestionnaire();
 		form1.setTitle(TITLE );
+		form1.setSection(KeyFactory.keyToString(sectionKey));
+
+		GwtQuestionnaire form2 = new GwtQuestionnaire();
 		form2.setTitle(TITLE);
+		form2.setSection(KeyFactory.keyToString(sectionKey));
+		
 		formDao.storeQuestionnaire(form1);
 		formDao.storeQuestionnaire(form2);
 		String form1Key = form1.getKey();
@@ -110,6 +120,7 @@ public class FormDsDaoTest extends AbstractDsDaoTest {
 	private GwtQuestionnaire createQuestionnaire() {
 		String formText = readFromFile("form.txt");
 		GwtQuestionnaire form = new FormParser().parse(formText);
+		form.setSection(KeyFactory.keyToString(sectionKey ));
 		return form;
 	}
 	

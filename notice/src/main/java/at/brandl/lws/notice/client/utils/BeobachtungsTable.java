@@ -119,7 +119,7 @@ public class BeobachtungsTable extends CellTable<GwtBeobachtung> {
 		};
 		Column<GwtBeobachtung, String> dateColumn = new TextColumn<GwtBeobachtung>() {
 			public String getValue(GwtBeobachtung object) {
-				return at.brandl.lws.notice.shared.Utils.DATE_FORMAT.format(object
+				return Utils.DATE_FORMAT.format(object
 						.getDate());
 			}
 		};

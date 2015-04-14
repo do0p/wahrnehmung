@@ -122,7 +122,7 @@ public class AuthorizationAdmin extends AbstractAdminTab {
 		Authorization aut = new Authorization();
 
 		String email = userBox.getValue();
-		if (Utils.isEmpty(email)) {
+		if (at.brandl.lws.notice.shared.Utils.isEmpty(email)) {
 			return;
 		}
 		aut.setEmail(email);
@@ -145,7 +145,7 @@ public class AuthorizationAdmin extends AbstractAdminTab {
 	@Override
 	void delete() {
 		String email = userBox.getValue();
-		if (Utils.isEmpty(email)) {
+		if (at.brandl.lws.notice.shared.Utils.isEmpty(email)) {
 			return;
 		}
 
@@ -182,13 +182,13 @@ public class AuthorizationAdmin extends AbstractAdminTab {
 
 	@Override
 	boolean enableCancel() {
-		return Utils.isNotEmpty(userBox.getValue()) || adminCheckBox.getValue()
+		return at.brandl.lws.notice.shared.Utils.isNotEmpty(userBox.getValue()) || adminCheckBox.getValue()
 				|| seeAllCheckBox.getValue() || editSectionCheckBox.getValue();
 	}
 
 	@Override
 	boolean enableSave() {
-		return Utils.isNotEmpty(userBox.getValue());
+		return at.brandl.lws.notice.shared.Utils.isNotEmpty(userBox.getValue());
 	}
 
 }

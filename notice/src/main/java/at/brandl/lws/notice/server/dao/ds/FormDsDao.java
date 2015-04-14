@@ -17,6 +17,7 @@ import at.brandl.lws.notice.shared.util.Constants.Question;
 import at.brandl.lws.notice.shared.util.Constants.QuestionGroup;
 import at.brandl.lws.notice.shared.util.Constants.Questionnaire;
 import at.brandl.lws.notice.shared.util.Constants.Questionnaire.Cache;
+import at.brandl.lws.notice.shared.validator.GwtQuestionnaireValidator;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Entity;
@@ -74,6 +75,11 @@ public class FormDsDao extends AbstractDsDao {
 	}
 
 	public void storeQuestionnaire(GwtQuestionnaire gwtForm) {
+		
+		if(!GwtQuestionnaireValidator.valid(gwtForm)) {
+			throw new IllegalArgumentException("illegal form " + gwtForm);
+		}
+		
 		final DatastoreService datastoreService = getDatastoreService();
 
 		final Transaction transaction = datastoreService.beginTransaction();

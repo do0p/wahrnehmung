@@ -204,14 +204,14 @@ public class ChildAdmin extends AbstractAdminTab {
 
 	@Override
 	boolean enableCancel() {
-		return bdBox.getValue() != null || Utils.isNotEmpty(fnBox.getValue())
-				|| Utils.isNotEmpty(lnBox.getValue());
+		return bdBox.getValue() != null || at.brandl.lws.notice.shared.Utils.isNotEmpty(fnBox.getValue())
+				|| at.brandl.lws.notice.shared.Utils.isNotEmpty(lnBox.getValue());
 	}
 
 	@Override
 	boolean enableSave() {
-		return bdBox.getValue() != null && Utils.isNotEmpty(fnBox.getValue())
-				&& Utils.isNotEmpty(lnBox.getValue());
+		return bdBox.getValue() != null && at.brandl.lws.notice.shared.Utils.isNotEmpty(fnBox.getValue())
+				&& at.brandl.lws.notice.shared.Utils.isNotEmpty(lnBox.getValue());
 	}
 
 }
