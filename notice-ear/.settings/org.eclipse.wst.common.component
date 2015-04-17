@@ -2,10 +2,10 @@
     <wb-module deploy-name="appengine-modules-ear-13">
         <wb-resource deploy-path="/" source-path="/target/m2e-wtp/ear-resources"/>
         <wb-resource deploy-path="/" source-path="/src/main/application" tag="defaultRootSource"/>
-        <dependent-module archiveName="notice-13.war" deploy-path="/" handle="module:/resource/notice/notice">
+        <dependent-module archiveName="notice-14.war" deploy-path="/" handle="module:/resource/notice/notice">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="notice-service-13.war" deploy-path="/" handle="module:/resource/notice-service/notice-service">
+        <dependent-module archiveName="notice-service-14.war" deploy-path="/" handle="module:/resource/notice-service/notice-service">
             <dependency-type>uses</dependency-type>
         </dependent-module>
     </wb-module>
