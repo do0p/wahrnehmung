@@ -4,8 +4,6 @@ import static com.google.appengine.api.datastore.FetchOptions.Builder.withDefaul
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
 
 import at.brandl.lws.notice.model.Authorization;
 
@@ -19,7 +17,7 @@ import com.google.appengine.api.users.User;
 public class AuthorizationDsDao extends AbstractDsDao {
 
 
-	public static final Set<String> SUPER_USER_IDS = new HashSet<String>();
+//	public static final Set<String> SUPER_USER_IDS = new HashSet<String>();
 	public static final String AUTH_DAO_MEMCACHE = "authDao";
 
 	public static final String AUTHORIZATION_KIND = "AuthorizationDs";
@@ -30,9 +28,9 @@ public class AuthorizationDsDao extends AbstractDsDao {
 	public static final String EDIT_SECTIONS_FIELD = "editSections";
 	public static final String EDIT_DIALOGUE_DATES_FIELD = "editDialogueDates";
 
-	static {
-		SUPER_USER_IDS.add("dbrandl72@gmail.com");
-	}
+//	static {
+//		SUPER_USER_IDS.add("dbrandl72@gmail.com");
+//	}
 
 	public AuthorizationDsDao() {
 		initCache();
@@ -47,18 +45,19 @@ public class AuthorizationDsDao extends AbstractDsDao {
 		final Key key = KeyFactory.createKey(AUTHORIZATION_KIND, userId);
 		Entity authorization = getFromCache(key, AUTH_DAO_MEMCACHE);
 		if (authorization == null) {
-			if (SUPER_USER_IDS.contains(userId)) {
-				authorization = createSuperUser(key, userId);
-			} else {
+//			if (SUPER_USER_IDS.contains(userId)) {
+//				authorization = createSuperUser(key, userId);
+//			} else {
 				try {
 					authorization = getDatastoreService().get(key);
 				} catch (EntityNotFoundException e) {
 					authorization = null;
 				}
-			}
+//			}
 			getCache(AUTH_DAO_MEMCACHE).put(key, authorization);
 		}
-		return toGwt(authorization);
+		Authorization gwtAuthorization = toGwt(authorization);
+		return gwtAuthorization;
 	}
 
 	public Collection<Authorization> queryAuthorizations() {
@@ -72,10 +71,10 @@ public class AuthorizationDsDao extends AbstractDsDao {
 	public void storeAuthorization(Authorization aut) {
 		
 		final String userId = createUserId(aut.getEmail());
-		if(SUPER_USER_IDS.contains(userId))
-		{
-			return;
-		}
+//		if(SUPER_USER_IDS.contains(userId))
+//		{
+//			return;
+//		}
 		aut.setUserId(userId);
 		final Entity authorization = toEntity(aut);
 		aut.setKey(KeyFactory.keyToString(authorization.getKey()));
@@ -98,11 +97,11 @@ public class AuthorizationDsDao extends AbstractDsDao {
 			insertIntoCache(entity, AUTH_DAO_MEMCACHE);
 		}
 
-		for (String superUserId : SUPER_USER_IDS) {
-			final Key key = KeyFactory.createKey(AUTHORIZATION_KIND,
-					superUserId);
-			insertIntoCache(createSuperUser(key, superUserId), AUTH_DAO_MEMCACHE);
-		}
+//		for (String superUserId : SUPER_USER_IDS) {
+//			final Key key = KeyFactory.createKey(AUTHORIZATION_KIND,
+//					superUserId);
+//			insertIntoCache(createSuperUser(key, superUserId), AUTH_DAO_MEMCACHE);
+//		}
 	}
 
 	private Iterable<Entity> queryAuthorizationsInternal() {
@@ -145,14 +144,14 @@ public class AuthorizationDsDao extends AbstractDsDao {
 		return authorization;
 	}
 
-	private Entity createSuperUser(Key key, String email) {
-		final Entity superUser = new Entity(key);
-		superUser.setProperty(USER_ID_FIELD, email);
-		superUser.setProperty(EMAIL_FIELD, email);
-		superUser.setProperty(ADMIN_FIELD, true);
-		superUser.setProperty(SEE_ALL_FIELD, true);
-		superUser.setProperty(EDIT_SECTIONS_FIELD, true);
-		superUser.setProperty(EDIT_DIALOGUE_DATES_FIELD, true);
-		return superUser;
-	}
+//	private Entity createSuperUser(Key key, String email) {
+//		final Entity superUser = new Entity(key);
+//		superUser.setProperty(USER_ID_FIELD, email);
+//		superUser.setProperty(EMAIL_FIELD, email);
+//		superUser.setProperty(ADMIN_FIELD, true);
+//		superUser.setProperty(SEE_ALL_FIELD, true);
+//		superUser.setProperty(EDIT_SECTIONS_FIELD, true);
+//		superUser.setProperty(EDIT_DIALOGUE_DATES_FIELD, true);
+//		return superUser;
+//	}
 }

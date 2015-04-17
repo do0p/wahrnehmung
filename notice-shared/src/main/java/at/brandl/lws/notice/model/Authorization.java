@@ -25,6 +25,8 @@ public class Authorization implements Serializable {
 	private String key;
 
 	private Boolean editDialogueDates;
+	
+	private boolean superUser;
 
 	public boolean isLoggedIn() {
 		return loggedIn;
@@ -118,6 +120,14 @@ public class Authorization implements Serializable {
 
 	public void setEditDialogueDates(Boolean editDialogueDates) {
 		this.editDialogueDates = editDialogueDates;
+	}
+
+	public boolean isSuperUser() {
+		return superUser;
+	}
+
+	public void setSuperUser(boolean superUser) {
+		this.superUser = superUser;
 	}
 
 }
