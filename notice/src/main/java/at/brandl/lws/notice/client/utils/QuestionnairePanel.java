@@ -91,5 +91,10 @@ public class QuestionnairePanel extends VerticalPanel implements
 		return answers;
 	}
 
+	public GwtQuestionnaire getQuestionnaire() {
+		
+		return questionnaire;
+	}
+
 
 }

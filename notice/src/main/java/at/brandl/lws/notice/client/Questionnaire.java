@@ -152,7 +152,10 @@ public class Questionnaire extends VerticalPanel implements ChangeListener,
 			public void onClick(ClickEvent event) {
 
 				if (questionnaireIsShown()) {
-					Print.it(questionnairePanel);
+					String html = Utils.createPrintQuestionnaire(questionnairePanel.getQuestionnaire(), questionnairePanel.getAnswers());
+//					dialogBox.setErrorMessage(html);
+//					dialogBox.show();
+					Print.it(html);
 				}
 			}
 
