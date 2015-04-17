@@ -29,6 +29,7 @@ import com.google.gwt.user.datepicker.client.DateBox;
 import com.google.gwt.user.datepicker.client.DateBox.Format;
 
 public class Utils {
+	private static final String TITLE = "h3";
 	private static final String BORDER_0 = "border=\"0\"";
 	private static final String BR = "<br/>";
 	private static final String COLSPAN_2 = "colspan=\"2\"";
@@ -212,7 +213,7 @@ public class Utils {
 
 		StringBuilder content = new StringBuilder();
 
-		content.append(row(cell(COLSPAN_2, bold(questionnaire.getTitle()))));
+		content.append(row(cell(COLSPAN_2, title(questionnaire.getTitle()))));
 
 		for (GwtQuestionGroup group : questionnaire.getGroups()) {
 
@@ -327,6 +328,10 @@ public class Utils {
 		return tag(CELL, attributes, contents);
 	}
 
+	private static String title(String contents) {
+		return tag(TITLE, "", contents);
+	}
+	
 	private static String bold(String contents) {
 		return tag(BOLD, "", contents);
 	}
