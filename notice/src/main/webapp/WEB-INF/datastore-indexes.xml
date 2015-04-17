@@ -31,9 +31,4 @@
         <property name="order" direction="asc"/>
     </datastore-index>
     
-    <datastore-index kind="QuestionnaireDs" ancestor="false" source="manual">
-        <property name="createDate" direction="asc"/>
-    </datastore-index>
-    
-    
 </datastore-indexes>
