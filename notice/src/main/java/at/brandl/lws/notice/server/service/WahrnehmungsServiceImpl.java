@@ -12,6 +12,7 @@ import at.brandl.lws.notice.server.dao.ds.AuthorizationDsDao;
 import at.brandl.lws.notice.server.dao.ds.BeobachtungDsDao;
 import at.brandl.lws.notice.server.dao.ds.FileDsDao;
 import at.brandl.lws.notice.shared.Utils;
+import at.brandl.lws.notice.shared.service.AuthorizationService;
 import at.brandl.lws.notice.shared.service.WahrnehmungsService;
 import at.brandl.lws.notice.shared.validator.GwtBeobachtungValidator;
 
@@ -37,12 +38,12 @@ public class WahrnehmungsServiceImpl extends RemoteServiceServlet implements
 	private final UploadOptions options;
 	private final BeobachtungDsDao beobachtungsDao;
 	private final UserService userService;
-	private final AuthorizationDsDao authorizationDao;
+	private final AuthorizationServiceImpl authorizationService;
 	private final FileDsDao fileDao;
 
 	public WahrnehmungsServiceImpl() {
 		beobachtungsDao = DaoRegistry.get(BeobachtungDsDao.class);
-		authorizationDao = DaoRegistry.get(AuthorizationDsDao.class);
+		authorizationService = new AuthorizationServiceImpl();
 		fileDao = DaoRegistry.get(FileDsDao.class);
 		userService = UserServiceFactory.getUserService();
 		options = UploadOptions.Builder
@@ -120,7 +121,7 @@ public class WahrnehmungsServiceImpl extends RemoteServiceServlet implements
 
 	private User getUserForQuery() {
 		final User currentUser = userService.getCurrentUser();
-		final Authorization authorization = authorizationDao
+		final Authorization authorization = authorizationService
 				.getAuthorization(currentUser);
 		final User user = authorization.isSeeAll() ? null : currentUser;
 		return user;

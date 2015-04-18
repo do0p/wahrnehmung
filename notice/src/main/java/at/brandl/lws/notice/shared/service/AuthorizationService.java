@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import at.brandl.lws.notice.model.Authorization;
 
+import com.google.appengine.api.users.User;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
@@ -19,4 +20,5 @@ public abstract interface AuthorizationService extends RemoteService
   boolean currentUserIsAdmin();
 
   Authorization getAuthorizationForCurrentUser(String paramString);
+
 }

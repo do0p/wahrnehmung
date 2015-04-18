@@ -100,4 +100,9 @@ public class AuthorizationServiceImpl extends RemoteServiceServlet implements
 		authorization.setEmail(user.getEmail());
 		return authorization;
 	}
+
+	public Authorization getAuthorization(User currentUser) {
+
+		return getAuthorizationForCurrentUserInternal();
+	}
 }
