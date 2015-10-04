@@ -2,8 +2,10 @@ package at.brandl.lws.notice.client.admin;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import at.brandl.lws.notice.client.utils.DecisionBox;
 import at.brandl.lws.notice.client.utils.Utils;
@@ -29,26 +31,21 @@ public class SectionAdmin extends AbstractAdminTab {
 	private final SectionServiceAsync sectionService = GWT
 			.create(SectionService.class);
 
-	// private final SaveSuccess saveSuccess;
 	private final Tree tree;
 
 	private final List<SaveItem> saveItems = new ArrayList<SaveItem>();
 	private final DecisionBox decisionBox;
 
-	private int countDown = 0;
-
 	public SectionAdmin() {
 		super(false);
-
+		getButtonPanel().setSaveButtonLabel(labels().save());
 		decisionBox = new DecisionBox();
 		decisionBox.setText(labels().sectionDelWarning());
 
 		tree = new Tree();
 
-		// saveSuccess = new SaveSuccess();
-
 		layout();
-		
+
 		updateButtonPanel();
 
 	}
@@ -68,15 +65,8 @@ public class SectionAdmin extends AbstractAdminTab {
 		sectionService.querySections(new TreeBuilder());
 	}
 
-	private void resetFormAtTheEnd() {
-		if (--countDown < 1) {
-			reset();
-		}
-	}
-
 	@Override
 	void reset() {
-		countDown = 0;
 		saveItems.clear();
 		tree.clear();
 		refresh();
@@ -91,18 +81,22 @@ public class SectionAdmin extends AbstractAdminTab {
 
 			addChildSections(rootSections, tree, groupedSections);
 			tree.add(createSaveItem((String) null));
-
+			updateButtonPanel();
 		}
 
 		private SaveItem createSaveItem(String parentKey) {
 			final SaveItem saveItem = new SaveItem(parentKey);
 			saveItems.add(saveItem);
+			addButtonUpdateChangeHandler(saveItem);
+			addButtonUpdateKeyPressHandler(saveItem);
 			return saveItem;
 		}
 
 		protected SaveItem createSaveItem(GwtSection section) {
 			final SaveItem saveItem = new SaveItem(section);
 			saveItems.add(saveItem);
+			addButtonUpdateChangeHandler(saveItem);
+			addButtonUpdateKeyPressHandler(saveItem);
 			return saveItem;
 		}
 
@@ -112,19 +106,30 @@ public class SectionAdmin extends AbstractAdminTab {
 		}
 
 		private void addChildSections(List<GwtSection> sections,
-				final HasTreeItems parent,
+				HasTreeItems parent,
 				Map<String, List<GwtSection>> groupedSections) {
+
 			if (sections == null) {
 				return;
 			}
+
 			for (final GwtSection section : sections) {
 				final InlineLabel sectionName = new InlineLabel(
 						section.getSectionName());
+				String archiveLabel;
+				if (section.getArchived()) {
+					sectionName.setStylePrimaryName(Utils.ARCHIVED_STYLE);
+					archiveLabel = labels().unarchive();
+				} else {
+					archiveLabel = labels().archive();
+				}
 				final Anchor sectionEdit = new Anchor(labels().change());
+				final Anchor sectionArchive = new Anchor(archiveLabel);
 				final Anchor sectionDel = new Anchor(labels().delete());
 
 				final TreeItem sectionItem = new TreeItem(createSectionLabel(
-						sectionName, sectionEdit, sectionDel));
+						sectionName, sectionEdit, sectionArchive, sectionDel));
+
 				final HandlerRegistration editClickHandler = sectionEdit
 						.addClickHandler(new ClickHandler() {
 							@Override
@@ -136,6 +141,33 @@ public class SectionAdmin extends AbstractAdminTab {
 								}
 							}
 						});
+
+				final HandlerRegistration archiveClickHandler = sectionArchive
+						.addClickHandler(new ClickHandler() {
+							@Override
+							public void onClick(ClickEvent event) {
+								if (NativeEvent.BUTTON_LEFT == event
+										.getNativeButton()) {
+									if (section.getArchived()) {
+										sectionName
+												.removeStyleName(Utils.ARCHIVED_STYLE);
+										section.setArchived(Boolean.FALSE);
+										sectionArchive.setText(labels()
+												.archive());
+									} else {
+										sectionName
+												.setStylePrimaryName(Utils.ARCHIVED_STYLE);
+										section.setArchived(Boolean.TRUE);
+										sectionArchive.setText(labels()
+												.unarchive());
+										sectionItem.removeItems();
+									}
+									createSaveItem(section);
+									updateButtonPanel();
+								}
+							}
+						});
+
 				sectionDel.addClickHandler(new ClickHandler() {
 					@Override
 					public void onClick(ClickEvent event) {
@@ -147,30 +179,35 @@ public class SectionAdmin extends AbstractAdminTab {
 											.setStylePrimaryName(Utils.DELETED_STYLE);
 									sectionItem.setState(false);
 									editClickHandler.removeHandler();
+									archiveClickHandler.removeHandler();
 									createDelItem(section);
+									updateButtonPanel();
 								}
 							});
 							decisionBox.center();
 						}
 					}
-
 				});
 
-				addPlusItem(section.getKey(), sectionItem);
-				addChildSections(groupedSections.get(section.getKey()),
-						sectionItem, groupedSections);
+				if (!section.getArchived()) {
+					addPlusItem(section.getKey(), sectionItem);
+					addChildSections(groupedSections.get(section.getKey()),
+							sectionItem, groupedSections);
+				}
 				parent.addItem(sectionItem);
 			}
 		}
 
 		private HorizontalPanel createSectionLabel(
 				final InlineLabel sectionName, final Anchor sectionEdit,
-				final Anchor sectionDel) {
+				final Anchor sectionArchive, final Anchor sectionDel) {
 			final HorizontalPanel sectionLabel = new HorizontalPanel();
 			sectionLabel.setSpacing(Utils.SPACING);
 			sectionLabel.add(sectionName);
 			sectionLabel.add(new InlineLabel(" ("));
 			sectionLabel.add(sectionEdit);
+			sectionLabel.add(new InlineLabel("/"));
+			sectionLabel.add(sectionArchive);
 			sectionLabel.add(new InlineLabel("/"));
 			sectionLabel.add(sectionDel);
 			sectionLabel.add(new InlineLabel(")"));
@@ -213,22 +250,48 @@ public class SectionAdmin extends AbstractAdminTab {
 	@Override
 	void save() {
 		final List<SaveItem> tmpSaveItems = new ArrayList<SaveItem>(saveItems);
-		countDown = saveItems.size();
+		final Set<String> alreadySaved = new HashSet<>();
+
 		for (final SaveItem saveItem : tmpSaveItems) {
+
+			if (saveItem.section == null) {
+				continue;
+			}
+
+			String key = saveItem.section.getKey();
+			if (alreadySaved.contains(key)) {
+				continue;
+			}
 
 			if (saveItem.delete) {
 				sectionService.deleteSection(saveItem.section,
 						new AsyncVoidCallBack());
-			} else {
-				final String value = saveItem.getValue();
-				if (at.brandl.lws.notice.shared.Utils.isEmpty(value)) {
-					countDown--;
-					continue;
-				}
-				sectionService.storeSection(
-						createSectionFromSaveItem(saveItem, value),
-						new AsyncVoidCallBack());
+				alreadySaved.add(key);
 			}
+		}
+
+		List<GwtSection> sections = new ArrayList<GwtSection>();
+		for (final SaveItem saveItem : tmpSaveItems) {
+
+			if (saveItem.section != null
+					&& alreadySaved.contains(saveItem.section.getKey())) {
+				continue;
+			}
+
+			final String value = saveItem.getValue();
+			if (at.brandl.lws.notice.shared.Utils.isEmpty(value)) {
+				continue;
+			}
+
+			sections.add(createSectionFromSaveItem(saveItem, value));
+
+			if (saveItem.section != null) {
+				alreadySaved.add(saveItem.section.getKey());
+			}
+		}
+		
+		if (!sections.isEmpty()) {
+			sectionService.storeSection(sections, new AsyncVoidCallBack());
 		}
 	}
 
@@ -278,28 +341,33 @@ public class SectionAdmin extends AbstractAdminTab {
 		@Override
 		public void onFailure(Throwable caught) {
 			super.onFailure(caught);
-			resetFormAtTheEnd();
+			reset();
 		}
 
 		@Override
 		public void onSuccess(Void result) {
-			// if (!dialogBox.isShowing()) {
-			// saveSuccess.center();
-			// saveSuccess.show();
-			// }
-			resetFormAtTheEnd();
+			reset();
 		}
 
 	}
 
 	@Override
 	boolean enableCancel() {
-		return true;
+		return enableSave();
 	}
 
 	@Override
 	boolean enableSave() {
-		return true;
+		for (SaveItem item : saveItems) {
+
+			if (item.section != null) {
+				return true;
+			}
+			if (!at.brandl.lws.notice.shared.Utils.isEmpty(item.getValue())) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 }

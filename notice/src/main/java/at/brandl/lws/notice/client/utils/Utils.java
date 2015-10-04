@@ -47,6 +47,7 @@ public class Utils {
 	public static final String LINE_BREAK = BR;
 	public static final String SEND_BUTTON_STYLE = "sendButton";
 	public static final String DELETED_STYLE = "deleted";
+	public static final String ARCHIVED_STYLE = "archived";
 
 	public static final String SHORTEN_POSTFIX = "...";
 

@@ -57,6 +57,8 @@ public interface Labels extends Messages {
 	String over12();
 	String countOnly();
 	String archived();
+	String archive();
+	String unarchive();
 	String summaries();
 	String forms();
 	String questionnaire();

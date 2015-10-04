@@ -21,11 +21,10 @@ public class SectionServiceImpl extends RemoteServiceServlet implements
 	private final SectionDsDao sectionDao;
 	private AuthorizationServiceImpl authorizationService;
 
-
 	public SectionServiceImpl() {
 		sectionDao = DaoRegistry.get(SectionDsDao.class);
 		authorizationService = new AuthorizationServiceImpl();
-	
+
 	}
 
 	@Override
@@ -37,17 +36,17 @@ public class SectionServiceImpl extends RemoteServiceServlet implements
 
 	}
 
-
 	@Override
-	public void storeSection(GwtSection section)
+	public void storeSection(List<GwtSection> sections)
 			throws IllegalArgumentException {
 		authorizationService.assertCurrentUserIsSectionAdmin();
-		sectionDao.storeSection(section);
+		for (GwtSection section : sections) {
+			sectionDao.storeSection(section);
+		}
 	}
 
 	@Override
-	public void deleteSection(GwtSection section)
-			throws IllegalStateException {
+	public void deleteSection(GwtSection section) throws IllegalStateException {
 		authorizationService.assertCurrentUserIsSectionAdmin();
 		final Collection<String> allSectionKeysToDelete = sectionDao
 				.getAllChildKeys(section.getKey());
@@ -57,11 +56,12 @@ public class SectionServiceImpl extends RemoteServiceServlet implements
 
 	private void sort(List<GwtSection> allSections) {
 		Collections.sort(allSections, new Comparator<GwtSection>() {
-			
+
 			@Override
 			public int compare(GwtSection o1, GwtSection o2) {
-				
-				return Collator.getInstance(Locale.GERMAN).compare(o1.getSectionName(),o2.getSectionName());
+
+				return Collator.getInstance(Locale.GERMAN).compare(
+						o1.getSectionName(), o2.getSectionName());
 			}
 		});
 	}

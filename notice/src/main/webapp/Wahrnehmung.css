@@ -35,6 +35,10 @@ h1 {
 	text-decoration: line-through;
 }
 
+.archived {
+	font-style: italic;
+}
+
 /** Set ids using widget.getElement().setId("idOfElement") */
 #closeButton {
 	margin: 15px 6px 6px;

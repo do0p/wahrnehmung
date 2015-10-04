@@ -90,6 +90,7 @@ public class Search extends VerticalPanel {
 			@Override
 			public void onClick(ClickEvent event) {
 				nameSelection.setIncludeArchived(archived.getValue());
+				sectionSelection.setIncludeArchived(archived.getValue());
 				updateGui();
 				search();
 			}

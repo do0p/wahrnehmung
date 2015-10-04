@@ -30,6 +30,7 @@ public class SectionSelection {
 	private final List<SectionSelectionBox> selectionBoxes;
 	private final Map<String, List<Integer>> sectionSelectionMap = new HashMap<String, List<Integer>>();
 	private boolean updated;
+	private boolean archived;
 
 	private String selectedSectionKey;
 
@@ -56,8 +57,7 @@ public class SectionSelection {
 	}
 
 	private SectionSelectionBox createSelection(String defaultText) {
-		return new SectionSelectionBox("- " + 
-				defaultText + " -");
+		return new SectionSelectionBox("- " + defaultText + " -");
 	}
 
 	public String getSelectedSectionKey() {
@@ -70,7 +70,7 @@ public class SectionSelection {
 		}
 		return null;
 	}
-	
+
 	public int getSelectedSectionKeyLevel() {
 		int size = selectionBoxes.size();
 		for (int i = size - 1; i > -1; i--) {
@@ -94,9 +94,16 @@ public class SectionSelection {
 			@Override
 			public void onSuccess(List<GwtSection> result) {
 
+				for(SectionSelectionBox selectionBox : selectionBoxes) {
+					selectionBox.clear();
+				}
+				
 				final Map<String, List<GwtSection>> children = new HashMap<String, List<GwtSection>>();
 				final SectionSelectionBox parentBox = selectionBoxes.get(0);
 				for (GwtSection section : result) {
+					if (!archived && section.getArchived()) {
+						continue;
+					}
 					if (section.getParentKey() == null) {
 						parentBox.addItem(section.getSectionName(), section
 								.getKey().toString());
@@ -161,7 +168,8 @@ public class SectionSelection {
 			}
 
 			private void addChildren(Map<String, List<GwtSection>> children,
-					String parentKey, int depth, List<String[]> subSelectionItems) {
+					String parentKey, int depth,
+					List<String[]> subSelectionItems) {
 				final List<GwtSection> sections = children.get(parentKey);
 				if (sections != null) {
 					for (GwtSection section : sections) {
@@ -233,7 +241,7 @@ public class SectionSelection {
 	}
 
 	public void reset() {
-		for(SectionSelectionBox box : selectionBoxes) {
+		for (SectionSelectionBox box : selectionBoxes) {
 			box.setSelectedIndex(0);
 		}
 	}
@@ -263,16 +271,24 @@ public class SectionSelection {
 
 		}
 	}
-	
-	
+
 	public void addChangeHandler(ChangeHandler changeHanlder) {
-		for(SectionSelectionBox sectionSelectionBox : selectionBoxes) {
+		for (SectionSelectionBox sectionSelectionBox : selectionBoxes) {
 			sectionSelectionBox.addChangeHandler(changeHanlder);
 		}
 	}
-	
+
 	public boolean hasSelection() {
 		return getSelectedSectionKey() != null;
+	}
+
+
+	public void setIncludeArchived(boolean archived) {
+
+		if (!this.archived == archived) {
+			this.archived = archived;
+			createSectionSelections();
+		}
 	}
 
 }

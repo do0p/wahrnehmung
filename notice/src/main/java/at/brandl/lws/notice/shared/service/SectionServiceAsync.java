@@ -10,7 +10,7 @@ public interface SectionServiceAsync {
 
 	void querySections(AsyncCallback<List<GwtSection>> callback);
 
-	void storeSection(GwtSection section, AsyncCallback<Void> callback);
+	void storeSection(List<GwtSection> sections, AsyncCallback<Void> callback);
 
 	void deleteSection(GwtSection section, AsyncCallback<Void> callback);
 

@@ -37,6 +37,10 @@ public class SectionDsDaoTest extends AbstractDsDaoTest {
 		String sectionName = sectionDao.getSectionName(key);
 		Assert.assertEquals(SECTION_NAME, sectionName);
 
+		GwtSection storedSection = sectionDao.getSection(key);
+		Assert.assertEquals(SECTION_NAME, storedSection.getSectionName());
+		Assert.assertEquals(Boolean.FALSE, storedSection.getArchived());
+		
 		// read all
 		final List<GwtSection> allSections = sectionDao.getAllSections();
 		Assert.assertEquals(1, allSections.size());
@@ -44,9 +48,16 @@ public class SectionDsDaoTest extends AbstractDsDaoTest {
 		// update
 		final String updatedSectionName = "XYZ";
 		section.setSectionName(updatedSectionName);
+		section.setArchived(Boolean.TRUE);
 		sectionDao.storeSection(section);
 		sectionName = sectionDao.getSectionName(key);
 		Assert.assertEquals(updatedSectionName, sectionName);
+		
+		GwtSection updatedSection = sectionDao.getSection(key);
+		Assert.assertEquals(updatedSectionName, updatedSection.getSectionName());
+		Assert.assertEquals(Boolean.TRUE, updatedSection.getArchived());
+	
+		
 		assertServicesContains(key);
 
 		// store duplicate

@@ -9,6 +9,8 @@ import at.brandl.lws.notice.client.utils.Utils;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyPressEvent;
+import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -74,6 +76,16 @@ abstract class AbstractAdminTab extends VerticalPanel {
 		});
 	}
 
+	<T> void addButtonUpdateKeyPressHandler(ValueBoxBase<T> valueBox) {
+		valueBox.addKeyPressHandler(new KeyPressHandler() {
+			
+			@Override
+			public void onKeyPress(KeyPressEvent event) {
+				updateButtonPanel();
+			}
+		});
+	}
+	
 	void addButtonUpdateChangeHandler(CheckBox checkBox) {
 		checkBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
 			@Override
@@ -129,8 +141,8 @@ abstract class AbstractAdminTab extends VerticalPanel {
 			setSpacing(Utils.SPACING);
 			this.showDeleteButton = showDeleteButton;
 			saveButton = new Button(labels.create());
-			deleteButton = new Button(labels().delete());
-			cancelButton = new Button(labels().cancel());
+			deleteButton = new Button(labels.delete());
+			cancelButton = new Button(labels.cancel());
 			saveButton.addClickHandler(new ClickHandler() {
 				@Override
 				public void onClick(ClickEvent event) {

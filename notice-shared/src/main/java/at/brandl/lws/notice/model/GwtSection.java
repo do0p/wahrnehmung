@@ -8,6 +8,7 @@ public class GwtSection implements Serializable{
 	private String sectionName;
 	private String key;
 	private String parentKey;
+	private Boolean archived;
 
 	public String getKey() {
 		return key;
@@ -31,6 +32,14 @@ public class GwtSection implements Serializable{
 
 	public void setParentKey(String parentKey) {
 		this.parentKey = parentKey;
+	}
+
+	public Boolean getArchived() {
+		return archived == null ? Boolean.FALSE : archived;
+	}
+
+	public void setArchived(Boolean archived) {
+		this.archived = archived;
 	}
 
 }

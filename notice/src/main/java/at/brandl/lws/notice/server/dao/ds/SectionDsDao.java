@@ -25,6 +25,7 @@ public class SectionDsDao extends AbstractDsDao {
 
 	public static final String SECTION_KIND = "SectionDs";
 	public static final String SECTION_NAME_FIELD = "sectionName";
+	public static final String SECTION_ARCHIVE_FIELD = "archived";
 	public static final String SECTION_MEMCACHE = "section";
 	
 	private Map<String, List<String>> sectionChildCache;
@@ -71,7 +72,7 @@ public class SectionDsDao extends AbstractDsDao {
 							section.getProperty(SECTION_NAME_FIELD)
 									+ " existiert bereits!");
 				}
-			}
+			} 
 
 			datastoreService.put(section);
 			transaction.commit();
@@ -183,6 +184,7 @@ public class SectionDsDao extends AbstractDsDao {
 			entity = new Entity(toKey(key));
 		}
 		entity.setProperty(SECTION_NAME_FIELD, gwtSection.getSectionName());
+		entity.setProperty(SECTION_ARCHIVE_FIELD, gwtSection.getArchived());
 		return entity;
 	}
 
@@ -190,6 +192,11 @@ public class SectionDsDao extends AbstractDsDao {
 		final GwtSection section = new GwtSection();
 		section.setKey(toString(entity.getKey()));
 		section.setSectionName((String) entity.getProperty(SECTION_NAME_FIELD));
+		Boolean archived = (Boolean) entity.getProperty(SECTION_ARCHIVE_FIELD);
+		if(archived == null) {
+			archived = Boolean.FALSE;
+		}
+		section.setArchived(archived);
 		final Key parentKey = entity.getParent();
 		if (parentKey != null) {
 			section.setParentKey(toString(parentKey));
