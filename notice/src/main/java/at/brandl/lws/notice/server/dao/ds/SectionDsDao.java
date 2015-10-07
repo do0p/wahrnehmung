@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 
 import at.brandl.lws.notice.model.GwtSection;
+import at.brandl.lws.notice.model.ObjectUtils;
 import at.brandl.lws.notice.server.dao.DaoRegistry;
 
 import com.google.appengine.api.datastore.DatastoreService;
@@ -23,6 +24,7 @@ import com.google.appengine.api.datastore.Transaction;
 
 public class SectionDsDao extends AbstractDsDao {
 
+	public static final String SEPARATOR = " / ";
 	public static final String SECTION_KIND = "SectionDs";
 	public static final String SECTION_NAME_FIELD = "sectionName";
 	public static final String SECTION_ARCHIVE_FIELD = "archived";
@@ -37,8 +39,16 @@ public class SectionDsDao extends AbstractDsDao {
 	}
 	
 	public String getSectionName(String sectionKey) {
-		final Entity section = getCachedEntity(toKey(sectionKey), SECTION_MEMCACHE);
-		return (String) section.getProperty(SECTION_NAME_FIELD);
+
+		return getSectionName(toKey(sectionKey));
+	}
+
+	private String getSectionName(Key key) {
+		String name = "";
+		if(key.getParent() != null) {
+			name = getSectionName(key.getParent()) + SEPARATOR; 
+		}
+		return name + getCachedEntity(key, SECTION_MEMCACHE).getProperty(SECTION_NAME_FIELD);
 	}
 
 	public List<GwtSection> getAllSections() {
@@ -166,8 +176,17 @@ public class SectionDsDao extends AbstractDsDao {
 
 	private boolean exists(Entity section, DatastoreService datastoreService) {
 		final Filter filter = createEqualsPredicate(SECTION_NAME_FIELD, section);
+		Key parent = section.getParent();
 		final Query query = new Query(SECTION_KIND).setFilter(filter);
-		return count(query, withDefaults(), datastoreService) > 0;
+		if(parent != null) {
+			query.setAncestor(parent);
+		}
+		for(Entity storedSection : execute(query, withDefaults(), datastoreService)){
+			if(ObjectUtils.equals(parent, storedSection.getParent())) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private Entity toEntity(GwtSection gwtSection) {

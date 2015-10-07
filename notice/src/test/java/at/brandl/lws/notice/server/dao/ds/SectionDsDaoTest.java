@@ -23,6 +23,60 @@ public class SectionDsDaoTest extends AbstractDsDaoTest {
 	public void setUp() {
 		sectionDao = DaoRegistry.get(SectionDsDao.class);
 		section = TestUtils.createSection(null, SECTION_NAME, null);
+
+	}
+
+	@Test
+	public void nameOfSectionWithParent() {
+
+		// create
+		sectionDao.storeSection(section);
+		final String key = section.getKey();
+
+		// child section
+		GwtSection childSection = TestUtils.createSection(null, SECTION_NAME,
+				key);
+		sectionDao.storeSection(childSection);
+		final String childKey = childSection.getKey();
+
+		Assert.assertEquals(SECTION_NAME, sectionDao.getSectionName(key));
+		Assert.assertEquals(SECTION_NAME + SectionDsDao.SEPARATOR + SECTION_NAME,
+				sectionDao.getSectionName(childKey));
+	}
+
+	@Test
+	public void duplicateNamesOnWithDifferentParents() {
+
+		// create
+		sectionDao.storeSection(section);
+		final String key = section.getKey();
+		Assert.assertNotNull(key);
+
+		// child section
+		GwtSection childSection = TestUtils.createSection(null, SECTION_NAME,
+				key);
+		sectionDao.storeSection(childSection);
+		final String childKey = childSection.getKey();
+		Assert.assertNotNull(childKey);
+		assertServicesContains(childKey);
+
+		// child section
+		GwtSection grandChildSection = TestUtils.createSection(null,
+				SECTION_NAME, childKey);
+		sectionDao.storeSection(grandChildSection);
+		final String grandChildKey = grandChildSection.getKey();
+		Assert.assertNotNull(grandChildKey);
+		assertServicesContains(grandChildKey);
+
+		// store duplicate
+		GwtSection childSection2 = TestUtils.createSection(null, SECTION_NAME,
+				key);
+		try {
+			sectionDao.storeSection(childSection2);
+			Assert.fail("should have thrown exception");
+		} catch (IllegalArgumentException e) {
+			// success
+		}
 	}
 
 	@Test
@@ -40,7 +94,7 @@ public class SectionDsDaoTest extends AbstractDsDaoTest {
 		GwtSection storedSection = sectionDao.getSection(key);
 		Assert.assertEquals(SECTION_NAME, storedSection.getSectionName());
 		Assert.assertEquals(Boolean.FALSE, storedSection.getArchived());
-		
+
 		// read all
 		final List<GwtSection> allSections = sectionDao.getAllSections();
 		Assert.assertEquals(1, allSections.size());
@@ -52,12 +106,11 @@ public class SectionDsDaoTest extends AbstractDsDaoTest {
 		sectionDao.storeSection(section);
 		sectionName = sectionDao.getSectionName(key);
 		Assert.assertEquals(updatedSectionName, sectionName);
-		
+
 		GwtSection updatedSection = sectionDao.getSection(key);
 		Assert.assertEquals(updatedSectionName, updatedSection.getSectionName());
 		Assert.assertEquals(Boolean.TRUE, updatedSection.getArchived());
-	
-		
+
 		assertServicesContains(key);
 
 		// store duplicate
