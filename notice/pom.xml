@@ -53,6 +53,22 @@
 			<version>${project.version}</version>
 			<classifier>sources</classifier>
 		</dependency>
+		<dependency>
+			<groupId>com.google.apis</groupId>
+			<artifactId>google-api-services-drive</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.google.api-client</groupId>
+			<artifactId>google-api-client</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.google.oauth-client</groupId>
+			<artifactId>google-oauth-client-appengine</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.google.apis</groupId>
+			<artifactId>google-api-services-script</artifactId>
+		</dependency>
 		<!-- <dependency> <groupId>jstl</groupId> <artifactId>jstl</artifactId> 
 			<version>1.2</version> </dependency> -->
 
@@ -95,7 +111,7 @@
 				</configuration>
 			</plugin>
 
-			
+
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>gwt-maven-plugin</artifactId>
@@ -109,7 +125,7 @@
 					</execution>
 				</executions>
 				<configuration>
-				 	<style>PRETTY</style>
+					<style>PRETTY</style>
 				</configuration>
 			</plugin>
 
