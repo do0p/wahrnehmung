@@ -53,6 +53,7 @@ public class BeobachtungDsDaoTest extends AbstractDsDaoTest {
 	private GwtBeobachtung beobachtung2;
 	private GwtBeobachtung beobachtung3;
 	private GwtBeobachtung beobachtung4;
+	private GwtBeobachtung beobachtung5;
 
 	@Before
 	public void setUp() {
@@ -88,6 +89,9 @@ public class BeobachtungDsDaoTest extends AbstractDsDaoTest {
 				new Date(NOW - HOUR), "beobachtung3");
 		beobachtung4 = createBeobachtung(child2Key, section1Key, user1,
 				new Date(NOW), "beobachtung4");
+		beobachtung5 = createBeobachtung(child1Key, section1Key, user1,
+				new Date(NOW - 100 * HOUR), "beobachtung5");
+		beobachtung5.setArchived(true);
 		final Entity beobachtung1Entity = createBeobachtungEntity(beobachtung1,
 				user1);
 		insertIntoDatastore(beobachtung1Entity);
@@ -95,6 +99,7 @@ public class BeobachtungDsDaoTest extends AbstractDsDaoTest {
 		insertIntoDatastore(createBeobachtungEntity(beobachtung2, user2));
 		insertIntoDatastore(createBeobachtungEntity(beobachtung3, user1));
 		insertIntoDatastore(createBeobachtungEntity(beobachtung4, user1));
+		insertIntoDatastore(createBeobachtungEntity(beobachtung5, user1));
 	}
 
 	@Test
@@ -287,7 +292,25 @@ public class BeobachtungDsDaoTest extends AbstractDsDaoTest {
 		beobachtungsDao.deleteBeobachtung(key);
 		assertServicesContainsNot(key);
 	}
+	
+	@Test
+	public void getArchived() {
+		BeobachtungsFilter filter = createFilter(child1Key, null);
+		filter.setArchived(true);
+		assertEquals(beobachtungsDao.getBeobachtungen(
+				filter, range), beobachtung5);
+	
+	}
 
+	@Test
+	public void getSinceLastDevelopementDialogue() {
+		BeobachtungsFilter filter = createFilter(child1Key, null);
+		filter.setSinceLastDevelopmementDialogue(true);
+		assertEquals(beobachtungsDao.getBeobachtungen(
+				filter, range), beobachtung3, beobachtung2, beobachtung1, beobachtung5);
+	
+	}
+	
 	@Override
 	protected String getMemCacheServiceName() {
 		return BeobachtungDsDao.getCacheName(false);

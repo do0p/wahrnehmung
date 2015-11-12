@@ -91,11 +91,19 @@ public class BeobachtungDsDao extends AbstractDsDao {
 			filter.setSinceLastDevelopmementDialogue(false);
 		}
 		String origChildKey = filter.getChildKey();
+		
+		boolean sinceLastDevelopmementDialogue = filter.isSinceLastDevelopmementDialogue();
 		for (String childKey : childKeys) {
 			filter.setChildKey(childKey);
-			List<GwtBeobachtung> beobachtungen = getCachedBeobachtungen(filter,
-					childKey, oldestEntry);
-			result.addAll(beobachtungen);
+			result.addAll(getCachedBeobachtungen(filter,
+					childKey, oldestEntry));
+			
+			if(sinceLastDevelopmementDialogue) {
+				filter.setArchived(!filter.isArchived());
+				result.addAll(getCachedBeobachtungen(filter,
+						childKey, oldestEntry));
+				filter.setArchived(!filter.isArchived());
+			}
 		}
 		filter.setChildKey(origChildKey);
 		return result;
@@ -108,6 +116,7 @@ public class BeobachtungDsDao extends AbstractDsDao {
 	@SuppressWarnings("unchecked")
 	private List<GwtBeobachtung> getCachedBeobachtungen(
 			BeobachtungsFilter filter, String childKey, Date oldestEntry) {
+		
 		List<GwtBeobachtung> beobachtungen;
 		boolean archived = filter.isArchived();
 		if (!getCache(getCacheName(archived)).contains(filter)
@@ -833,6 +842,11 @@ public class BeobachtungDsDao extends AbstractDsDao {
 			DatastoreService datastoreService) {
 		return beobachtungenExist(sectionKeys, datastoreService, false)
 				|| beobachtungenExist(sectionKeys, datastoreService, true);
+	}
+
+	public Iterator<GwtBeobachtung> getBeobachtungen(Collection<String> ids) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

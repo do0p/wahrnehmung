@@ -13,7 +13,7 @@
 	<properties>
 		<appengine.app.version>${project.version}</appengine.app.version>
 		<appengine.app.id>wahrnehmung-test</appengine.app.id>
-		<appengine.target.version>1.9.19</appengine.target.version>
+		<appengine.target.version>1.9.28</appengine.target.version>
 		<gwt.target.version>2.7.0-rc1</gwt.target.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
@@ -79,6 +79,11 @@
 				<groupId>com.google.apis</groupId>
 				<artifactId>google-api-services-script</artifactId>
 				<version>v1-rev1-1.20.0</version>
+			</dependency>
+			<dependency>
+				<groupId>com.google.appengine.tools</groupId>
+				<artifactId>appengine-gcs-client</artifactId>
+				<version>0.5</version>
 			</dependency>
 			<!-- <dependency> <groupId>jstl</groupId> <artifactId>jstl</artifactId> 
 				<version>1.2</version> </dependency> -->
@@ -168,7 +173,7 @@
 											appengine-maven-plugin
 										</artifactId>
 										<versionRange>
-											[1.9.17,)
+											[1.9.28,)
 										</versionRange>
 										<goals>
 											<goal>enhance</goal>
