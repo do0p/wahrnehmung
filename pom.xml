@@ -5,7 +5,7 @@
 
 	<groupId>at.brandl.lws.notice</groupId>
 	<artifactId>parent</artifactId>
-	<version>17</version>
+	<version>18</version>
 	<packaging>pom</packaging>
 
 	<name>Notice parent</name>
