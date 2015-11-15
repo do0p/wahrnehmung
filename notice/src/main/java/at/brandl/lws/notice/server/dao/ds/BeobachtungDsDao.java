@@ -80,8 +80,45 @@ public class BeobachtungDsDao extends AbstractDsDao {
 
 	private List<GwtBeobachtung> getBeobachtungen(BeobachtungsFilter filter) {
 
-		final List<GwtBeobachtung> result = new ArrayList<GwtBeobachtung>();
+		List<GwtBeobachtung> result = new ArrayList<GwtBeobachtung>();
+		String origChildKey = filter.getChildKey();
 		Collection<String> childKeys = getChildKeys(filter);
+
+		Date oldestEntry = setTimeRangeForMultiChildQueries(filter, childKeys);
+
+		for (String childKey : childKeys) {
+
+			filter.setChildKey(childKey);
+
+			Map<String, Collection<GwtBeobachtung>> childResult = new HashMap<>(
+					getCachedBeobachtungen(filter, childKey, oldestEntry));
+
+			if (filter.isSinceLastDevelopmementDialogue()) {
+
+				filter.setArchived(!filter.isArchived());
+				Map<String, Collection<GwtBeobachtung>> cachedBeobachtungen = getCachedBeobachtungen(
+						filter, childKey, oldestEntry);
+				filter.setArchived(!filter.isArchived());
+
+				merge(childResult, cachedBeobachtungen);
+			}
+
+			if (filter.isShowSummaries()) {
+
+				addSummaries(childResult);
+			}
+
+			result.addAll(getBeobachtungenForDisplay(childResult.values(),
+					filter.isShowEmptyEntries()));
+		}
+
+		filter.setChildKey(origChildKey);
+		return result;
+	}
+
+	private Date setTimeRangeForMultiChildQueries(BeobachtungsFilter filter,
+			Collection<String> childKeys) {
+
 		Date oldestEntry = null;
 		if (childKeys.size() > 1) {
 			oldestEntry = getOldestEntry(filter);
@@ -90,23 +127,42 @@ public class BeobachtungDsDao extends AbstractDsDao {
 			}
 			filter.setSinceLastDevelopmementDialogue(false);
 		}
-		String origChildKey = filter.getChildKey();
-		
-		boolean sinceLastDevelopmementDialogue = filter.isSinceLastDevelopmementDialogue();
-		for (String childKey : childKeys) {
-			filter.setChildKey(childKey);
-			result.addAll(getCachedBeobachtungen(filter,
-					childKey, oldestEntry));
-			
-			if(sinceLastDevelopmementDialogue) {
-				filter.setArchived(!filter.isArchived());
-				result.addAll(getCachedBeobachtungen(filter,
-						childKey, oldestEntry));
-				filter.setArchived(!filter.isArchived());
+		return oldestEntry;
+	}
+
+	private void addSummaries(
+			Map<String, Collection<GwtBeobachtung>> childResult) {
+
+		for (String sectionName : childResult.keySet()) {
+
+			Collection<GwtBeobachtung> beobachtungen = childResult
+					.get(sectionName);
+
+			if (!beobachtungen.isEmpty()) {
+
+				GwtBeobachtung summary = createSummary(beobachtungen,
+						sectionName);
+				beobachtungen.add(summary);
 			}
 		}
-		filter.setChildKey(origChildKey);
-		return result;
+	}
+
+	private <T> void merge(Map<String, Collection<T>> target,
+			Map<String, Collection<T>> source) {
+
+		for (Entry<String, Collection<T>> entry : source.entrySet()) {
+
+			String key = entry.getKey();
+			if (target.containsKey(key)) {
+
+				List<T> beobachtungen = new ArrayList<T>(target.get(key));
+				beobachtungen.addAll(entry.getValue());
+				target.put(key, beobachtungen);
+
+			} else {
+				target.put(key, entry.getValue());
+			}
+		}
 	}
 
 	private Date getOldestEntry(BeobachtungsFilter filter) {
@@ -114,21 +170,31 @@ public class BeobachtungDsDao extends AbstractDsDao {
 	}
 
 	@SuppressWarnings("unchecked")
-	private List<GwtBeobachtung> getCachedBeobachtungen(
+	private Map<String, Collection<GwtBeobachtung>> getCachedBeobachtungen(
 			BeobachtungsFilter filter, String childKey, Date oldestEntry) {
-		
-		List<GwtBeobachtung> beobachtungen;
-		boolean archived = filter.isArchived();
-		if (!getCache(getCacheName(archived)).contains(filter)
-				|| updateNeeded(childKey)) {
+
+		Map<String, Collection<GwtBeobachtung>> beobachtungen;
+		MemcacheService cache = getCache(getCacheName(filter.isArchived()));
+
+		if (!cache.contains(filter) || updateNeeded(childKey)) {
 			beobachtungen = getBeobachtungen(childKey, filter, oldestEntry);
-			getCache(getCacheName(archived)).put(filter, beobachtungen);
+			cache.put(filter, beobachtungen);
 		} else {
-			beobachtungen = (List<GwtBeobachtung>) getCache(
-					getCacheName(archived)).get(filter);
+			beobachtungen = (Map<String, Collection<GwtBeobachtung>>) cache
+					.get(filter);
 		}
 
 		return beobachtungen;
+	}
+
+	private <T> Map<String, Collection<T>> convertToMap(
+			Multimap<String, T> beobachtungen) {
+
+		HashMap<String, Collection<T>> result = new HashMap<>();
+		for (String key : beobachtungen.keySet()) {
+			result.put(key, new ArrayList<T>(beobachtungen.get(key)));
+		}
+		return result;
 	}
 
 	private Collection<String> getChildKeys(BeobachtungsFilter filter) {
@@ -174,73 +240,55 @@ public class BeobachtungDsDao extends AbstractDsDao {
 		return section.getParentKey() != null;
 	}
 
-	private List<GwtBeobachtung> getBeobachtungen(String childKey,
-			BeobachtungsFilter filter, Date oldestEntry) {
-		GwtChild child = childDao.getChild(childKey);
+	private Map<String, Collection<GwtBeobachtung>> getBeobachtungen(
+			String childKey, BeobachtungsFilter filter, Date oldestEntry) {
 
 		Multimap<String, GwtBeobachtung> allBeobachtungen = getAllGwtBeobachtungen(
-				childKey, filter.getSectionKey(), oldestEntry, filter.isArchived());
+				childKey, filter.getSectionKey(), oldestEntry,
+				filter.isArchived());
 
-		Predicate<Entry<String, GwtBeobachtung>> mapFilter = createFilter(
-				child, filter);
-
+		GwtChild child = childDao.getChild(childKey);
 		Multimap<String, GwtBeobachtung> filteredBeobachtungen = Multimaps
-				.filterEntries(allBeobachtungen, mapFilter);
-		List<GwtBeobachtung> result = new ArrayList<GwtBeobachtung>();
+				.filterEntries(allBeobachtungen, createFilter(child, filter));
 
-		if (filter.isShowSummaries()) {
-			for (String sectionKey : filteredBeobachtungen.keySet()) {
-
-				Collection<GwtBeobachtung> beobachtungen = filteredBeobachtungen
-						.get(sectionKey);
-
-				if (beobachtungen.isEmpty()) {
-					continue;
-				}
-
-				GwtBeobachtung summary = createSummary(beobachtungen,
-						sectionKey);
-				result.add(summary);
-			}
-		}
-		Collection<GwtBeobachtung> values = filteredBeobachtungen.values();
-		result.addAll(getBeobachtungenForDisplay(values,
-				filter.isShowEmptyEntries()));
-		return result;
+		return convertToMap(filteredBeobachtungen);
 	}
 
 	private HashSet<GwtBeobachtung> getBeobachtungenForDisplay(
-			Collection<GwtBeobachtung> beobachtungen, boolean showEmptyEntries) {
+			Collection<Collection<GwtBeobachtung>> allBeobachtungen,
+			boolean showEmptyEntries) {
+
 		HashSet<GwtBeobachtung> result = new HashSet<GwtBeobachtung>();
-		if (showEmptyEntries) {
-			result.addAll(beobachtungen);
-		} else {
-			for (GwtBeobachtung beobachtung : beobachtungen) {
-				String text = beobachtung.getText();
-				if (text == null || text.isEmpty() || text.equals("<br>")) {
-					continue;
+		for (Collection<GwtBeobachtung> beobachtungen : allBeobachtungen) {
+			if (showEmptyEntries) {
+				result.addAll(beobachtungen);
+			} else {
+				for (GwtBeobachtung beobachtung : beobachtungen) {
+					String text = beobachtung.getText();
+					if (text == null || text.isEmpty() || text.equals("<br>")) {
+						continue;
+					}
+					result.add(beobachtung);
 				}
-				result.add(beobachtung);
 			}
 		}
 		return result;
 	}
 
 	private GwtBeobachtung createSummary(
-			Collection<GwtBeobachtung> beobachtungen, String sectionKey) {
+			Collection<GwtBeobachtung> beobachtungen, String sectionName) {
 
 		ResourceBundle bundle = ResourceBundle.getBundle("messages");
 
 		List<GwtBeobachtung> tmpList = getSortedList(beobachtungen);
 		GwtBeobachtung lastBeobachtung = tmpList.get(0);
 		GwtBeobachtung firstBeobachtung = tmpList.get(tmpList.size() - 1);
-		String sectionName = sectionDao.getSectionName(sectionKey);
 		String childName = firstBeobachtung.getChildName();
 		Date startDate = firstBeobachtung.getDate();
 		Date endDate = lastBeobachtung.getDate();
 		GwtSummary summary = new GwtSummary();
 		summary.setChildKey(firstBeobachtung.getChildKey());
-		summary.setSectionKey(sectionKey);
+		summary.setSectionKey(sectionName);
 		summary.setChildName(childName);
 		summary.setSectionName(sectionName);
 		summary.setDate(new Date());
@@ -285,7 +333,6 @@ public class BeobachtungDsDao extends AbstractDsDao {
 
 			@Override
 			public boolean apply(Entry<String, GwtBeobachtung> entry) {
-				String sectionKey = entry.getKey();
 				GwtBeobachtung beobachtung = entry.getValue();
 
 				final String user = filter.getUser();
@@ -295,7 +342,8 @@ public class BeobachtungDsDao extends AbstractDsDao {
 				}
 
 				if (filter.getSectionKey() != null
-						&& !filter.getSectionKey().equals(sectionKey)) {
+						&& !filter.getSectionKey().equals(
+								beobachtung.getSectionKey())) {
 					return false;
 				}
 
@@ -371,8 +419,10 @@ public class BeobachtungDsDao extends AbstractDsDao {
 		return result;
 	}
 
-	private String createKey(String childKey, String sectionKey, Date oldestEntry) {
-		return childKey + (oldestEntry == null ? "" : oldestEntry.getTime()) + (sectionKey == null ? "" : sectionKey);
+	private String createKey(String childKey, String sectionKey,
+			Date oldestEntry) {
+		return childKey + (oldestEntry == null ? "" : oldestEntry.getTime())
+				+ (sectionKey == null ? "" : sectionKey);
 	}
 
 	private Multimap<String, GwtBeobachtung> getAllBeobachtungen(
@@ -394,7 +444,8 @@ public class BeobachtungDsDao extends AbstractDsDao {
 					throw new IllegalArgumentException(
 							"unknown section with key " + sectionKey);
 				}
-				sectionToBeobachtung.put(sectionKey, gwtBeobachtung);
+				sectionToBeobachtung.put(gwtBeobachtung.getSectionName(),
+						gwtBeobachtung);
 
 				setParentSections(section, gwtBeobachtung, sectionToBeobachtung);
 			} catch (RuntimeException e) {
@@ -462,7 +513,8 @@ public class BeobachtungDsDao extends AbstractDsDao {
 			GwtSection parentSection = sectionDao.getSection(parentKey);
 			// do not summarize in the top level
 			if (parentSection.getParentKey() != null) {
-				sectionToBeobachtung.put(parentKey, gwtBeobachtung);
+				sectionToBeobachtung.put(sectionDao.getSectionName(parentKey),
+						gwtBeobachtung);
 				setParentSections(parentSection, gwtBeobachtung,
 						sectionToBeobachtung);
 			}
@@ -842,11 +894,6 @@ public class BeobachtungDsDao extends AbstractDsDao {
 			DatastoreService datastoreService) {
 		return beobachtungenExist(sectionKeys, datastoreService, false)
 				|| beobachtungenExist(sectionKeys, datastoreService, true);
-	}
-
-	public Iterator<GwtBeobachtung> getBeobachtungen(Collection<String> ids) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 }

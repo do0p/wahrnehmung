@@ -1,4 +1,5 @@
 package at.brandl.lws.notice.server.dao.ds;
+
 import static at.brandl.lws.notice.TestUtils.createBeobachtung;
 import static at.brandl.lws.notice.TestUtils.createBeobachtungEntity;
 import static at.brandl.lws.notice.TestUtils.createChildEntity;
@@ -42,6 +43,8 @@ public class BeobachtungDsDaoWithSummariesTest extends AbstractDsDaoTest {
 	private String section1Key;
 	private String section2Key;
 	private String section3Key;
+	private String section4Key;
+	private String section5Key;
 
 	private BeobachtungDsDao beobachtungsDao;
 
@@ -52,6 +55,7 @@ public class BeobachtungDsDaoWithSummariesTest extends AbstractDsDaoTest {
 	private GwtBeobachtung beobachtung2;
 	private GwtBeobachtung beobachtung3;
 	private GwtBeobachtung beobachtung4;
+	private GwtBeobachtung beobachtung5;
 
 	@Before
 	public void setUp() {
@@ -69,15 +73,21 @@ public class BeobachtungDsDaoWithSummariesTest extends AbstractDsDaoTest {
 		child2Key = TestUtils.toString(child2.getKey());
 
 		final Entity section3 = createSectionEntity(SECTION_NAME3, null);
+		final Entity section4 = createSectionEntity(SECTION_NAME3, null);
 		insertIntoDatastore(section3);
+		insertIntoDatastore(section4);
 		section3Key = TestUtils.toString(section3.getKey());
+		section4Key = TestUtils.toString(section4.getKey());
 
 		final Entity section1 = createSectionEntity(SECTION_NAME1, section3Key);
 		final Entity section2 = createSectionEntity(SECTION_NAME2, section3Key);
+		final Entity section5 = createSectionEntity(SECTION_NAME2, section4Key);
 		insertIntoDatastore(section1);
 		insertIntoDatastore(section2);
+		insertIntoDatastore(section5);
 		section1Key = TestUtils.toString(section1.getKey());
 		section2Key = TestUtils.toString(section2.getKey());
+		section5Key = TestUtils.toString(section5.getKey());
 
 		beobachtung1 = createBeobachtung(child1Key, section2Key, user1,
 				new Date(NOW - 3 * HOUR), "beobachtung1");
@@ -87,6 +97,9 @@ public class BeobachtungDsDaoWithSummariesTest extends AbstractDsDaoTest {
 				new Date(NOW - HOUR), "beobachtung3");
 		beobachtung4 = createBeobachtung(child2Key, section1Key, user1,
 				new Date(NOW), "beobachtung4");
+		beobachtung5 = createBeobachtung(child1Key, section5Key, user1,
+				new Date(NOW - 100 * HOUR), "beobachtung5");
+		beobachtung5.setArchived(true);
 		final Entity beobachtung1Entity = createBeobachtungEntity(beobachtung1,
 				user1);
 		insertIntoDatastore(beobachtung1Entity);
@@ -94,6 +107,8 @@ public class BeobachtungDsDaoWithSummariesTest extends AbstractDsDaoTest {
 		insertIntoDatastore(createBeobachtungEntity(beobachtung2, user2));
 		insertIntoDatastore(createBeobachtungEntity(beobachtung3, user1));
 		insertIntoDatastore(createBeobachtungEntity(beobachtung4, user1));
+		insertIntoDatastore(createBeobachtungEntity(beobachtung5, user1));
+
 	}
 
 	@Test
@@ -285,6 +300,26 @@ public class BeobachtungDsDaoWithSummariesTest extends AbstractDsDaoTest {
 		assertServicesContainsNot(key);
 	}
 
+	@Test
+	public void getArchived() {
+		BeobachtungsFilter filter = createFilterWithSummaries(child1Key, null);
+		filter.setArchived(true);
+		List<GwtBeobachtung> beobachtungen = beobachtungsDao.getBeobachtungen(
+				filter, range);
+		Assert.assertEquals(2, beobachtungen.size());
+		Assert.assertEquals(beobachtungen.get(1), beobachtung5);
+	}
+
+	@Test
+	public void getSinceLastDevelopementDialogue() {
+		BeobachtungsFilter filter = createFilterWithSummaries(child1Key, null);
+		filter.setSinceLastDevelopmementDialogue(true);
+		List<GwtBeobachtung> beobachtungen = beobachtungsDao.getBeobachtungen(
+				filter, range);
+		Assert.assertEquals(7, beobachtungen.size());
+	}
+	
+	
 	@Override
 	protected String getMemCacheServiceName() {
 		return BeobachtungDsDao.getCacheName(false);

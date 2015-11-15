@@ -108,8 +108,6 @@ public class BeobachtungsFilter implements Serializable {
 				+ ((childKey == null) ? 0 : childKey.hashCode());
 		result = prime * result
 				+ ((sectionKey == null) ? 0 : sectionKey.hashCode());
-		result = prime * result + (showEmptyEntries ? 1231 : 1237);
-		result = prime * result + (showSummaries ? 1231 : 1237);
 		result = prime * result
 				+ (sinceLastDevelopmementDialogue ? 1231 : 1237);
 		result = prime * result + Arrays.hashCode(timeRange);
@@ -138,10 +136,6 @@ public class BeobachtungsFilter implements Serializable {
 			if (other.sectionKey != null)
 				return false;
 		} else if (!sectionKey.equals(other.sectionKey))
-			return false;
-		if (showEmptyEntries != other.showEmptyEntries)
-			return false;
-		if (showSummaries != other.showSummaries)
 			return false;
 		if (sinceLastDevelopmementDialogue != other.sinceLastDevelopmementDialogue)
 			return false;
