@@ -57,6 +57,16 @@
     <servlet-name>authServlet</servlet-name>
     <url-pattern>/wahrnehmung/auth</url-pattern>
   </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>docServlet</servlet-name>
+    <url-pattern>/wahrnehmung/doc</url-pattern>
+  </servlet-mapping>  
+  <servlet>
+    <servlet-name>docServlet</servlet-name>
+    <servlet-class>at.brandl.lws.notice.server.service.DocServiceImpl</servlet-class>
+  </servlet>
+
+  
   <security-constraint>
     <web-resource-collection>
       <web-resource-name>/*</web-resource-name>
