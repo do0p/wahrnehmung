@@ -95,8 +95,20 @@
 	</dependencies>
 
 	<build>
-		<plugins>
+	
+		<resources>
+			<resource>
+				<directory>C:/Users/Dominik/Google Drive/LWS/wahrnehmung</directory>
+				<includes>
+					<include>client_secret.json</include>
+				</includes>
+			</resource>
+			<resource>
+				<directory>${basedir}/src/main/resources</directory>
+			</resource>
+		</resources>
 
+		<plugins>
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

@@ -5,6 +5,7 @@ import at.brandl.lws.notice.client.utils.Navigation;
 import at.brandl.lws.notice.client.utils.PopUp;
 import at.brandl.lws.notice.client.utils.Utils;
 import at.brandl.lws.notice.model.Authorization;
+import at.brandl.lws.notice.model.UserGrantRequiredException;
 import at.brandl.lws.notice.shared.service.DocsService;
 import at.brandl.lws.notice.shared.service.DocsServiceAsync;
 
@@ -23,7 +24,7 @@ public class Documentation extends VerticalPanel {
 	private final Labels labels = (Labels) GWT.create(Labels.class);
 	private final DocsServiceAsync docService = (DocsServiceAsync) GWT
 			.create(DocsService.class);
-	
+
 	private final NameSelection nameSelection;
 
 	public Documentation(Authorization authorization, Navigation navigation) {
@@ -33,32 +34,38 @@ public class Documentation extends VerticalPanel {
 	}
 
 	private void layout() {
-		
+
 		nameSelection.setSize(Utils.NAMESELECTION_WIDTH + Utils.PIXEL,
 				Utils.ROW_HEIGHT - 12 + Utils.PIXEL);
 		add(nameSelection);
-		
+
 		Utils.formatCenter(this, createButtonContainer());
 	}
 
-	
 	private Panel createButtonContainer() {
 		final Grid buttonContainer = new Grid(1, 1);
 
 		final Button printButton = new Button(labels.print());
 		printButton.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
-				docService.printDocumentation(nameSelection.getSelectedChildKey(), false, 2015, new AsyncCallback<String>() {
-					
-					@Override
-					public void onSuccess(String result) {
-						Window.open(result, "_blank", "");
-					}
-					
-					@Override
-					public void onFailure(Throwable caught) {
-					}
-				});
+				docService.printDocumentation(
+						nameSelection.getSelectedChildKey(), false, 2015,
+						new AsyncCallback<String>() {
+
+							@Override
+							public void onSuccess(String result) {
+								Window.open(result, "_blank", "");
+							}
+
+							@Override
+							public void onFailure(Throwable caught) {
+								if (caught instanceof UserGrantRequiredException) {
+									Window.Location
+											.assign(((UserGrantRequiredException) caught)
+													.getAuthorizationUrl());
+								}
+							}
+						});
 			}
 		});
 
@@ -66,9 +73,7 @@ public class Documentation extends VerticalPanel {
 				+ Utils.PIXEL);
 		buttonContainer.setWidget(0, 0, printButton);
 
-
 		return buttonContainer;
 	}
-
 
 }

@@ -2,7 +2,7 @@ package at.brandl.lws.notice.server.service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.security.GeneralSecurityException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -10,17 +10,16 @@ import java.util.List;
 import at.brandl.lws.notice.model.BeobachtungsFilter;
 import at.brandl.lws.notice.model.GwtBeobachtung;
 import at.brandl.lws.notice.model.GwtChild;
+import at.brandl.lws.notice.model.UserGrantRequiredException;
 import at.brandl.lws.notice.server.dao.DaoRegistry;
 import at.brandl.lws.notice.server.dao.ds.BeobachtungDsDao;
 import at.brandl.lws.notice.server.dao.ds.ChildDsDao;
 import at.brandl.lws.notice.shared.service.DocsService;
 
+import com.google.api.client.auth.oauth2.AuthorizationCodeFlow;
+import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
-import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
-import com.google.api.client.http.AbstractInputStreamContent;
 import com.google.api.client.http.ByteArrayContent;
-import com.google.api.client.http.HttpTransport;
-import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.Drive.Files.Insert;
 import com.google.api.services.drive.DriveScopes;
@@ -28,10 +27,13 @@ import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
 import com.google.api.services.drive.model.ParentReference;
 import com.google.api.services.drive.model.Permission;
+import com.google.api.services.script.Script;
+import com.google.api.services.script.model.ExecutionRequest;
 import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.Storage.Objects.Get;
 import com.google.api.services.storage.StorageScopes;
 import com.google.api.services.storage.model.StorageObject;
+import com.google.appengine.api.users.UserServiceFactory;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
@@ -39,16 +41,19 @@ import com.google.gwt.view.client.Range;
 
 public class DocServiceImpl extends RemoteServiceServlet implements DocsService {
 
+	private static final String SCRIPT_NAME = "documentUpdate";
+	// private static final String SCRIPT_TYPE =
+	// "application/vnd.google-apps.script";
 	private static final String FOLDER_TYPE = "application/vnd.google-apps.folder";
 	private static final String APPLICATION_NAME = "wahrnehmung-test";
 	private static final String BUCKET = APPLICATION_NAME + ".appspot.com";
 	private static final long serialVersionUID = 6254413733240094242L;
 	private static final String TEMPLATE_FILE = "template.docx";
 	private static final Range ALL = new Range(0, Integer.MAX_VALUE);
-	private static final JacksonFactory JSON_FACTORY = JacksonFactory
-			.getDefaultInstance();
+	private static final String SCRIPT_PROJECT_KEY = "MG_5zR_lIyT2fsbjXj3xcFocrZYMzalMr";
 
 	private static Storage storageService;
+	private static Script scriptService;
 
 	private final BeobachtungDsDao noticeDao;
 	private final ChildDsDao childDao;
@@ -61,7 +66,8 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 	}
 
 	@Override
-	public String printDocumentation(String childKey, boolean overwrite, int year) {
+	public String printDocumentation(String childKey, boolean overwrite,
+			int year) throws UserGrantRequiredException {
 
 		GwtChild child = getChild(childKey);
 		File file = createDocument(createTitle(child));
@@ -118,9 +124,19 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 		return noticesPerSection;
 	}
 
-	private void updateDocument(GwtChild child, File file) {
-		// TODO Auto-generated method stub
+	private void updateDocument(GwtChild child, File file) throws UserGrantRequiredException {
+		ExecutionRequest request = new ExecutionRequest();
+		request.setFunction(SCRIPT_NAME);
 
+		List<Object> parameters = new ArrayList<Object>();
+		parameters.add(file.getId());
+		parameters.add(child.getLastName());
+		request.setParameters(parameters);
+		try {
+			getScript().scripts().run(SCRIPT_PROJECT_KEY, request).execute();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	private GwtChild getChild(String childKey) {
@@ -142,7 +158,7 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 			File file;
 			String folderName = "Berichte 2015/2016";
 			FileList files = getDrive().files().list()
-					.setQ(createFolderQuery(folderName)).execute();
+					.setQ(createQuery(folderName, FOLDER_TYPE)).execute();
 
 			int numFiles = files.getItems().size();
 			if (numFiles == 0) {
@@ -167,9 +183,8 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 		}
 	}
 
-	private String createFolderQuery(String folderName) {
-		return "title = '" + folderName + "' and mimeType = '" + FOLDER_TYPE
-				+ "' and 'root' in parents";
+	private String createQuery(String title, String type) {
+		return "title = '" + title + "' and mimeType = '" + type + "'";
 	}
 
 	private File createFile(String title, String mimeType,
@@ -204,7 +219,7 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 			throw new RuntimeException(e);
 		}
 	}
-	
+
 	private ByteArrayContent getTemplateFile() {
 
 		try {
@@ -249,50 +264,19 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 		return filter;
 	}
 
-	public String uploadFile(File file) throws IOException {
-
-		File newFile = new File();
-		Drive drive = getDrive();
-
-		AbstractInputStreamContent content = null;// new ByteArrayContent(type,
-													// array);
-		file = drive.files().insert(file, content).execute();
-		return file.getId();
-	}
-
-	private String listFiles() throws IOException {
-
-		Drive drive = getDrive();
-
-		FileList fileList = drive.files().list().execute();
-		return fileList.toPrettyString();
-	}
-
 	private Drive getDrive() {
-
-		// HttpRequestInitializer httpRequestInitializer = new
-		// AppIdentityCredential(
-		// SCOPES);
 
 		if (null == driveService) {
 			try {
 				GoogleCredential credential = GoogleCredential
 						.getApplicationDefault();
-				// Depending on the environment that provides the default
-				// credentials (e.g. Compute Engine,
-				// App Engine), the credentials may require us to specify the
-				// scopes we need explicitly.
-				// Check for this case, and inject the Cloud Storage scope if
-				// required.
 				if (credential.createScopedRequired()) {
 					credential = credential.createScoped(DriveScopes.all());
 				}
-				HttpTransport httpTransport = GoogleNetHttpTransport
-						.newTrustedTransport();
-				driveService = new Drive.Builder(httpTransport, JSON_FACTORY,
-						credential).setApplicationName(APPLICATION_NAME)
-						.build();
-			} catch (IOException | GeneralSecurityException e) {
+				driveService = new Drive.Builder(Utils.HTTP_TRANSPORT,
+						Utils.JSON_FACTORY, credential).setApplicationName(
+						APPLICATION_NAME).build();
+			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
 		}
@@ -304,30 +288,53 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 	 * Cloud Storage.
 	 */
 	private static Storage getStorage() {
+
 		if (null == storageService) {
 			try {
 				GoogleCredential credential = GoogleCredential
 						.getApplicationDefault();
-				// Depending on the environment that provides the default
-				// credentials (e.g. Compute Engine,
-				// App Engine), the credentials may require us to specify the
-				// scopes
-				// we need explicitly.
-				// Check for this case, and inject the Cloud Storage scope if
-				// required.
 				if (credential.createScopedRequired()) {
 					credential = credential.createScoped(StorageScopes.all());
 				}
-				HttpTransport httpTransport = GoogleNetHttpTransport
-						.newTrustedTransport();
-				storageService = new Storage.Builder(httpTransport,
-						JSON_FACTORY, credential).setApplicationName(
+				storageService = new Storage.Builder(Utils.HTTP_TRANSPORT,
+						Utils.JSON_FACTORY, credential).setApplicationName(
 						APPLICATION_NAME).build();
-			} catch (IOException | GeneralSecurityException e) {
+			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
 		}
 		return storageService;
 	}
 
+	/**
+	 * Returns an authenticated Storage object used to make service calls to
+	 * Cloud Storage.
+	 * @throws UserGrantRequiredException 
+	 */
+	private static Script getScript() throws UserGrantRequiredException {
+
+		if (null == scriptService) {
+			try {
+
+				AuthorizationCodeFlow flow = Utils.newFlow();
+				Credential credential = flow.loadCredential(getUserId());
+				if (credential == null) {
+					throw new UserGrantRequiredException(flow.newAuthorizationUrl().build());
+				}
+
+				scriptService = new Script.Builder(Utils.HTTP_TRANSPORT,
+						Utils.JSON_FACTORY, credential).setApplicationName(
+						APPLICATION_NAME).build();
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+		return scriptService;
+	}
+
+
+	private static String getUserId() {
+
+		return UserServiceFactory.getUserService().getCurrentUser().getUserId();
+	}
 }
