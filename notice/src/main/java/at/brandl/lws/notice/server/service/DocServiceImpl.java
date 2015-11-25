@@ -14,9 +14,11 @@ import at.brandl.lws.notice.model.UserGrantRequiredException;
 import at.brandl.lws.notice.server.dao.DaoRegistry;
 import at.brandl.lws.notice.server.dao.ds.BeobachtungDsDao;
 import at.brandl.lws.notice.server.dao.ds.ChildDsDao;
+import at.brandl.lws.notice.server.service.Utils.StateParser;
 import at.brandl.lws.notice.shared.service.DocsService;
 
 import com.google.api.client.auth.oauth2.AuthorizationCodeFlow;
+import com.google.api.client.auth.oauth2.AuthorizationCodeRequestUrl;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.ByteArrayContent;
@@ -28,6 +30,7 @@ import com.google.api.services.drive.model.FileList;
 import com.google.api.services.drive.model.ParentReference;
 import com.google.api.services.drive.model.Permission;
 import com.google.api.services.script.Script;
+import com.google.api.services.script.Script.Scripts.Run;
 import com.google.api.services.script.model.ExecutionRequest;
 import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.Storage.Objects.Get;
@@ -41,7 +44,7 @@ import com.google.gwt.view.client.Range;
 
 public class DocServiceImpl extends RemoteServiceServlet implements DocsService {
 
-	private static final String SCRIPT_NAME = "documentUpdate";
+	private static final String SCRIPT_NAME = "searchAndReplace";
 	// private static final String SCRIPT_TYPE =
 	// "application/vnd.google-apps.script";
 	private static final String FOLDER_TYPE = "application/vnd.google-apps.folder";
@@ -53,7 +56,6 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 	private static final String SCRIPT_PROJECT_KEY = "MG_5zR_lIyT2fsbjXj3xcFocrZYMzalMr";
 
 	private static Storage storageService;
-	private static Script scriptService;
 
 	private final BeobachtungDsDao noticeDao;
 	private final ChildDsDao childDao;
@@ -71,7 +73,8 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 
 		GwtChild child = getChild(childKey);
 		File file = createDocument(createTitle(child));
-		updateDocument(child, file);
+		updatePermissions(file, "writer");
+		updateDocument(child, file, overwrite, year);
 
 		Collection<GwtBeobachtung> childNotices = fetchNotices(childKey);
 		Multimap<String, GwtBeobachtung> sectionNotices = groupNoticesPerSection(childNotices);
@@ -81,8 +84,6 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 			Collection<GwtBeobachtung> notices = sectionNotices.get(sectionKey);
 			updateDocument(sectionKey, notices);
 		}
-
-		updatePermissions(file, "writer");
 
 		return file.getDefaultOpenWithLink();
 	}
@@ -95,7 +96,7 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 		permission.setType("group");
 		try {
 			getDrive().permissions().insert(file.getId(), permission)
-					.setSendNotificationEmails(true).execute();
+					.setSendNotificationEmails(false).execute();
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -124,7 +125,8 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 		return noticesPerSection;
 	}
 
-	private void updateDocument(GwtChild child, File file) throws UserGrantRequiredException {
+	private void updateDocument(GwtChild child, File file, boolean overwrite,
+			int year) throws UserGrantRequiredException {
 		ExecutionRequest request = new ExecutionRequest();
 		request.setFunction(SCRIPT_NAME);
 
@@ -133,7 +135,9 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 		parameters.add(child.getLastName());
 		request.setParameters(parameters);
 		try {
-			getScript().scripts().run(SCRIPT_PROJECT_KEY, request).execute();
+			Run run = getScript(child.getKey(), overwrite, year).scripts().run(
+					SCRIPT_PROJECT_KEY, request);
+			run.execute();
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -287,7 +291,7 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 	 * Returns an authenticated Storage object used to make service calls to
 	 * Cloud Storage.
 	 */
-	private static Storage getStorage() {
+	private Storage getStorage() {
 
 		if (null == storageService) {
 			try {
@@ -309,29 +313,38 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 	/**
 	 * Returns an authenticated Storage object used to make service calls to
 	 * Cloud Storage.
-	 * @throws UserGrantRequiredException 
+	 * 
+	 * @param childKey
+	 * @param overwrite
+	 * @param year
+	 * @throws UserGrantRequiredException
 	 */
-	private static Script getScript() throws UserGrantRequiredException {
+	private Script getScript(String childKey, boolean overwrite, int year)
+			throws UserGrantRequiredException {
 
-		if (null == scriptService) {
-			try {
+		try {
 
-				AuthorizationCodeFlow flow = Utils.newFlow();
-				Credential credential = flow.loadCredential(getUserId());
-				if (credential == null) {
-					throw new UserGrantRequiredException(flow.newAuthorizationUrl().build());
-				}
+			AuthorizationCodeFlow flow = Utils.newFlow();
+			Credential credential = flow.loadCredential(getUserId());
+			if (credential == null) {
 
-				scriptService = new Script.Builder(Utils.HTTP_TRANSPORT,
-						Utils.JSON_FACTORY, credential).setApplicationName(
-						APPLICATION_NAME).build();
-			} catch (IOException e) {
-				throw new RuntimeException(e);
+				AuthorizationCodeRequestUrl authorizationUrl = flow
+						.newAuthorizationUrl();
+				String redirectUri = Utils
+						.getRedirectUri(getThreadLocalRequest());
+				authorizationUrl.setRedirectUri(redirectUri);
+				String state = new StateParser(childKey, overwrite, year)
+						.getState();
+				authorizationUrl.setState(state);
+				throw new UserGrantRequiredException(authorizationUrl.build());
 			}
-		}
-		return scriptService;
-	}
 
+			return new Script.Builder(Utils.HTTP_TRANSPORT, Utils.JSON_FACTORY,
+					credential).setApplicationName(APPLICATION_NAME).build();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
 
 	private static String getUserId() {
 

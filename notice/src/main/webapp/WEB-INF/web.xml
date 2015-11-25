@@ -65,6 +65,14 @@
     <servlet-name>docServlet</servlet-name>
     <servlet-class>at.brandl.lws.notice.server.service.DocServiceImpl</servlet-class>
   </servlet>
+  <servlet-mapping>
+    <servlet-name>docOAuthCallbackServlet</servlet-name>
+    <url-pattern>/oauth2docscallback</url-pattern>
+  </servlet-mapping>  
+  <servlet>
+    <servlet-name>docOAuthCallbackServlet</servlet-name>
+    <servlet-class>at.brandl.lws.notice.server.service.DocsOauthCallbackService</servlet-class>
+  </servlet>  
 
   
   <security-constraint>
