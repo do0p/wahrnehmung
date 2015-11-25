@@ -425,6 +425,7 @@ public class EditContent extends HorizontalPanel {
 		beobachtung = new GwtBeobachtung();
 		beobachtung.setDate(dateBox.getValue());
 		beobachtung.setSectionKey(sectionSelection.getSelectedSectionKey());
+		beobachtung.setCountOnly(countOnly.getValue());
 		updateState();
 	}
 
