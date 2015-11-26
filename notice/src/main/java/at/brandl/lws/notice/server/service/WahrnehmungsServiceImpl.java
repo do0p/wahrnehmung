@@ -8,11 +8,9 @@ import at.brandl.lws.notice.model.BeobachtungsResult;
 import at.brandl.lws.notice.model.GwtBeobachtung;
 import at.brandl.lws.notice.model.GwtFileInfo;
 import at.brandl.lws.notice.server.dao.DaoRegistry;
-import at.brandl.lws.notice.server.dao.ds.AuthorizationDsDao;
 import at.brandl.lws.notice.server.dao.ds.BeobachtungDsDao;
 import at.brandl.lws.notice.server.dao.ds.FileDsDao;
 import at.brandl.lws.notice.shared.Utils;
-import at.brandl.lws.notice.shared.service.AuthorizationService;
 import at.brandl.lws.notice.shared.service.WahrnehmungsService;
 import at.brandl.lws.notice.shared.validator.GwtBeobachtungValidator;
 

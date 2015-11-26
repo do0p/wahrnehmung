@@ -1,7 +1,12 @@
 package at.brandl.lws.notice.server.service;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 
@@ -17,66 +22,19 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.repackaged.org.apache.commons.codec.binary.Base64;
 import com.google.api.client.util.store.DataStoreFactory;
-import com.google.api.services.script.ScriptScopes;
 
 class Utils {
 
-	static class StateParser {
-
-		private String childKey;
-		private boolean overwrite;
-		private int year;
-		private String state;
-
-		public StateParser(String childKey, boolean overwrite, int year) {
-			this.childKey = childKey;
-			this.overwrite = overwrite;
-			this.year = year;
-			this.state = encodeState(childKey, overwrite, year);
-		}
-
-		public StateParser(String state) {
-			String[] decodedState = decodeState(state);
-			this.childKey = decodedState[0];
-			this.overwrite = decodedState[1] == "y";
-			this.year = Integer.parseInt(decodedState[2]);
-			this.state = state;
-		}
-
-		public String getChildKey() {
-			return childKey;
-		}
-
-		public boolean getOverwrite() {
-			return overwrite;
-		}
-
-		public int getYear() {
-			return year;
-		}
-
-		public String getState() {
-			return state;
-		}
-
-		private String[] decodeState(String state) {
-			String decodedState = new String(Base64.decodeBase64(state));
-			return decodedState.split(":");
-		}
-
-		private String encodeState(String childKey, boolean overwrite, int year) {
-			String state = childKey + ":" + (overwrite ? "y" : "n") + ":"
-					+ year;
-			return Base64.encodeBase64URLSafeString(state.getBytes());
-		}
-	}
-
+	private static final String DOCUMENTS_SCOPE = "https://www.googleapis.com/auth/documents";
+	private static final String CLIENT_SECRET = "/client_secret.json";
+	private static final String ENCODING = "UTF-8";
 	static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
 	static final HttpTransport HTTP_TRANSPORT;
 	private static final DataStoreFactory DATA_STORE_FACTORY = AppEngineDataStoreFactory
 			.getDefaultInstance();
 
 	static {
+		
 		try {
 			HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
 		} catch (GeneralSecurityException | IOException e) {
@@ -91,26 +49,47 @@ class Utils {
 	}
 
 	static GoogleAuthorizationCodeFlow newFlow() {
+
 		try {
 			return new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT,
 					JSON_FACTORY, getClientCredential(),
-					Arrays.asList("https://www.googleapis.com/auth/documents"))
-					.setDataStoreFactory(DATA_STORE_FACTORY)
-					.setAccessType("online").build();
+					Arrays.asList(DOCUMENTS_SCOPE)).setDataStoreFactory(
+					DATA_STORE_FACTORY).build();
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
 	private static GoogleClientSecrets getClientCredential() {
+
 		try {
-			return GoogleClientSecrets.load(
-					JSON_FACTORY,
-					new InputStreamReader(Utils.class
-							.getResourceAsStream("/client_secret.json"),
-							"UTF-8"));
+			InputStream in = Utils.class.getResourceAsStream(CLIENT_SECRET);
+			InputStreamReader reader = new InputStreamReader(in, ENCODING);
+			return GoogleClientSecrets.load(JSON_FACTORY, reader);
 		} catch (IOException e) {
 			throw new RuntimeException("could not read secrects", e);
+		}
+	}
+
+	static HttpServletRequest decodeState(String state) {
+
+		try {
+			ByteArrayInputStream in = new ByteArrayInputStream(
+					Base64.decodeBase64(state));
+			return (HttpServletRequest) new ObjectInputStream(in).readObject();
+		} catch (ClassNotFoundException | IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	static String encodeState(HttpServletRequest request) {
+
+		try {
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
+			new ObjectOutputStream(out).writeObject(request);
+			return Base64.encodeBase64URLSafeString(out.toByteArray());
+		} catch (IOException e) {
+			throw new RuntimeException(e);
 		}
 	}
 

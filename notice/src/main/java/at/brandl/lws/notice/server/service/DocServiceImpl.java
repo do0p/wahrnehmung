@@ -7,6 +7,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+
 import at.brandl.lws.notice.model.BeobachtungsFilter;
 import at.brandl.lws.notice.model.GwtBeobachtung;
 import at.brandl.lws.notice.model.GwtChild;
@@ -14,11 +16,9 @@ import at.brandl.lws.notice.model.UserGrantRequiredException;
 import at.brandl.lws.notice.server.dao.DaoRegistry;
 import at.brandl.lws.notice.server.dao.ds.BeobachtungDsDao;
 import at.brandl.lws.notice.server.dao.ds.ChildDsDao;
-import at.brandl.lws.notice.server.service.Utils.StateParser;
 import at.brandl.lws.notice.shared.service.DocsService;
 
 import com.google.api.client.auth.oauth2.AuthorizationCodeFlow;
-import com.google.api.client.auth.oauth2.AuthorizationCodeRequestUrl;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.ByteArrayContent;
@@ -71,10 +71,14 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 	public String printDocumentation(String childKey, boolean overwrite,
 			int year) throws UserGrantRequiredException {
 
+		// this must be the first call, because it might trigger an
+		// authorization roundtrip
+		Credential userCredential = getUserCredentials();
+
 		GwtChild child = getChild(childKey);
 		File file = createDocument(createTitle(child));
 		updatePermissions(file, "writer");
-		updateDocument(child, file, overwrite, year);
+		updateDocument(child, file, userCredential);
 
 		Collection<GwtBeobachtung> childNotices = fetchNotices(childKey);
 		Multimap<String, GwtBeobachtung> sectionNotices = groupNoticesPerSection(childNotices);
@@ -125,8 +129,8 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 		return noticesPerSection;
 	}
 
-	private void updateDocument(GwtChild child, File file, boolean overwrite,
-			int year) throws UserGrantRequiredException {
+	private void updateDocument(GwtChild child, File file,
+			Credential userCredential) {
 		ExecutionRequest request = new ExecutionRequest();
 		request.setFunction(SCRIPT_NAME);
 
@@ -135,7 +139,7 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 		parameters.add(Arrays.asList("%%NAME%%", child.getLastName()));
 		request.setParameters(parameters);
 		try {
-			Run run = getScript(child.getKey(), overwrite, year).scripts().run(
+			Run run = getScript(userCredential).scripts().run(
 					SCRIPT_PROJECT_KEY, request);
 			run.execute();
 		} catch (IOException e) {
@@ -314,36 +318,38 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 	 * Returns an authenticated Storage object used to make service calls to
 	 * Cloud Storage.
 	 * 
-	 * @param childKey
-	 * @param overwrite
-	 * @param year
+	 * @param credential
 	 * @throws UserGrantRequiredException
 	 */
-	private Script getScript(String childKey, boolean overwrite, int year)
-			throws UserGrantRequiredException {
+	private Script getScript(Credential credential) {
 
+		return new Script.Builder(Utils.HTTP_TRANSPORT, Utils.JSON_FACTORY,
+				credential).setApplicationName(APPLICATION_NAME).build();
+
+	}
+
+	private Credential getUserCredentials() throws UserGrantRequiredException {
+
+		AuthorizationCodeFlow flow = Utils.newFlow();
 		try {
-
-			AuthorizationCodeFlow flow = Utils.newFlow();
 			Credential credential = flow.loadCredential(getUserId());
-			if (credential == null) {
-
-				AuthorizationCodeRequestUrl authorizationUrl = flow
-						.newAuthorizationUrl();
-				String redirectUri = Utils
-						.getRedirectUri(getThreadLocalRequest());
-				authorizationUrl.setRedirectUri(redirectUri);
-				String state = new StateParser(childKey, overwrite, year)
-						.getState();
-				authorizationUrl.setState(state);
-				throw new UserGrantRequiredException(authorizationUrl.build());
+			if (credential != null) {
+				return credential;
 			}
-
-			return new Script.Builder(Utils.HTTP_TRANSPORT, Utils.JSON_FACTORY,
-					credential).setApplicationName(APPLICATION_NAME).build();
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
+
+		throw new UserGrantRequiredException(buildAuthorizationUrl(flow));
+	}
+
+	private String buildAuthorizationUrl(AuthorizationCodeFlow flow) {
+
+		HttpServletRequest request = getThreadLocalRequest();
+		String redirectUri = Utils.getRedirectUri(request);
+		String state = Utils.encodeState(request);
+		return flow.newAuthorizationUrl().setRedirectUri(redirectUri)
+				.setState(state).build();
 	}
 
 	private static String getUserId() {
