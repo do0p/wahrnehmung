@@ -132,7 +132,7 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 
 		List<Object> parameters = new ArrayList<Object>();
 		parameters.add(file.getId());
-		parameters.add(child.getLastName());
+		parameters.add(Arrays.asList("%%NAME%%", child.getLastName()));
 		request.setParameters(parameters);
 		try {
 			Run run = getScript(child.getKey(), overwrite, year).scripts().run(

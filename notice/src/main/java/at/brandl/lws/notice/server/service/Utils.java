@@ -94,9 +94,9 @@ class Utils {
 		try {
 			return new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT,
 					JSON_FACTORY, getClientCredential(),
-					Arrays.asList("https://www.googleapis.com/auth/documents", ScriptScopes.DRIVE))
+					Arrays.asList("https://www.googleapis.com/auth/documents"))
 					.setDataStoreFactory(DATA_STORE_FACTORY)
-					.setAccessType("offline").build();
+					.setAccessType("online").build();
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
