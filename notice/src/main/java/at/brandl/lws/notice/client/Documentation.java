@@ -26,6 +26,11 @@ public class Documentation extends VerticalPanel {
 			.create(DocsService.class);
 
 	private final NameSelection nameSelection;
+	private boolean overwrite = false;
+	private int year = 2015;
+	private String code;
+	private Button printButton;
+	private String selectedChidKey;
 
 	public Documentation(Authorization authorization, Navigation navigation) {
 		PopUp dialogBox = new PopUp();
@@ -45,28 +50,12 @@ public class Documentation extends VerticalPanel {
 	private Panel createButtonContainer() {
 		final Grid buttonContainer = new Grid(1, 1);
 
-		final Button printButton = new Button(labels.print());
+		printButton = new Button(labels.print());
 		printButton.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
-				docService.printDocumentation(
-						nameSelection.getSelectedChildKey(), false, 2015,
-						new AsyncCallback<String>() {
-
-							@Override
-							public void onSuccess(String result) {
-								Window.open(result, "_blank", "");
-							}
-
-							@Override
-							public void onFailure(Throwable caught) {
-								if (caught instanceof UserGrantRequiredException) {
-									Window.Location
-											.assign(((UserGrantRequiredException) caught)
-													.getAuthorizationUrl());
-								}
-							}
-						});
+				print();
 			}
+
 		});
 
 		printButton.setSize(Utils.BUTTON_WIDTH + Utils.PIXEL, Utils.ROW_HEIGHT
@@ -74,6 +63,53 @@ public class Documentation extends VerticalPanel {
 		buttonContainer.setWidget(0, 0, printButton);
 
 		return buttonContainer;
+	}
+
+	private void print() {
+		docService.printDocumentation(getChildKey(), overwrite, year, code,
+				new AsyncCallback<String>() {
+
+					@Override
+					public void onSuccess(String result) {
+						Window.open(result, "_blank", "");
+						nameSelection.reset();
+						selectedChidKey = null;
+					}
+
+					@Override
+					public void onFailure(Throwable caught) {
+						if (caught instanceof UserGrantRequiredException) {
+							Window.Location
+									.assign(((UserGrantRequiredException) caught)
+											.getAuthorizationUrl());
+						}
+					}
+				});
+	}
+
+	private String getChildKey() {
+		return selectedChidKey != null ? selectedChidKey : nameSelection.getSelectedChildKey();
+	}
+
+	public void submit() {
+		print();
+	}
+
+	public void setChildKey(String childKey) {
+		nameSelection.setSelected(childKey);
+		this.selectedChidKey = childKey;
+	}
+
+	public void setOverwrite(boolean overwrite) {
+		this.overwrite = overwrite;
+	}
+
+	public void setYear(int year) {
+		this.year = year;
+	}
+
+	public void setCode(String code) {
+		this.code = code;
 	}
 
 }

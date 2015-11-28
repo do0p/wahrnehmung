@@ -44,7 +44,7 @@ class Utils {
 
 	static String getRedirectUri(HttpServletRequest req) {
 		GenericUrl url = new GenericUrl(req.getRequestURL().toString());
-		url.setRawPath("/oauth2docscallback");
+		url.setRawPath("/");
 		return url.build();
 	}
 
@@ -71,12 +71,12 @@ class Utils {
 		}
 	}
 
-	static HttpServletRequest decodeState(String state) {
+	static SerializableRequest decodeState(String state) {
 
 		try {
 			ByteArrayInputStream in = new ByteArrayInputStream(
 					Base64.decodeBase64(state));
-			return (HttpServletRequest) new ObjectInputStream(in).readObject();
+			return (SerializableRequest) new ObjectInputStream(in).readObject();
 		} catch (ClassNotFoundException | IOException e) {
 			throw new RuntimeException(e);
 		}

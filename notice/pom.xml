@@ -43,6 +43,11 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava-gwt</artifactId>
+			<version>18.0</version>
+		</dependency>
+		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>notice-shared</artifactId>
 			<version>${project.version}</version>
@@ -95,7 +100,7 @@
 	</dependencies>
 
 	<build>
-	
+
 		<resources>
 			<resource>
 				<directory>C:/Users/Dominik/Google Drive/LWS/wahrnehmung</directory>

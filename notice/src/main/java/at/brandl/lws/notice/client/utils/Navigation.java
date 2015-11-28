@@ -21,7 +21,7 @@ public class Navigation extends HorizontalPanel {
 	static final String NEW_ENTRY = "new";
 	private static final String FORM_ENTRY = "form";
 	private static final String LIST_ENTRY = "list";
-	private static final String DOCUMENTATION_ENTRY = "documentation";
+	public static final String DOCUMENTATION_ENTRY = "documentation";
 
 	private final Authorization authorization;
 

@@ -17,9 +17,11 @@ import at.brandl.lws.notice.server.dao.DaoRegistry;
 import at.brandl.lws.notice.server.dao.ds.BeobachtungDsDao;
 import at.brandl.lws.notice.server.dao.ds.ChildDsDao;
 import at.brandl.lws.notice.shared.service.DocsService;
+import at.brandl.lws.notice.shared.service.StateParser;
 
 import com.google.api.client.auth.oauth2.AuthorizationCodeFlow;
 import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.client.auth.oauth2.TokenResponse;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.ByteArrayContent;
 import com.google.api.services.drive.Drive;
@@ -69,11 +71,11 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 
 	@Override
 	public String printDocumentation(String childKey, boolean overwrite,
-			int year) throws UserGrantRequiredException {
+			int year, String requestToken) throws UserGrantRequiredException {
 
 		// this must be the first call, because it might trigger an
 		// authorization roundtrip
-		Credential userCredential = getUserCredentials();
+		Credential userCredential = getUserCredentials(requestToken, childKey, overwrite, year);
 
 		GwtChild child = getChild(childKey);
 		File file = createDocument(createTitle(child));
@@ -328,26 +330,35 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 
 	}
 
-	private Credential getUserCredentials() throws UserGrantRequiredException {
+	private Credential getUserCredentials(String requestToken, String childKey, boolean overwrite, int year)
+			throws UserGrantRequiredException {
 
 		AuthorizationCodeFlow flow = Utils.newFlow();
 		try {
 			Credential credential = flow.loadCredential(getUserId());
-			if (credential != null) {
-				return credential;
+			if (credential == null && requestToken != null) {
+				TokenResponse response = flow.newTokenRequest(requestToken)
+						.setRedirectUri(Utils.getRedirectUri(getThreadLocalRequest())).execute();
+				String userId = getUserId();
+				credential = flow.createAndStoreCredential(response, userId);
 			}
+
+			if (credential == null) {
+				throw new UserGrantRequiredException(
+						buildAuthorizationUrl(flow, childKey, overwrite, year));
+			}
+
+			return credential;
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-
-		throw new UserGrantRequiredException(buildAuthorizationUrl(flow));
 	}
 
-	private String buildAuthorizationUrl(AuthorizationCodeFlow flow) {
+	private String buildAuthorizationUrl(AuthorizationCodeFlow flow, String childKey, boolean overwrite, int year) {
 
 		HttpServletRequest request = getThreadLocalRequest();
 		String redirectUri = Utils.getRedirectUri(request);
-		String state = Utils.encodeState(request);
+		String state = new StateParser(childKey, overwrite, year).getState();
 		return flow.newAuthorizationUrl().setRedirectUri(redirectUri)
 				.setState(state).build();
 	}
