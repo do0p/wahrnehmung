@@ -24,22 +24,19 @@ public class Notice extends SecuredContent implements
 		this.navigation = new Navigation(authorization);
 		RootPanel.get(Utils.NAVIGATION_ELEMENT).add(this.navigation);
 		History.addValueChangeHandler(this);
-		String code = Location.getParameter("code");
-		if (code != null) {
+
+		String stateParam = Location.getParameter("state");
+		if (stateParam != null) {
 			Documentation content = (Documentation) navigation
 					.getContent(Navigation.DOCUMENTATION_ENTRY);
-			content.setCode(code);
 			setContent(content);
 
-			String stateParam = Location.getParameter("state");
-			if (stateParam != null) {
-				StateParser state = new StateParser(stateParam);
-				content.setChildKey(state.getChildKey());
-				content.setOverwrite(state.getOverwrite());
-				content.setYear(state.getYear());
-				content.submit();
-			}
-			
+			StateParser state = new StateParser(stateParam);
+			content.setChildKey(state.getChildKey());
+			content.setOverwrite(state.getOverwrite());
+			content.setYear(state.getYear());
+			content.submit();
+
 		} else {
 			changePage(History.getToken());
 		}

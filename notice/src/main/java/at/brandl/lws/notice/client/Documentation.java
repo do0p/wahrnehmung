@@ -28,7 +28,6 @@ public class Documentation extends VerticalPanel {
 	private final NameSelection nameSelection;
 	private boolean overwrite = false;
 	private int year = 2015;
-	private String code;
 	private Button printButton;
 	private String selectedChidKey;
 
@@ -66,7 +65,7 @@ public class Documentation extends VerticalPanel {
 	}
 
 	private void print() {
-		docService.printDocumentation(getChildKey(), overwrite, year, code,
+		docService.printDocumentation(getChildKey(), overwrite, year, 
 				new AsyncCallback<String>() {
 
 					@Override
@@ -107,9 +106,4 @@ public class Documentation extends VerticalPanel {
 	public void setYear(int year) {
 		this.year = year;
 	}
-
-	public void setCode(String code) {
-		this.code = code;
-	}
-
 }

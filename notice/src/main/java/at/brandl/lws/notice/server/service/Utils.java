@@ -25,6 +25,7 @@ import com.google.api.client.util.store.DataStoreFactory;
 
 class Utils {
 
+	private static final String OFFLINE = "offline";
 	private static final String DOCUMENTS_SCOPE = "https://www.googleapis.com/auth/documents";
 	private static final String CLIENT_SECRET = "/client_secret.json";
 	private static final String ENCODING = "UTF-8";
@@ -44,7 +45,7 @@ class Utils {
 
 	static String getRedirectUri(HttpServletRequest req) {
 		GenericUrl url = new GenericUrl(req.getRequestURL().toString());
-		url.setRawPath("/");
+		url.setRawPath("/oauth2docscallback");
 		return url.build();
 	}
 
@@ -54,7 +55,7 @@ class Utils {
 			return new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT,
 					JSON_FACTORY, getClientCredential(),
 					Arrays.asList(DOCUMENTS_SCOPE)).setDataStoreFactory(
-					DATA_STORE_FACTORY).build();
+					DATA_STORE_FACTORY).setAccessType(OFFLINE).build();
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
