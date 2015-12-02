@@ -10,8 +10,19 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.servlet.http.HttpServletRequest;
+
+import org.jsoup.Jsoup;
+import org.jsoup.helper.StringUtil;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
+import org.jsoup.nodes.TextNode;
+import org.jsoup.safety.Whitelist;
+import org.jsoup.select.NodeTraversor;
+import org.jsoup.select.NodeVisitor;
 
 import at.brandl.lws.notice.model.BeobachtungsFilter;
 import at.brandl.lws.notice.model.GwtBeobachtung;
@@ -44,6 +55,7 @@ import com.google.api.services.storage.Storage.Objects.Get;
 import com.google.api.services.storage.StorageScopes;
 import com.google.api.services.storage.model.StorageObject;
 import com.google.appengine.api.users.UserServiceFactory;
+import com.google.apphosting.api.ApiProxy.CancelledException;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.google.gwt.view.client.Range;
 
@@ -52,6 +64,7 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 	private static final String TEXT_NAME = "_text_";
 	private static final String REPLACEMENT_SCRIPT_NAME = "searchAndReplace";
 	private static final String SECTIONS_SCRIPT_NAME = "insertSections";
+	private static final String REMOVE_TEMPLATE_SCRIPT_NAME = "removeTemplates";
 	// private static final String SCRIPT_TYPE =
 	// "application/vnd.google-apps.script";
 	private static final String FOLDER_TYPE = "application/vnd.google-apps.folder";
@@ -115,7 +128,16 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 		updateDocument(replacements, REPLACEMENT_SCRIPT_NAME, file,
 				userCredential);
 
+//		Map<String, Object> sectionNotices = new HashMap<>();
+//		for (Entry<String, Object> entry : notices.entrySet()) {
+//			sectionNotices.put(entry.getKey(), entry.getValue());
+//			updateDocument(sectionNotices, SECTIONS_SCRIPT_NAME, file,
+//					userCredential);
+//			sectionNotices.clear();
+//		}
+
 		updateDocument(notices, SECTIONS_SCRIPT_NAME, file, userCredential);
+		updateDocument(null, REMOVE_TEMPLATE_SCRIPT_NAME, file, userCredential);
 
 		return file.getDefaultOpenWithLink();
 	}
@@ -168,18 +190,31 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 
 	private String getText(GwtBeobachtung notice) {
 		StringBuilder text = new StringBuilder();
-		text.append("am: " + notice.getDate());
+		text.append("am: " + format(notice.getDate()));
 		if (at.brandl.lws.notice.shared.Utils.isNotEmpty(notice.getUser())) {
 			text.append("\nvon: " + notice.getUser());
 		}
 		if (notice.getDuration() != null) {
-			text.append("\nDauer: " + notice.getDuration());
+			text.append("\nDauer: " + notice.getDuration().getText());
 		}
 		if (notice.getSocial() != null) {
-			text.append("\nSozialform: " + notice.getSocial());
+			text.append("\nSozialform: " + notice.getSocial().getText());
 		}
-		text.append("\n\n" + notice.getText());
+		text.append("\n\n" + parse(notice.getText()));
 		return text.toString();
+	}
+
+	private String parse(String htmlText) {
+		
+		String cleaned = Jsoup.clean(htmlText, Whitelist.relaxed());
+		Document document = Jsoup.parseBodyFragment(cleaned);
+		Element body = document.body();
+		FormattingVisitor formattingVisitor = new FormattingVisitor();
+		NodeTraversor nodeTraversor = new NodeTraversor(formattingVisitor);
+
+		nodeTraversor.traverse(body);
+
+		return formattingVisitor.toString();
 	}
 
 	private String getName(GwtChild child) {
@@ -215,15 +250,25 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 
 		List<Object> parameters = new ArrayList<Object>();
 		parameters.add(file.getId());
-		parameters.add(data);
+		if (data != null) {
+			parameters.add(data);
+		}
 		request.setParameters(parameters);
+		long start = System.currentTimeMillis();
 		try {
 			Run run = getScript(userCredential).scripts().run(
 					SCRIPT_PROJECT_KEY, request);
+			System.err.println(run.buildHttpRequestUrl().toString());
 			run.execute();
+			long duration = System.currentTimeMillis() - start;
+			System.err.println("call took " + duration + "ms.");
 		} catch (IOException e) {
 			throw new RuntimeException(e);
+		} catch (CancelledException e) {
+			long duration = System.currentTimeMillis() - start;
+			System.err.println("call cancelled after " + duration + "ms.");
 		}
+
 	}
 
 	private GwtChild getChild(String childKey) {
@@ -427,12 +472,12 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-		
+
 		if (credential == null) {
 			throw new UserGrantRequiredException(buildAuthorizationUrl(flow,
 					childKey, overwrite, year));
 		}
-		
+
 		return credential;
 	}
 
@@ -449,5 +494,39 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 	private static String getUserId() {
 
 		return UserServiceFactory.getUserService().getCurrentUser().getUserId();
+	}
+
+	private class FormattingVisitor implements NodeVisitor {
+		private StringBuilder accum = new StringBuilder();
+
+		public void head(Node node, int depth) {
+
+			String name = node.nodeName();
+			if (node instanceof TextNode) {
+				accum.append(((TextNode) node).text());
+			} else if (name.equals("li")) {
+				accum.append("\n * ");
+			} else if (name.equals("dt")) {
+				accum.append("  ");
+			} else if (StringUtil.in(name, "p", "h1", "h2", "h3", "h4", "h5",
+					"tr")) {
+				accum.append("\n");
+			}
+		}
+
+		// hit when all of the node's children (if any) have been visited
+		public void tail(Node node, int depth) {
+
+			String name = node.nodeName();
+			if (StringUtil.in(name, "br", "dd", "dt", "p", "h1", "h2", "h3",
+					"h4", "h5", "div")) {
+				accum.append("\n");
+			}
+		}
+
+		@Override
+		public String toString() {
+			return accum.toString();
+		}
 	}
 }
