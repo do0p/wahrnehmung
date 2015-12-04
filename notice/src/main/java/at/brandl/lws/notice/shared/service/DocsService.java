@@ -8,6 +8,7 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RemoteServiceRelativePath("doc")
 public interface DocsService extends RemoteService {
 
-	String printDocumentation(String childKey, boolean overwrite, int year) throws UserGrantRequiredException;
+	String printDocumentation(String childKey, int year) throws UserGrantRequiredException;
 
+	void deleteAll();
 }

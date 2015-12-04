@@ -16,7 +16,7 @@ public class JsoupTest {
 		String clean = Jsoup.clean(TEXT, Whitelist.relaxed());
 		Document document = Jsoup.parseBodyFragment(clean);
 		Element body = document.body();
-
+		System.out.println(String.format("Berichte %d/%d", 2015, 2015+1));
 
 	}
 

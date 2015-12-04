@@ -10,7 +10,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -88,16 +87,16 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 	}
 
 	@Override
-	public String printDocumentation(String childKey, boolean overwrite,
-			int year) throws UserGrantRequiredException {
+	public String printDocumentation(String childKey, int year)
+			throws UserGrantRequiredException {
 
 		// this must be the first call, because it might trigger an
 		// authorization roundtrip
-		Credential userCredential = getUserCredentials(childKey, overwrite,
-				year);
+		Credential userCredential = getUserCredentials(childKey, year);
 
 		GwtChild child = getChild(childKey);
-		File file = createDocument(createTitle(child));
+		ParentReference parent = getParent(year);
+		File file = createDocument(createTitle(child), parent);
 		updatePermissions(file, "writer");
 
 		Collection<GwtBeobachtung> childNotices = fetchNotices(childKey);
@@ -128,18 +127,32 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 		updateDocument(replacements, REPLACEMENT_SCRIPT_NAME, file,
 				userCredential);
 
-//		Map<String, Object> sectionNotices = new HashMap<>();
-//		for (Entry<String, Object> entry : notices.entrySet()) {
-//			sectionNotices.put(entry.getKey(), entry.getValue());
-//			updateDocument(sectionNotices, SECTIONS_SCRIPT_NAME, file,
-//					userCredential);
-//			sectionNotices.clear();
-//		}
+		// Map<String, Object> sectionNotices = new HashMap<>();
+		// for (Entry<String, Object> entry : notices.entrySet()) {
+		// sectionNotices.put(entry.getKey(), entry.getValue());
+		// updateDocument(sectionNotices, SECTIONS_SCRIPT_NAME, file,
+		// userCredential);
+		// sectionNotices.clear();
+		// }
 
 		updateDocument(notices, SECTIONS_SCRIPT_NAME, file, userCredential);
 		updateDocument(null, REMOVE_TEMPLATE_SCRIPT_NAME, file, userCredential);
 
 		return file.getDefaultOpenWithLink();
+	}
+
+	@Override
+	public void deleteAll() {
+		try {
+			FileList files = getDrive().files().list().execute();
+			for (File file : files.getItems()) {
+				getDrive().files().delete(file.getId()).execute();
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 	}
 
 	private void addNotice(Map<String, Object> notices, GwtBeobachtung notice) {
@@ -190,22 +203,27 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 
 	private String getText(GwtBeobachtung notice) {
 		StringBuilder text = new StringBuilder();
-		text.append("am: " + format(notice.getDate()));
-		if (at.brandl.lws.notice.shared.Utils.isNotEmpty(notice.getUser())) {
-			text.append("\nvon: " + notice.getUser());
-		}
-		if (notice.getDuration() != null) {
-			text.append("\nDauer: " + notice.getDuration().getText());
-		}
-		if (notice.getSocial() != null) {
-			text.append("\nSozialform: " + notice.getSocial().getText());
+
+		if (notice instanceof GwtSummary) {
+			text.append(notice.getUser());
+		} else {
+			text.append("am: " + format(notice.getDate()));
+			if (at.brandl.lws.notice.shared.Utils.isNotEmpty(notice.getUser())) {
+				text.append("\nvon: " + notice.getUser());
+			}
+			if (notice.getDuration() != null) {
+				text.append("\nDauer: " + notice.getDuration().getText());
+			}
+			if (notice.getSocial() != null) {
+				text.append("\nSozialform: " + notice.getSocial().getText());
+			}
 		}
 		text.append("\n\n" + parse(notice.getText()));
 		return text.toString();
 	}
 
 	private String parse(String htmlText) {
-		
+
 		String cleaned = Jsoup.clean(htmlText, Whitelist.relaxed());
 		Document document = Jsoup.parseBodyFragment(cleaned);
 		Element body = document.body();
@@ -228,8 +246,12 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 		permission.setRole(role);
 		permission.setType("group");
 		try {
+			long start = System.currentTimeMillis();
 			getDrive().permissions().insert(file.getId(), permission)
 					.setSendNotificationEmails(false).execute();
+			long duration = System.currentTimeMillis() - start;
+			System.err.println("update permissions took " + duration + "ms");
+
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -276,21 +298,25 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 		return childDao.getChild(childKey);
 	}
 
-	private File createDocument(String title) {
+	private File createDocument(String title, ParentReference parent) {
 
 		ByteArrayContent template = getTemplateFile();
-		ParentReference parent = getParent();
+
 		File file = createFile(title, template.getType(), parent);
 		return uploadNewFile(file, template);
 	}
 
-	private ParentReference getParent() {
+	private ParentReference getParent(int year) {
 
 		try {
 			File file;
-			String folderName = "Berichte 2015/2016";
+			String folderName = String.format("Berichte %d/%d", year, year + 1);
+
+			long start = System.currentTimeMillis();
 			FileList files = getDrive().files().list()
 					.setQ(createQuery(folderName, FOLDER_TYPE)).execute();
+			long duration = System.currentTimeMillis() - start;
+			System.err.println("get parent took " + duration + "ms");
 
 			int numFiles = files.getItems().size();
 			if (numFiles == 0) {
@@ -334,21 +360,31 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 
 	private File uploadNewFile(File file, ByteArrayContent content) {
 
+		long start = System.currentTimeMillis();
 		try {
 			Insert insert = getDrive().files().insert(file, content);
 			insert.setConvert(true);
 			return insert.execute();
+
 		} catch (IOException e) {
 			throw new RuntimeException(e);
+		} finally {
+			long duration = System.currentTimeMillis() - start;
+			System.err.println("upload of file took " + duration + "ms");
 		}
 	}
 
 	private File uploadNewFolder(File file) {
 
+		long start = System.currentTimeMillis();
 		try {
 			return getDrive().files().insert(file).execute();
 		} catch (IOException e) {
 			throw new RuntimeException(e);
+
+		} finally {
+			long duration = System.currentTimeMillis() - start;
+			System.err.println("upload of file folder " + duration + "ms");
 		}
 	}
 
@@ -368,7 +404,10 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 	private String getType() throws IOException {
 
 		Get get = getStorage().objects().get(BUCKET, TEMPLATE_FILE);
+		long start = System.currentTimeMillis();
 		StorageObject object = get.execute();
+		long duration = System.currentTimeMillis() - start;
+		System.err.println("get type of template took " + duration + "ms");
 		return object.getContentType();
 	}
 
@@ -376,7 +415,10 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		Get get = getStorage().objects().get(BUCKET, TEMPLATE_FILE);
+		long start = System.currentTimeMillis();
 		get.executeMediaAndDownloadTo(out);
+		long duration = System.currentTimeMillis() - start;
+		System.err.println("get content of template took " + duration + "ms");
 		return out.toByteArray();
 	}
 
@@ -391,7 +433,6 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 		BeobachtungsFilter filter = new BeobachtungsFilter();
 		filter.setChildKey(childKey);
 		filter.setSinceLastDevelopmementDialogue(true);
-		filter.setShowEmptyEntries(true);
 		filter.setShowSummaries(true);
 		return filter;
 	}
@@ -452,8 +493,8 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 
 	}
 
-	private Credential getUserCredentials(String childKey, boolean overwrite,
-			int year) throws UserGrantRequiredException {
+	private Credential getUserCredentials(String childKey, int year)
+			throws UserGrantRequiredException {
 
 		AuthorizationCodeFlow flow = Utils.newFlow();
 		Credential credential = null;
@@ -475,18 +516,18 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 
 		if (credential == null) {
 			throw new UserGrantRequiredException(buildAuthorizationUrl(flow,
-					childKey, overwrite, year));
+					childKey, year));
 		}
 
 		return credential;
 	}
 
 	private String buildAuthorizationUrl(AuthorizationCodeFlow flow,
-			String childKey, boolean overwrite, int year) {
+			String childKey, int year) {
 
 		HttpServletRequest request = getThreadLocalRequest();
 		String redirectUri = Utils.getRedirectUri(request);
-		String state = new StateParser(childKey, overwrite, year).getState();
+		String state = new StateParser(childKey, year).getState();
 		return flow.newAuthorizationUrl().setRedirectUri(redirectUri)
 				.setState(state).build();
 	}

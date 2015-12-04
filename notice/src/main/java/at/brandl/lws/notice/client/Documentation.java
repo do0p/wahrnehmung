@@ -26,10 +26,10 @@ public class Documentation extends VerticalPanel {
 			.create(DocsService.class);
 
 	private final NameSelection nameSelection;
-	private boolean overwrite = false;
 	private int year = 2015;
 	private Button printButton;
 	private String selectedChidKey;
+	private Button deleteButton;
 
 	public Documentation(Authorization authorization, Navigation navigation) {
 		PopUp dialogBox = new PopUp();
@@ -47,7 +47,7 @@ public class Documentation extends VerticalPanel {
 	}
 
 	private Panel createButtonContainer() {
-		final Grid buttonContainer = new Grid(1, 1);
+		final Grid buttonContainer = new Grid(1, 2);
 
 		printButton = new Button(labels.print());
 		printButton.addClickHandler(new ClickHandler() {
@@ -60,12 +60,24 @@ public class Documentation extends VerticalPanel {
 		printButton.setSize(Utils.BUTTON_WIDTH + Utils.PIXEL, Utils.ROW_HEIGHT
 				+ Utils.PIXEL);
 		buttonContainer.setWidget(0, 0, printButton);
+		
+		deleteButton = new Button(labels.delete());
+		deleteButton.addClickHandler(new ClickHandler() {
+			public void onClick(ClickEvent event) {
+				deleteAll();
+			}
+
+		});
+
+		deleteButton.setSize(Utils.BUTTON_WIDTH + Utils.PIXEL, Utils.ROW_HEIGHT
+				+ Utils.PIXEL);
+		buttonContainer.setWidget(0, 1, deleteButton);
 
 		return buttonContainer;
 	}
 
 	private void print() {
-		docService.printDocumentation(getChildKey(), overwrite, year, 
+		docService.printDocumentation(getChildKey(), year,
 				new AsyncCallback<String>() {
 
 					@Override
@@ -86,8 +98,24 @@ public class Documentation extends VerticalPanel {
 				});
 	}
 
+	private void deleteAll() {
+		docService.deleteAll(new AsyncCallback<Void>() {
+
+			@Override
+			public void onSuccess(Void result) {
+				nameSelection.reset();
+				selectedChidKey = null;
+			}
+
+			@Override
+			public void onFailure(Throwable caught) {
+			}
+		});
+	}
+
 	private String getChildKey() {
-		return selectedChidKey != null ? selectedChidKey : nameSelection.getSelectedChildKey();
+		return selectedChidKey != null ? selectedChidKey : nameSelection
+				.getSelectedChildKey();
 	}
 
 	public void submit() {
@@ -97,10 +125,6 @@ public class Documentation extends VerticalPanel {
 	public void setChildKey(String childKey) {
 		nameSelection.setSelected(childKey);
 		this.selectedChidKey = childKey;
-	}
-
-	public void setOverwrite(boolean overwrite) {
-		this.overwrite = overwrite;
 	}
 
 	public void setYear(int year) {

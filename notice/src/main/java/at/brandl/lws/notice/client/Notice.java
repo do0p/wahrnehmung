@@ -33,7 +33,6 @@ public class Notice extends SecuredContent implements
 
 			StateParser state = new StateParser(stateParam);
 			content.setChildKey(state.getChildKey());
-			content.setOverwrite(state.getOverwrite());
 			content.setYear(state.getYear());
 			content.submit();
 
