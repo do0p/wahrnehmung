@@ -10,18 +10,15 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.jsoup.Jsoup;
-import org.jsoup.helper.StringUtil;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.nodes.Node;
-import org.jsoup.nodes.TextNode;
 import org.jsoup.safety.Whitelist;
 import org.jsoup.select.NodeTraversor;
-import org.jsoup.select.NodeVisitor;
 
 import at.brandl.lws.notice.model.BeobachtungsFilter;
 import at.brandl.lws.notice.model.GwtBeobachtung;
@@ -54,49 +51,55 @@ import com.google.api.services.storage.Storage.Objects.Get;
 import com.google.api.services.storage.StorageScopes;
 import com.google.api.services.storage.model.StorageObject;
 import com.google.appengine.api.users.UserServiceFactory;
-import com.google.apphosting.api.ApiProxy.CancelledException;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.google.gwt.view.client.Range;
 
 public class DocServiceImpl extends RemoteServiceServlet implements DocsService {
 
-	private static final String TEXT_NAME = "_text_";
-	private static final String REPLACEMENT_SCRIPT_NAME = "searchAndReplace";
-	private static final String SECTIONS_SCRIPT_NAME = "insertSections";
-	private static final String REMOVE_TEMPLATE_SCRIPT_NAME = "removeTemplates";
-	// private static final String SCRIPT_TYPE =
-	// "application/vnd.google-apps.script";
-	private static final String FOLDER_TYPE = "application/vnd.google-apps.folder";
-	private static final String APPLICATION_NAME = "wahrnehmung-test";
-	private static final String BUCKET = APPLICATION_NAME + ".appspot.com";
 	private static final long serialVersionUID = 6254413733240094242L;
-	private static final String TEMPLATE_FILE = "template.docx";
-	private static final Range ALL = new Range(0, Integer.MAX_VALUE);
-	private static final String SCRIPT_PROJECT_KEY = "MG_5zR_lIyT2fsbjXj3xcFocrZYMzalMr";
 
-	private static Storage storageService;
+	private static final String APPLICATION_NAME = "wahrnehmung-test";
+	private static final String GROUP = "lws-test@googlegroups.com";
+
+	private static final String TEMPLATE_FILE = "template.docx";
+	private static final String BUCKET = APPLICATION_NAME + ".appspot.com";
+	private static final String SCRIPT_PROJECT_KEY = "MG_5zR_lIyT2fsbjXj3xcFocrZYMzalMr";
+	private static final String SCRIPT_NAME = "updateDocument";
+
+	private static final String TEXT_NAME = "_text_";
+	private static final String READER_ROLE = "reader";
+	private static final String GROUP_TYPE = "group";
+	private static final String FOLDER_TYPE = "application/vnd.google-apps.folder";
+	private static final Range ALL = new Range(0, Integer.MAX_VALUE);
 
 	private final BeobachtungDsDao noticeDao;
 	private final ChildDsDao childDao;
+	private final AuthorizationServiceImpl authorizationService;
+
 	private Drive driveService;
+	private Storage storageService;
 
 	public DocServiceImpl() {
 
 		noticeDao = DaoRegistry.get(BeobachtungDsDao.class);
 		childDao = DaoRegistry.get(ChildDsDao.class);
+		authorizationService = new AuthorizationServiceImpl();
 	}
 
 	@Override
 	public String printDocumentation(String childKey, int year)
 			throws UserGrantRequiredException {
 
+		authorizationService.assertCurrentUserIsTeacher();
+
 		// this must be the first call, because it might trigger an
 		// authorization roundtrip
-		Credential userCredential = getUserCredentials(childKey, year);
+		Credential userCredential = getUserCredentials(childKey, year,
+				getUserId());
 
 		GwtChild child = getChild(childKey);
-		ParentReference parent = getParent(year);
-		File file = createDocument(createTitle(child), parent);
+		ParentReference folder = getFolder(getFolderName(year));
+		File file = createDocument(createTitle(child), folder);
 		updatePermissions(file, "writer");
 
 		Collection<GwtBeobachtung> childNotices = fetchNotices(childKey);
@@ -124,21 +127,13 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 		replacements.put("%%VON%%", format(oldest));
 		replacements.put("%%BIS%%", format(newest));
 
-		updateDocument(replacements, REPLACEMENT_SCRIPT_NAME, file,
-				userCredential);
-
-		// Map<String, Object> sectionNotices = new HashMap<>();
-		// for (Entry<String, Object> entry : notices.entrySet()) {
-		// sectionNotices.put(entry.getKey(), entry.getValue());
-		// updateDocument(sectionNotices, SECTIONS_SCRIPT_NAME, file,
-		// userCredential);
-		// sectionNotices.clear();
-		// }
-
-		updateDocument(notices, SECTIONS_SCRIPT_NAME, file, userCredential);
-		updateDocument(null, REMOVE_TEMPLATE_SCRIPT_NAME, file, userCredential);
+		updateDocument(SCRIPT_NAME, file, userCredential, replacements, notices);
 
 		return file.getDefaultOpenWithLink();
+	}
+
+	private String getFolderName(int year) {
+		return String.format("Berichte %d/%d", year, year + 1);
 	}
 
 	@Override
@@ -242,16 +237,12 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 	private void updatePermissions(File file, String role) {
 
 		Permission permission = new Permission();
-		permission.setValue("lws-test@googlegroups.com");
+		permission.setValue(GROUP);
 		permission.setRole(role);
-		permission.setType("group");
+		permission.setType(GROUP_TYPE);
 		try {
-			long start = System.currentTimeMillis();
 			getDrive().permissions().insert(file.getId(), permission)
 					.setSendNotificationEmails(false).execute();
-			long duration = System.currentTimeMillis() - start;
-			System.err.println("update permissions took " + duration + "ms");
-
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -263,8 +254,9 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 		return "Bericht " + child.getFirstName();
 	}
 
-	private void updateDocument(Map<?, ?> data, String scriptName, File file,
-			Credential userCredential) {
+	private void updateDocument(String scriptName, File file,
+			Credential userCredential, Map<String, String> replacements,
+			Map<String, Object> notices) {
 
 		ExecutionRequest request = new ExecutionRequest();
 
@@ -272,25 +264,18 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 
 		List<Object> parameters = new ArrayList<Object>();
 		parameters.add(file.getId());
-		if (data != null) {
-			parameters.add(data);
-		}
+		parameters.add(replacements);
+		parameters.add(notices);
+
 		request.setParameters(parameters);
-		long start = System.currentTimeMillis();
 		try {
 			Run run = getScript(userCredential).scripts().run(
 					SCRIPT_PROJECT_KEY, request);
 			System.err.println(run.buildHttpRequestUrl().toString());
 			run.execute();
-			long duration = System.currentTimeMillis() - start;
-			System.err.println("call took " + duration + "ms.");
 		} catch (IOException e) {
 			throw new RuntimeException(e);
-		} catch (CancelledException e) {
-			long duration = System.currentTimeMillis() - start;
-			System.err.println("call cancelled after " + duration + "ms.");
 		}
-
 	}
 
 	private GwtChild getChild(String childKey) {
@@ -306,32 +291,10 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 		return uploadNewFile(file, template);
 	}
 
-	private ParentReference getParent(int year) {
+	private ParentReference getFolder(String folderName) {
 
 		try {
-			File file;
-			String folderName = String.format("Berichte %d/%d", year, year + 1);
-
-			long start = System.currentTimeMillis();
-			FileList files = getDrive().files().list()
-					.setQ(createQuery(folderName, FOLDER_TYPE)).execute();
-			long duration = System.currentTimeMillis() - start;
-			System.err.println("get parent took " + duration + "ms");
-
-			int numFiles = files.getItems().size();
-			if (numFiles == 0) {
-				file = createFile(folderName, FOLDER_TYPE, null);
-				file = uploadNewFolder(file);
-				updatePermissions(file, "reader");
-
-			} else if (numFiles == 1) {
-				file = files.getItems().get(0);
-
-			} else {
-				throw new IllegalStateException("more than one folder in root"
-						+ files.toPrettyString());
-			}
-
+			File file = getOrCreateFolder(folderName);
 			ParentReference parentReference = new ParentReference();
 			parentReference.setId(file.getId());
 			return parentReference;
@@ -339,6 +302,27 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	private File getOrCreateFolder(String folderName) throws IOException {
+
+		FileList files = getDrive().files().list()
+				.setQ(createQuery(folderName, FOLDER_TYPE)).execute();
+
+		File file;
+		int numFiles = files.getItems().size();
+		if (numFiles == 0) {
+			file = createFile(folderName, FOLDER_TYPE, null);
+			file = uploadNewFile(file, null);
+			updatePermissions(file, READER_ROLE);
+		} else if (numFiles == 1) {
+			file = files.getItems().get(0);
+
+		} else {
+			throw new IllegalStateException("more than one folder with name "
+					+ folderName + " in root" + files.toPrettyString());
+		}
+		return file;
 	}
 
 	private String createQuery(String title, String type) {
@@ -360,31 +344,20 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 
 	private File uploadNewFile(File file, ByteArrayContent content) {
 
-		long start = System.currentTimeMillis();
 		try {
-			Insert insert = getDrive().files().insert(file, content);
-			insert.setConvert(true);
+			Insert insert;
+			if (content != null) {
+
+				insert = getDrive().files().insert(file, content);
+				insert.setConvert(true);
+			} else {
+				insert = getDrive().files().insert(file);
+			}
+
 			return insert.execute();
 
 		} catch (IOException e) {
 			throw new RuntimeException(e);
-		} finally {
-			long duration = System.currentTimeMillis() - start;
-			System.err.println("upload of file took " + duration + "ms");
-		}
-	}
-
-	private File uploadNewFolder(File file) {
-
-		long start = System.currentTimeMillis();
-		try {
-			return getDrive().files().insert(file).execute();
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-
-		} finally {
-			long duration = System.currentTimeMillis() - start;
-			System.err.println("upload of file folder " + duration + "ms");
 		}
 	}
 
@@ -404,10 +377,7 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 	private String getType() throws IOException {
 
 		Get get = getStorage().objects().get(BUCKET, TEMPLATE_FILE);
-		long start = System.currentTimeMillis();
 		StorageObject object = get.execute();
-		long duration = System.currentTimeMillis() - start;
-		System.err.println("get type of template took " + duration + "ms");
 		return object.getContentType();
 	}
 
@@ -440,20 +410,26 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 	private Drive getDrive() {
 
 		if (null == driveService) {
-			try {
-				GoogleCredential credential = GoogleCredential
-						.getApplicationDefault();
-				if (credential.createScopedRequired()) {
-					credential = credential.createScoped(DriveScopes.all());
-				}
-				driveService = new Drive.Builder(Utils.HTTP_TRANSPORT,
-						Utils.JSON_FACTORY, credential).setApplicationName(
-						APPLICATION_NAME).build();
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
+			GoogleCredential credential = createApplicationCredentials(DriveScopes
+					.all());
+			driveService = new Drive.Builder(Utils.HTTP_TRANSPORT,
+					Utils.JSON_FACTORY, credential).setApplicationName(
+					APPLICATION_NAME).build();
 		}
 		return driveService;
+	}
+
+	private GoogleCredential createApplicationCredentials(Set<String> scopes) {
+		try {
+			GoogleCredential credential = GoogleCredential
+					.getApplicationDefault();
+			if (credential.createScopedRequired()) {
+				credential = credential.createScoped(scopes);
+			}
+			return credential;
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	/**
@@ -463,18 +439,12 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 	private Storage getStorage() {
 
 		if (null == storageService) {
-			try {
-				GoogleCredential credential = GoogleCredential
-						.getApplicationDefault();
-				if (credential.createScopedRequired()) {
-					credential = credential.createScoped(StorageScopes.all());
-				}
-				storageService = new Storage.Builder(Utils.HTTP_TRANSPORT,
-						Utils.JSON_FACTORY, credential).setApplicationName(
-						APPLICATION_NAME).build();
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
+
+			GoogleCredential credential = createApplicationCredentials(StorageScopes
+					.all());
+			storageService = new Storage.Builder(Utils.HTTP_TRANSPORT,
+					Utils.JSON_FACTORY, credential).setApplicationName(
+					APPLICATION_NAME).build();
 		}
 		return storageService;
 	}
@@ -488,30 +458,40 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 	 */
 	private Script getScript(Credential credential) {
 
+		// GoogleCredential googleCredential;
+		// try {
+		// googleCredential = GoogleCredential
+		// .getApplicationDefault();
+		// if (googleCredential.createScopedRequired()) {
+		// googleCredential =
+		// googleCredential.createScoped(Arrays.asList("https://www.googleapis.com/auth/documents"));
+		// }
 		return new Script.Builder(Utils.HTTP_TRANSPORT, Utils.JSON_FACTORY,
 				credential).setApplicationName(APPLICATION_NAME).build();
+		// } catch (IOException e) {
+		// throw new RuntimeException(e);
+		// }
 
 	}
 
-	private Credential getUserCredentials(String childKey, int year)
-			throws UserGrantRequiredException {
+	private Credential getUserCredentials(String childKey, int year,
+			String userId) throws UserGrantRequiredException {
 
 		AuthorizationCodeFlow flow = Utils.newFlow();
 		Credential credential = null;
 		try {
-			credential = flow.loadCredential(getUserId());
+			credential = flow.loadCredential(userId);
 			if (credential != null) {
 
-				if (credential.getExpiresInSeconds() < 60) {
-					if (!credential.refreshToken()) {
-						credential = null;
-						flow.getCredentialDataStore().delete(getUserId());
-					}
+				if (credential.getExpiresInSeconds() < 60
+						&& !credential.refreshToken()) {
+					credential = null;
+					flow.getCredentialDataStore().delete(userId);
 				}
-
 			}
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw new RuntimeException("could not get credentials for user "
+					+ userId, e);
 		}
 
 		if (credential == null) {
@@ -537,37 +517,5 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 		return UserServiceFactory.getUserService().getCurrentUser().getUserId();
 	}
 
-	private class FormattingVisitor implements NodeVisitor {
-		private StringBuilder accum = new StringBuilder();
-
-		public void head(Node node, int depth) {
-
-			String name = node.nodeName();
-			if (node instanceof TextNode) {
-				accum.append(((TextNode) node).text());
-			} else if (name.equals("li")) {
-				accum.append("\n * ");
-			} else if (name.equals("dt")) {
-				accum.append("  ");
-			} else if (StringUtil.in(name, "p", "h1", "h2", "h3", "h4", "h5",
-					"tr")) {
-				accum.append("\n");
-			}
-		}
-
-		// hit when all of the node's children (if any) have been visited
-		public void tail(Node node, int depth) {
-
-			String name = node.nodeName();
-			if (StringUtil.in(name, "br", "dd", "dt", "p", "h1", "h2", "h3",
-					"h4", "h5", "div")) {
-				accum.append("\n");
-			}
-		}
-
-		@Override
-		public String toString() {
-			return accum.toString();
-		}
-	}
+	
 }

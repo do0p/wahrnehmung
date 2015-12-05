@@ -4,7 +4,10 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.safety.Whitelist;
+import org.jsoup.select.NodeTraversor;
 import org.junit.Test;
+
+import at.brandl.lws.notice.server.service.FormattingVisitor;
 
 public class JsoupTest {
 
@@ -16,7 +19,12 @@ public class JsoupTest {
 		String clean = Jsoup.clean(TEXT, Whitelist.relaxed());
 		Document document = Jsoup.parseBodyFragment(clean);
 		Element body = document.body();
-		System.out.println(String.format("Berichte %d/%d", 2015, 2015+1));
+		FormattingVisitor formattingVisitor = new FormattingVisitor();
+		NodeTraversor nodeTraversor = new NodeTraversor(formattingVisitor);
+
+		nodeTraversor.traverse(body);
+
+		System.out.println( formattingVisitor.toString());
 
 	}
 

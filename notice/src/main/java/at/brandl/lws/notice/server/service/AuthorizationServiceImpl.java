@@ -50,6 +50,12 @@ public class AuthorizationServiceImpl extends RemoteServiceServlet implements
 							+ this.userService.getCurrentUser());
 	}
 
+	public void assertCurrentUserIsTeacher() {
+		if (!currentUserIsTeacher())
+			throw new IllegalStateException("current user is no teacher: "
+					+ this.userService.getCurrentUser());
+	}
+
 	public boolean currentUserIsAdmin() {
 
 		Authorization authorization = getAuthorizationForCurrentUserInternal();
@@ -61,6 +67,11 @@ public class AuthorizationServiceImpl extends RemoteServiceServlet implements
 		return (authorization != null)
 				&& ((authorization.isAdmin()) || (authorization
 						.isEditSections()));
+	}
+
+	public boolean currentUserIsTeacher() {
+		Authorization authorization = getAuthorizationForCurrentUserInternal();
+		return (authorization != null) && (authorization.isSeeAll());
 	}
 
 	public Authorization getAuthorizationForCurrentUser(String followUpUrl) {
@@ -79,7 +90,7 @@ public class AuthorizationServiceImpl extends RemoteServiceServlet implements
 	}
 
 	private Authorization getAuthorizationForCurrentUserInternal() {
-		if(!userService.isUserLoggedIn()) {
+		if (!userService.isUserLoggedIn()) {
 			return null;
 		}
 		User user = this.userService.getCurrentUser();
@@ -105,4 +116,5 @@ public class AuthorizationServiceImpl extends RemoteServiceServlet implements
 
 		return getAuthorizationForCurrentUserInternal();
 	}
+
 }
