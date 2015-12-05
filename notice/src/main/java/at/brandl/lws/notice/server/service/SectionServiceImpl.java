@@ -60,6 +60,10 @@ public class SectionServiceImpl extends RemoteServiceServlet implements
 			@Override
 			public int compare(GwtSection o1, GwtSection o2) {
 
+				long sort = o1.getPos() - o2.getPos();
+				if(sort != 0) {
+					return sort > 0 ? 1 : -1;
+				}
 				return Collator.getInstance(Locale.GERMAN).compare(
 						o1.getSectionName(), o2.getSectionName());
 			}

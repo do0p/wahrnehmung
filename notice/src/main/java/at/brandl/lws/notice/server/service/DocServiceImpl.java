@@ -394,8 +394,7 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 
 	private List<GwtBeobachtung> fetchNotices(String childKey) {
 
-		BeobachtungsFilter filter = createFilter(childKey);
-		return noticeDao.getBeobachtungen(filter, ALL);
+		return noticeDao.getBeobachtungen(createFilter(childKey), ALL);
 	}
 
 	private BeobachtungsFilter createFilter(String childKey) {

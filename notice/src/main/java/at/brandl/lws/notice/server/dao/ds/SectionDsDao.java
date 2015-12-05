@@ -28,6 +28,7 @@ public class SectionDsDao extends AbstractDsDao {
 	public static final String SECTION_KIND = "SectionDs";
 	public static final String SECTION_NAME_FIELD = "sectionName";
 	public static final String SECTION_ARCHIVE_FIELD = "archived";
+	public static final String SECTION_POS_FIELD = "pos";
 	public static final String SECTION_MEMCACHE = "section";
 	
 	private Map<String, List<String>> sectionChildCache;
@@ -141,14 +142,14 @@ public class SectionDsDao extends AbstractDsDao {
 			Map<String, List<String>> result) {
 		final List<String> childKeys = new ArrayList<String>();
 		result.put(parentKey == null ? null : toString(parentKey), childKeys);
-		for (Entity section : getAllSectionsInternal(parentKey)) {
+		for (Entity section : getAllSectionKeysInternal(parentKey)) {
 			childKeys.add(toString(section.getKey()));
 			childKeys.addAll(addChildKeys(section.getKey(), result));
 		}
 		return childKeys;
 	}
 
-	private Iterable<Entity> getAllSectionsInternal(Key parentKey) {
+	private Iterable<Entity> getAllSectionKeysInternal(Key parentKey) {
 		final Query query = new Query(SECTION_KIND, parentKey).setKeysOnly();
 		return removeKey(execute(query, withDefaults()), parentKey);
 	}
@@ -202,6 +203,7 @@ public class SectionDsDao extends AbstractDsDao {
 		} else {
 			entity = new Entity(toKey(key));
 		}
+		entity.setProperty(SECTION_POS_FIELD, gwtSection.getPos());
 		entity.setProperty(SECTION_NAME_FIELD, gwtSection.getSectionName());
 		entity.setProperty(SECTION_ARCHIVE_FIELD, gwtSection.getArchived());
 		return entity;
@@ -211,6 +213,11 @@ public class SectionDsDao extends AbstractDsDao {
 		final GwtSection section = new GwtSection();
 		section.setKey(toString(entity.getKey()));
 		section.setSectionName((String) entity.getProperty(SECTION_NAME_FIELD));
+		Long pos = (Long) entity.getProperty(SECTION_POS_FIELD);
+		if(pos == null) {
+			pos = 0l;
+		}
+		section.setPos(pos);
 		Boolean archived = (Boolean) entity.getProperty(SECTION_ARCHIVE_FIELD);
 		if(archived == null) {
 			archived = Boolean.FALSE;
