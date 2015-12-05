@@ -26,7 +26,7 @@ public class Notice extends SecuredContent implements
 		History.addValueChangeHandler(this);
 
 		String stateParam = Location.getParameter("state");
-		if (stateParam != null) {
+		if (stateParam != null && ((authorization.isAdmin()) || (authorization.isSeeAll()))) {
 			Documentation content = (Documentation) navigation
 					.getContent(Navigation.DOCUMENTATION_ENTRY);
 			setContent(content);

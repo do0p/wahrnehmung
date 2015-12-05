@@ -37,10 +37,13 @@ public class Navigation extends HorizontalPanel {
 		add(new Hyperlink(labels.notice(), NEW_ENTRY));
 		add(new Hyperlink(labels.questionnaire(), FORM_ENTRY));
 		add(new Hyperlink(labels.search(), LIST_ENTRY));
-		add(new Hyperlink(labels.documentation(), DOCUMENTATION_ENTRY));
+		if ((authorization.isAdmin()) || (authorization.isSeeAll())) {
+			add(new Hyperlink(labels.documentation(), DOCUMENTATION_ENTRY));
+		}
 		if ((authorization.isAdmin()) || (authorization.isEditSections())
-				|| (authorization.isSeeAll()))
+				|| (authorization.isSeeAll())) {
 			add(new Hyperlink(labels.configuration(), ADMIN));
+		}
 	}
 
 	public Widget getContent(String token) {
@@ -66,7 +69,7 @@ public class Navigation extends HorizontalPanel {
 	}
 
 	private Documentation getDocumentation() {
-		if(documentation == null) {
+		if (documentation == null) {
 			documentation = new Documentation(authorization, this);
 		}
 		return documentation;
@@ -92,7 +95,7 @@ public class Navigation extends HorizontalPanel {
 		}
 		return editContent;
 	}
-	
+
 	public Questionnaire getFormContent() {
 		if (questionnaire == null) {
 			questionnaire = new Questionnaire(this.authorization);
