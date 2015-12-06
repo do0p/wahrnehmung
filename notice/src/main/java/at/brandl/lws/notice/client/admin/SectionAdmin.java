@@ -121,7 +121,10 @@ public class SectionAdmin extends AbstractAdminTab {
 				boolean first = i == 0;
 				boolean last = i + 1 == numSections;
 				final GwtSection section = sections.get(i);
-				section.setPos(i);
+				if (section.getPos() != i) {
+					section.setPos(i);
+					saveItems.add(new SaveItem(section));
+				}
 				final InlineLabel sectionName = new InlineLabel(
 						section.getSectionName());
 				String archiveLabel;
@@ -256,7 +259,8 @@ public class SectionAdmin extends AbstractAdminTab {
 			return anchors;
 		}
 
-		private void addPlusItem(final String parentKey, final HasTreeItems object) {
+		private void addPlusItem(final String parentKey,
+				final HasTreeItems object) {
 			if (object instanceof TreeItem) {
 				final Anchor addLabel = new Anchor(labels().create());
 				final TreeItem addItem = new TreeItem(addLabel);
@@ -335,6 +339,7 @@ public class SectionAdmin extends AbstractAdminTab {
 			sections.add(pos - 1, section);
 			parent.removeItems();
 			addChildSections(parentSection, sections, parent, groupedSections);
+			updateButtonPanel();
 		}
 
 		private void handleSortDown(HasTreeItems parent,
@@ -348,6 +353,7 @@ public class SectionAdmin extends AbstractAdminTab {
 			section.setPos(section.getPos() + 1);
 			parent.removeItems();
 			addChildSections(parentSection, sections, parent, groupedSections);
+			updateButtonPanel();
 		}
 	}
 
