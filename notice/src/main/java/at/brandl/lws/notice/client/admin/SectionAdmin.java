@@ -28,6 +28,21 @@ import com.google.gwt.user.client.ui.TreeItem;
 
 public class SectionAdmin extends AbstractAdminTab {
 
+	private static enum Direction {
+		
+		UP(-1), DOWN(1);
+
+		private final int delta;
+		
+		private Direction(int delta) {
+			this.delta = delta;
+		}
+		
+		public int getDelta() {
+			return delta;
+		}
+	}
+
 	private final SectionServiceAsync sectionService = GWT
 			.create(SectionService.class);
 
@@ -300,6 +315,7 @@ public class SectionAdmin extends AbstractAdminTab {
 				final InlineLabel sectionName, final TreeItem sectionItem,
 				final HandlerRegistration editClickHandler,
 				final HandlerRegistration archiveClickHandler) {
+			
 			sectionName.setStylePrimaryName(Utils.DELETED_STYLE);
 			sectionItem.setState(false);
 			editClickHandler.removeHandler();
@@ -334,23 +350,29 @@ public class SectionAdmin extends AbstractAdminTab {
 				Map<String, List<GwtSection>> groupedSections,
 				List<GwtSection> sections, GwtSection section,
 				TreeItem sectionItem, GwtSection parentSection) {
-			int pos = (int) section.getPos();
-			sections.remove(pos);
-			sections.add(pos - 1, section);
-			parent.removeItems();
-			addChildSections(parentSection, sections, parent, groupedSections);
-			updateButtonPanel();
+
+			moveSection(section, sections, parent, parentSection,
+					groupedSections, Direction.UP);
 		}
+
 
 		private void handleSortDown(HasTreeItems parent,
 				Map<String, List<GwtSection>> groupedSections,
 				List<GwtSection> sections, GwtSection section,
 				TreeItem sectionItem, GwtSection parentSection) {
+
+			moveSection(section, sections, parent, parentSection,
+					groupedSections, Direction.DOWN);
+		}
+		
+
+		private void moveSection(GwtSection section, List<GwtSection> sections,
+				HasTreeItems parent, GwtSection parentSection,
+				Map<String, List<GwtSection>> groupedSections, Direction direction) {
+
 			int pos = (int) section.getPos();
 			sections.remove(pos);
-			sections.add(pos + 1, section);
-
-			section.setPos(section.getPos() + 1);
+			sections.add(pos + direction.getDelta(), section);
 			parent.removeItems();
 			addChildSections(parentSection, sections, parent, groupedSections);
 			updateButtonPanel();
@@ -360,6 +382,36 @@ public class SectionAdmin extends AbstractAdminTab {
 	@Override
 	void save() {
 		final List<SaveItem> tmpSaveItems = new ArrayList<SaveItem>(saveItems);
+
+		final Set<String> processed = deleteSections(tmpSaveItems);
+
+		List<GwtSection> sections = new ArrayList<GwtSection>();
+		for (final SaveItem saveItem : tmpSaveItems) {
+
+			if (saveItem.section != null
+					&& processed.contains(saveItem.section.getKey())) {
+				continue;
+			}
+
+			final String value = saveItem.getValue();
+			if (at.brandl.lws.notice.shared.Utils.isEmpty(value)) {
+				continue;
+			}
+
+			sections.add(createSectionFromSaveItem(saveItem, value));
+
+			if (saveItem.section != null) {
+				processed.add(saveItem.section.getKey());
+			}
+		}
+
+		if (!sections.isEmpty()) {
+			sectionService.storeSection(sections, new AsyncVoidCallBack());
+		}
+	}
+
+	private Set<String> deleteSections(List<SaveItem> tmpSaveItems) {
+
 		final Set<String> alreadySaved = new HashSet<>();
 
 		for (final SaveItem saveItem : tmpSaveItems) {
@@ -380,29 +432,7 @@ public class SectionAdmin extends AbstractAdminTab {
 			}
 		}
 
-		List<GwtSection> sections = new ArrayList<GwtSection>();
-		for (final SaveItem saveItem : tmpSaveItems) {
-
-			if (saveItem.section != null
-					&& alreadySaved.contains(saveItem.section.getKey())) {
-				continue;
-			}
-
-			final String value = saveItem.getValue();
-			if (at.brandl.lws.notice.shared.Utils.isEmpty(value)) {
-				continue;
-			}
-
-			sections.add(createSectionFromSaveItem(saveItem, value));
-
-			if (saveItem.section != null) {
-				alreadySaved.add(saveItem.section.getKey());
-			}
-		}
-
-		if (!sections.isEmpty()) {
-			sectionService.storeSection(sections, new AsyncVoidCallBack());
-		}
+		return alreadySaved;
 	}
 
 	private GwtSection createSectionFromSaveItem(SaveItem saveItem,
