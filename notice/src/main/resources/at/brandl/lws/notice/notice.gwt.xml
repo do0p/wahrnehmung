@@ -4,6 +4,7 @@
   <inherits name='com.google.gwt.user.User'/>
   <inherits name='at.brandl.lws.notice.NoticeShared'/>
   <inherits name="com.google.common.io.Io"/>
+  <inherits name="com.google.common.collect.Collect"/>
   
   <!-- Inherit the default GWT style sheet.  You can change       -->
   <!-- the theme of your GWT application by uncommenting          -->

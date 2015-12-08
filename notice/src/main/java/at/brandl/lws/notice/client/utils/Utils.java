@@ -16,6 +16,8 @@ import at.brandl.lws.notice.model.GwtQuestionGroup;
 import at.brandl.lws.notice.model.GwtQuestionnaire;
 import at.brandl.lws.notice.model.GwtQuestionnaireAnswers;
 
+import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.CellPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
@@ -346,6 +348,11 @@ public class Utils {
 
 	private static String endTag(String tagName) {
 		return "</" + tagName + ">";
+	}
+
+	public static boolean isLeftClick(ClickEvent event) {
+	
+		return NativeEvent.BUTTON_LEFT == event.getNativeButton();
 	}
 
 }
