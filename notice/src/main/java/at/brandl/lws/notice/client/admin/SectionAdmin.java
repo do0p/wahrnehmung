@@ -2,6 +2,7 @@ package at.brandl.lws.notice.client.admin;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -41,18 +42,22 @@ public class SectionAdmin extends AbstractAdminTab {
 
 	private static class SaveItem extends TextBox {
 
+		private static int count = 0;
+		private final String id;
 		private GwtSection section;
 		private String parentKey;
 		private boolean delete;
 
 		public SaveItem(String parentKey) {
-			
+
+			id = "p" + count++ + parentKey;
 			this.parentKey = parentKey;
 			setFocus(true);
 		}
 
 		public SaveItem(GwtSection section) {
-			
+
+			id = section.getKey();
 			this.section = section;
 			setText(section.getSectionName());
 			selectAll();
@@ -60,7 +65,8 @@ public class SectionAdmin extends AbstractAdminTab {
 		}
 
 		public SaveItem(GwtSection section, boolean delete) {
-			
+
+			id = section.getKey();
 			this.section = section;
 			this.delete = delete;
 		}
@@ -77,11 +83,26 @@ public class SectionAdmin extends AbstractAdminTab {
 			section.setSectionName(getValue());
 			return section;
 		}
+
+		@Override
+		public boolean equals(Object obj) {
+
+			if (!(obj instanceof SaveItem)) {
+				return false;
+			}
+			SaveItem other = (SaveItem) obj;
+			return id.equals(other.id);
+		}
+
+		@Override
+		public int hashCode() {
+			return id.hashCode();
+		}
 	}
 
 	private final SectionServiceAsync sectionService = GWT
 			.create(SectionService.class);
-	private final List<SaveItem> saveItems = new ArrayList<SaveItem>();
+	private final Set<SaveItem> saveItems = new HashSet<SaveItem>();
 
 	private final Tree tree;
 	private final DecisionBox decisionBox;
@@ -132,29 +153,25 @@ public class SectionAdmin extends AbstractAdminTab {
 
 	@Override
 	void save() {
-		final List<SaveItem> tmpSaveItems = new ArrayList<SaveItem>(saveItems);
 
-		final Set<String> processed = deleteSections(tmpSaveItems);
-
-		List<GwtSection> sections = new ArrayList<GwtSection>();
-		for (final SaveItem saveItem : tmpSaveItems) {
-
-			if (at.brandl.lws.notice.shared.Utils.isEmpty(saveItem.getValue())
-					|| (saveItem.section != null && processed
-							.contains(saveItem.section.getKey()))) {
-				continue;
-			}
-
-			sections.add(saveItem.createSectionFromSaveItem());
-
-			if (saveItem.section != null) {
-				processed.add(saveItem.section.getKey());
-			}
-		}
+		deleteSections();
+		List<GwtSection> sections = getSections();
 
 		if (!sections.isEmpty()) {
 			sectionService.storeSection(sections, new AsyncVoidCallBack());
 		}
+	}
+
+	private List<GwtSection> getSections() {
+
+		List<GwtSection> sections = new ArrayList<GwtSection>();
+		for (final SaveItem saveItem : saveItems) {
+			if (at.brandl.lws.notice.shared.Utils.isEmpty(saveItem.getValue())) {
+				continue;
+			}
+			sections.add(saveItem.createSectionFromSaveItem());
+		}
+		return sections;
 	}
 
 	private void layout() {
@@ -167,29 +184,22 @@ public class SectionAdmin extends AbstractAdminTab {
 		sectionService.querySections(new TreeBuilder());
 	}
 
-	private Set<String> deleteSections(List<SaveItem> tmpSaveItems) {
+	private void deleteSections() {
 
-		final Set<String> alreadySaved = new HashSet<>();
-
-		for (final SaveItem saveItem : tmpSaveItems) {
+		Iterator<SaveItem> iterator = saveItems.iterator();
+		while (iterator.hasNext()) {
+			SaveItem saveItem = iterator.next();
 
 			if (saveItem.section == null) {
-				continue;
-			}
-
-			String key = saveItem.section.getKey();
-			if (alreadySaved.contains(key)) {
 				continue;
 			}
 
 			if (saveItem.delete) {
 				sectionService.deleteSection(saveItem.section,
 						new AsyncVoidCallBack());
-				alreadySaved.add(key);
+				iterator.remove();
 			}
 		}
-
-		return alreadySaved;
 	}
 
 	private class TreeBuilder extends ErrorReportingCallback<List<GwtSection>> {
@@ -415,9 +425,8 @@ public class SectionAdmin extends AbstractAdminTab {
 			return anchors;
 		}
 
-		private void addNewSectionItem(HasTreeItems object, String parentKey) {
-
-			final SaveItem saveItem = createSaveItemForNewSection(parentKey);
+		private void addNewSectionItem(HasTreeItems object,
+				final String parentKey) {
 
 			if (object instanceof TreeItem) {
 
@@ -429,12 +438,13 @@ public class SectionAdmin extends AbstractAdminTab {
 					@Override
 					public void onClick(ClickEvent event) {
 						if (NativeEvent.BUTTON_LEFT == event.getNativeButton()) {
-							sectionItem.insertItem(1, saveItem);
+							sectionItem.insertItem(1,
+									createSaveItemForNewSection(parentKey));
 						}
 					}
 				});
 			} else {
-				object.addItem(saveItem);
+				object.addItem(createSaveItemForNewSection(parentKey));
 			}
 		}
 
