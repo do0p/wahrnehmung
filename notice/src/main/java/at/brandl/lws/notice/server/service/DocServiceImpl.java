@@ -6,8 +6,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -23,6 +25,7 @@ import org.jsoup.select.NodeTraversor;
 import at.brandl.lws.notice.model.BeobachtungsFilter;
 import at.brandl.lws.notice.model.GwtBeobachtung;
 import at.brandl.lws.notice.model.GwtChild;
+import at.brandl.lws.notice.model.GwtSection;
 import at.brandl.lws.notice.model.GwtSummary;
 import at.brandl.lws.notice.model.UserGrantRequiredException;
 import at.brandl.lws.notice.server.dao.DaoRegistry;
@@ -51,10 +54,14 @@ import com.google.api.services.storage.Storage.Objects.Get;
 import com.google.api.services.storage.StorageScopes;
 import com.google.api.services.storage.model.StorageObject;
 import com.google.appengine.api.users.UserServiceFactory;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.google.gwt.view.client.Range;
 
 public class DocServiceImpl extends RemoteServiceServlet implements DocsService {
+
+	private static final String ROOT_KEY = "root";
 
 	private static final long serialVersionUID = 6254413733240094242L;
 
@@ -67,6 +74,7 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 	private static final String SCRIPT_NAME = "updateDocument";
 
 	private static final String TEXT_NAME = "_text_";
+	private static final String ORDER_NAME = "_order_";
 	private static final String READER_ROLE = "reader";
 	private static final String GROUP_TYPE = "group";
 	private static final String FOLDER_TYPE = "application/vnd.google-apps.folder";
@@ -79,10 +87,13 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 	private Drive driveService;
 	private Storage storageService;
 
+	private SectionDsDao sectionDao;
+
 	public DocServiceImpl() {
 
 		noticeDao = DaoRegistry.get(BeobachtungDsDao.class);
 		childDao = DaoRegistry.get(ChildDsDao.class);
+		sectionDao = DaoRegistry.get(SectionDsDao.class);
 		authorizationService = new AuthorizationServiceImpl();
 	}
 
@@ -103,7 +114,7 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 		updatePermissions(file, "writer");
 
 		Collection<GwtBeobachtung> childNotices = fetchNotices(childKey);
-		Map<String, Object> notices = new HashMap<>();
+		Map<String, Object> notices = createMap();
 		Date oldest = new Date(Long.MIN_VALUE);
 		Date newest = new Date(Long.MIN_VALUE);
 		for (GwtBeobachtung notice : childNotices) {
@@ -130,6 +141,50 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 		updateDocument(SCRIPT_NAME, file, userCredential, replacements, notices);
 
 		return file.getDefaultOpenWithLink();
+	}
+
+	private Map<String, Object> createMap() {
+
+		return createMap(ROOT_KEY, groupChildSections());
+	}
+
+	private Multimap<String, GwtSection> groupChildSections() {
+
+		Multimap<String, GwtSection> childSections = ArrayListMultimap.create();
+		for (GwtSection section : getAllSections()) {
+			String parentKey = section.getParentKey();
+			parentKey = parentKey == null ? ROOT_KEY : parentKey;
+			childSections.put(parentKey, section);
+		}
+		return childSections;
+	}
+
+	private List<GwtSection> getAllSections() {
+		List<GwtSection> allSections = new ArrayList<>(
+				sectionDao.getAllSections());
+		Collections.sort(allSections);
+		
+		return allSections;
+	}
+
+	private Map<String, Object> createMap(String parentKey,
+			Multimap<String, GwtSection> childSections) {
+
+		LinkedHashMap<String, Object> parentMap = new LinkedHashMap<>();
+		Collection<GwtSection> sections = childSections.get(parentKey);
+		if (sections != null) {
+			ArrayList<Object> sectionOrder = new ArrayList<>();
+			parentMap.put(ORDER_NAME, sectionOrder);
+			for (GwtSection section : sections) {
+				LinkedHashMap<String, Object> childMap = new LinkedHashMap<>();
+				childMap.put(TEXT_NAME, new ArrayList<>());
+				childMap.putAll(createMap(section.getKey(), childSections));
+				String sectionName = section.getSectionName();
+				parentMap.put(sectionName, childMap);
+				sectionOrder.add(sectionName);
+			}
+		}
+		return parentMap;
 	}
 
 	private String getFolderName(int year) {
@@ -162,7 +217,9 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 			if (parts.length == 2) {
 				addText(subsections, TEXT_NAME, notice);
 			} else {
-				addText(subsections, parts[2], notice);
+				Map<String, Object> subsectionsText = getOrCreate(sections,
+						parts[2]);
+				addText(subsectionsText, TEXT_NAME, notice);
 			}
 		}
 	}
@@ -178,7 +235,7 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 		Map<String, Object> subsections = (Map<String, Object>) sections
 				.get(sectionName);
 		if (subsections == null) {
-			subsections = new HashMap<>();
+			subsections = new LinkedHashMap<>();
 			sections.put(sectionName, subsections);
 		}
 		return subsections;
@@ -271,7 +328,6 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 		try {
 			Run run = getScript(userCredential).scripts().run(
 					SCRIPT_PROJECT_KEY, request);
-			System.err.println(run.buildHttpRequestUrl().toString());
 			run.execute();
 		} catch (IOException e) {
 			throw new RuntimeException(e);
@@ -385,10 +441,7 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		Get get = getStorage().objects().get(BUCKET, TEMPLATE_FILE);
-		long start = System.currentTimeMillis();
 		get.executeMediaAndDownloadTo(out);
-		long duration = System.currentTimeMillis() - start;
-		System.err.println("get content of template took " + duration + "ms");
 		return out.toByteArray();
 	}
 
@@ -516,5 +569,4 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 		return UserServiceFactory.getUserService().getCurrentUser().getUserId();
 	}
 
-	
 }

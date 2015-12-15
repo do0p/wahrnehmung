@@ -7,6 +7,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 
@@ -19,6 +21,7 @@ import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.JsonGenerator;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.repackaged.org.apache.commons.codec.binary.Base64;
 import com.google.api.client.util.store.DataStoreFactory;
@@ -92,6 +95,18 @@ class Utils {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
+	}
+	
+	static void debugJson(Object object) throws IOException {
+		
+		Writer writer = new StringWriter();
+		JsonGenerator jsonGenerator = JSON_FACTORY.createJsonGenerator(writer);
+		
+		jsonGenerator.enablePrettyPrint();
+		jsonGenerator.serialize(object);
+		jsonGenerator.close();
+		
+		System.err.println(writer);
 	}
 
 }
