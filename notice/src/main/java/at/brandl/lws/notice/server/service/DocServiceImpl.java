@@ -115,7 +115,7 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 
 		Collection<GwtBeobachtung> childNotices = fetchNotices(childKey);
 		Map<String, Object> notices = createMap();
-		Date oldest = new Date(Long.MIN_VALUE);
+		Date oldest = new Date(Long.MAX_VALUE);
 		Date newest = new Date(Long.MIN_VALUE);
 		for (GwtBeobachtung notice : childNotices) {
 
@@ -235,8 +235,12 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 		Map<String, Object> subsections = (Map<String, Object>) sections
 				.get(sectionName);
 		if (subsections == null) {
+			System.err.println("no section found for section name " + sectionName);
 			subsections = new LinkedHashMap<>();
 			sections.put(sectionName, subsections);
+			@SuppressWarnings("unchecked")
+			List<String> sectionNames = (List<String>)sections.get(ORDER_NAME);
+			sectionNames.add(sectionName);
 		}
 		return subsections;
 	}
@@ -326,6 +330,7 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 
 		request.setParameters(parameters);
 		try {
+			Utils.debugJson(parameters);
 			Run run = getScript(userCredential).scripts().run(
 					SCRIPT_PROJECT_KEY, request);
 			run.execute();
