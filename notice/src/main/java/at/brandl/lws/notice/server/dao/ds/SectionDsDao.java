@@ -69,6 +69,10 @@ public class SectionDsDao extends AbstractDsDao {
 
 	public void storeSection(GwtSection gwtSection) {
 
+		if(gwtSection.getSectionName().contains(SEPARATOR)) {
+			throw new IllegalArgumentException("section name may not contain '" + SEPARATOR + "'");
+		}
+		
 		final DatastoreService datastoreService = getDatastoreService();
 
 		final Transaction transaction = datastoreService.beginTransaction();

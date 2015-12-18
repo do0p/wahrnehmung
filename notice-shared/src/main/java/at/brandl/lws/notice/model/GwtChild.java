@@ -2,6 +2,7 @@ package at.brandl.lws.notice.model;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -21,6 +22,9 @@ public class GwtChild implements Serializable, Comparable<GwtChild> {
 
 	public void setDevelopementDialogueDates(List<Date> developementDialogues) {
 		this.developementDialogueDates = developementDialogues;
+		if (this.developementDialogueDates != null) {
+			Collections.sort(this.developementDialogueDates);
+		}
 	}
 
 	public void addDevelopementDialogueDate(Date date) {
@@ -29,6 +33,7 @@ public class GwtChild implements Serializable, Comparable<GwtChild> {
 		}
 		if (!developementDialogueDates.contains(date)) {
 			developementDialogueDates.add(date);
+			Collections.sort(this.developementDialogueDates);
 		}
 	}
 
@@ -81,7 +86,8 @@ public class GwtChild implements Serializable, Comparable<GwtChild> {
 	public Date getLastDevelopementDialogueDate() {
 		return developementDialogueDates == null
 				|| developementDialogueDates.isEmpty() ? null
-				: developementDialogueDates.get(0);
+				: developementDialogueDates.get(developementDialogueDates
+						.size() - 1);
 	}
 
 	public int compareTo(GwtChild other) {

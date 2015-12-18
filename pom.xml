@@ -91,13 +91,6 @@
 				<artifactId>google-api-services-script</artifactId>
 				<version>v1-rev1-1.20.0</version>
 			</dependency>
-			<dependency>
-				<groupId>com.google.appengine.tools</groupId>
-				<artifactId>appengine-gcs-client</artifactId>
-				<version>0.5</version>
-			</dependency>
-			<!-- <dependency> <groupId>jstl</groupId> <artifactId>jstl</artifactId> 
-				<version>1.2</version> </dependency> -->
 
 			<!-- Test Dependencies -->
 			<dependency>

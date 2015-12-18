@@ -152,6 +152,12 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 
 		Multimap<String, GwtSection> childSections = ArrayListMultimap.create();
 		for (GwtSection section : getAllSections()) {
+			if (section.getSectionName().contains(SectionDsDao.SEPARATOR)) {
+				throw new IllegalArgumentException(
+						"section name may not contain '"
+								+ SectionDsDao.SEPARATOR + "'");
+			}
+
 			String parentKey = section.getParentKey();
 			parentKey = parentKey == null ? ROOT_KEY : parentKey;
 			childSections.put(parentKey, section);
@@ -163,27 +169,30 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 		List<GwtSection> allSections = new ArrayList<>(
 				sectionDao.getAllSections());
 		Collections.sort(allSections);
-		
+
 		return allSections;
 	}
 
 	private Map<String, Object> createMap(String parentKey,
 			Multimap<String, GwtSection> childSections) {
 
-		LinkedHashMap<String, Object> parentMap = new LinkedHashMap<>();
 		Collection<GwtSection> sections = childSections.get(parentKey);
-		if (sections != null) {
-			ArrayList<Object> sectionOrder = new ArrayList<>();
-			parentMap.put(ORDER_NAME, sectionOrder);
-			for (GwtSection section : sections) {
-				LinkedHashMap<String, Object> childMap = new LinkedHashMap<>();
-				childMap.put(TEXT_NAME, new ArrayList<>());
-				childMap.putAll(createMap(section.getKey(), childSections));
-				String sectionName = section.getSectionName();
-				parentMap.put(sectionName, childMap);
-				sectionOrder.add(sectionName);
-			}
+		if (sections == null || sections.isEmpty()) {
+			return Collections.emptyMap();
 		}
+
+		LinkedHashMap<String, Object> parentMap = new LinkedHashMap<>();
+		ArrayList<Object> sectionOrder = new ArrayList<>();
+		parentMap.put(ORDER_NAME, sectionOrder);
+		for (GwtSection section : sections) {
+			LinkedHashMap<String, Object> childMap = new LinkedHashMap<>();
+			childMap.put(TEXT_NAME, new ArrayList<>());
+			childMap.putAll(createMap(section.getKey(), childSections));
+			String sectionName = section.getSectionName();
+			parentMap.put(sectionName, childMap);
+			sectionOrder.add(sectionName);
+		}
+
 		return parentMap;
 	}
 
@@ -208,19 +217,24 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 	private void addNotice(Map<String, Object> notices, GwtBeobachtung notice) {
 
 		String[] parts = notice.getSectionName().split(SectionDsDao.SEPARATOR);
-		Map<String, Object> sections = getOrCreate(notices, parts[0]);
+		try {
+			Map<String, Object> sections = getOrCreate(notices, parts[0]);
 
-		if (parts.length == 1) {
-			addText(sections, TEXT_NAME, notice);
-		} else {
-			Map<String, Object> subsections = getOrCreate(sections, parts[1]);
-			if (parts.length == 2) {
-				addText(subsections, TEXT_NAME, notice);
+			if (parts.length == 1) {
+				addText(sections, TEXT_NAME, notice);
 			} else {
-				Map<String, Object> subsectionsText = getOrCreate(sections,
-						parts[2]);
-				addText(subsectionsText, TEXT_NAME, notice);
+				Map<String, Object> subsections = getOrCreate(sections,
+						parts[1]);
+				if (parts.length == 2) {
+					addText(subsections, TEXT_NAME, notice);
+				} else {
+					Map<String, Object> subsectionsText = getOrCreate(
+							subsections, parts[2]);
+					addText(subsectionsText, TEXT_NAME, notice);
+				}
 			}
+		} catch (IllegalArgumentException e) {
+			System.err.println("error with " + Arrays.toString(parts));
 		}
 	}
 
@@ -235,12 +249,11 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 		Map<String, Object> subsections = (Map<String, Object>) sections
 				.get(sectionName);
 		if (subsections == null) {
-			System.err.println("no section found for section name " + sectionName);
-			subsections = new LinkedHashMap<>();
-			sections.put(sectionName, subsections);
-			@SuppressWarnings("unchecked")
-			List<String> sectionNames = (List<String>)sections.get(ORDER_NAME);
-			sectionNames.add(sectionName);
+			System.err.println("no section found for section name "
+					+ sectionName);
+			System.err.println("sectionnames: " + sections.keySet());
+			throw new IllegalArgumentException(
+					"no section found for section name " + sectionName);
 		}
 		return subsections;
 	}
