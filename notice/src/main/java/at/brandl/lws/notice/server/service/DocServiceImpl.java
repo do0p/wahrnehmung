@@ -22,6 +22,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.safety.Whitelist;
 import org.jsoup.select.NodeTraversor;
 
+import at.brandl.lws.notice.model.BackendServiceException;
 import at.brandl.lws.notice.model.BeobachtungsFilter;
 import at.brandl.lws.notice.model.GwtBeobachtung;
 import at.brandl.lws.notice.model.GwtChild;
@@ -47,7 +48,6 @@ import com.google.api.services.drive.model.FileList;
 import com.google.api.services.drive.model.ParentReference;
 import com.google.api.services.drive.model.Permission;
 import com.google.api.services.script.Script;
-import com.google.api.services.script.Script.Scripts.Run;
 import com.google.api.services.script.model.ExecutionRequest;
 import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.Storage.Objects.Get;
@@ -99,7 +99,7 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 
 	@Override
 	public String printDocumentation(String childKey, int year)
-			throws UserGrantRequiredException {
+			throws UserGrantRequiredException, BackendServiceException {
 
 		authorizationService.assertCurrentUserIsTeacher();
 
@@ -111,7 +111,7 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 		GwtChild child = getChild(childKey);
 		ParentReference folder = getFolder(getFolderName(year));
 		File file = createDocument(createTitle(child), folder);
-		updatePermissions(file, "writer");
+		updatePermissions(file, "writer", true);
 
 		Collection<GwtBeobachtung> childNotices = fetchNotices(childKey);
 		Map<String, Object> notices = createMap();
@@ -207,7 +207,7 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 			for (File file : files.getItems()) {
 				getDrive().files().delete(file.getId()).execute();
 			}
-		} catch (IOException e) {
+		} catch (IOException | BackendServiceException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -308,7 +308,8 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 		return child.getFirstName() + " " + child.getLastName().toUpperCase();
 	}
 
-	private void updatePermissions(File file, String role) {
+	private void updatePermissions(File file, String role, boolean retry)
+			throws BackendServiceException {
 
 		Permission permission = new Permission();
 		permission.setValue(GROUP);
@@ -318,7 +319,14 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 			getDrive().permissions().insert(file.getId(), permission)
 					.setSendNotificationEmails(false).execute();
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			if (retry) {
+				updatePermissions(file, role, false);
+			} else {
+				throw new BackendServiceException(
+						"Got exception setting permission " + role
+								+ " for file " + file.getDefaultOpenWithLink(),
+						e);
+			}
 		}
 
 	}
@@ -330,7 +338,7 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 
 	private void updateDocument(String scriptName, File file,
 			Credential userCredential, Map<String, String> replacements,
-			Map<String, Object> notices) {
+			Map<String, Object> notices) throws BackendServiceException {
 
 		ExecutionRequest request = new ExecutionRequest();
 
@@ -343,12 +351,12 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 
 		request.setParameters(parameters);
 		try {
-			Utils.debugJson(parameters);
-			Run run = getScript(userCredential).scripts().run(
-					SCRIPT_PROJECT_KEY, request);
-			run.execute();
+			getScript(userCredential).scripts()
+					.run(SCRIPT_PROJECT_KEY, request).execute();
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw new BackendServiceException("Got exception updating file "
+					+ file.getDefaultOpenWithLink() + " with "
+					+ Utils.createJsonString(parameters), e);
 		}
 	}
 
@@ -357,7 +365,7 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 		return childDao.getChild(childKey);
 	}
 
-	private File createDocument(String title, ParentReference parent) {
+	private File createDocument(String title, ParentReference parent) throws BackendServiceException {
 
 		ByteArrayContent template = getTemplateFile();
 
@@ -365,36 +373,46 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 		return uploadNewFile(file, template);
 	}
 
-	private ParentReference getFolder(String folderName) {
+	private ParentReference getFolder(String folderName)
+			throws BackendServiceException {
 
-		try {
-			File file = getOrCreateFolder(folderName);
-			ParentReference parentReference = new ParentReference();
-			parentReference.setId(file.getId());
-			return parentReference;
+		File file = getOrCreateFolder(folderName);
+		ParentReference parentReference = new ParentReference();
+		parentReference.setId(file.getId());
+		return parentReference;
 
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
 	}
 
-	private File getOrCreateFolder(String folderName) throws IOException {
+	private File getOrCreateFolder(String folderName)
+			throws BackendServiceException {
 
-		FileList files = getDrive().files().list()
-				.setQ(createQuery(folderName, FOLDER_TYPE)).execute();
+		FileList files;
+		try {
+			files = getDrive().files().list()
+					.setQ(createQuery(folderName, FOLDER_TYPE)).execute();
+		} catch (IOException e) {
+			throw new BackendServiceException(
+					"Got exception retrieving root folders", e);
+		}
 
 		File file;
 		int numFiles = files.getItems().size();
 		if (numFiles == 0) {
 			file = createFile(folderName, FOLDER_TYPE, null);
 			file = uploadNewFile(file, null);
-			updatePermissions(file, READER_ROLE);
+			updatePermissions(file, READER_ROLE, true);
 		} else if (numFiles == 1) {
 			file = files.getItems().get(0);
 
 		} else {
+			String folderlist;
+			try {
+				folderlist = files.toPrettyString();
+			} catch (IOException e) {
+				folderlist = "";
+			}
 			throw new IllegalStateException("more than one folder with name "
-					+ folderName + " in root" + files.toPrettyString());
+					+ folderName + " in root: " + folderlist);
 		}
 		return file;
 	}
@@ -416,7 +434,8 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 		return file;
 	}
 
-	private File uploadNewFile(File file, ByteArrayContent content) {
+	private File uploadNewFile(File file, ByteArrayContent content)
+			throws BackendServiceException {
 
 		try {
 			Insert insert;
@@ -431,36 +450,43 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 			return insert.execute();
 
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw new BackendServiceException("Got exception creating file "
+					+ file.getTitle(), e);
 		}
 	}
 
-	private ByteArrayContent getTemplateFile() {
+	private ByteArrayContent getTemplateFile() throws BackendServiceException {
+
+		byte[] contet = getContent();
+		String type = getType();
+		return new ByteArrayContent(type, contet);
+
+	}
+
+	private String getType() throws BackendServiceException {
 
 		try {
-
-			byte[] contet = getContent();
-			String type = getType();
-			return new ByteArrayContent(type, contet);
-
+			Get get = getStorage().objects().get(BUCKET, TEMPLATE_FILE);
+			StorageObject object = get.execute();
+			return object.getContentType();
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw new BackendServiceException(
+					"Got exception retrieving content type of " + TEMPLATE_FILE,
+					e);
 		}
 	}
 
-	private String getType() throws IOException {
+	private byte[] getContent() throws BackendServiceException {
 
-		Get get = getStorage().objects().get(BUCKET, TEMPLATE_FILE);
-		StorageObject object = get.execute();
-		return object.getContentType();
-	}
-
-	private byte[] getContent() throws IOException {
-
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		Get get = getStorage().objects().get(BUCKET, TEMPLATE_FILE);
-		get.executeMediaAndDownloadTo(out);
-		return out.toByteArray();
+		try {
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
+			Get get = getStorage().objects().get(BUCKET, TEMPLATE_FILE);
+			get.executeMediaAndDownloadTo(out);
+			return out.toByteArray();
+		} catch (IOException e) {
+			throw new BackendServiceException(
+					"Got exception retrieving content from " + TEMPLATE_FILE, e);
+		}
 	}
 
 	private List<GwtBeobachtung> fetchNotices(String childKey) {
@@ -477,7 +503,7 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 		return filter;
 	}
 
-	private Drive getDrive() {
+	private Drive getDrive() throws BackendServiceException {
 
 		if (null == driveService) {
 			GoogleCredential credential = createApplicationCredentials(DriveScopes
@@ -489,7 +515,7 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 		return driveService;
 	}
 
-	private GoogleCredential createApplicationCredentials(Set<String> scopes) {
+	private GoogleCredential createApplicationCredentials(Set<String> scopes) throws BackendServiceException {
 		try {
 			GoogleCredential credential = GoogleCredential
 					.getApplicationDefault();
@@ -498,7 +524,7 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 			}
 			return credential;
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw new BackendServiceException("Got exception creating app credentials with scopes " + scopes, e);
 		}
 	}
 
@@ -506,7 +532,7 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 	 * Returns an authenticated Storage object used to make service calls to
 	 * Cloud Storage.
 	 */
-	private Storage getStorage() {
+	private Storage getStorage() throws BackendServiceException {
 
 		if (null == storageService) {
 
@@ -528,24 +554,12 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 	 */
 	private Script getScript(Credential credential) {
 
-		// GoogleCredential googleCredential;
-		// try {
-		// googleCredential = GoogleCredential
-		// .getApplicationDefault();
-		// if (googleCredential.createScopedRequired()) {
-		// googleCredential =
-		// googleCredential.createScoped(Arrays.asList("https://www.googleapis.com/auth/documents"));
-		// }
 		return new Script.Builder(Utils.HTTP_TRANSPORT, Utils.JSON_FACTORY,
 				credential).setApplicationName(APPLICATION_NAME).build();
-		// } catch (IOException e) {
-		// throw new RuntimeException(e);
-		// }
-
 	}
 
 	private Credential getUserCredentials(String childKey, int year,
-			String userId) throws UserGrantRequiredException {
+			String userId) throws UserGrantRequiredException, BackendServiceException {
 
 		AuthorizationCodeFlow flow = Utils.newFlow();
 		Credential credential = null;
@@ -560,7 +574,7 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 				}
 			}
 		} catch (IOException e) {
-			throw new RuntimeException("could not get credentials for user "
+			throw new BackendServiceException("could not get credentials for user "
 					+ userId, e);
 		}
 

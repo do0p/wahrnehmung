@@ -38,7 +38,7 @@ class Utils {
 			.getDefaultInstance();
 
 	static {
-		
+
 		try {
 			HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
 		} catch (GeneralSecurityException | IOException e) {
@@ -57,8 +57,9 @@ class Utils {
 		try {
 			return new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT,
 					JSON_FACTORY, getClientCredential(),
-					Arrays.asList(DOCUMENTS_SCOPE)).setDataStoreFactory(
-					DATA_STORE_FACTORY).setAccessType(OFFLINE).build();
+					Arrays.asList(DOCUMENTS_SCOPE))
+					.setDataStoreFactory(DATA_STORE_FACTORY)
+					.setAccessType(OFFLINE).build();
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -96,17 +97,22 @@ class Utils {
 			throw new RuntimeException(e);
 		}
 	}
-	
-	static void debugJson(Object object) throws IOException {
-		
-		Writer writer = new StringWriter();
-		JsonGenerator jsonGenerator = JSON_FACTORY.createJsonGenerator(writer);
-		
-		jsonGenerator.enablePrettyPrint();
-		jsonGenerator.serialize(object);
-		jsonGenerator.close();
-		
-		System.err.println(writer);
+
+	static String createJsonString(Object object) {
+		try {
+			Writer writer = new StringWriter();
+			JsonGenerator jsonGenerator = JSON_FACTORY
+					.createJsonGenerator(writer);
+
+			jsonGenerator.enablePrettyPrint();
+			jsonGenerator.serialize(object);
+			jsonGenerator.close();
+
+			String debugString = writer.toString();
+			return debugString;
+		} catch (IOException e) {
+			return object.toString();
+		}
 	}
 
 }

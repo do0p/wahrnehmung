@@ -30,9 +30,10 @@ public class Documentation extends VerticalPanel {
 	private Button printButton;
 	private String selectedChidKey;
 	private Button deleteButton;
+	private PopUp dialogBox;
 
 	public Documentation(Authorization authorization, Navigation navigation) {
-		PopUp dialogBox = new PopUp();
+		dialogBox = new PopUp();
 		this.nameSelection = new NameSelection(dialogBox);
 		layout();
 	}
@@ -60,7 +61,7 @@ public class Documentation extends VerticalPanel {
 		printButton.setSize(Utils.BUTTON_WIDTH + Utils.PIXEL, Utils.ROW_HEIGHT
 				+ Utils.PIXEL);
 		buttonContainer.setWidget(0, 0, printButton);
-		
+
 		deleteButton = new Button(labels.delete());
 		deleteButton.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
@@ -93,9 +94,17 @@ public class Documentation extends VerticalPanel {
 							Window.Location
 									.assign(((UserGrantRequiredException) caught)
 											.getAuthorizationUrl());
+						} else {
+							showErrorMessage(caught.getLocalizedMessage());
 						}
 					}
 				});
+	}
+
+	private void showErrorMessage(String message) {
+		dialogBox.setErrorMessage(message);
+		dialogBox.setDisableWhileShown(printButton);
+		dialogBox.center();
 	}
 
 	private void deleteAll() {
