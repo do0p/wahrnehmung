@@ -1,5 +1,7 @@
 package at.brandl.lws.notice.server.service;
 
+import static at.brandl.lws.notice.server.service.DriveServiceImpl.WRITER_ROLE;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -12,7 +14,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -36,18 +37,15 @@ import at.brandl.lws.notice.server.dao.ds.ChildDsDao;
 import at.brandl.lws.notice.server.dao.ds.SectionDsDao;
 import at.brandl.lws.notice.shared.service.DocsService;
 import at.brandl.lws.notice.shared.service.StateParser;
+import at.brandl.lws.notice.shared.util.Constants;
 
 import com.google.api.client.auth.oauth2.AuthorizationCodeFlow;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.ByteArrayContent;
-import com.google.api.services.drive.Drive;
-import com.google.api.services.drive.Drive.Files.Insert;
-import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
 import com.google.api.services.drive.model.ParentReference;
-import com.google.api.services.drive.model.Permission;
 import com.google.api.services.script.Script;
 import com.google.api.services.script.model.ExecutionRequest;
 import com.google.api.services.storage.Storage;
@@ -66,30 +64,22 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 
 	private static final long serialVersionUID = 6254413733240094242L;
 
-	private static final String APPLICATION_NAME = "wahrnehmung-test";
-	private static final String GROUP = "lws-test@googlegroups.com";
-
 	private static final String TEMPLATE_FILE = "template.docx";
-	private static final String BUCKET = APPLICATION_NAME + ".appspot.com";
+	private static final String BUCKET = Constants.APPLICATION_NAME
+			+ ".appspot.com";
 	private static final String SCRIPT_PROJECT_KEY = "MG_5zR_lIyT2fsbjXj3xcFocrZYMzalMr";
 	private static final String SCRIPT_NAME = "updateDocument";
-	private static final String ROOT_PARENT = "root";
-
 	private static final String TEXT_NAME = "_text_";
 	private static final String ORDER_NAME = "_order_";
-	private static final String READER_ROLE = "reader";
-	private static final String GROUP_TYPE = "group";
-	private static final String FOLDER_TYPE = "application/vnd.google-apps.folder";
 	private static final Range ALL = new Range(0, Integer.MAX_VALUE);
 
 	private final BeobachtungDsDao noticeDao;
 	private final ChildDsDao childDao;
 	private final AuthorizationServiceImpl authorizationService;
+	private final DriveServiceImpl driveService;
+	private final SectionDsDao sectionDao;
 
-	private Drive driveService;
 	private Storage storageService;
-
-	private SectionDsDao sectionDao;
 
 	public DocServiceImpl() {
 
@@ -97,6 +87,7 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 		childDao = DaoRegistry.get(ChildDsDao.class);
 		sectionDao = DaoRegistry.get(SectionDsDao.class);
 		authorizationService = new AuthorizationServiceImpl();
+		driveService = new DriveServiceImpl();
 	}
 
 	@Override
@@ -112,9 +103,10 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 				getUserId());
 
 		GwtChild child = getChild(childKey);
-		ParentReference folder = getFolder(getFolderName(year));
-		File file = createDocument(createTitle(child), folder);
-		updatePermissions(file, "writer", true);
+
+		ParentReference folder = getOrCreateDocumentationFolder(child);
+
+		File file = createDocument(child, year, folder);
 
 		Collection<GwtBeobachtung> childNotices = fetchNotices(childKey);
 		Map<String, Object> notices = createMap();
@@ -144,6 +136,25 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 		updateDocument(SCRIPT_NAME, file, userCredential, replacements, notices);
 
 		return file.getDefaultOpenWithLink();
+	}
+
+	private ParentReference getOrCreateDocumentationFolder(GwtChild child)
+			throws BackendServiceException {
+		
+		ParentReference docRootFolder = driveService.getOrCreateFolder(Constants.NOTICE_ROOT_FOLDER_NAME,
+				null);
+		
+		String fullChildName = getFullChildName(child);
+		ParentReference childFolder = driveService.getOrCreateFolder(fullChildName,
+				docRootFolder);
+		
+		return driveService.getOrCreateFolder(Constants.DOCUMENTATION_FOLDER_NAME,
+				childFolder);
+	}
+
+	private String getFullChildName(GwtChild child) {
+		
+		return String.format("%1$s %2$s (%3$td.%3$tm.%3$ty)", child.getFirstName(), child.getLastName(), child.getBirthDay());
 	}
 
 	private Map<String, Object> createMap() {
@@ -199,20 +210,9 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 		return parentMap;
 	}
 
-	private String getFolderName(int year) {
-		return String.format("Berichte %d/%d", year, year + 1);
-	}
-
 	@Override
 	public void deleteAll() {
-		try {
-			FileList files = getDrive().files().list().execute();
-			for (File file : files.getItems()) {
-				getDrive().files().delete(file.getId()).execute();
-			}
-		} catch (IOException | BackendServiceException e) {
-			e.printStackTrace();
-		}
+		driveService.deleteAll();
 
 	}
 
@@ -310,32 +310,9 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 		return child.getFirstName() + " " + child.getLastName().toUpperCase();
 	}
 
-	private void updatePermissions(File file, String role, boolean retry)
-			throws BackendServiceException {
+	private String createTitle(GwtChild child, int year) {
 
-		Permission permission = new Permission();
-		permission.setValue(GROUP);
-		permission.setRole(role);
-		permission.setType(GROUP_TYPE);
-		try {
-			getDrive().permissions().insert(file.getId(), permission)
-					.setSendNotificationEmails(false).execute();
-		} catch (IOException e) {
-			if (retry) {
-				updatePermissions(file, role, false);
-			} else {
-				throw new BackendServiceException(
-						"Got exception setting permission " + role
-								+ " for file " + file.getDefaultOpenWithLink(),
-						e);
-			}
-		}
-
-	}
-
-	private String createTitle(GwtChild child) {
-
-		return "Bericht " + child.getFirstName();
+		return String.format("Bericht %s SJ %s-%s", getFullChildName(child), year, year+1);
 	}
 
 	private void updateDocument(String scriptName, File file,
@@ -367,127 +344,31 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 		return childDao.getChild(childKey);
 	}
 
-	private File createDocument(String title, ParentReference parent)
+	private File createDocument(GwtChild child, int year, ParentReference parent)
 			throws BackendServiceException, DocumentationAlreadyExistsException {
 
 		ByteArrayContent template = getTemplateFile();
 
+		String title = createTitle(child, year);
 		assertFileNotExists(title, parent);
-		File file = createFile(title, template.getType(), parent);
-		return uploadNewFile(file, template);
+		File file = driveService.uploadFile(title, template.getType(), parent,
+				template);
+		driveService.updatePermissions(file, WRITER_ROLE, true);
+		return file;
 	}
 
 	private void assertFileNotExists(String title, ParentReference parent)
 			throws DocumentationAlreadyExistsException, BackendServiceException {
 
-		FileList files;
-		try {
-			files = getDrive().files().list()
-					.setQ(createQuery(title, null, parent.getId())).execute();
-		} catch (IOException e) {
-			throw new BackendServiceException(
-					"Got exception retrieving file with name " + title, e);
-		}
+		String mimeType = null;
+		String parentId = parent.getId();
+		FileList files = driveService.getFiles(title, mimeType, parentId);
 
 		int numFiles = files.getItems().size();
 		if (numFiles > 0) {
 			File file = files.getItems().iterator().next();
 			throw new DocumentationAlreadyExistsException(
 					file.getDefaultOpenWithLink());
-		}
-	}
-
-	private ParentReference getFolder(String folderName)
-			throws BackendServiceException {
-
-		File file = getOrCreateFolder(folderName);
-		ParentReference parentReference = new ParentReference();
-		parentReference.setId(file.getId());
-		return parentReference;
-
-	}
-
-	private File getOrCreateFolder(String folderName)
-			throws BackendServiceException {
-
-		FileList files;
-		try {
-			files = getDrive().files().list()
-					.setQ(createQuery(folderName, FOLDER_TYPE, ROOT_PARENT))
-					.execute();
-		} catch (IOException e) {
-			throw new BackendServiceException(
-					"Got exception retrieving folder with name " + folderName,
-					e);
-		}
-
-		File file;
-		int numFiles = files.getItems().size();
-		if (numFiles == 0) {
-			file = createFile(folderName, FOLDER_TYPE, null);
-			file = uploadNewFile(file, null);
-			updatePermissions(file, READER_ROLE, true);
-		} else if (numFiles == 1) {
-			file = files.getItems().get(0);
-
-		} else {
-			String folderlist;
-			try {
-				folderlist = files.toPrettyString();
-			} catch (IOException e) {
-				folderlist = "";
-			}
-			throw new IllegalStateException("more than one folder with name "
-					+ folderName + " in root: " + folderlist);
-		}
-		return file;
-	}
-
-	private String createQuery(String title, String type, String parent) {
-		StringBuilder query = new StringBuilder();
-		query.append("title = '" + title + "'");
-		if (type != null) {
-			query.append(" and ");
-			query.append("mimeType = '" + type + "'");
-		}
-		if (parent != null) {
-			query.append(" and ");
-			query.append("'" + parent + "' in parents");
-		}
-		return query.toString();
-	}
-
-	private File createFile(String title, String mimeType,
-			ParentReference parent) {
-
-		File file = new File();
-		file.setEditable(true);
-		file.setTitle(title);
-		file.setMimeType(mimeType);
-		if (parent != null) {
-			file.setParents(Arrays.asList(parent));
-		}
-		return file;
-	}
-
-	private File uploadNewFile(File file, ByteArrayContent content)
-			throws BackendServiceException {
-
-		try {
-			Insert insert;
-			if (content != null) {
-
-				insert = getDrive().files().insert(file, content);
-				insert.setConvert(true);
-			} else {
-				insert = getDrive().files().insert(file);
-			}
-
-			return insert.execute();
-
-		} catch (IOException e) {
-			throw new BackendServiceException("Got exception creating file "
-					+ file.getTitle(), e);
 		}
 	}
 
@@ -539,34 +420,6 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 		return filter;
 	}
 
-	private Drive getDrive() throws BackendServiceException {
-
-		if (null == driveService) {
-			GoogleCredential credential = createApplicationCredentials(DriveScopes
-					.all());
-			driveService = new Drive.Builder(Utils.HTTP_TRANSPORT,
-					Utils.JSON_FACTORY, credential).setApplicationName(
-					APPLICATION_NAME).build();
-		}
-		return driveService;
-	}
-
-	private GoogleCredential createApplicationCredentials(Set<String> scopes)
-			throws BackendServiceException {
-		try {
-			GoogleCredential credential = GoogleCredential
-					.getApplicationDefault();
-			if (credential.createScopedRequired()) {
-				credential = credential.createScoped(scopes);
-			}
-			return credential;
-		} catch (IOException e) {
-			throw new BackendServiceException(
-					"Got exception creating app credentials with scopes "
-							+ scopes, e);
-		}
-	}
-
 	/**
 	 * Returns an authenticated Storage object used to make service calls to
 	 * Cloud Storage.
@@ -575,11 +428,11 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 
 		if (null == storageService) {
 
-			GoogleCredential credential = createApplicationCredentials(StorageScopes
-					.all());
+			GoogleCredential credential = Utils
+					.createApplicationCredentials(StorageScopes.all());
 			storageService = new Storage.Builder(Utils.HTTP_TRANSPORT,
 					Utils.JSON_FACTORY, credential).setApplicationName(
-					APPLICATION_NAME).build();
+					Constants.APPLICATION_NAME).build();
 		}
 		return storageService;
 	}
@@ -594,7 +447,8 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 	private Script getScript(Credential credential) {
 
 		return new Script.Builder(Utils.HTTP_TRANSPORT, Utils.JSON_FACTORY,
-				credential).setApplicationName(APPLICATION_NAME).build();
+				credential).setApplicationName(Constants.APPLICATION_NAME)
+				.build();
 	}
 
 	private Credential getUserCredentials(String childKey, int year,

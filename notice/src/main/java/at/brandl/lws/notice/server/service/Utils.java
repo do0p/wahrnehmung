@@ -11,12 +11,16 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
+
+import at.brandl.lws.notice.model.BackendServiceException;
 
 import com.google.api.client.extensions.appengine.datastore.AppEngineDataStoreFactory;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpTransport;
@@ -112,6 +116,22 @@ class Utils {
 			return debugString;
 		} catch (IOException e) {
 			return object.toString();
+		}
+	}
+
+	static GoogleCredential createApplicationCredentials(Set<String> scopes)
+			throws BackendServiceException {
+		try {
+			GoogleCredential credential = GoogleCredential
+					.getApplicationDefault();
+			if (credential.createScopedRequired()) {
+				credential = credential.createScoped(scopes);
+			}
+			return credential;
+		} catch (IOException e) {
+			throw new BackendServiceException(
+					"Got exception creating app credentials with scopes "
+							+ scopes, e);
 		}
 	}
 
