@@ -5,6 +5,7 @@ import at.brandl.lws.notice.client.utils.Navigation;
 import at.brandl.lws.notice.client.utils.PopUp;
 import at.brandl.lws.notice.client.utils.Utils;
 import at.brandl.lws.notice.model.Authorization;
+import at.brandl.lws.notice.model.DocumentationAlreadyExistsException;
 import at.brandl.lws.notice.model.UserGrantRequiredException;
 import at.brandl.lws.notice.shared.service.DocsService;
 import at.brandl.lws.notice.shared.service.DocsServiceAsync;
@@ -94,7 +95,11 @@ public class Documentation extends VerticalPanel {
 							Window.Location
 									.assign(((UserGrantRequiredException) caught)
 											.getAuthorizationUrl());
-						} else {
+						} if (caught instanceof DocumentationAlreadyExistsException) {
+							String docUrl = ((DocumentationAlreadyExistsException) caught).getDocUrl();
+							showErrorMessage(labels.documentationExistsWarning(nameSelection.getText(), year, docUrl));
+						}
+						else {
 							showErrorMessage(caught.getLocalizedMessage());
 						}
 					}

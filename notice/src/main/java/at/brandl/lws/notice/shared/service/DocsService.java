@@ -1,6 +1,7 @@
 package at.brandl.lws.notice.shared.service;
 
 import at.brandl.lws.notice.model.BackendServiceException;
+import at.brandl.lws.notice.model.DocumentationAlreadyExistsException;
 import at.brandl.lws.notice.model.UserGrantRequiredException;
 
 import com.google.gwt.user.client.rpc.RemoteService;
@@ -9,7 +10,7 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RemoteServiceRelativePath("doc")
 public interface DocsService extends RemoteService {
 
-	String printDocumentation(String childKey, int year) throws UserGrantRequiredException, BackendServiceException;
+	String printDocumentation(String childKey, int year) throws DocumentationAlreadyExistsException, UserGrantRequiredException, BackendServiceException;
 
 	void deleteAll();
 }

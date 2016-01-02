@@ -24,6 +24,7 @@ import org.jsoup.select.NodeTraversor;
 
 import at.brandl.lws.notice.model.BackendServiceException;
 import at.brandl.lws.notice.model.BeobachtungsFilter;
+import at.brandl.lws.notice.model.DocumentationAlreadyExistsException;
 import at.brandl.lws.notice.model.GwtBeobachtung;
 import at.brandl.lws.notice.model.GwtChild;
 import at.brandl.lws.notice.model.GwtSection;
@@ -72,6 +73,7 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 	private static final String BUCKET = APPLICATION_NAME + ".appspot.com";
 	private static final String SCRIPT_PROJECT_KEY = "MG_5zR_lIyT2fsbjXj3xcFocrZYMzalMr";
 	private static final String SCRIPT_NAME = "updateDocument";
+	private static final String ROOT_PARENT = "root";
 
 	private static final String TEXT_NAME = "_text_";
 	private static final String ORDER_NAME = "_order_";
@@ -99,7 +101,8 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 
 	@Override
 	public String printDocumentation(String childKey, int year)
-			throws UserGrantRequiredException, BackendServiceException {
+			throws DocumentationAlreadyExistsException,
+			UserGrantRequiredException, BackendServiceException {
 
 		authorizationService.assertCurrentUserIsTeacher();
 
@@ -208,7 +211,6 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 				getDrive().files().delete(file.getId()).execute();
 			}
 		} catch (IOException | BackendServiceException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -365,12 +367,34 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 		return childDao.getChild(childKey);
 	}
 
-	private File createDocument(String title, ParentReference parent) throws BackendServiceException {
+	private File createDocument(String title, ParentReference parent)
+			throws BackendServiceException, DocumentationAlreadyExistsException {
 
 		ByteArrayContent template = getTemplateFile();
 
+		assertFileNotExists(title, parent);
 		File file = createFile(title, template.getType(), parent);
 		return uploadNewFile(file, template);
+	}
+
+	private void assertFileNotExists(String title, ParentReference parent)
+			throws DocumentationAlreadyExistsException, BackendServiceException {
+
+		FileList files;
+		try {
+			files = getDrive().files().list()
+					.setQ(createQuery(title, null, parent.getId())).execute();
+		} catch (IOException e) {
+			throw new BackendServiceException(
+					"Got exception retrieving file with name " + title, e);
+		}
+
+		int numFiles = files.getItems().size();
+		if (numFiles > 0) {
+			File file = files.getItems().iterator().next();
+			throw new DocumentationAlreadyExistsException(
+					file.getDefaultOpenWithLink());
+		}
 	}
 
 	private ParentReference getFolder(String folderName)
@@ -389,10 +413,12 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 		FileList files;
 		try {
 			files = getDrive().files().list()
-					.setQ(createQuery(folderName, FOLDER_TYPE)).execute();
+					.setQ(createQuery(folderName, FOLDER_TYPE, ROOT_PARENT))
+					.execute();
 		} catch (IOException e) {
 			throw new BackendServiceException(
-					"Got exception retrieving root folders", e);
+					"Got exception retrieving folder with name " + folderName,
+					e);
 		}
 
 		File file;
@@ -417,8 +443,18 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 		return file;
 	}
 
-	private String createQuery(String title, String type) {
-		return "title = '" + title + "' and mimeType = '" + type + "'";
+	private String createQuery(String title, String type, String parent) {
+		StringBuilder query = new StringBuilder();
+		query.append("title = '" + title + "'");
+		if (type != null) {
+			query.append(" and ");
+			query.append("mimeType = '" + type + "'");
+		}
+		if (parent != null) {
+			query.append(" and ");
+			query.append("'" + parent + "' in parents");
+		}
+		return query.toString();
 	}
 
 	private File createFile(String title, String mimeType,
@@ -515,7 +551,8 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 		return driveService;
 	}
 
-	private GoogleCredential createApplicationCredentials(Set<String> scopes) throws BackendServiceException {
+	private GoogleCredential createApplicationCredentials(Set<String> scopes)
+			throws BackendServiceException {
 		try {
 			GoogleCredential credential = GoogleCredential
 					.getApplicationDefault();
@@ -524,7 +561,9 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 			}
 			return credential;
 		} catch (IOException e) {
-			throw new BackendServiceException("Got exception creating app credentials with scopes " + scopes, e);
+			throw new BackendServiceException(
+					"Got exception creating app credentials with scopes "
+							+ scopes, e);
 		}
 	}
 
@@ -559,7 +598,8 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 	}
 
 	private Credential getUserCredentials(String childKey, int year,
-			String userId) throws UserGrantRequiredException, BackendServiceException {
+			String userId) throws UserGrantRequiredException,
+			BackendServiceException {
 
 		AuthorizationCodeFlow flow = Utils.newFlow();
 		Credential credential = null;
@@ -574,8 +614,8 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 				}
 			}
 		} catch (IOException e) {
-			throw new BackendServiceException("could not get credentials for user "
-					+ userId, e);
+			throw new BackendServiceException(
+					"could not get credentials for user " + userId, e);
 		}
 
 		if (credential == null) {
