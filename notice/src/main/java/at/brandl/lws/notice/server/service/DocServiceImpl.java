@@ -1,6 +1,6 @@
 package at.brandl.lws.notice.server.service;
 
-import static at.brandl.lws.notice.server.service.DriveServiceImpl.WRITER_ROLE;
+import static at.brandl.lws.notice.server.service.DriveServiceImpl.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -28,6 +28,7 @@ import at.brandl.lws.notice.model.BeobachtungsFilter;
 import at.brandl.lws.notice.model.DocumentationAlreadyExistsException;
 import at.brandl.lws.notice.model.GwtBeobachtung;
 import at.brandl.lws.notice.model.GwtChild;
+import at.brandl.lws.notice.model.GwtDocumentation;
 import at.brandl.lws.notice.model.GwtSection;
 import at.brandl.lws.notice.model.GwtSummary;
 import at.brandl.lws.notice.model.UserGrantRequiredException;
@@ -91,7 +92,27 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 	}
 
 	@Override
-	public String printDocumentation(String childKey, int year)
+	public List<GwtDocumentation> getDocumentations(String childKey)
+			throws BackendServiceException {
+
+		authorizationService.assertCurrentUserIsTeacher();
+
+		GwtChild child = getChild(childKey);
+		ParentReference folder = getOrCreateDocumentationFolder(child);
+
+		FileList files = driveService.getFiles(null, DOCUMENT_TYPE,
+				folder.getId());
+		List<GwtDocumentation> documentations = new ArrayList<GwtDocumentation>();
+		for (File file : files.getItems()) {
+			GwtDocumentation documentation = map(file);
+			documentations.add(documentation);
+		}
+		Collections.sort(documentations);
+		return documentations;
+	}
+
+	@Override
+	public GwtDocumentation createDocumentation(String childKey, int year)
 			throws DocumentationAlreadyExistsException,
 			UserGrantRequiredException, BackendServiceException {
 
@@ -135,26 +156,36 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 
 		updateDocument(SCRIPT_NAME, file, userCredential, replacements, notices);
 
-		return file.getDefaultOpenWithLink();
+		return map(file);
+	}
+
+	private GwtDocumentation map(File file) {
+
+		GwtDocumentation documentation = new GwtDocumentation();
+		documentation.setCreateDate(new Date(file.getCreatedDate().getValue()));
+		documentation.setTitle(file.getTitle());
+		documentation.setUrl(file.getDefaultOpenWithLink());
+		return documentation;
 	}
 
 	private ParentReference getOrCreateDocumentationFolder(GwtChild child)
 			throws BackendServiceException {
-		
-		ParentReference docRootFolder = driveService.getOrCreateFolder(Constants.NOTICE_ROOT_FOLDER_NAME,
-				null);
-		
+
+		ParentReference docRootFolder = driveService.getOrCreateFolder(
+				Constants.NOTICE_ROOT_FOLDER_NAME, null);
+
 		String fullChildName = getFullChildName(child);
-		ParentReference childFolder = driveService.getOrCreateFolder(fullChildName,
-				docRootFolder);
-		
-		return driveService.getOrCreateFolder(Constants.DOCUMENTATION_FOLDER_NAME,
-				childFolder);
+		ParentReference childFolder = driveService.getOrCreateFolder(
+				fullChildName, docRootFolder);
+
+		return driveService.getOrCreateFolder(
+				Constants.DOCUMENTATION_FOLDER_NAME, childFolder);
 	}
 
 	private String getFullChildName(GwtChild child) {
-		
-		return String.format("%1$s %2$s (%3$td.%3$tm.%3$ty)", child.getFirstName(), child.getLastName(), child.getBirthDay());
+
+		return String.format("%1$s %2$s (%3$td.%3$tm.%3$ty)",
+				child.getFirstName(), child.getLastName(), child.getBirthDay());
 	}
 
 	private Map<String, Object> createMap() {
@@ -208,12 +239,6 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 		}
 
 		return parentMap;
-	}
-
-	@Override
-	public void deleteAll() {
-		driveService.deleteAll();
-
 	}
 
 	private void addNotice(Map<String, Object> notices, GwtBeobachtung notice) {
@@ -312,7 +337,8 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 
 	private String createTitle(GwtChild child, int year) {
 
-		return String.format("Bericht %s SJ %s-%s", getFullChildName(child), year, year+1);
+		return String.format("Bericht %s SJ %s-%s", getFullChildName(child),
+				year, year + 1);
 	}
 
 	private void updateDocument(String scriptName, File file,
@@ -360,9 +386,8 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 	private void assertFileNotExists(String title, ParentReference parent)
 			throws DocumentationAlreadyExistsException, BackendServiceException {
 
-		String mimeType = null;
-		String parentId = parent.getId();
-		FileList files = driveService.getFiles(title, mimeType, parentId);
+		FileList files = driveService.getFiles(title, DOCUMENT_TYPE,
+				parent.getId());
 
 		int numFiles = files.getItems().size();
 		if (numFiles > 0) {
