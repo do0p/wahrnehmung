@@ -15,5 +15,7 @@ public interface DocsService extends RemoteService {
 
 	GwtDocumentation createDocumentation(String childKey, int year) throws DocumentationAlreadyExistsException, UserGrantRequiredException, BackendServiceException;
 
+	void deleteDocumentation(String id) throws BackendServiceException;
+
 	List<GwtDocumentation> getDocumentations(String childKey) throws BackendServiceException;
 }

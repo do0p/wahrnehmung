@@ -7,11 +7,38 @@ public class GwtDocumentation implements Serializable,
 		Comparable<GwtDocumentation> {
 
 	private static final long serialVersionUID = 981564571078971411L;
-	
+
 	private String url;
 	private String title;
 	private Date createDate;
-	
+	private String childKey;
+	private int year;
+	private String id;
+
+	public int getYear() {
+		return year;
+	}
+
+	public void setYear(int year) {
+		this.year = year;
+	}
+
+	public String getChildKey() {
+		return childKey;
+	}
+
+	public void setChildKey(String childKey) {
+		this.childKey = childKey;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
 	public String getUrl() {
 		return url;
 	}
@@ -43,15 +70,16 @@ public class GwtDocumentation implements Serializable,
 
 	@Override
 	public boolean equals(Object obj) {
-		if(!(obj instanceof GwtDocumentation)) {
+		if (!(obj instanceof GwtDocumentation)) {
 			return false;
 		}
 		GwtDocumentation other = (GwtDocumentation) obj;
-		return url.equals(other.url);
+		return id.equals(other.id);
 	}
-	
+
 	@Override
 	public int hashCode() {
-		return url.hashCode();
+		return id.hashCode();
 	}
+
 }

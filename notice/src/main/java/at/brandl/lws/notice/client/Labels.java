@@ -69,4 +69,5 @@ public interface Labels extends Messages {
 	String documentation();
 	String documentationExistsWarning(String childName, int year, String url);
 	String createDocumentation(String year);
+	String documentationDelWarning();
 }

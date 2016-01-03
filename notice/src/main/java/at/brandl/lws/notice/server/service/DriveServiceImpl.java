@@ -27,12 +27,12 @@ public class DriveServiceImpl {
 
 	public static final String READER_ROLE = "reader";
 	public static final String WRITER_ROLE = "writer";
-	
+
 	private static final String ROOT_PARENT = "root";
 	private static final String GROUP_TYPE = "group";
 	public static final String FOLDER_TYPE = "application/vnd.google-apps.folder";
 	public static final String DOCUMENT_TYPE = "application/vnd.google-apps.document";
-	
+
 	private Drive driveService;
 
 	public File uploadFolder(String folderName, ParentReference parent)
@@ -108,8 +108,8 @@ public class DriveServiceImpl {
 
 	}
 
-	public ParentReference getOrCreateFolder(String folderName, ParentReference parent)
-			throws BackendServiceException {
+	public ParentReference getOrCreateFolder(String folderName,
+			ParentReference parent) throws BackendServiceException {
 
 		String parentId = parent == null ? ROOT_PARENT : parent.getId();
 		FileList files = getFiles(folderName, FOLDER_TYPE, parentId);
@@ -136,12 +136,22 @@ public class DriveServiceImpl {
 		return createParentReference(file);
 	}
 
+	public void deleteFile(String fileId) throws BackendServiceException {
+
+		try {
+			getDrive().files().delete(fileId).execute();
+		} catch (IOException e) {
+			throw new BackendServiceException("Got exception deleting file "
+					+ fileId, e);
+		}
+	}
+
 	private ParentReference createParentReference(File file) {
 		ParentReference parentReference = new ParentReference();
 		parentReference.setId(file.getId());
 		return parentReference;
 	}
-	
+
 	private File createFile(String title, String mimeType,
 			ParentReference parent) {
 
@@ -157,7 +167,7 @@ public class DriveServiceImpl {
 
 	private String createQuery(String title, String type, String parent) {
 		List<String> queries = new ArrayList<String>();
-		if(title != null) {
+		if (title != null) {
 			queries.add("title = '" + title + "'");
 		}
 		if (type != null) {
@@ -172,9 +182,9 @@ public class DriveServiceImpl {
 	private String join(Collection<String> parts, String separator) {
 		StringBuilder builder = new StringBuilder();
 		Iterator<String> iterator = parts.iterator();
-		while(iterator.hasNext()) {
+		while (iterator.hasNext()) {
 			builder.append(iterator.next());
-			if(iterator.hasNext()) {
+			if (iterator.hasNext()) {
 				builder.append(separator);
 			}
 		}

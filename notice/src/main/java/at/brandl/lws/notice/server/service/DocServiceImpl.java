@@ -104,7 +104,7 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 				folder.getId());
 		List<GwtDocumentation> documentations = new ArrayList<GwtDocumentation>();
 		for (File file : files.getItems()) {
-			GwtDocumentation documentation = map(file);
+			GwtDocumentation documentation = map(file, childKey, -1);
 			documentations.add(documentation);
 		}
 		Collections.sort(documentations);
@@ -156,15 +156,25 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 
 		updateDocument(SCRIPT_NAME, file, userCredential, replacements, notices);
 
-		return map(file);
+		return map(file, childKey, year);
 	}
 
-	private GwtDocumentation map(File file) {
+	@Override
+	public void deleteDocumentation(String fileId)
+			throws BackendServiceException {
+
+		driveService.deleteFile(fileId);
+	}
+
+	private GwtDocumentation map(File file, String childKey, int year) {
 
 		GwtDocumentation documentation = new GwtDocumentation();
+		documentation.setId(file.getId());
 		documentation.setCreateDate(new Date(file.getCreatedDate().getValue()));
 		documentation.setTitle(file.getTitle());
 		documentation.setUrl(file.getDefaultOpenWithLink());
+		documentation.setChildKey(childKey);
+		documentation.setYear(year);
 		return documentation;
 	}
 
