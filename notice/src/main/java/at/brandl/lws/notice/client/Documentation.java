@@ -24,6 +24,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -49,15 +50,23 @@ public class Documentation extends VerticalPanel {
 		decisionBox = new DecisionBox();
 		decisionBox.setText(labels.documentationDelWarning());
 		layout();
+		printButton.setEnabled(false);
 		nameSelection.addSelectionHandler(new SelectionHandler<Suggestion>() {
 			@Override
 			public void onSelection(SelectionEvent<Suggestion> event) {
-				retrieveDocumentations();
-				// updateButtonPanel();
+				getDocumentations();
+				updateButtonState();
 			}
-
 		});
 
+	}
+
+	private void updateButtonState() {
+		printButton.setEnabled(isPrintingEnabled());
+	}
+
+	private boolean isPrintingEnabled() {
+		return getChildKey() != null;
 	}
 
 	private void layout() {
@@ -91,7 +100,7 @@ public class Documentation extends VerticalPanel {
 		return printButton;
 	}
 
-	private void retrieveDocumentations() {
+	private void getDocumentations() {
 
 		documentationGrid.resizeRows(0);
 		String childKey = nameSelection.getSelectedChildKey();
@@ -135,6 +144,7 @@ public class Documentation extends VerticalPanel {
 			public void onClick(ClickEvent event) {
 				decisionBox.addOkClickHandler(new ClickHandler() {
 					public void onClick(ClickEvent arg0) {
+						printButton.setEnabled(false);
 						docService.deleteDocumentation(id,
 								new AsyncCallback<Void>() {
 									public void onFailure(Throwable caught) {
@@ -144,6 +154,7 @@ public class Documentation extends VerticalPanel {
 
 									public void onSuccess(Void arg0) {
 										documentationGrid.removeRow(row);
+										updateButtonState();
 									}
 								});
 					}
@@ -155,23 +166,36 @@ public class Documentation extends VerticalPanel {
 	}
 
 	private void print() {
+
+		if(getChildKey() == null) {
+			updateButtonState();
+			return;
+		}
+		
+		printButton.setEnabled(false);
+		final int row = documentationGrid.getRowCount();
+		documentationGrid.resizeRows(row + 1);
+		documentationGrid.setWidget(row, 0, new Image("/loader.gif"));
+
+		
+		
 		docService.createDocumentation(getChildKey(), year,
 				new AsyncCallback<GwtDocumentation>() {
 
 					@Override
 					public void onSuccess(GwtDocumentation documentation) {
 
-						int row = documentationGrid.getRowCount();
-						documentationGrid.resizeRows(row + 1);
 						addDocumentation(row, documentation);
-
 						Window.open(documentation.getUrl(), "_blank", "");
 						nameSelection.reset();
 						selectedChidKey = null;
+						updateButtonState();
 					}
 
 					@Override
 					public void onFailure(Throwable caught) {
+
+						documentationGrid.removeRow(row);
 						if (caught instanceof UserGrantRequiredException) {
 							Window.Location
 									.assign(((UserGrantRequiredException) caught)
