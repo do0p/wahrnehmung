@@ -75,7 +75,7 @@ public class ChildDsDaoTest extends AbstractDsDaoTest {
 		child.setKey(key);
 
 		// delete
-		childDao.deleteChild(child);
+		childDao.deleteChild(child.getKey());
 
 		assertServicesContainsNot(key);
 
@@ -117,7 +117,7 @@ public class ChildDsDaoTest extends AbstractDsDaoTest {
 
 		removeFromCache(key);
 
-		childDao.deleteChild(child);
+		childDao.deleteChild(child.getKey());
 		assertServicesContainsNot(key);
 	}
 

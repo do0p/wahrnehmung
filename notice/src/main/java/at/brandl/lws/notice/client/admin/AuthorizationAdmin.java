@@ -42,7 +42,7 @@ public class AuthorizationAdmin extends AbstractAdminTab {
 		this.seeAllCheckBox = new CheckBox(labels().teacher());
 		this.editSectionCheckBox = new CheckBox(labels().sectionAdmin());
 
-		this.users = new ListBox(false);
+		this.users = new ListBox();
 		this.users.setVisibleItemCount(VISIBLE_USERS);
 		rebuildUsersList();
 

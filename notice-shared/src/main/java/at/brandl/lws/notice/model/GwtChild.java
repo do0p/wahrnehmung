@@ -15,6 +15,8 @@ public class GwtChild implements Serializable, Comparable<GwtChild> {
 	private String key;
 	private List<Date> developementDialogueDates;
 	private Boolean archived;
+	private Long beginYear;
+	private Long beginGrade;
 
 	public List<Date> getDevelopementDialogueDates() {
 		return developementDialogueDates;
@@ -99,6 +101,22 @@ public class GwtChild implements Serializable, Comparable<GwtChild> {
 			}
 		}
 		return result;
+	}
+
+	public Long getBeginYear() {
+		return beginYear;
+	}
+
+	public void setBeginYear(Long beginYear) {
+		this.beginYear = beginYear;
+	}
+
+	public Long getBeginGrade() {
+		return beginGrade;
+	}
+
+	public void setBeginGrade(Long beginGrade) {
+		this.beginGrade = beginGrade;
 	}
 
 }

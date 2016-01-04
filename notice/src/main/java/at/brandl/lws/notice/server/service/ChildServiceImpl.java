@@ -39,10 +39,10 @@ public class ChildServiceImpl extends RemoteServiceServlet implements
 	}
 
 	@Override
-	public void deleteChild(GwtChild child) throws IllegalArgumentException {
+	public void deleteChild(String childKey) throws IllegalArgumentException {
 		authorizationService.assertCurrentUserIsAdmin();
-		beobachtungsDao.deleteAllFromChild(child.getKey());
-		childDao.deleteChild(child);
+		beobachtungsDao.deleteAllFromChild(childKey);
+		childDao.deleteChild(childKey);
 	}
 
 	@Override

@@ -13,7 +13,7 @@ public interface ChildServiceAsync {
 
 	void storeChild(GwtChild child, AsyncCallback<Void> callback);
 
-	void deleteChild(GwtChild child, AsyncCallback<Void> callback);
+	void deleteChild(String key, AsyncCallback<Void> callback);
 
 	void getChild(String key, AsyncCallback<GwtChild> callback);
 
