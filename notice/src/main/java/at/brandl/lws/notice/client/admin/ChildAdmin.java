@@ -1,7 +1,9 @@
 package at.brandl.lws.notice.client.admin;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import at.brandl.lws.notice.client.utils.DecisionBox;
 import at.brandl.lws.notice.client.utils.Utils;
@@ -11,6 +13,8 @@ import at.brandl.lws.notice.shared.service.ChildServiceAsync;
 import at.brandl.lws.notice.shared.validator.GwtChildValidator;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -21,7 +25,6 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.LongBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.datepicker.client.DateBox;
@@ -29,22 +32,40 @@ import com.google.gwt.user.datepicker.client.DateBox;
 public class ChildAdmin extends AbstractAdminTab {
 
 	private static final int VISIBLE_CHILDREN = 20;
+	private static final int MAX_YEARS_IN_SCHOOL = 10;
 
 	private final ChildServiceAsync childService = GWT
 			.create(ChildService.class);
 	private final TextBox fnBox;
 	private final TextBox lnBox;
-	private final LongBox beginYearBox;
-	private final LongBox beginGradeBox;
+	private final ListBox beginYearBox;
+	private final ListBox beginGradeBox;
 	private final DateBox bdBox;
 	private final CheckBox archivedBox;
 	private final DecisionBox decisionBox;
 	private final ListBox children;
 
+	private Map<Long, Integer> beginYearMap = new HashMap<>();
+	private Map<Long, Integer> beginGradeMap = new HashMap<>();
+
 	private GwtChild child;
 
 	public ChildAdmin() {
 		super(true);
+
+		beginYearBox = new ListBox();
+		beginGradeBox = new ListBox();
+		int year = new Date().getYear() + 1900;
+		for (int i = 0; i < MAX_YEARS_IN_SCHOOL; i++) {
+
+			String beginYear = Integer.toString(year - i);
+			beginYearMap.put(Long.valueOf(beginYear), i);
+			beginYearBox.addItem(beginYear);
+
+			String beginGrade = Integer.toString(i + 1);
+			beginGradeMap.put(Long.valueOf(beginGrade), i);
+			beginGradeBox.addItem(beginGrade);
+		}
 
 		child = new GwtChild();
 
@@ -73,18 +94,26 @@ public class ChildAdmin extends AbstractAdminTab {
 				child.setBirthDay(bdBox.getValue());
 			}
 		});
-		beginYearBox = new LongBox();
-		beginYearBox.addValueChangeHandler(new ValueChangeHandler<Long>() {
+		beginYearBox.addChangeHandler(new ChangeHandler() {
 			@Override
-			public void onValueChange(ValueChangeEvent<Long> event) {
-					child.setBeginYear(beginYearBox.getValue());
+			public void onChange(ChangeEvent event) {
+				int selectedIndex = beginYearBox.getSelectedIndex();
+				if (selectedIndex != -1) {
+					Long beginYear = Long.valueOf(beginYearBox
+							.getItemText(selectedIndex));
+					child.setBeginYear(beginYear);
+				}
 			}
 		});
-		beginGradeBox = new LongBox();
-		beginGradeBox.addValueChangeHandler(new ValueChangeHandler<Long>() {
+		beginGradeBox.addChangeHandler(new ChangeHandler() {
 			@Override
-			public void onValueChange(ValueChangeEvent<Long> event) {
-					child.setBeginGrade(beginGradeBox.getValue());
+			public void onChange(ChangeEvent event) {
+				int selectedIndex = beginGradeBox.getSelectedIndex();
+				if (selectedIndex != -1) {
+					Long beginGrade = Long.valueOf(beginGradeBox
+							.getItemText(selectedIndex));
+					child.setBeginGrade(beginGrade);
+				}
 			}
 		});
 		archivedBox = new CheckBox();
@@ -206,8 +235,15 @@ public class ChildAdmin extends AbstractAdminTab {
 				fnBox.setText(child.getFirstName());
 				lnBox.setText(child.getLastName());
 				bdBox.setValue(child.getBirthDay());
-				beginYearBox.setValue(child.getBeginYear());
-				beginGradeBox.setValue(child.getBeginGrade());
+				Integer index = beginYearMap.get(child.getBeginYear());
+				if (index != null) {
+					beginYearBox.setSelectedIndex(index);
+				}
+
+				index = beginGradeMap.get(child.getBeginGrade());
+				if (index != null) {
+					beginGradeBox.setSelectedIndex(index);
+				}
 				archivedBox.setValue(child.getArchived());
 				getButtonPanel().setSaveButtonLabel(labels().change());
 			}
