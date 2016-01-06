@@ -150,6 +150,7 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 		Map<String, String> replacements = new HashMap<>();
 		replacements.put("%%NAME%%", getName(child));
 		replacements.put("%%SCHULJAHR%%", year + " / " + (year + 1));
+		replacements.put("%%SCHULSTUFE%%", calcGrade(child, year));
 		replacements.put("%%DATUM%%", format(new Date()));
 		replacements.put("%%VON%%", format(oldest));
 		replacements.put("%%BIS%%", format(newest));
@@ -157,6 +158,17 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 		updateDocument(SCRIPT_NAME, file, userCredential, replacements, notices);
 
 		return map(file, childKey, year);
+	}
+
+	private String calcGrade(GwtChild child, int year) {
+
+		Number beginYear = child.getBeginYear();
+		Number beginGrade = child.getBeginGrade();
+		if (beginYear != null && beginGrade != null) {
+			return Integer.toString(year - beginYear.intValue()
+					+ beginGrade.intValue());
+		} 
+		return "";
 	}
 
 	@Override
