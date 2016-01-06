@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import at.brandl.lws.notice.model.GwtFileInfo;
-import at.brandl.lws.notice.shared.Utils;
+import at.brandl.lws.notice.shared.Config;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Entity;
@@ -176,7 +176,7 @@ public class FileDsDao extends AbstractDsDao {
 	private void deleteInBlobstore(Entity fileAttachement) {
 		String storageFilename = (String) fileAttachement
 				.getProperty(STORAGE_FILENAME_FIELD);
-		GcsFilename gcsFilename = new GcsFilename(Utils.GS_BUCKET_NAME,
+		GcsFilename gcsFilename = new GcsFilename(Config.getInstance().getBucketName(),
 				storageFilename);
 		try {
 			gcsService.delete(gcsFilename);

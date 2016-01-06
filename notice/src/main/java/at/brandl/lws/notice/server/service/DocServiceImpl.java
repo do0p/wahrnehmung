@@ -1,6 +1,7 @@
 package at.brandl.lws.notice.server.service;
 
-import static at.brandl.lws.notice.server.service.DriveServiceImpl.*;
+import static at.brandl.lws.notice.server.service.DriveServiceImpl.DOCUMENT_TYPE;
+import static at.brandl.lws.notice.server.service.DriveServiceImpl.WRITER_ROLE;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -36,6 +37,7 @@ import at.brandl.lws.notice.server.dao.DaoRegistry;
 import at.brandl.lws.notice.server.dao.ds.BeobachtungDsDao;
 import at.brandl.lws.notice.server.dao.ds.ChildDsDao;
 import at.brandl.lws.notice.server.dao.ds.SectionDsDao;
+import at.brandl.lws.notice.shared.Config;
 import at.brandl.lws.notice.shared.service.DocsService;
 import at.brandl.lws.notice.shared.service.StateParser;
 import at.brandl.lws.notice.shared.util.Constants;
@@ -61,13 +63,16 @@ import com.google.gwt.view.client.Range;
 
 public class DocServiceImpl extends RemoteServiceServlet implements DocsService {
 
+	private static final Config CONFIG = Config.getInstance();
+
+	private static final String APPLICATION_NAME = CONFIG.getApplicationName();
+
 	private static final String ROOT_KEY = "root";
 
 	private static final long serialVersionUID = 6254413733240094242L;
 
 	private static final String TEMPLATE_FILE = "template.docx";
-	private static final String BUCKET = Constants.APPLICATION_NAME
-			+ ".appspot.com";
+	private static final String BUCKET = CONFIG.getBucketName();
 	private static final String SCRIPT_PROJECT_KEY = "MG_5zR_lIyT2fsbjXj3xcFocrZYMzalMr";
 	private static final String SCRIPT_NAME = "updateDocument";
 	private static final String TEXT_NAME = "_text_";
@@ -167,7 +172,7 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 		if (beginYear != null && beginGrade != null) {
 			return Integer.toString(year - beginYear.intValue()
 					+ beginGrade.intValue());
-		} 
+		}
 		return "";
 	}
 
@@ -482,7 +487,7 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 					.createApplicationCredentials(StorageScopes.all());
 			storageService = new Storage.Builder(Utils.HTTP_TRANSPORT,
 					Utils.JSON_FACTORY, credential).setApplicationName(
-					Constants.APPLICATION_NAME).build();
+					APPLICATION_NAME).build();
 		}
 		return storageService;
 	}
@@ -497,8 +502,7 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 	private Script getScript(Credential credential) {
 
 		return new Script.Builder(Utils.HTTP_TRANSPORT, Utils.JSON_FACTORY,
-				credential).setApplicationName(Constants.APPLICATION_NAME)
-				.build();
+				credential).setApplicationName(APPLICATION_NAME).build();
 	}
 
 	private Credential getUserCredentials(String childKey, int year,

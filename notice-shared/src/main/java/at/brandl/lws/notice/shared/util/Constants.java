@@ -132,8 +132,6 @@ public class Constants {
 	}
 
 	public static final String MULTIPLE_CHOICE = "multipleChoice";
-	public static final String APPLICATION_NAME = "wahrnehmung-test";
-	public static final String GROUP = "lws-test@googlegroups.com";
 	public static final String DOCUMENTATION_FOLDER_NAME = "Berichte";
 	public static final String NOTICE_ROOT_FOLDER_NAME = "Beobachtungs Dokumente";
 }

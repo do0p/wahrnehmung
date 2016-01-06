@@ -1,7 +1,6 @@
 package at.brandl.lws.notice.server.service;
 
 import static at.brandl.lws.notice.server.service.Utils.createApplicationCredentials;
-import static at.brandl.lws.notice.shared.util.Constants.APPLICATION_NAME;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -11,7 +10,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import at.brandl.lws.notice.model.BackendServiceException;
-import at.brandl.lws.notice.shared.util.Constants;
+import at.brandl.lws.notice.shared.Config;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.ByteArrayContent;
@@ -25,6 +24,7 @@ import com.google.api.services.drive.model.Permission;
 
 public class DriveServiceImpl {
 
+	private static final Config CONFIG = Config.getInstance();
 	public static final String READER_ROLE = "reader";
 	public static final String WRITER_ROLE = "writer";
 
@@ -92,7 +92,7 @@ public class DriveServiceImpl {
 			throws BackendServiceException {
 
 		Permission permission = new Permission();
-		permission.setValue(Constants.GROUP);
+		permission.setValue(CONFIG.getDocumentationGroupName());
 		permission.setRole(role);
 		permission.setType(GROUP_TYPE);
 		try {
@@ -203,7 +203,7 @@ public class DriveServiceImpl {
 					.all());
 			driveService = new Drive.Builder(Utils.HTTP_TRANSPORT,
 					Utils.JSON_FACTORY, credential).setApplicationName(
-					APPLICATION_NAME).build();
+					CONFIG.getApplicationName()).build();
 		}
 		return driveService;
 	}
