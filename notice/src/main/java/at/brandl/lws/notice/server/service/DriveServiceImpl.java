@@ -45,6 +45,7 @@ public class DriveServiceImpl {
 			return getDrive().files().insert(file).execute();
 
 		} catch (IOException e) {
+			e.printStackTrace(System.err);
 			throw new BackendServiceException("Got exception creating file "
 					+ file.getTitle(), e);
 		}
@@ -69,6 +70,7 @@ public class DriveServiceImpl {
 			return insert.execute();
 
 		} catch (IOException e) {
+			e.printStackTrace(System.err);
 			throw new BackendServiceException("Got exception creating file "
 					+ file.getTitle(), e);
 		}
@@ -80,6 +82,7 @@ public class DriveServiceImpl {
 			return getDrive().files().list()
 					.setQ(createQuery(title, mimeType, parentId)).execute();
 		} catch (IOException e) {
+			e.printStackTrace(System.err);
 			throw new BackendServiceException(
 					"Got exception retrieving file with name " + title, e);
 		}
@@ -99,6 +102,7 @@ public class DriveServiceImpl {
 			if (retry) {
 				updatePermissions(file, role, false);
 			} else {
+				e.printStackTrace(System.err);
 				throw new BackendServiceException(
 						"Got exception setting permission " + role
 								+ " for file " + file.getDefaultOpenWithLink(),
@@ -141,6 +145,7 @@ public class DriveServiceImpl {
 		try {
 			getDrive().files().delete(fileId).execute();
 		} catch (IOException e) {
+			e.printStackTrace(System.err);
 			throw new BackendServiceException("Got exception deleting file "
 					+ fileId, e);
 		}

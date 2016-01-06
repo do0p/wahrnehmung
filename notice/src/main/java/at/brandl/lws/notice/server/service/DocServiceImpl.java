@@ -381,6 +381,7 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 			getScript(userCredential).scripts()
 					.run(SCRIPT_PROJECT_KEY, request).execute();
 		} catch (IOException e) {
+			e.printStackTrace(System.err);
 			throw new BackendServiceException("Got exception updating file "
 					+ file.getDefaultOpenWithLink() + " with "
 					+ Utils.createJsonString(parameters), e);
@@ -434,6 +435,7 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 			StorageObject object = get.execute();
 			return object.getContentType();
 		} catch (IOException e) {
+			e.printStackTrace(System.err);
 			throw new BackendServiceException(
 					"Got exception retrieving content type of " + TEMPLATE_FILE,
 					e);
@@ -448,6 +450,7 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 			get.executeMediaAndDownloadTo(out);
 			return out.toByteArray();
 		} catch (IOException e) {
+			e.printStackTrace(System.err);
 			throw new BackendServiceException(
 					"Got exception retrieving content from " + TEMPLATE_FILE, e);
 		}
@@ -515,6 +518,7 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 				}
 			}
 		} catch (IOException e) {
+			e.printStackTrace(System.err);
 			throw new BackendServiceException(
 					"could not get credentials for user " + userId, e);
 		}

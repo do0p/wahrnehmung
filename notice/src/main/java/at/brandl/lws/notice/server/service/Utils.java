@@ -129,6 +129,7 @@ class Utils {
 			}
 			return credential;
 		} catch (IOException e) {
+			e.printStackTrace(System.err);
 			throw new BackendServiceException(
 					"Got exception creating app credentials with scopes "
 							+ scopes, e);

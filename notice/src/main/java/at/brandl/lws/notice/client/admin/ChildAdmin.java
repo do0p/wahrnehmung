@@ -67,7 +67,7 @@ public class ChildAdmin extends AbstractAdminTab {
 			beginGradeBox.addItem(beginGrade);
 		}
 
-		child = new GwtChild();
+		initChild();
 
 		decisionBox = new DecisionBox();
 		decisionBox.setText(labels().childDelWarning());
@@ -197,9 +197,28 @@ public class ChildAdmin extends AbstractAdminTab {
 
 	@Override
 	void reset() {
-		child = new GwtChild();
-
+		
+		resetForm();
+		initChild();
+		
 		getButtonPanel().setSaveButtonLabel(labels().create());
+	}
+
+	private void resetForm() {
+		
+		fnBox.setValue(null);
+		lnBox.setValue(null);
+		bdBox.setValue(null);
+		beginYearBox.setSelectedIndex(0);
+		beginGradeBox.setSelectedIndex(0);
+		archivedBox.setValue(false);
+	}
+
+	private void initChild() {
+
+		child = new GwtChild();
+		child.setBeginYear(Long.valueOf(beginYearBox.getSelectedValue()));
+		child.setBeginGrade(Long.valueOf(beginGradeBox.getSelectedValue()));
 	}
 
 	@Override
@@ -235,15 +254,21 @@ public class ChildAdmin extends AbstractAdminTab {
 				fnBox.setText(child.getFirstName());
 				lnBox.setText(child.getLastName());
 				bdBox.setValue(child.getBirthDay());
+				
 				Integer index = beginYearMap.get(child.getBeginYear());
 				if (index != null) {
 					beginYearBox.setSelectedIndex(index);
+				} else {
+					child.setBeginYear(Long.valueOf(beginYearBox.getSelectedValue()));
 				}
 
 				index = beginGradeMap.get(child.getBeginGrade());
 				if (index != null) {
 					beginGradeBox.setSelectedIndex(index);
+				} else {
+					child.setBeginGrade(Long.valueOf(beginGradeBox.getSelectedValue()));
 				}
+				
 				archivedBox.setValue(child.getArchived());
 				getButtonPanel().setSaveButtonLabel(labels().change());
 			}
