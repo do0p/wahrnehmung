@@ -11,7 +11,6 @@ import at.brandl.lws.notice.model.GwtQuestionnaireAnswers;
 import at.brandl.lws.notice.server.dao.DaoRegistry;
 import at.brandl.lws.notice.server.dao.ds.FormDsDao;
 import at.brandl.lws.notice.server.dao.ds.QuestionnaireDsDao;
-import at.brandl.lws.notice.shared.service.FormPrinter;
 import at.brandl.lws.notice.shared.service.FormService;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;

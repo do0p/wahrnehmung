@@ -43,7 +43,7 @@ public class DevelopementDialogueAdmin extends AbstractAdminTab {
 		nameSelection = new NameSelection(getDialogBox());
 		dateBox = new DateBox();
 		dateBox.setFormat(Utils.DATEBOX_FORMAT);
-		dates = new ListBox(false);
+		dates = new ListBox();
 		dates.setVisibleItemCount(NUMBER_VISIBLE_DATES);
 
 		layout();

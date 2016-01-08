@@ -92,7 +92,10 @@ public class NameSelection extends SuggestBox {
 	}
 
 	private void setSelectedInternal(String childKey) {
-		setText(reverseChildMap.get(childKey));
+		String childName = reverseChildMap.get(childKey);
+		setText(childName);
+		setValue(childName);
+		GWT.log("childname " + childName + " for key " + childKey) ;
 	}
 
 	public boolean hasSelection() {

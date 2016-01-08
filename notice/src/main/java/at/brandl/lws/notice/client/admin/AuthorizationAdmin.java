@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import at.brandl.lws.notice.client.utils.Utils;
 import at.brandl.lws.notice.model.Authorization;
 import at.brandl.lws.notice.shared.service.AuthorizationService;
 import at.brandl.lws.notice.shared.service.AuthorizationServiceAsync;
@@ -43,7 +42,7 @@ public class AuthorizationAdmin extends AbstractAdminTab {
 		this.seeAllCheckBox = new CheckBox(labels().teacher());
 		this.editSectionCheckBox = new CheckBox(labels().sectionAdmin());
 
-		this.users = new ListBox(false);
+		this.users = new ListBox();
 		this.users.setVisibleItemCount(VISIBLE_USERS);
 		rebuildUsersList();
 

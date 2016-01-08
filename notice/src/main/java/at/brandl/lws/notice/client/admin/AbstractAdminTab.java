@@ -7,6 +7,8 @@ import at.brandl.lws.notice.client.utils.PopUp;
 import at.brandl.lws.notice.client.utils.Utils;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyPressEvent;
@@ -17,6 +19,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.ValueBoxBase;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.datepicker.client.DateBox;
@@ -76,6 +79,15 @@ abstract class AbstractAdminTab extends VerticalPanel {
 		});
 	}
 
+	void addButtonUpdateChangeHandler(ListBox listBox) {
+		listBox.addChangeHandler(new ChangeHandler() {
+			@Override
+			public void onChange(ChangeEvent event) {
+				updateButtonPanel();
+			}
+		});
+	}
+	
 	<T> void addButtonUpdateKeyPressHandler(ValueBoxBase<T> valueBox) {
 		valueBox.addKeyPressHandler(new KeyPressHandler() {
 			

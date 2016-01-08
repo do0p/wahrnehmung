@@ -8,7 +8,7 @@
 		<groupId>at.brandl.lws.notice</groupId>
 		<artifactId>parent</artifactId>
 		<relativePath>../</relativePath>
-		<version>17-1</version>
+		<version>18</version>
 	</parent>
 
 	<artifactId>notice</artifactId>
@@ -43,6 +43,10 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava-gwt</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>notice-shared</artifactId>
 			<version>${project.version}</version>
@@ -73,6 +77,17 @@
 			<groupId>com.google.appengine.tools</groupId>
 			<artifactId>appengine-gcs-client</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.jsoup</groupId>
+			<artifactId>jsoup</artifactId>
+			<version>1.8.3</version>
+		</dependency>
+<!-- 		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.0.1</version>
+		</dependency> -->
+
 		<!-- <dependency> <groupId>jstl</groupId> <artifactId>jstl</artifactId> 
 			<version>1.2</version> </dependency> -->
 
@@ -95,8 +110,21 @@
 	</dependencies>
 
 	<build>
-		<plugins>
 
+		<resources>
+			<resource>
+				<directory>C:/Users/Dominik/Google Drive/LWS/wahrnehmung</directory>
+				<includes>
+					<include>client_secret.json</include>
+				</includes>
+			</resource>
+			<resource>
+				<directory>${basedir}/src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
+
+		<plugins>
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

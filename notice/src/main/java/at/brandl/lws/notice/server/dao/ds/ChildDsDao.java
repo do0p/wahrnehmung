@@ -85,8 +85,8 @@ public class ChildDsDao extends AbstractDsDao {
 		}
 	}
 
-	public void deleteChild(GwtChild child) {
-		deleteEntity(toKey(child.getKey()), Cache.NAME);
+	public void deleteChild(String childKey) {
+		deleteEntity(toKey(childKey), Cache.NAME);
 		dirty = true;
 	}
 
@@ -131,6 +131,8 @@ public class ChildDsDao extends AbstractDsDao {
 		gwtChild.setFirstName((String) child.getProperty(Child.FIRSTNAME));
 		gwtChild.setLastName((String) child.getProperty(Child.LASTNAME));
 		gwtChild.setBirthDay((Date) child.getProperty(Child.BIRTHDAY));
+		gwtChild.setBeginYear((Long) child.getProperty(Child.BEGIN_YEAR));
+		gwtChild.setBeginGrade((Long) child.getProperty(Child.BEGIN_GRADE));
 		gwtChild.setArchived((Boolean) child.getProperty(Child.ARCHIVED));
 		gwtChild.setDevelopementDialogueDates((List<Date>) child.getProperty(Child.DEVELOPEMENT_DIALOGUE_DATES));
 		return gwtChild;
@@ -147,6 +149,8 @@ public class ChildDsDao extends AbstractDsDao {
 		child.setProperty(Child.FIRSTNAME, gwtChild.getFirstName());
 		child.setProperty(Child.LASTNAME, gwtChild.getLastName());
 		child.setProperty(Child.BIRTHDAY, gwtChild.getBirthDay());
+		child.setProperty(Child.BEGIN_YEAR, gwtChild.getBeginYear());
+		child.setProperty(Child.BEGIN_GRADE, gwtChild.getBeginGrade());
 		child.setProperty(Child.ARCHIVED, gwtChild.getArchived());
 		List<Date> developementDialogueDates = gwtChild
 				.getDevelopementDialogueDates();

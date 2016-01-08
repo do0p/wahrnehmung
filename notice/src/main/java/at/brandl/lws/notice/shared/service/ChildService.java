@@ -16,7 +16,7 @@ public interface ChildService extends RemoteService {
 	
 	void storeChild(GwtChild child) throws IllegalArgumentException;
 	
-	void deleteChild(GwtChild child) throws IllegalArgumentException;
+	void deleteChild(String key) throws IllegalArgumentException;
 	
 	void addDevelopementDialogueDate(String key, Date date);
 

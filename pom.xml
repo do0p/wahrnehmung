@@ -5,7 +5,7 @@
 
 	<groupId>at.brandl.lws.notice</groupId>
 	<artifactId>parent</artifactId>
-	<version>17-1</version>
+	<version>18</version>
 	<packaging>pom</packaging>
 
 	<name>Notice parent</name>
@@ -14,7 +14,7 @@
 		<appengine.app.version>${project.version}</appengine.app.version>
 		<appengine.app.id>wahrnehmung-test</appengine.app.id>
 		<appengine.target.version>1.9.28</appengine.target.version>
-		<gwt.target.version>2.7.0-rc1</gwt.target.version>
+		<gwt.target.version>2.7.0</gwt.target.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
@@ -29,6 +29,11 @@
 		<dependencies>
 			<!-- Compile/runtime dependencies -->
 			<dependency>
+				<groupId>com.google.guava</groupId>
+				<artifactId>guava-gwt</artifactId>
+				<version>15.0</version>
+			</dependency>
+			<dependency>
 				<groupId>com.google.appengine</groupId>
 				<artifactId>appengine-api-1.0-sdk</artifactId>
 				<version>${appengine.target.version}</version>
@@ -41,7 +46,13 @@
 			<dependency>
 				<groupId>com.google.appengine.tools</groupId>
 				<artifactId>appengine-gcs-client</artifactId>
-				<version>0.4.2</version>
+				<version>0.5</version>
+				<exclusions>
+					<exclusion>
+						<groupId>com.google.guava</groupId>
+						<artifactId>guava</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>javax.servlet</groupId>
@@ -80,13 +91,6 @@
 				<artifactId>google-api-services-script</artifactId>
 				<version>v1-rev1-1.20.0</version>
 			</dependency>
-			<dependency>
-				<groupId>com.google.appengine.tools</groupId>
-				<artifactId>appengine-gcs-client</artifactId>
-				<version>0.5</version>
-			</dependency>
-			<!-- <dependency> <groupId>jstl</groupId> <artifactId>jstl</artifactId> 
-				<version>1.2</version> </dependency> -->
 
 			<!-- Test Dependencies -->
 			<dependency>

@@ -2,6 +2,7 @@ package at.brandl.lws.notice.model;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -14,6 +15,8 @@ public class GwtChild implements Serializable, Comparable<GwtChild> {
 	private String key;
 	private List<Date> developementDialogueDates;
 	private Boolean archived;
+	private Long beginYear;
+	private Long beginGrade;
 
 	public List<Date> getDevelopementDialogueDates() {
 		return developementDialogueDates;
@@ -21,6 +24,9 @@ public class GwtChild implements Serializable, Comparable<GwtChild> {
 
 	public void setDevelopementDialogueDates(List<Date> developementDialogues) {
 		this.developementDialogueDates = developementDialogues;
+		if (this.developementDialogueDates != null) {
+			Collections.sort(this.developementDialogueDates);
+		}
 	}
 
 	public void addDevelopementDialogueDate(Date date) {
@@ -29,6 +35,7 @@ public class GwtChild implements Serializable, Comparable<GwtChild> {
 		}
 		if (!developementDialogueDates.contains(date)) {
 			developementDialogueDates.add(date);
+			Collections.sort(this.developementDialogueDates);
 		}
 	}
 
@@ -81,7 +88,8 @@ public class GwtChild implements Serializable, Comparable<GwtChild> {
 	public Date getLastDevelopementDialogueDate() {
 		return developementDialogueDates == null
 				|| developementDialogueDates.isEmpty() ? null
-				: developementDialogueDates.get(0);
+				: developementDialogueDates.get(developementDialogueDates
+						.size() - 1);
 	}
 
 	public int compareTo(GwtChild other) {
@@ -93,6 +101,22 @@ public class GwtChild implements Serializable, Comparable<GwtChild> {
 			}
 		}
 		return result;
+	}
+
+	public Long getBeginYear() {
+		return beginYear;
+	}
+
+	public void setBeginYear(Long beginYear) {
+		this.beginYear = beginYear;
+	}
+
+	public Long getBeginGrade() {
+		return beginGrade;
+	}
+
+	public void setBeginGrade(Long beginGrade) {
+		this.beginGrade = beginGrade;
 	}
 
 }

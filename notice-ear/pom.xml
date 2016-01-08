@@ -6,7 +6,7 @@
 		<groupId>at.brandl.lws.notice</groupId>
 		<artifactId>parent</artifactId>
 		<relativePath>../</relativePath>
-		<version>17-1</version>
+		<version>18</version>
 	</parent>
 
 	<artifactId>appengine-modules-ear</artifactId>
@@ -50,6 +50,14 @@
 				<groupId>com.google.appengine</groupId>
 				<artifactId>appengine-maven-plugin</artifactId>
 				<version>${appengine.target.version}</version>
+				<configuration>
+					<jvmFlags>
+						<jvmFlag>-Xdebug</jvmFlag>
+						<jvmFlag>-Xrunjdwp:transport=dt_socket,address=1044,server=y,suspend=n
+						</jvmFlag>
+					</jvmFlags>
+					<disableUpdateCheck>true</disableUpdateCheck>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

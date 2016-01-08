@@ -2,13 +2,14 @@ package at.brandl.lws.notice.model;
 
 import java.io.Serializable;
 
-public class GwtSection implements Serializable{
+public class GwtSection implements Serializable, Comparable<GwtSection>{
 
 	private static final long serialVersionUID = 4741899568904397965L;
 	private String sectionName;
 	private String key;
 	private String parentKey;
 	private Boolean archived;
+	private long pos;
 
 	public String getKey() {
 		return key;
@@ -40,6 +41,26 @@ public class GwtSection implements Serializable{
 
 	public void setArchived(Boolean archived) {
 		this.archived = archived;
+	}
+
+	public long getPos() {
+		return pos;
+	}
+
+	public void setPos(long pos) {
+		this.pos = pos;
+	}
+
+	@Override
+	public int compareTo(GwtSection o) {
+		long diff = pos - o.getPos();
+		if(diff < 0) {
+			return -1;
+		} 
+		if (diff > 0)  {
+			return 1;
+		}
+		return 0;	
 	}
 
 }

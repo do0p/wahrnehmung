@@ -8,11 +8,9 @@ import at.brandl.lws.notice.model.BeobachtungsResult;
 import at.brandl.lws.notice.model.GwtBeobachtung;
 import at.brandl.lws.notice.model.GwtFileInfo;
 import at.brandl.lws.notice.server.dao.DaoRegistry;
-import at.brandl.lws.notice.server.dao.ds.AuthorizationDsDao;
 import at.brandl.lws.notice.server.dao.ds.BeobachtungDsDao;
 import at.brandl.lws.notice.server.dao.ds.FileDsDao;
-import at.brandl.lws.notice.shared.Utils;
-import at.brandl.lws.notice.shared.service.AuthorizationService;
+import at.brandl.lws.notice.shared.Config;
 import at.brandl.lws.notice.shared.service.WahrnehmungsService;
 import at.brandl.lws.notice.shared.validator.GwtBeobachtungValidator;
 
@@ -47,7 +45,7 @@ public class WahrnehmungsServiceImpl extends RemoteServiceServlet implements
 		fileDao = DaoRegistry.get(FileDsDao.class);
 		userService = UserServiceFactory.getUserService();
 		options = UploadOptions.Builder
-				.withGoogleStorageBucketName(Utils.GS_BUCKET_NAME);
+				.withGoogleStorageBucketName(Config.getInstance().getBucketName());
 		blobstoreService = BlobstoreServiceFactory.getBlobstoreService();
 
 	}
