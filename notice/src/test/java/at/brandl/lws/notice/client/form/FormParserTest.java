@@ -35,8 +35,8 @@ public class FormParserTest {
 	private static final String GROUP_TITLE2 = "GroupTitle2";
 	private static final String GROUP1 = GROUP_DELIMITER + GROUP_TITLE1;
 	private static final String GROUP2 = GROUP_DELIMITER + GROUP_TITLE2;
-	private static final String QUESTION_LABEL1 = "Frage1 * x + - / *üÜöÖäÄß";
-	private static final String QUESTION_LABEL2 = "Die Grundrechnungsarten x + -";
+	private static final String QUESTION_LABEL1 = "Frage1 * x + - / *üÜöÖäÄß:";
+	private static final String QUESTION_LABEL2 = "Wort – Bild zuordnen";
 	private static final String QUESTION2 = QUESTION_START + QUESTION_LABEL2
 			+ TEMPLATE_START + ANSWER_TEMPLATE;
 	private static final String QUESTION1 = QUESTION_START + QUESTION_LABEL1

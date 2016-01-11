@@ -21,7 +21,7 @@ public class FormParser extends FormPrinter {
 	private static final String GROUP_DELIMITER = "-";
 	private static final String OPTION_DELIMITER_PATTERN = "\\"
 			+ OPTION_DELIMITER;
-	private static final String TEXT = "[-+*/\\w\\s.?!,üÜöÖäÄß()]+";
+	private static final String TEXT = "[-+*/\\w\\s.?!,üÜöÖäÄß():]+";
 	private static final String WHITE_SPACE = "\\s*";
 	private static final String QUESTION_MARK_PATTERN = "\\" + QUESTION_MARK;
 	private static final String VALUE = WHITE_SPACE + "\\w+" + WHITE_SPACE;
