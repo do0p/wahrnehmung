@@ -13,6 +13,7 @@ public class GwtMultipleChoiceAnswer extends GwtAnswer {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public void setValue(Object value) {
 		if (!(value instanceof Collection)) {
 			throw new IllegalArgumentException(
