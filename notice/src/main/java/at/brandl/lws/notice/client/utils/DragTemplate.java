@@ -1,5 +1,7 @@
 package at.brandl.lws.notice.client.utils;
 
+import java.util.logging.Logger;
+
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.DragStartEvent;
 import com.google.gwt.event.dom.client.DragStartHandler;
@@ -8,6 +10,7 @@ import com.google.gwt.user.client.ui.Label;
 
 public class DragTemplate extends FocusPanel {
 
+	static final Logger LOGGER = Logger.getLogger("DragLogger");
 	private final String type;
 	private final String text;
 	private static int count;
@@ -24,7 +27,8 @@ public class DragTemplate extends FocusPanel {
 		return new DragStartHandler() {
 			@Override
 			public void onDragStart(DragStartEvent event) {
-				event.setData(DragTargetLabel.DATA, text + count++);
+//				LOGGER.log(Level.SEVERE, "in onDragStart of " + this);
+				event.setData(DragTargetLabel.DATA, new Data(text + count++, text).toString());
 				event.setData(DragTargetLabel.TYPE, type);
 				event.getDataTransfer().setDragImage(getElement(), 10, 10);
 				event.stopPropagation();
@@ -32,12 +36,18 @@ public class DragTemplate extends FocusPanel {
 
 		};
 	}
-	
-	public static  DragTemplate createQuestionTemplate() {
+
+	public static DragTemplate createQuestionTemplate() {
 		return new DragTemplate("question", DragableQuestion.QUESTION_LABEL);
 	}
-	
+
 	public static DragTemplate createQuestionGroupTemplate() {
-		return new DragTemplate("question group", DragableQuestionGroup.QUESTION_GROUP_LABEL);
+		return new DragTemplate("question group",
+				DragableQuestionGroup.QUESTION_GROUP_LABEL);
+	}
+
+	@Override
+	public String toString() {
+		return "DragTemplate: " + text;
 	}
 }

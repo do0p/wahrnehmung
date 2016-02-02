@@ -27,11 +27,11 @@ public class AdminContent extends TabPanel {
 			add(new DevelopementDialogueAdmin(),
 					labels.developementDialogueDates());
 		}
-//		if (authorization.isSuperUser()) {
-//			add(new QuestionnaireAdmin(), labels.forms());
-//		}
 		if (authorization.isAdmin()) {
 			add(new DnDQuestionnaireAdmin(), labels.forms());
+		}
+		if (authorization.isSuperUser()) {
+			add(new QuestionnaireAdmin(), labels.forms() + " old");
 		}
 		if (authorization.isAdmin() || authorization.isEditSections() || authorization.isEditDialogueDates()) {
 			selectTab(0);

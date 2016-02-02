@@ -32,7 +32,7 @@ import com.google.gwt.user.datepicker.client.DateBox;
 public class ChildAdmin extends AbstractAdminTab {
 
 	private static final int VISIBLE_CHILDREN = 20;
-	private static final int MAX_YEARS_IN_SCHOOL = 10;
+	private static final int MAX_YEARS_IN_SCHOOL = 12;
 
 	private final ChildServiceAsync childService = GWT
 			.create(ChildService.class);

@@ -1,32 +1,38 @@
 package at.brandl.lws.notice.client.utils;
 
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.DragEndEvent;
 import com.google.gwt.event.dom.client.DragEndHandler;
 import com.google.gwt.event.dom.client.DragStartEvent;
 import com.google.gwt.event.dom.client.DragStartHandler;
-import com.google.gwt.user.client.ui.VerticalPanel;
 
-abstract class DragablePanel<T extends DragablePanel<T>> extends DragTargetPanel<T> {
+abstract class Dragable<T extends Dragable<T>> extends DragTarget<T> {
 
-	DragablePanel(VerticalPanel parent, boolean insideGroup) {
-		super(parent, insideGroup);
+	private final String key;
+
+	Dragable(String key, DragContainer parent) {
+		super(parent);
+		this.key = key;
 		getElement().setDraggable(Element.DRAGGABLE_TRUE);
 		addDragStartHandler(getDragStartHandler());
 		addDragEndHandler(getDragEndHandler());
 	}
 
-	abstract String getData();
+	abstract Data getData();
 
 	abstract String getType();
-	
+
 	DragStartHandler getDragStartHandler() {
 		return new DragStartHandler() {
 			@Override
 			public void onDragStart(DragStartEvent event) {
-				event.setData(DATA, getData());
+				// LOGGER.log(Level.SEVERE, "in onDragStart of " + this);
+				event.setData(DATA, getData().toString());
 				event.setData(TYPE, getType());
 				event.getDataTransfer().setDragImage(getElement(), 10, 10);
+				removeFromRegister(getKey());
 				event.stopPropagation();
 			}
 
@@ -37,10 +43,24 @@ abstract class DragablePanel<T extends DragablePanel<T>> extends DragTargetPanel
 		return new DragEndHandler() {
 			@Override
 			public void onDragEnd(DragEndEvent event) {
-				removeFromParent();
+				// LOGGER.log(Level.SEVERE, "in onDragEnd of " + this);
+				if (isRegistered(getKey())) {
+					removeFromParent();
+				} else {
+					// LOGGER.log(Level.SEVERE, "deleting " + this);
+					showDecisionBox(new ClickHandler() {
+						@Override
+						public void onClick(ClickEvent event) {
+							removeFromParent();
+						}
+					});
+				}
 				event.stopPropagation();
 			}
 		};
 	}
 
+	public String getKey() {
+		return key;
+	}
 }

@@ -38,7 +38,6 @@ public class FormServiceImpl extends RemoteServiceServlet implements
 		return questionnaire;
 	}
 
-
 	@Override
 	public List<GwtQuestionnaire> getAllForms(String childKey) {
 		Map<String, GwtQuestionnaire> titles = new HashMap<String, GwtQuestionnaire>();
@@ -52,6 +51,17 @@ public class FormServiceImpl extends RemoteServiceServlet implements
 		for (GwtQuestionnaireAnswers answers : allAnswers) {
 			GwtQuestionnaire form = formDao.getQuestionnaire(answers
 					.getQuestionnaireKey());
+			titles.put(form.getTitle(), form);
+		}
+
+		return new ArrayList<GwtQuestionnaire>(titles.values());
+	}
+
+	@Override
+	public List<GwtQuestionnaire> getAllForms() {
+		Map<String, GwtQuestionnaire> titles = new HashMap<String, GwtQuestionnaire>();
+
+		for (GwtQuestionnaire form : formDao.getAllQuestionnaires()) {
 			titles.put(form.getTitle(), form);
 		}
 

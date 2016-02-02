@@ -1,24 +1,21 @@
 package at.brandl.lws.notice.client.utils;
 
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.VerticalPanel;
 
-class DragableQuestion extends DragablePanel<DragableQuestion> {
+public class DragableQuestion extends Dragable<DragableQuestion> {
 
 	static final String QUESTION_LABEL = "question";
 
-	private Label label;
+	private ChangeableLabel label;
 
-	private DragableQuestion(String data, VerticalPanel parent,
-			boolean insideGroup) {
-		super(parent, insideGroup);
-		label = new Label(data);
+	private DragableQuestion(Data data, DragContainer parent) {
+		super(data.getKey(), parent);
+		label = new ChangeableLabel(data.getValue());
 		add(label);
 	}
 
 	@Override
-	String getData() {
-		return label.getText();
+	Data getData() {
+		return new Data(getKey(), label.getText());
 	}
 
 	@Override
@@ -26,9 +23,13 @@ class DragableQuestion extends DragablePanel<DragableQuestion> {
 		return QUESTION_LABEL;
 	}
 
-	static DragableQuestion valueOf(String data, VerticalPanel parent,
-			boolean insideGroup) {
+	public static DragableQuestion valueOf(Data data, DragContainer parent) {
 
-		return new DragableQuestion(data, parent, insideGroup);
+		return new DragableQuestion(data, parent);
+	}
+
+	@Override
+	public String toString() {
+		return "DragableQuestion: " + label.getText();
 	}
 }

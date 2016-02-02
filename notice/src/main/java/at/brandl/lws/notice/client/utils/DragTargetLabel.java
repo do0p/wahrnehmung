@@ -1,25 +1,23 @@
 package at.brandl.lws.notice.client.utils;
 
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.VerticalPanel;
 
-public class DragTargetLabel extends DragTargetPanel<DragTargetLabel> {
+public class DragTargetLabel extends DragTarget<DragTargetLabel> {
 
 	private final Label label;
 
-	private DragTargetLabel(String data, VerticalPanel parent,
-			boolean insideGroup) {
-		super(parent, insideGroup);
+	private DragTargetLabel(String data, DragContainer parent) {
+		super(parent);
 		label = new Label(data);
 		add(label);
 	}
 
-	public static DragTargetLabel valueOf(String data, VerticalPanel panel) {
-		return valueOf(data, panel, false);
+	public static DragTargetLabel valueOf(String data, DragContainer parent) {
+		return new DragTargetLabel(data, parent);
 	}
 	
-	static DragTargetLabel valueOf(String data, VerticalPanel panel,
-			boolean insideGroup) {
-		return new DragTargetLabel(data, panel, insideGroup);
+	@Override
+	public String toString() {
+		return "DragTargetLabel: " + label.getText();
 	}
 }

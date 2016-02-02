@@ -1,15 +1,14 @@
 package at.brandl.lws.notice.client.utils;
 
-import com.google.gwt.user.client.ui.VerticalPanel;
 
-abstract class DragablePanelFactory<T extends DragablePanel<T>> {
+abstract class DragablePanelFactory<T extends Dragable<T>> {
 
-	static DragablePanel<?> create(String type, String data, VerticalPanel panel, boolean insideGroup) {
+	static Dragable<?> create(String type, Data data, DragContainer parent) {
 		switch(type){
 		case DragableQuestion.QUESTION_LABEL:
-			return DragableQuestion.valueOf(data, panel, insideGroup);
+			return DragableQuestion.valueOf(data, parent);
 		case DragableQuestionGroup.QUESTION_GROUP_LABEL:
-			return DragableQuestionGroup.valueOf(data, panel, insideGroup);
+			return DragableQuestionGroup.valueOf(data, parent);
 			
 		}
 		throw new RuntimeException("unkonwn type " + type);

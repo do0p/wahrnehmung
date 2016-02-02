@@ -12,4 +12,6 @@ public interface FormServiceAsync {
 
 	void getAllForms(String childKey, AsyncCallback<List<GwtQuestionnaire>> callback);
 	
+	void getAllForms(AsyncCallback<List<GwtQuestionnaire>> callback);
+	
 }
