@@ -12,6 +12,7 @@ import java.io.InputStreamReader;
 import java.util.List;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import at.brandl.lws.notice.model.GwtAnswerTemplate;
@@ -21,8 +22,8 @@ import at.brandl.lws.notice.model.GwtQuestion;
 import at.brandl.lws.notice.model.GwtQuestionGroup;
 import at.brandl.lws.notice.model.GwtQuestionnaire;
 import at.brandl.lws.notice.server.service.FormParser;
-import at.brandl.lws.notice.shared.service.FormPrinter;
 
+@Ignore
 public class FormParserTest {
 
 	private static final String NL = System.lineSeparator();

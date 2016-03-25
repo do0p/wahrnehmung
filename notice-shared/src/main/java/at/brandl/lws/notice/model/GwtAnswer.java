@@ -9,6 +9,7 @@ public abstract class GwtAnswer implements Serializable {
 	private String key;
 	private String questionKey;
 	private Date date;
+	private Date createDate;
 	private boolean updated;
 
 	public abstract Object getValue();
@@ -47,6 +48,14 @@ public abstract class GwtAnswer implements Serializable {
 		this.key = key;
 	}
 
+	public Date getCreateDate() {
+		return createDate;
+	}
+
+	public void setCreateDate(Date createDate) {
+		this.createDate = createDate;
+	}
+	
 	@Override
 	public String toString() {
 	
@@ -79,4 +88,6 @@ public abstract class GwtAnswer implements Serializable {
 		
 		return result;
 	}
+
+
 }

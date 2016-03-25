@@ -75,6 +75,7 @@ public class Constants {
 		public static final String TITLE = "title";
 		public static final String SECTION = "sectionKey";
 		public static final String CREATE_DATE = "createDate";
+		public static final String UPDATE_DATE = "updateDate";
 
 		public static class Cache {
 
@@ -129,6 +130,7 @@ public class Constants {
 		public static final String USER = "user";
 		public static final String VALUE = "value";
 		public static final String TYPE = "type";
+		public static final String CREATE_DATE = "createDate";
 	}
 
 	public static final String MULTIPLE_CHOICE = "multipleChoice";

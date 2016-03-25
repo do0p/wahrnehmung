@@ -166,6 +166,7 @@ public class QuestionnaireDsDao extends AbstractDsDao {
 			GwtMultipleChoiceAnswer answer = new GwtMultipleChoiceAnswer();
 			answer.setKey(toString(entity.getKey()));
 			answer.setDate((Date) entity.getProperty(QuestionnaireAnswer.DATE));
+			answer.setCreateDate((Date) entity.getProperty(QuestionnaireAnswer.CREATE_DATE));
 			answer.setQuestionKey(toString((Key) entity
 					.getProperty(QuestionnaireAnswer.QUESTION_KEY)));
 			answer.setValue(entity.getProperty(QuestionnaireAnswer.VALUE));
@@ -189,6 +190,7 @@ public class QuestionnaireDsDao extends AbstractDsDao {
 		Entity entity;
 		if (key == null) {
 			entity = new Entity(QuestionnaireAnswer.KIND, parent);
+			entity.setProperty(QuestionnaireAnswer.CREATE_DATE, new Date());
 		} else {
 			entity = new Entity(toKey(key));
 		}

@@ -2,22 +2,9 @@ package at.brandl.lws.notice.server.dao.ds;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
-
-import at.brandl.lws.notice.model.GwtAnswerTemplate;
-import at.brandl.lws.notice.model.GwtMultipleChoiceAnswerTemplate;
-import at.brandl.lws.notice.model.GwtMultipleChoiceOption;
-import at.brandl.lws.notice.model.GwtQuestion;
-import at.brandl.lws.notice.model.GwtQuestionGroup;
-import at.brandl.lws.notice.model.GwtQuestionnaire;
-import at.brandl.lws.notice.shared.util.Constants;
-import at.brandl.lws.notice.shared.util.Constants.AnswerTemplate;
-import at.brandl.lws.notice.shared.util.Constants.MultipleChoiceOption;
-import at.brandl.lws.notice.shared.util.Constants.Question;
-import at.brandl.lws.notice.shared.util.Constants.QuestionGroup;
-import at.brandl.lws.notice.shared.util.Constants.Questionnaire;
-import at.brandl.lws.notice.shared.util.Constants.Questionnaire.Cache;
-import at.brandl.lws.notice.shared.validator.GwtQuestionnaireValidator;
+import java.util.Map;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Entity;
@@ -28,31 +15,49 @@ import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Transaction;
 import com.google.appengine.api.memcache.MemcacheService;
 
+import at.brandl.lws.notice.model.GwtAnswer;
+import at.brandl.lws.notice.model.GwtAnswerTemplate;
+import at.brandl.lws.notice.model.GwtMultipleChoiceAnswerTemplate;
+import at.brandl.lws.notice.model.GwtMultipleChoiceOption;
+import at.brandl.lws.notice.model.GwtQuestion;
+import at.brandl.lws.notice.model.GwtQuestionGroup;
+import at.brandl.lws.notice.model.GwtQuestionnaire;
+import at.brandl.lws.notice.model.GwtQuestionnaireAnswers;
+import at.brandl.lws.notice.shared.util.Constants;
+import at.brandl.lws.notice.shared.util.Constants.AnswerTemplate;
+import at.brandl.lws.notice.shared.util.Constants.MultipleChoiceOption;
+import at.brandl.lws.notice.shared.util.Constants.Question;
+import at.brandl.lws.notice.shared.util.Constants.QuestionGroup;
+import at.brandl.lws.notice.shared.util.Constants.Questionnaire;
+import at.brandl.lws.notice.shared.util.Constants.Questionnaire.Cache;
+import at.brandl.lws.notice.shared.validator.GwtQuestionnaireValidator;
+
 public class FormDsDao extends AbstractDsDao {
 
 	private static final String ALL_FORMS = "allForms";
-	private boolean dirty;
 
 	public List<GwtQuestionnaire> getAllQuestionnaires() {
 
-		if (dirty || !getCache().contains(ALL_FORMS)) {
+		synchronized (ALL_FORMS) {
+			if (!getCache().contains(ALL_FORMS)) {
 
-			List<GwtQuestionnaire> questionnaires = new ArrayList<GwtQuestionnaire>();
-			DatastoreService ds = getDatastoreService();
-			PreparedQuery query = ds.prepare(new Query(Questionnaire.KIND)
-					.addSort(Questionnaire.CREATE_DATE));
-			for (Entity form : query.asIterable()) {
-				questionnaires.add(getQuestionnaire(ds, form));
+				Map<String, GwtQuestionnaire> questionnaires = new HashMap<String, GwtQuestionnaire>();
+				DatastoreService ds = getDatastoreService();
+				PreparedQuery query = ds.prepare(new Query(Questionnaire.KIND).addSort(Questionnaire.CREATE_DATE));
+				for (Entity form : query.asIterable()) {
+					GwtQuestionnaire questionnaire = getQuestionnaire(ds, form);
+					questionnaires.put(questionnaire.getKey(), questionnaire);
+				}
+
+				getCache().put(ALL_FORMS, questionnaires);
 			}
-
-			getCache().put(ALL_FORMS, questionnaires);
 		}
 
 		@SuppressWarnings("unchecked")
-		List<GwtQuestionnaire> allForms = (List<GwtQuestionnaire>) getCache().get(ALL_FORMS);
-		return allForms;
+		Map<String, GwtQuestionnaire> allForms = (Map<String, GwtQuestionnaire>) getCache().get(ALL_FORMS);
+		return new ArrayList<GwtQuestionnaire>(allForms.values());
 	}
-	
+
 	public GwtQuestionnaire getQuestionnaire(String key) {
 
 		GwtQuestionnaire questionnaire = (GwtQuestionnaire) getCache().get(key);
@@ -74,12 +79,27 @@ public class FormDsDao extends AbstractDsDao {
 		return questionnaire;
 	}
 
+	public GwtQuestionnaire getQuestionnaire(GwtQuestionnaireAnswers answers) {
+
+		GwtQuestionnaire questionnaire = getQuestionnaire(answers.getQuestionnaireKey());
+		for (GwtAnswer answer : answers.getAnswers()) {
+			Date createDate = answer.getCreateDate();
+			String questionKey = answer.getQuestionKey();
+		//	Entity history = getHistoricQuestion(questionKey, createDate);
+		//	if(history != null) {
+				
+		//s	}
+		}
+
+		return questionnaire;
+	}
+
 	public void storeQuestionnaire(GwtQuestionnaire gwtForm) {
-		
-		if(!GwtQuestionnaireValidator.valid(gwtForm)) {
+
+		if (!GwtQuestionnaireValidator.valid(gwtForm)) {
 			throw new IllegalArgumentException("illegal form " + gwtForm);
 		}
-		
+
 		final DatastoreService datastoreService = getDatastoreService();
 
 		final Transaction transaction = datastoreService.beginTransaction();
@@ -88,8 +108,7 @@ public class FormDsDao extends AbstractDsDao {
 			storeForm(gwtForm, datastoreService);
 
 			transaction.commit();
-			getCache().put(gwtForm.getKey(), gwtForm);
-			dirty = true;
+			updateCache(gwtForm);
 
 		} finally {
 			if (transaction.isActive()) {
@@ -98,20 +117,30 @@ public class FormDsDao extends AbstractDsDao {
 		}
 	}
 
-	private GwtQuestionnaire getQuestionnaire(final DatastoreService ds,
-			Entity form) {
-		
+	private void updateCache(GwtQuestionnaire gwtForm) {
+		getCache().put(gwtForm.getKey(), gwtForm);
+		synchronized (ALL_FORMS) {
+			@SuppressWarnings("unchecked")
+			Map<String, GwtQuestionnaire> questionnaires = (Map<String, GwtQuestionnaire>) getCache().get(ALL_FORMS);
+			if (questionnaires == null) {
+				questionnaires = new HashMap<>();
+			}
+			questionnaires.put(gwtForm.getKey(), gwtForm);
+			getCache().put(ALL_FORMS, questionnaires);
+		}
+	}
+
+	private GwtQuestionnaire getQuestionnaire(final DatastoreService ds, Entity form) {
+
 		GwtQuestionnaire questionnaire = toGwtQuestionnaire(form);
 		questionnaire.setGroups(getGroups(form.getKey(), ds));
 		return questionnaire;
 	}
 
-	private List<GwtQuestionGroup> getGroups(Key parent,
-			final DatastoreService ds) {
+	private List<GwtQuestionGroup> getGroups(Key parent, final DatastoreService ds) {
 
 		List<GwtQuestionGroup> groups = new ArrayList<GwtQuestionGroup>();
-		PreparedQuery query = ds.prepare(new Query(QuestionGroup.KIND, parent)
-				.addSort(QuestionGroup.ORDER));
+		PreparedQuery query = ds.prepare(new Query(QuestionGroup.KIND, parent).addSort(QuestionGroup.ORDER));
 		for (Entity entity : query.asIterable()) {
 
 			GwtQuestionGroup gwtQuestionGroup = toGwtQuestionGroup(entity);
@@ -124,8 +153,7 @@ public class FormDsDao extends AbstractDsDao {
 	private List<GwtQuestion> getQuestions(Key parent, DatastoreService ds) {
 
 		List<GwtQuestion> questions = new ArrayList<GwtQuestion>();
-		PreparedQuery query = ds.prepare(new Query(Question.KIND, parent)
-				.addSort(Question.ORDER));
+		PreparedQuery query = ds.prepare(new Query(Question.KIND, parent).addSort(Question.ORDER));
 		for (Entity entity : query.asIterable()) {
 
 			GwtQuestion gwtQuestion = toGwtQuestion(entity);
@@ -141,19 +169,17 @@ public class FormDsDao extends AbstractDsDao {
 		Entity entity = query.asSingleEntity();
 		GwtAnswerTemplate gwtAnswerTemplate = toGwtAnswerTemplate(entity);
 		if (gwtAnswerTemplate instanceof GwtMultipleChoiceAnswerTemplate) {
-			((GwtMultipleChoiceAnswerTemplate) gwtAnswerTemplate)
-					.setOptions(getOptions(entity.getKey(), ds));
+			((GwtMultipleChoiceAnswerTemplate) gwtAnswerTemplate).setOptions(getOptions(entity.getKey(), ds));
 		}
 
 		return gwtAnswerTemplate;
 	}
 
-	private List<GwtMultipleChoiceOption> getOptions(Key parent,
-			DatastoreService ds) {
+	private List<GwtMultipleChoiceOption> getOptions(Key parent, DatastoreService ds) {
 
 		List<GwtMultipleChoiceOption> options = new ArrayList<GwtMultipleChoiceOption>();
-		PreparedQuery query = ds.prepare(new Query(MultipleChoiceOption.KIND,
-				parent).addSort(MultipleChoiceOption.ORDER));
+		PreparedQuery query = ds
+				.prepare(new Query(MultipleChoiceOption.KIND, parent).addSort(MultipleChoiceOption.ORDER));
 		for (Entity entity : query.asIterable()) {
 
 			GwtMultipleChoiceOption gwtOption = toGwtMultipleChoiceOption(entity);
@@ -165,7 +191,7 @@ public class FormDsDao extends AbstractDsDao {
 	private void storeForm(GwtQuestionnaire gwtForm, final DatastoreService ds) {
 
 		Entity form = toEntity(gwtForm);
-		form.setProperty(Questionnaire.CREATE_DATE, new Date());
+
 		ds.put(form);
 		Key formKey = form.getKey();
 		gwtForm.setKey(toString(formKey));
@@ -177,8 +203,7 @@ public class FormDsDao extends AbstractDsDao {
 		}
 	}
 
-	private void storeGroup(GwtQuestionGroup gwtGroup, Key parent, int order,
-			final DatastoreService ds) {
+	private void storeGroup(GwtQuestionGroup gwtGroup, Key parent, int order, DatastoreService ds) {
 
 		Entity group = toEntity(gwtGroup, parent, order);
 		ds.put(group);
@@ -192,50 +217,67 @@ public class FormDsDao extends AbstractDsDao {
 		}
 	}
 
-	private void storeQuestion(GwtQuestion gwtQuestion, Key parent, int order,
-			final DatastoreService ds) {
+	private void storeQuestion(GwtQuestion gwtQuestion, Key parent, int order, final DatastoreService ds) {
 
-		Entity question = toEntity(gwtQuestion, parent, order);
-		ds.put(question);
-		Key questionKey = question.getKey();
-		gwtQuestion.setKey(toString(questionKey));
-
-		storeTemplate(gwtQuestion.getTemplate(), questionKey, ds);
-	}
-
-	private void storeTemplate(GwtAnswerTemplate gwtTemplate, Key parent,
-			final DatastoreService ds) {
-
-		if (gwtTemplate instanceof GwtMultipleChoiceAnswerTemplate) {
-
-			storeMultipleChoiceTemplate(
-					(GwtMultipleChoiceAnswerTemplate) gwtTemplate, parent, ds);
+		GwtQuestion storedQuestion = getQuestion(gwtQuestion.getKey());
+		if (storedQuestion != null) {
+			if (!gwtQuestion.equals(storedQuestion)) {
+				archiveStoredQuestion(storedQuestion);
+				updateQuestion(gwtQuestion);
+			}
 		} else {
 
-			throw new IllegalArgumentException("unknown type of template "
-					+ gwtTemplate);
+			Entity question = toEntity(gwtQuestion, parent, order);
+			ds.put(question);
+			Key questionKey = question.getKey();
+			gwtQuestion.setKey(toString(questionKey));
+
+			storeTemplate(gwtQuestion.getTemplate(), questionKey, ds);
 		}
 	}
 
-	private void storeMultipleChoiceTemplate(
-			GwtMultipleChoiceAnswerTemplate gwtMultipleChoiceTemplate,
-			Key parent, final DatastoreService ds) {
+	private void updateQuestion(GwtQuestion gwtQuestion) {
+		// TODO Auto-generated method stub
 
-		Entity template = toEntity(Constants.MULTIPLE_CHOICE, parent);
+	}
+
+	private void archiveStoredQuestion(GwtQuestion storedQuestion) {
+		// TODO Auto-generated method stub
+
+	}
+
+	private GwtQuestion getQuestion(String key) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	private void storeTemplate(GwtAnswerTemplate gwtTemplate, Key parent, final DatastoreService ds) {
+
+		if (gwtTemplate instanceof GwtMultipleChoiceAnswerTemplate) {
+
+			storeMultipleChoiceTemplate((GwtMultipleChoiceAnswerTemplate) gwtTemplate, parent, ds);
+		} else {
+
+			throw new IllegalArgumentException("unknown type of template " + gwtTemplate);
+		}
+	}
+
+	private void storeMultipleChoiceTemplate(GwtMultipleChoiceAnswerTemplate gwtMultipleChoiceTemplate, Key parent,
+			final DatastoreService ds) {
+
+		Entity template = toEntity(gwtMultipleChoiceTemplate, parent);
 		ds.put(template);
 		Key templateKey = template.getKey();
 		gwtMultipleChoiceTemplate.setKey(toString(templateKey));
 
 		int i = 0;
-		for (GwtMultipleChoiceOption gwtOption : gwtMultipleChoiceTemplate
-				.getOptions()) {
+		for (GwtMultipleChoiceOption gwtOption : gwtMultipleChoiceTemplate.getOptions()) {
 
 			storeOption(gwtOption, templateKey, i++, ds);
 		}
 	}
 
-	private void storeOption(GwtMultipleChoiceOption gwtOption, Key parent,
-			int order, final DatastoreService ds) {
+	private void storeOption(GwtMultipleChoiceOption gwtOption, Key parent, int order, final DatastoreService ds) {
 
 		Entity option = toEntity(gwtOption, parent, order);
 		ds.put(option);
@@ -244,7 +286,14 @@ public class FormDsDao extends AbstractDsDao {
 
 	private Entity toEntity(GwtQuestionnaire gwtForm) {
 
-		Entity form = new Entity(Questionnaire.KIND);
+		Entity form;
+		if (gwtForm.getKey() != null) {
+			form = new Entity(toKey(gwtForm.getKey()));
+			form.setProperty(Questionnaire.UPDATE_DATE, new Date());
+		} else {
+			form = new Entity(Questionnaire.KIND);
+			form.setProperty(Questionnaire.CREATE_DATE, new Date());
+		}
 		form.setProperty(Questionnaire.TITLE, gwtForm.getTitle());
 		form.setProperty(Questionnaire.SECTION, toKey(gwtForm.getSection()));
 		return form;
@@ -252,7 +301,12 @@ public class FormDsDao extends AbstractDsDao {
 
 	private Entity toEntity(GwtQuestionGroup gwtGroup, Key parent, int order) {
 
-		Entity group = new Entity(QuestionGroup.KIND, parent);
+		Entity group;
+		if (gwtGroup.getKey() != null) {
+			group = new Entity(toKey(gwtGroup.getKey()));
+		} else {
+			group = new Entity(QuestionGroup.KIND, parent);
+		}
 		group.setProperty(QuestionGroup.TITLE, gwtGroup.getTitle());
 		group.setProperty(QuestionGroup.ORDER, order);
 		return group;
@@ -260,23 +314,43 @@ public class FormDsDao extends AbstractDsDao {
 
 	private Entity toEntity(GwtQuestion gwtQuestion, Key parent, int order) {
 
-		Entity question = new Entity(Question.KIND, parent);
+		Entity question;
+		if (gwtQuestion.getKey() != null) {
+			question = new Entity(toKey(gwtQuestion.getKey()));
+		} else {
+			question = new Entity(Question.KIND, parent);
+		}
 		question.setProperty(Question.LABEL, gwtQuestion.getLabel());
 		question.setProperty(Question.ORDER, order);
 		return question;
 	}
 
-	private Entity toEntity(String type, Key parent) {
+	private Entity toEntity(GwtAnswerTemplate gwtTemplate, Key parent) {
+		String type;
+		if (gwtTemplate instanceof GwtMultipleChoiceAnswerTemplate) {
+			type = Constants.MULTIPLE_CHOICE;
+		} else {
+			throw new RuntimeException("no mapping for templateclass " + gwtTemplate.getClass());
+		}
 
-		Entity template = new Entity(AnswerTemplate.KIND, parent);
+		Entity template;
+		if (gwtTemplate.getKey() != null) {
+			template = new Entity(toKey(gwtTemplate.getKey()));
+		} else {
+			template = new Entity(AnswerTemplate.KIND, parent);
+		}
 		template.setProperty(AnswerTemplate.Type, type);
 		return template;
 	}
 
-	private Entity toEntity(GwtMultipleChoiceOption gwtOption, Key parent,
-			int order) {
+	private Entity toEntity(GwtMultipleChoiceOption gwtOption, Key parent, int order) {
 
-		Entity option = new Entity(MultipleChoiceOption.KIND, parent);
+		Entity option;
+		if (gwtOption.getKey() != null) {
+			option = new Entity(toKey(gwtOption.getKey()));
+		} else {
+			option = new Entity(MultipleChoiceOption.KIND, parent);
+		}
 		option.setProperty(MultipleChoiceOption.LABEL, gwtOption.getLabel());
 		option.setProperty(MultipleChoiceOption.VALUE, gwtOption.getValue());
 		option.setProperty(MultipleChoiceOption.ORDER, order);
@@ -287,8 +361,7 @@ public class FormDsDao extends AbstractDsDao {
 
 		GwtQuestionnaire form = new GwtQuestionnaire();
 		form.setTitle((String) entity.getProperty(Questionnaire.TITLE));
-		form.setSection(toString((Key) entity
-				.getProperty(Questionnaire.SECTION)));
+		form.setSection(toString((Key) entity.getProperty(Questionnaire.SECTION)));
 		form.setKey(toString(entity.getKey()));
 		return form;
 	}
@@ -318,8 +391,7 @@ public class FormDsDao extends AbstractDsDao {
 			template.setKey(toString(entity.getKey()));
 			return template;
 		}
-		throw new IllegalStateException("unknown type of answer template "
-				+ type);
+		throw new IllegalStateException("unknown type of answer template " + type);
 	}
 
 	private GwtMultipleChoiceOption toGwtMultipleChoiceOption(Entity entity) {
@@ -330,8 +402,6 @@ public class FormDsDao extends AbstractDsDao {
 		option.setKey(toString(entity.getKey()));
 		return option;
 	}
-
-
 
 	private MemcacheService getCache() {
 		return getCache(Cache.NAME);

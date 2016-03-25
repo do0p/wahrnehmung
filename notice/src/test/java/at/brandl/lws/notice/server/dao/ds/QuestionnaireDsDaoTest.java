@@ -42,8 +42,29 @@ public class QuestionnaireDsDaoTest extends AbstractDsDaoTest {
 	}
 
 	protected LocalDatastoreServiceTestConfig createDsConfig() {
-		return new LocalDatastoreServiceTestConfig()
-				.setApplyAllHighRepJobPolicy();
+		return new LocalDatastoreServiceTestConfig().setApplyAllHighRepJobPolicy();
+	}
+
+	@Test
+	public void createDateDoesNotChange() {
+		questionnaireDao.storeAnswers(answers, null);
+		Collection<GwtQuestionnaireAnswers> allAnswers = questionnaireDao.getAllAnswers(childKey);
+
+		GwtQuestionnaireAnswers storedAnswers = allAnswers.iterator().next();
+		GwtAnswer storedAnswer = storedAnswers.getAnswers().iterator().next();
+		Date createDate = storedAnswer.getCreateDate();
+		Assert.assertNotNull(createDate);
+
+		storedAnswer.setCreateDate(new Date(0));
+
+		questionnaireDao.storeAnswers(storedAnswers, null);
+
+		allAnswers = questionnaireDao.getAllAnswers(childKey);
+
+		storedAnswers = allAnswers.iterator().next();
+		storedAnswer = storedAnswers.getAnswers().iterator().next();
+		Assert.assertEquals(createDate, storedAnswer.getCreateDate());
+
 	}
 
 	@Test
@@ -51,8 +72,7 @@ public class QuestionnaireDsDaoTest extends AbstractDsDaoTest {
 
 		questionnaireDao.storeAnswers(answers, null);
 
-		Collection<GwtQuestionnaireAnswers> allAnswers = questionnaireDao
-				.getAllAnswers(childKey);
+		Collection<GwtQuestionnaireAnswers> allAnswers = questionnaireDao.getAllAnswers(childKey);
 
 		Assert.assertNotNull(allAnswers);
 		Assert.assertEquals(1, allAnswers.size());
@@ -65,8 +85,7 @@ public class QuestionnaireDsDaoTest extends AbstractDsDaoTest {
 	public void insert() {
 
 		assertUpdated(answers, true);
-		GwtQuestionnaireAnswers storedAnswers = questionnaireDao.storeAnswers(
-				answers, null);
+		GwtQuestionnaireAnswers storedAnswers = questionnaireDao.storeAnswers(answers, null);
 		Assert.assertEquals(answers, storedAnswers);
 		assertUpdated(storedAnswers, false);
 
@@ -80,8 +99,7 @@ public class QuestionnaireDsDaoTest extends AbstractDsDaoTest {
 
 		questionnaireDao.storeAnswers(answers, null);
 
-		Collection<GwtQuestionnaireAnswers> allAnswers = questionnaireDao
-				.getAllAnswers(childKey);
+		Collection<GwtQuestionnaireAnswers> allAnswers = questionnaireDao.getAllAnswers(childKey);
 
 		GwtQuestionnaireAnswers storedAnswers = allAnswers.iterator().next();
 
@@ -97,8 +115,7 @@ public class QuestionnaireDsDaoTest extends AbstractDsDaoTest {
 		answers.addAnswer(answer);
 
 		questionnaireDao.storeAnswers(answers, null);
-		Collection<GwtQuestionnaireAnswers> allAnswers = questionnaireDao
-				.getAllAnswers(childKey);
+		Collection<GwtQuestionnaireAnswers> allAnswers = questionnaireDao.getAllAnswers(childKey);
 
 		GwtQuestionnaireAnswers storedAnswers = allAnswers.iterator().next();
 		Assert.assertEquals(2, storedAnswers.getAnswers().size());
@@ -134,8 +151,7 @@ public class QuestionnaireDsDaoTest extends AbstractDsDaoTest {
 		questionnaireDao.storeAnswers(answers, null);
 		String key = answers.getKey();
 
-		Collection<GwtQuestionnaireAnswers> allAnswers = questionnaireDao
-				.getAllAnswers(childKey);
+		Collection<GwtQuestionnaireAnswers> allAnswers = questionnaireDao.getAllAnswers(childKey);
 
 		assertCacheContainsStringKey(childKey);
 		assertDatastoreContains(key);
@@ -157,8 +173,7 @@ public class QuestionnaireDsDaoTest extends AbstractDsDaoTest {
 		questionnaireDao.storeAnswers(answers, null);
 		String key = answers.getKey();
 
-		Collection<GwtQuestionnaireAnswers> allAnswers = questionnaireDao
-				.getAllAnswers(childKey);
+		Collection<GwtQuestionnaireAnswers> allAnswers = questionnaireDao.getAllAnswers(childKey);
 
 		assertCacheContainsStringKey(childKey);
 		assertDatastoreContains(key);
@@ -190,9 +205,9 @@ public class QuestionnaireDsDaoTest extends AbstractDsDaoTest {
 		return answers;
 	}
 
-	private GwtAnswer createAnswer(String questionKey2, boolean updated) {
+	private GwtAnswer createAnswer(String questionKey, boolean updated) {
 		GwtAnswer answer = new GwtMultipleChoiceAnswer();
-		answer.setQuestionKey(questionKey2);
+		answer.setQuestionKey(questionKey);
 		answer.setDate(new Date());
 		answer.setValue(Arrays.asList("a"));
 		answer.setUpdated(updated);
