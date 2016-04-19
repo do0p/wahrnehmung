@@ -124,18 +124,47 @@ public class DriveServiceImpl {
 			file = uploadFile(folderName, FOLDER_TYPE, parent, null);
 			updatePermissions(file, READER_ROLE, true);
 
+			// check for race condition, if another folder has been created at
+			// the same time
+			if (getFiles(folderName, FOLDER_TYPE, parentId).getItems().size() > 1) {
+
+				// some other thread has created a folder, so delete this one
+				// and start all over
+				deleteFile(file.getId());
+				return getOrCreateFolder(folderName, parent);
+			}
+
 		} else if (numFiles == 1) {
 			file = files.getItems().get(0);
 
 		} else {
-			String folderlist;
-			try {
-				folderlist = files.toPrettyString();
-			} catch (IOException e) {
-				folderlist = "";
+
+			// delete duplicate empty folders
+			for (File duplicate : files.getItems()) {
+				String duplicateFileId = duplicate.getId();
+				FileList children = getFiles(null, null, duplicateFileId);
+				if (children.getItems().isEmpty()) {
+					System.err.println("deleting empty duplicate folder: " + duplicateFileId);
+					deleteFile(duplicateFileId);
+					if (--numFiles == 1) {
+						break;
+					}
+				}
 			}
-			throw new IllegalStateException("more than one folder with name "
-					+ folderName + " in root: " + folderlist);
+
+			if (numFiles > 1) {
+				String folderlist;
+				try {
+					folderlist = files.toPrettyString();
+				} catch (IOException e) {
+					folderlist = "";
+				}
+				throw new IllegalStateException(
+						"more than one folder with name " + folderName
+								+ " in root: " + folderlist);
+			}
+			
+			return getOrCreateFolder(folderName, parent);
 		}
 		return createParentReference(file);
 	}
