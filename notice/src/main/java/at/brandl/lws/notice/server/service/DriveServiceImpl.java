@@ -141,14 +141,8 @@ public class DriveServiceImpl {
 
 			// delete duplicate empty folders
 			for (File duplicate : files.getItems()) {
-				String duplicateFileId = duplicate.getId();
-				FileList children = getFiles(null, null, duplicateFileId);
-				if (children.getItems().isEmpty()) {
-					System.err.println("deleting empty duplicate folder: " + duplicateFileId);
-					deleteFile(duplicateFileId);
-					if (--numFiles == 1) {
+				if(deleteEmptyFolder(duplicate) && (--numFiles == 1)) {
 						break;
-					}
 				}
 			}
 
@@ -167,6 +161,30 @@ public class DriveServiceImpl {
 			return getOrCreateFolder(folderName, parent);
 		}
 		return createParentReference(file);
+	}
+
+	private boolean deleteEmptyFolder(File folder)
+			throws BackendServiceException {
+
+		if(!FOLDER_TYPE.equals(folder.getMimeType())) {
+			// only deleting empty folders
+			return false;
+		}
+		
+		String folderId = folder.getId();
+		List<File> children = getFiles(null, null, folderId).getItems();
+		boolean noChildren = true;
+		for(File file : children) {
+			noChildren &= deleteEmptyFolder(file);
+		}
+		
+		if (noChildren) {
+			System.err.println("deleting empty duplicate folder: " + folderId);
+			deleteFile(folderId);
+			return true;
+		}
+		
+		return false;
 	}
 
 	public void deleteFile(String fileId) throws BackendServiceException {
