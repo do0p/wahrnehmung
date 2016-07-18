@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -125,7 +126,8 @@ public class FormDsDaoTest extends AbstractDsDaoTest {
 		String form2Key = form2.getKey();
 		Assert.assertNotEquals(form1Key, form2Key);
 
-		List<GwtQuestionnaire> allQuestionnaires = formDao.getAllQuestionnaires();
+		List<GwtQuestionnaire> allQuestionnaires = formDao
+				.getAllQuestionnaires();
 		Assert.assertEquals(2, allQuestionnaires.size());
 		Assert.assertEquals(form1Key, allQuestionnaires.get(0).getKey());
 		Assert.assertEquals(form2Key, allQuestionnaires.get(1).getKey());
@@ -134,7 +136,8 @@ public class FormDsDaoTest extends AbstractDsDaoTest {
 	@Test
 	public void cacheIsUnique() {
 
-		List<GwtQuestionnaire> allQuestionnaires = formDao.getAllQuestionnaires();
+		List<GwtQuestionnaire> allQuestionnaires = formDao
+				.getAllQuestionnaires();
 		Assert.assertTrue(allQuestionnaires.isEmpty());
 		Assert.assertNull(form.getKey());
 
@@ -271,7 +274,29 @@ public class FormDsDaoTest extends AbstractDsDaoTest {
 	protected String getMemCacheServiceName() {
 		return Cache.NAME;
 	}
+	
+	@Override
+	protected void assertCacheContainsStringKey(String key) {
+		Assert.assertTrue(getAllFormsMapFromCache().containsKey(key));
+	}
 
+	@Override
+	protected void assertCacheContainsNotStringKey(String key) {
+		Assert.assertFalse(getAllFormsMapFromCache().containsKey(key));
+	}
+	
+	@Override
+	protected void removeFromCacheStringKey(String key) {
+		Map<String, GwtQuestionnaire> questionnaires = getAllFormsMapFromCache();
+		questionnaires.remove(key);
+		putCacheEntry(FormDsDao.ALL_FORMS, questionnaires);
+	}
+
+	@SuppressWarnings("unchecked")
+	private Map<String, GwtQuestionnaire> getAllFormsMapFromCache() {
+		return (Map<String, GwtQuestionnaire>)getCacheEntry(FormDsDao.ALL_FORMS);
+	}
+	
 	private GwtQuestionnaire createQuestionnaire() {
 		String formText = readFromFile("form.txt");
 		GwtQuestionnaire form = new FormParser().parse(formText);
@@ -303,7 +328,8 @@ public class FormDsDaoTest extends AbstractDsDaoTest {
 
 	private void assertMultipleChoiceAnswerTemplate(GwtQuestion question) {
 		Assert.assertTrue(question.getTemplate() instanceof GwtMultipleChoiceAnswerTemplate);
-		for (GwtMultipleChoiceOption option : ((GwtMultipleChoiceAnswerTemplate) question.getTemplate()).getOptions()) {
+		for (GwtMultipleChoiceOption option : ((GwtMultipleChoiceAnswerTemplate) question
+				.getTemplate()).getOptions()) {
 			assertOption(option);
 		}
 	}
@@ -315,9 +341,11 @@ public class FormDsDaoTest extends AbstractDsDaoTest {
 
 	private String readFromFile(String fileName) {
 		StringBuilder text = new StringBuilder();
-		InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(fileName);
+		InputStream inputStream = this.getClass().getClassLoader()
+				.getResourceAsStream(fileName);
 		try {
-			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
+			BufferedReader bufferedReader = new BufferedReader(
+					new InputStreamReader(inputStream, "UTF-8"));
 
 			while (bufferedReader.ready()) {
 				text.append(bufferedReader.readLine());
