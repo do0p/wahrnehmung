@@ -35,13 +35,13 @@ public class SectionDsDao extends AbstractDsDao {
 	private volatile boolean sectionChildCacheUpdateNeeded = true;
 
 	public GwtSection getSection(String sectionKey) {
-		final Entity section = getCachedEntity(toKey(sectionKey), SECTION_MEMCACHE);
+		final Entity section = getCachedEntity(DsUtil.toKey(sectionKey), SECTION_MEMCACHE);
 		return toGwt(section);
 	}
 	
 	public String getSectionName(String sectionKey) {
 
-		return getSectionName(toKey(sectionKey));
+		return getSectionName(DsUtil.toKey(sectionKey));
 	}
 
 	private String getSectionName(Key key) {
@@ -92,7 +92,7 @@ public class SectionDsDao extends AbstractDsDao {
 			datastoreService.put(section);
 			transaction.commit();
 			sectionChildCacheUpdateNeeded = true;
-			gwtSection.setKey(toString(section.getKey()));
+			gwtSection.setKey(DsUtil.toString(section.getKey()));
 			insertIntoCache(section, SECTION_MEMCACHE);
 
 		} finally {
@@ -117,7 +117,7 @@ public class SectionDsDao extends AbstractDsDao {
 			}
 			for(String key : sectionKeys)
 			{
-				deleteEntity(toKey(key), datastoreService, SECTION_MEMCACHE);
+				deleteEntity(DsUtil.toKey(key), datastoreService, SECTION_MEMCACHE);
 			}
 			transaction.commit();
 			sectionChildCacheUpdateNeeded = true;
@@ -145,9 +145,9 @@ public class SectionDsDao extends AbstractDsDao {
 	private List<String> addChildKeys(Key parentKey,
 			Map<String, List<String>> result) {
 		final List<String> childKeys = new ArrayList<String>();
-		result.put(parentKey == null ? null : toString(parentKey), childKeys);
+		result.put(parentKey == null ? null : DsUtil.toString(parentKey), childKeys);
 		for (Entity section : getAllSectionKeysInternal(parentKey)) {
-			childKeys.add(toString(section.getKey()));
+			childKeys.add(DsUtil.toString(section.getKey()));
 			childKeys.addAll(addChildKeys(section.getKey(), result));
 		}
 		return childKeys;
@@ -202,10 +202,10 @@ public class SectionDsDao extends AbstractDsDao {
 			if (parentKey == null) {
 				entity = new Entity(SECTION_KIND);
 			} else {
-				entity = new Entity(SECTION_KIND, toKey(parentKey));
+				entity = new Entity(SECTION_KIND, DsUtil.toKey(parentKey));
 			}
 		} else {
-			entity = new Entity(toKey(key));
+			entity = new Entity(DsUtil.toKey(key));
 		}
 		entity.setProperty(SECTION_POS_FIELD, gwtSection.getPos());
 		entity.setProperty(SECTION_NAME_FIELD, gwtSection.getSectionName());
@@ -215,7 +215,7 @@ public class SectionDsDao extends AbstractDsDao {
 
 	private GwtSection toGwt(Entity entity) {
 		final GwtSection section = new GwtSection();
-		section.setKey(toString(entity.getKey()));
+		section.setKey(DsUtil.toString(entity.getKey()));
 		section.setSectionName((String) entity.getProperty(SECTION_NAME_FIELD));
 		Long pos = (Long) entity.getProperty(SECTION_POS_FIELD);
 		if(pos == null) {
@@ -229,7 +229,7 @@ public class SectionDsDao extends AbstractDsDao {
 		section.setArchived(archived);
 		final Key parentKey = entity.getParent();
 		if (parentKey != null) {
-			section.setParentKey(toString(parentKey));
+			section.setParentKey(DsUtil.toString(parentKey));
 		}
 		return section;
 	}

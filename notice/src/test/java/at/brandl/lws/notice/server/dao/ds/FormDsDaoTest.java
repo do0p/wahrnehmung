@@ -27,14 +27,11 @@ import com.google.appengine.api.datastore.KeyFactory;
 public class FormDsDaoTest extends AbstractDsDaoTest {
 
 	private static final String NEW_TITLE = "neuer title";
-
 	private static final String TITLE = "title";
-
 	private static final String NL = System.lineSeparator();
 
 	private FormDsDao formDao;
 	private GwtQuestionnaire form;
-
 	private Key sectionKey1;
 	private Key sectionKey2;
 
@@ -274,7 +271,7 @@ public class FormDsDaoTest extends AbstractDsDaoTest {
 	protected String getMemCacheServiceName() {
 		return Cache.NAME;
 	}
-	
+
 	@Override
 	protected void assertCacheContainsStringKey(String key) {
 		Assert.assertTrue(getAllFormsMapFromCache().containsKey(key));
@@ -284,7 +281,7 @@ public class FormDsDaoTest extends AbstractDsDaoTest {
 	protected void assertCacheContainsNotStringKey(String key) {
 		Assert.assertFalse(getAllFormsMapFromCache().containsKey(key));
 	}
-	
+
 	@Override
 	protected void removeFromCacheStringKey(String key) {
 		Map<String, GwtQuestionnaire> questionnaires = getAllFormsMapFromCache();
@@ -294,9 +291,9 @@ public class FormDsDaoTest extends AbstractDsDaoTest {
 
 	@SuppressWarnings("unchecked")
 	private Map<String, GwtQuestionnaire> getAllFormsMapFromCache() {
-		return (Map<String, GwtQuestionnaire>)getCacheEntry(FormDsDao.ALL_FORMS);
+		return (Map<String, GwtQuestionnaire>) getCacheEntry(FormDsDao.ALL_FORMS);
 	}
-	
+
 	private GwtQuestionnaire createQuestionnaire() {
 		String formText = readFromFile("form.txt");
 		GwtQuestionnaire form = new FormParser().parse(formText);

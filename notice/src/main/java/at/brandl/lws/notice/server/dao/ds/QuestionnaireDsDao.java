@@ -39,7 +39,7 @@ public class QuestionnaireDsDao extends AbstractDsDao {
 			result = new ArrayList<GwtQuestionnaireAnswers>();
 			DatastoreService ds = getDatastoreService();
 			PreparedQuery query = ds.prepare(new Query(
-					QuestionnaireAnswers.KIND, toKey(childKey)));
+					QuestionnaireAnswers.KIND, DsUtil.toKey(childKey)));
 			for (Entity entity : query.asIterable()) {
 
 				result.add(getQuestionnaireAnswers(entity, ds));
@@ -81,7 +81,7 @@ public class QuestionnaireDsDao extends AbstractDsDao {
 			}
 
 			if (answers.getAnswers().isEmpty()) {
-				ds.delete(toKey(answers.getKey()));
+				ds.delete(DsUtil.toKey(answers.getKey()));
 			}
 
 			transaction.commit();
@@ -117,7 +117,7 @@ public class QuestionnaireDsDao extends AbstractDsDao {
 			DatastoreService ds) {
 		Entity entity = toEntity(answers);
 		ds.put(entity);
-		answers.setKey(toString(entity.getKey()));
+		answers.setKey(DsUtil.toString(entity.getKey()));
 	}
 
 	private boolean storeAnswer(GwtAnswer answer, String answersKey, User user,
@@ -126,14 +126,14 @@ public class QuestionnaireDsDao extends AbstractDsDao {
 		Object value = answer.getValue();
 		if (value != null && !isEmptyCollection(value)) {
 			
-			Entity entity = toEntity(answer, toKey(answersKey), user);
+			Entity entity = toEntity(answer, DsUtil.toKey(answersKey), user);
 			ds.put(entity);
-			answer.setKey(toString(entity.getKey()));
+			answer.setKey(DsUtil.toString(entity.getKey()));
 			return true;
 		}
 
 		if (answer.getKey() != null) {
-			ds.delete(toKey(answer.getKey()));
+			ds.delete(DsUtil.toKey(answer.getKey()));
 		}
 		return false;
 	}
@@ -152,9 +152,9 @@ public class QuestionnaireDsDao extends AbstractDsDao {
 	private GwtQuestionnaireAnswers toGwtQuestionnaireAnswers(Entity entity) {
 
 		GwtQuestionnaireAnswers answers = new GwtQuestionnaireAnswers();
-		answers.setKey(toString(entity.getKey()));
-		answers.setChildKey(toString(entity.getParent()));
-		answers.setQuestionnaireKey(toString((Key) entity
+		answers.setKey(DsUtil.toString(entity.getKey()));
+		answers.setChildKey(DsUtil.toString(entity.getParent()));
+		answers.setQuestionnaireKey(DsUtil.toString((Key) entity
 				.getProperty(QuestionnaireAnswers.QUESTIONNAIRE_KEY)));
 		return answers;
 	}
@@ -164,10 +164,10 @@ public class QuestionnaireDsDao extends AbstractDsDao {
 		String type = (String) entity.getProperty(QuestionnaireAnswer.TYPE);
 		if (Constants.MULTIPLE_CHOICE.equals(type)) {
 			GwtMultipleChoiceAnswer answer = new GwtMultipleChoiceAnswer();
-			answer.setKey(toString(entity.getKey()));
+			answer.setKey(DsUtil.toString(entity.getKey()));
 			answer.setDate((Date) entity.getProperty(QuestionnaireAnswer.DATE));
 			answer.setCreateDate((Date) entity.getProperty(QuestionnaireAnswer.CREATE_DATE));
-			answer.setQuestionKey(toString((Key) entity
+			answer.setQuestionKey(DsUtil.toString((Key) entity
 					.getProperty(QuestionnaireAnswer.QUESTION_KEY)));
 			answer.setValue(entity.getProperty(QuestionnaireAnswer.VALUE));
 			return answer;
@@ -178,9 +178,9 @@ public class QuestionnaireDsDao extends AbstractDsDao {
 
 	private Entity toEntity(GwtQuestionnaireAnswers answers) {
 		Entity entity = new Entity(QuestionnaireAnswers.KIND,
-				toKey(answers.getChildKey()));
+				DsUtil.toKey(answers.getChildKey()));
 		entity.setProperty(QuestionnaireAnswers.QUESTIONNAIRE_KEY,
-				toKey(answers.getQuestionnaireKey()));
+				DsUtil.toKey(answers.getQuestionnaireKey()));
 		return entity;
 	}
 
@@ -192,11 +192,11 @@ public class QuestionnaireDsDao extends AbstractDsDao {
 			entity = new Entity(QuestionnaireAnswer.KIND, parent);
 			entity.setProperty(QuestionnaireAnswer.CREATE_DATE, new Date());
 		} else {
-			entity = new Entity(toKey(key));
+			entity = new Entity(DsUtil.toKey(key));
 		}
 		entity.setProperty(QuestionnaireAnswer.DATE, answer.getDate());
 		entity.setProperty(QuestionnaireAnswer.QUESTION_KEY,
-				toKey(answer.getQuestionKey()));
+				DsUtil.toKey(answer.getQuestionKey()));
 		entity.setProperty(QuestionnaireAnswer.VALUE, answer.getValue());
 		entity.setProperty(QuestionnaireAnswer.USER, user);
 		entity.setProperty(QuestionnaireAnswer.TYPE, Constants.MULTIPLE_CHOICE);

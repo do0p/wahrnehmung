@@ -8,7 +8,6 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.Filter;
 import com.google.appengine.api.datastore.Query.FilterOperator;
@@ -24,20 +23,6 @@ public abstract class AbstractDsDao extends AbstractDao {
 
 	protected Filter createEqualsPredicate(String fieldName, Object value) {
 		return new Query.FilterPredicate(fieldName, FilterOperator.EQUAL, value);
-	}
-
-	protected String toString(Key key) {
-		if(key == null) {
-			return null;
-		}
-		return KeyFactory.keyToString(key);
-	}
-
-	protected Key toKey(String key) {
-		if(key == null) {
-			return null;
-		}
-		return KeyFactory.stringToKey(key);
 	}
 
 	protected void insertIntoCache(Entity entity, String cacheName) {
