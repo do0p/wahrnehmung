@@ -58,7 +58,7 @@ public class FormPrinter {
 
 		appendQuestionLabel(formText, question.getLabel());
 
-		GwtAnswerTemplate template = question.getTemplate();
+		GwtAnswerTemplate template = question.getAnswerTemplate();
 
 		if (template instanceof GwtMultipleChoiceAnswerTemplate) {
 			appendMultipleChoiceTemplate(formText,

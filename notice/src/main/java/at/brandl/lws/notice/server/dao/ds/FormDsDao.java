@@ -1,7 +1,6 @@
 package at.brandl.lws.notice.server.dao.ds;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +14,7 @@ import at.brandl.lws.notice.shared.validator.GwtQuestionnaireValidator;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Transaction;
+import com.google.appengine.api.datastore.TransactionOptions;
 import com.google.appengine.api.memcache.MemcacheService;
 
 public class FormDsDao extends AbstractDsDao {
@@ -27,35 +27,31 @@ public class FormDsDao extends AbstractDsDao {
 		return new ArrayList<GwtQuestionnaire>(allForms.values());
 	}
 
+	
 	public GwtQuestionnaire getQuestionnaire(String key) {
-
-		Map<String, GwtQuestionnaire> allForms = getAllQuestionnairesAsMap();
-		GwtQuestionnaire questionnaire = allForms.get(key);
-		if (questionnaire == null) {
-
-			try {
-				final DatastoreService ds = getDatastoreService();
-				questionnaire = new FormDsReader(ds).readForm(key);
-
-			} catch (EntityNotFoundException e) {
-				throw new IllegalArgumentException("no form with key " + key, e);
-			}
-			updateCache(questionnaire);
-		}
-		return questionnaire;
+		DatastoreService ds = getDatastoreService();
+		FormDsReader reader = new FormDsReader(ds);
+		
+		return getQuestionnaire(key, reader);
 	}
+
 
 	public GwtQuestionnaire getQuestionnaire(GwtQuestionnaireAnswers answers) {
 
-		GwtQuestionnaire questionnaire = getQuestionnaire(answers
-				.getQuestionnaireKey());
+		DatastoreService ds = getDatastoreService();
+		FormDsReader reader = new FormDsReader(ds);
+		GwtQuestionnaire questionnaire = getQuestionnaire(
+				answers.getQuestionnaireKey(), reader);
 		for (GwtAnswer answer : answers.getAnswers()) {
-			Date createDate = answer.getCreateDate();
 			String questionKey = answer.getQuestionKey();
-			// Entity history = getHistoricQuestion(questionKey, createDate);
-			// if(history != null) {
-
-			// s }
+			String newestKey = questionnaire.getNewestVersion(questionKey);
+			if (newestKey == null) {
+				questionnaire.addArchivedQuestion(reader
+						.readQuestion(questionKey));
+			} else if (!newestKey.equals(questionKey)) {
+				questionnaire.replace(newestKey,
+						reader.readQuestion(questionKey));
+			}
 		}
 
 		return questionnaire;
@@ -69,10 +65,10 @@ public class FormDsDao extends AbstractDsDao {
 
 		final DatastoreService datastoreService = getDatastoreService();
 
-		final Transaction transaction = datastoreService.beginTransaction();
+		final Transaction transaction = datastoreService.beginTransaction(TransactionOptions.Builder.withXG(true));
 		try {
 
-			new FormDsWriter(datastoreService).writeForm(gwtForm);
+			new FormDsWriter(datastoreService).writeForm(gwtForm); 
 
 			transaction.commit();
 			updateCache(gwtForm);
@@ -82,6 +78,24 @@ public class FormDsDao extends AbstractDsDao {
 				transaction.rollback();
 			}
 		}
+	}
+	
+	private GwtQuestionnaire getQuestionnaire(String key, FormDsReader reader) {
+
+		Map<String, GwtQuestionnaire> allForms = getAllQuestionnairesAsMap();
+		GwtQuestionnaire questionnaire = allForms.get(key);
+		if (questionnaire == null) {
+
+			try {
+
+				questionnaire = reader.readForm(key);
+
+			} catch (EntityNotFoundException e) {
+				throw new IllegalArgumentException("no form with key " + key, e);
+			}
+			updateCache(questionnaire);
+		}
+		return questionnaire;
 	}
 
 	@SuppressWarnings("unchecked")

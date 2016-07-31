@@ -88,6 +88,7 @@ public class Constants {
 		public static final String KIND = "QuestionGroupDs";
 		public static final String TITLE = "title";
 		public static final String ORDER = "order";
+		public static String ARCHIVE_DATE = "archived";
 	}
 
 	public static class Question {
@@ -95,6 +96,8 @@ public class Constants {
 		public static final String KIND = "QuestionDs";
 		public static final String LABEL = "label";
 		public static final String ORDER = "order";
+		public static final String REPLACED = "replaced";
+		public static final String ARCHIVE_DATE = "archived";
 	}
 
 	public static class AnswerTemplate {

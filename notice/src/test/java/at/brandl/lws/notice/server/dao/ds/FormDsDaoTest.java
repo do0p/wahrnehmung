@@ -12,17 +12,21 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import at.brandl.lws.notice.model.GwtAnswer;
+import at.brandl.lws.notice.model.GwtMultipleChoiceAnswer;
 import at.brandl.lws.notice.model.GwtMultipleChoiceAnswerTemplate;
 import at.brandl.lws.notice.model.GwtMultipleChoiceOption;
 import at.brandl.lws.notice.model.GwtQuestion;
 import at.brandl.lws.notice.model.GwtQuestionGroup;
 import at.brandl.lws.notice.model.GwtQuestionnaire;
+import at.brandl.lws.notice.model.GwtQuestionnaireAnswers;
 import at.brandl.lws.notice.server.dao.DaoRegistry;
 import at.brandl.lws.notice.server.service.FormParser;
 import at.brandl.lws.notice.shared.util.Constants.Questionnaire.Cache;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 
 public class FormDsDaoTest extends AbstractDsDaoTest {
 
@@ -219,6 +223,7 @@ public class FormDsDaoTest extends AbstractDsDaoTest {
 		int questionsSize = questions.size();
 		GwtQuestion question = questions.get(0);
 		String questionKey = question.getKey();
+		String answerTemplateKey = question.getAnswerTemplate().getKey();
 
 		question.setLabel(NEW_TITLE);
 		formDao.storeQuestionnaire(form);
@@ -232,8 +237,9 @@ public class FormDsDaoTest extends AbstractDsDaoTest {
 		questions = questionGroup.getQuestions();
 		Assert.assertEquals(questionsSize, questions.size());
 		question = questions.get(0);
-		Assert.assertEquals(questionKey, question.getKey());
 		Assert.assertEquals(NEW_TITLE, question.getLabel());
+		Assert.assertNotEquals(questionKey, question.getKey());
+		Assert.assertNotEquals(answerTemplateKey, question.getAnswerTemplate().getKey());
 	}
 
 	@Test
@@ -249,6 +255,7 @@ public class FormDsDaoTest extends AbstractDsDaoTest {
 		int questionsSize = questions.size();
 		GwtQuestion question = questions.get(0);
 		String questionKey = question.getKey();
+		String answerTemplateKey = question.getAnswerTemplate().getKey();
 
 		question.setLabel(NEW_TITLE);
 		formDao.storeQuestionnaire(form);
@@ -263,8 +270,101 @@ public class FormDsDaoTest extends AbstractDsDaoTest {
 		questions = questionGroup.getQuestions();
 		Assert.assertEquals(questionsSize, questions.size());
 		question = questions.get(0);
-		Assert.assertEquals(questionKey, question.getKey());
 		Assert.assertEquals(NEW_TITLE, question.getLabel());
+		Assert.assertNotEquals(questionKey, question.getKey());
+		Assert.assertNotEquals(answerTemplateKey, question.getAnswerTemplate().getKey());
+	}
+	
+	@Test
+	public void deleteQuestion() {
+		formDao.storeQuestionnaire(form);
+
+		List<GwtQuestionGroup> groups = form.getGroups();
+		int groupSize = groups.size();
+		GwtQuestionGroup questionGroup = groups.get(0);
+		String groupKey = questionGroup.getKey();
+
+		List<GwtQuestion> questions = questionGroup.getQuestions();
+		int questionsSize = questions.size();
+		questions.remove(0);
+		
+		formDao.storeQuestionnaire(form);
+
+		form = formDao.getQuestionnaire(form.getKey());
+		groups = form.getGroups();
+		Assert.assertEquals(groupSize, groups.size());
+		questionGroup = groups.get(0);
+		Assert.assertEquals(groupKey, questionGroup.getKey());
+
+		questions = questionGroup.getQuestions();
+		Assert.assertEquals(questionsSize - 1, questions.size());
+	}
+	
+	@Test
+	public void deleteQuestionWithoutCache() {
+		formDao.storeQuestionnaire(form);
+
+		List<GwtQuestionGroup> groups = form.getGroups();
+		int groupSize = groups.size();
+		GwtQuestionGroup questionGroup = groups.get(0);
+		String groupKey = questionGroup.getKey();
+
+		List<GwtQuestion> questions = questionGroup.getQuestions();
+		int questionsSize = questions.size();
+		questions.remove(0);
+		
+		formDao.storeQuestionnaire(form);
+		removeFromCacheStringKey(form.getKey());
+
+		form = formDao.getQuestionnaire(form.getKey());
+		groups = form.getGroups();
+		Assert.assertEquals(groupSize, groups.size());
+		questionGroup = groups.get(0);
+		Assert.assertEquals(groupKey, questionGroup.getKey());
+
+		questions = questionGroup.getQuestions();
+		Assert.assertEquals(questionsSize - 1, questions.size());
+	}
+	
+	
+	@Test
+	public void getFormWithArchivedQuestion() {
+		formDao.storeQuestionnaire(form);
+
+		List<GwtQuestionGroup> groups = form.getGroups();
+		int groupSize = groups.size();
+		GwtQuestionGroup questionGroup = groups.get(0);
+		String groupKey = questionGroup.getKey();
+
+		List<GwtQuestion> questions = questionGroup.getQuestions();
+		int questionsSize = questions.size();
+		GwtQuestion question = questions.get(0);
+		String questionKey = question.getKey();
+		String label = question.getLabel();
+		String answerTemplateKey = question.getAnswerTemplate().getKey();
+
+		GwtAnswer answer = new GwtMultipleChoiceAnswer();
+		answer.setQuestionKey(questionKey);
+		GwtQuestionnaireAnswers answers = new GwtQuestionnaireAnswers();
+		answers.setQuestionnaireKey(form.getKey());
+		answers.addAnswer(answer);
+
+		question.setLabel(NEW_TITLE);
+		formDao.storeQuestionnaire(form);
+		
+		form = formDao.getQuestionnaire(answers);
+		groups = form.getGroups();
+		Assert.assertEquals(groupSize, groups.size());
+		questionGroup = groups.get(0);
+		Assert.assertEquals(groupKey, questionGroup.getKey());
+
+		questions = questionGroup.getQuestions();
+		Assert.assertEquals(questionsSize, questions.size());
+		question = questions.get(0);
+		Assert.assertEquals(label, question.getLabel());
+		Assert.assertEquals(questionKey, question.getKey());
+		Assert.assertEquals(answerTemplateKey, question.getAnswerTemplate().getKey());
+		
 	}
 
 	@Override
@@ -324,9 +424,9 @@ public class FormDsDaoTest extends AbstractDsDaoTest {
 	}
 
 	private void assertMultipleChoiceAnswerTemplate(GwtQuestion question) {
-		Assert.assertTrue(question.getTemplate() instanceof GwtMultipleChoiceAnswerTemplate);
+		Assert.assertTrue(question.getAnswerTemplate() instanceof GwtMultipleChoiceAnswerTemplate);
 		for (GwtMultipleChoiceOption option : ((GwtMultipleChoiceAnswerTemplate) question
-				.getTemplate()).getOptions()) {
+				.getAnswerTemplate()).getOptions()) {
 			assertOption(option);
 		}
 	}
@@ -359,5 +459,9 @@ public class FormDsDaoTest extends AbstractDsDaoTest {
 		}
 		return text.toString();
 	}
-
+	
+	protected LocalDatastoreServiceTestConfig createDsConfig() {
+		return new LocalDatastoreServiceTestConfig().setApplyAllHighRepJobPolicy();
+	}
+	
 }

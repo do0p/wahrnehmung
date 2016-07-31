@@ -249,7 +249,7 @@ public class Utils {
 			GwtAnswer answer, boolean isGroup) {
 
 		String labelStr = createLabel(isGroup, question);
-		String answerStr = createAnswer(question.getTemplate(), answer);
+		String answerStr = createAnswer(question.getAnswerTemplate(), answer);
 
 		return row(labelStr + answerStr);
 	}

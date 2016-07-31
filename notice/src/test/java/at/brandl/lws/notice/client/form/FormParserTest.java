@@ -276,7 +276,7 @@ public class FormParserTest {
 
 		assertNotNull(question);
 		assertEquals(questionLabel, question.getLabel());
-		GwtAnswerTemplate template = question.getTemplate();
+		GwtAnswerTemplate template = question.getAnswerTemplate();
 		assertNotNull(template);
 		assertTrue(template instanceof GwtMultipleChoiceAnswerTemplate);
 		List<GwtMultipleChoiceOption> options = ((GwtMultipleChoiceAnswerTemplate)template).getOptions();

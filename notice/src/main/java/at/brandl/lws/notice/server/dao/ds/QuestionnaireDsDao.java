@@ -1,23 +1,24 @@
 package at.brandl.lws.notice.server.dao.ds;
 
+import static at.brandl.lws.notice.server.dao.ds.converter.GwtAnswerConverter.toEntity;
+import static at.brandl.lws.notice.server.dao.ds.converter.GwtAnswerConverter.toGwtAnswer;
+import static at.brandl.lws.notice.server.dao.ds.converter.GwtQuestionnaireAnswersConverter.toEntity;
+import static at.brandl.lws.notice.server.dao.ds.converter.GwtQuestionnaireAnswersConverter.toGwtQuestionnaireAnswers;
+
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
 import at.brandl.lws.notice.model.GwtAnswer;
-import at.brandl.lws.notice.model.GwtMultipleChoiceAnswer;
 import at.brandl.lws.notice.model.GwtQuestionnaireAnswers;
-import at.brandl.lws.notice.shared.util.Constants;
 import at.brandl.lws.notice.shared.util.Constants.QuestionnaireAnswer;
 import at.brandl.lws.notice.shared.util.Constants.QuestionnaireAnswers;
 import at.brandl.lws.notice.shared.validator.GwtQuestionnaireAnswersValidator;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Transaction;
@@ -147,61 +148,6 @@ public class QuestionnaireDsDao extends AbstractDsDao {
 
 	private MemcacheService getCache() {
 		return getCache(QuestionnaireAnswers.Cache.NAME);
-	}
-
-	private GwtQuestionnaireAnswers toGwtQuestionnaireAnswers(Entity entity) {
-
-		GwtQuestionnaireAnswers answers = new GwtQuestionnaireAnswers();
-		answers.setKey(DsUtil.toString(entity.getKey()));
-		answers.setChildKey(DsUtil.toString(entity.getParent()));
-		answers.setQuestionnaireKey(DsUtil.toString((Key) entity
-				.getProperty(QuestionnaireAnswers.QUESTIONNAIRE_KEY)));
-		return answers;
-	}
-
-	private GwtAnswer toGwtAnswer(Entity entity) {
-
-		String type = (String) entity.getProperty(QuestionnaireAnswer.TYPE);
-		if (Constants.MULTIPLE_CHOICE.equals(type)) {
-			GwtMultipleChoiceAnswer answer = new GwtMultipleChoiceAnswer();
-			answer.setKey(DsUtil.toString(entity.getKey()));
-			answer.setDate((Date) entity.getProperty(QuestionnaireAnswer.DATE));
-			answer.setCreateDate((Date) entity.getProperty(QuestionnaireAnswer.CREATE_DATE));
-			answer.setQuestionKey(DsUtil.toString((Key) entity
-					.getProperty(QuestionnaireAnswer.QUESTION_KEY)));
-			answer.setValue(entity.getProperty(QuestionnaireAnswer.VALUE));
-			return answer;
-		}
-		throw new IllegalStateException("unknown type of answer: " + type);
-
-	}
-
-	private Entity toEntity(GwtQuestionnaireAnswers answers) {
-		Entity entity = new Entity(QuestionnaireAnswers.KIND,
-				DsUtil.toKey(answers.getChildKey()));
-		entity.setProperty(QuestionnaireAnswers.QUESTIONNAIRE_KEY,
-				DsUtil.toKey(answers.getQuestionnaireKey()));
-		return entity;
-	}
-
-	private Entity toEntity(GwtAnswer answer, Key parent, User user) {
-
-		String key = answer.getKey();
-		Entity entity;
-		if (key == null) {
-			entity = new Entity(QuestionnaireAnswer.KIND, parent);
-			entity.setProperty(QuestionnaireAnswer.CREATE_DATE, new Date());
-		} else {
-			entity = new Entity(DsUtil.toKey(key));
-		}
-		entity.setProperty(QuestionnaireAnswer.DATE, answer.getDate());
-		entity.setProperty(QuestionnaireAnswer.QUESTION_KEY,
-				DsUtil.toKey(answer.getQuestionKey()));
-		entity.setProperty(QuestionnaireAnswer.VALUE, answer.getValue());
-		entity.setProperty(QuestionnaireAnswer.USER, user);
-		entity.setProperty(QuestionnaireAnswer.TYPE, Constants.MULTIPLE_CHOICE);
-
-		return entity;
 	}
 
 }

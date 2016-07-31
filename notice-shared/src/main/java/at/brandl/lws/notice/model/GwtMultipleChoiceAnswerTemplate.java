@@ -9,6 +9,13 @@ public class GwtMultipleChoiceAnswerTemplate implements GwtAnswerTemplate{
 	private List<GwtMultipleChoiceOption> options = new ArrayList<GwtMultipleChoiceOption>();
 	private String key;
 
+
+	public static GwtMultipleChoiceAnswerTemplate valueOf(GwtMultipleChoiceAnswerTemplate template) {
+		GwtMultipleChoiceAnswerTemplate gwtTemplate = new GwtMultipleChoiceAnswerTemplate();
+		gwtTemplate.setOptions(template.getOptions());
+		return gwtTemplate;
+	}
+	
 	public List<GwtMultipleChoiceOption> getOptions() {
 		return options;
 	}
@@ -52,4 +59,5 @@ public class GwtMultipleChoiceAnswerTemplate implements GwtAnswerTemplate{
 		
 		return new GwtMultipleChoiceAnswer();
 	}
+
 }

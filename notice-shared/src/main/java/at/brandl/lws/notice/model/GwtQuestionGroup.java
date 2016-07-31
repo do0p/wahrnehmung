@@ -2,6 +2,7 @@ package at.brandl.lws.notice.model;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class GwtQuestionGroup implements Serializable {
@@ -10,6 +11,15 @@ public class GwtQuestionGroup implements Serializable {
 	private String title;
 	private List<GwtQuestion> questions = new ArrayList<GwtQuestion>();
 	private String key;
+	private Date archiveDate;
+
+	public Date getArchiveDate() {
+		return archiveDate;
+	}
+
+	public void setArchiveDate(Date archived) {
+		this.archiveDate = archived;
+	}
 
 	public String getTitle() {
 		return title;
@@ -31,7 +41,6 @@ public class GwtQuestionGroup implements Serializable {
 		questions.add(question);
 	}
 
-
 	public void setKey(String key) {
 		this.key = key;
 	}
@@ -39,7 +48,11 @@ public class GwtQuestionGroup implements Serializable {
 	public String getKey() {
 		return key;
 	}
-	
+
+	public boolean isArchived() {
+		return archiveDate != null;
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {
@@ -53,13 +66,27 @@ public class GwtQuestionGroup implements Serializable {
 		result &= ObjectUtils.equals(questions, other.questions);
 		return result;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		int result = 37;
 		result = result * 17 + ObjectUtils.hashCode(questions);
 		result = result * 17 + ObjectUtils.hashCode(title);
 		return result;
+	}
+
+	public void replaceQuestion(String toBeReplacedKey, GwtQuestion replacement) {
+		for (int i = 0; i < questions.size(); i++) {
+			if (toBeReplacedKey.equals(questions.get(i).getKey())) {
+				questions.set(i, replacement);
+				return;
+			}
+		}
+		System.err.println(String.format(
+				"Question with key %s is not contained in group with key %s",
+				toBeReplacedKey, this.key));
+		questions.add(replacement);
+
 	}
 
 }

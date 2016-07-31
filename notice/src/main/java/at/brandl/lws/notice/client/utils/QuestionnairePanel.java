@@ -77,7 +77,7 @@ public class QuestionnairePanel extends VerticalPanel implements
 		changeListener.notifyChange();
 		GwtAnswer answer = answers.getAnswer(questionKey);
 		if (answer == null) {
-			answer = questionnaire.getQuestion(questionKey).getTemplate()
+			answer = questionnaire.getQuestion(questionKey).getAnswerTemplate()
 					.createAnswer();
 			answer.setQuestionKey(questionKey);
 			answers.addAnswer(answer);

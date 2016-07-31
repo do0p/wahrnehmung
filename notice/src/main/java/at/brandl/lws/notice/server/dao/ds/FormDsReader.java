@@ -1,5 +1,12 @@
 package at.brandl.lws.notice.server.dao.ds;
 
+import static at.brandl.lws.notice.server.dao.ds.DsUtil.toKey;
+import static at.brandl.lws.notice.server.dao.ds.converter.GwtAnswerTemplateConverter.toGwtAnswerTemplate;
+import static at.brandl.lws.notice.server.dao.ds.converter.GwtMultipleChoiceOptionConverter.toGwtMultipleChoiceOption;
+import static at.brandl.lws.notice.server.dao.ds.converter.GwtQuestionConverter.toGwtQuestion;
+import static at.brandl.lws.notice.server.dao.ds.converter.GwtQuestionGroupConverter.toGwtQuestionGroup;
+import static at.brandl.lws.notice.server.dao.ds.converter.GwtQuestionnaireConverter.toGwtQuestionnaire;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,7 +16,6 @@ import at.brandl.lws.notice.model.GwtMultipleChoiceOption;
 import at.brandl.lws.notice.model.GwtQuestion;
 import at.brandl.lws.notice.model.GwtQuestionGroup;
 import at.brandl.lws.notice.model.GwtQuestionnaire;
-import at.brandl.lws.notice.shared.util.Constants;
 import at.brandl.lws.notice.shared.util.Constants.AnswerTemplate;
 import at.brandl.lws.notice.shared.util.Constants.MultipleChoiceOption;
 import at.brandl.lws.notice.shared.util.Constants.Question;
@@ -31,7 +37,7 @@ public class FormDsReader {
 		this.ds = ds;
 	}
 
-	public List<GwtQuestionnaire> readAllForms(){
+	public List<GwtQuestionnaire> readAllForms() {
 		List<GwtQuestionnaire> questionnaires = new ArrayList<>();
 		PreparedQuery query = ds.prepare(new Query(Questionnaire.KIND)
 				.addSort(Questionnaire.CREATE_DATE));
@@ -45,6 +51,19 @@ public class FormDsReader {
 	public GwtQuestionnaire readForm(String key) throws EntityNotFoundException {
 		Entity form = ds.get(DsUtil.toKey(key));
 		return convertToQuestionnaire(form);
+	}
+
+	public GwtQuestion readQuestion(String questionKey) {
+
+		try {
+			Entity entity = ds.get(toKey(questionKey));
+			GwtQuestion gwtQuestion = toGwtQuestion(entity);
+			gwtQuestion.setTemplate(getTemplate(entity.getKey()));
+			return gwtQuestion;
+		} catch (EntityNotFoundException e) {
+			throw new IllegalArgumentException("no question for key "
+					+ questionKey);
+		}
 	}
 
 	private GwtQuestionnaire convertToQuestionnaire(Entity form) {
@@ -62,20 +81,26 @@ public class FormDsReader {
 		for (Entity entity : query.asIterable()) {
 
 			GwtQuestionGroup gwtQuestionGroup = toGwtQuestionGroup(entity);
+			if(gwtQuestionGroup.isArchived()) {
+				continue;
+			}
 			gwtQuestionGroup.setQuestions(getQuestions(entity.getKey()));
 			groups.add(gwtQuestionGroup);
 		}
 		return groups;
 	}
 
-	private List<GwtQuestion> getQuestions(Key parent) {
+	private List<GwtQuestion> getQuestions(Key groupKey) {
 
 		List<GwtQuestion> questions = new ArrayList<GwtQuestion>();
-		PreparedQuery query = ds.prepare(new Query(Question.KIND, parent)
+		PreparedQuery query = ds.prepare(new Query(Question.KIND, groupKey)
 				.addSort(Question.ORDER));
 		for (Entity entity : query.asIterable()) {
 
 			GwtQuestion gwtQuestion = toGwtQuestion(entity);
+			if(gwtQuestion.isArchived()) {
+				continue;
+			}
 			gwtQuestion.setTemplate(getTemplate(entity.getKey()));
 			questions.add(gwtQuestion);
 		}
@@ -106,53 +131,5 @@ public class FormDsReader {
 			options.add(gwtOption);
 		}
 		return options;
-	}
-
-	private GwtQuestionnaire toGwtQuestionnaire(Entity entity) {
-
-		GwtQuestionnaire form = new GwtQuestionnaire();
-		form.setTitle((String) entity.getProperty(Questionnaire.TITLE));
-		form.setSection(DsUtil.toString((Key) entity
-				.getProperty(Questionnaire.SECTION)));
-		form.setKey(DsUtil.toString(entity.getKey()));
-		return form;
-	}
-
-	private GwtQuestionGroup toGwtQuestionGroup(Entity entity) {
-
-		GwtQuestionGroup group = new GwtQuestionGroup();
-		group.setTitle((String) entity.getProperty(QuestionGroup.TITLE));
-		group.setKey(DsUtil.toString(entity.getKey()));
-		return group;
-	}
-
-	private GwtQuestion toGwtQuestion(Entity entity) {
-
-		GwtQuestion question = new GwtQuestion();
-		question.setLabel((String) entity.getProperty(Question.LABEL));
-		question.setKey(DsUtil.toString(entity.getKey()));
-		return question;
-	}
-
-	private GwtAnswerTemplate toGwtAnswerTemplate(Entity entity) {
-
-		String type = (String) entity.getProperty(AnswerTemplate.Type);
-		if (Constants.MULTIPLE_CHOICE.equals(type)) {
-
-			GwtMultipleChoiceAnswerTemplate template = new GwtMultipleChoiceAnswerTemplate();
-			template.setKey(DsUtil.toString(entity.getKey()));
-			return template;
-		}
-		throw new IllegalStateException("unknown type of answer template "
-				+ type);
-	}
-
-	private GwtMultipleChoiceOption toGwtMultipleChoiceOption(Entity entity) {
-
-		GwtMultipleChoiceOption option = new GwtMultipleChoiceOption();
-		option.setLabel((String) entity.getProperty(MultipleChoiceOption.LABEL));
-		option.setValue((String) entity.getProperty(MultipleChoiceOption.VALUE));
-		option.setKey(DsUtil.toString(entity.getKey()));
-		return option;
 	}
 }
