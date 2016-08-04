@@ -23,6 +23,10 @@ public class DragableQuestion extends Dragable<DragableQuestion> {
 		return QUESTION_LABEL;
 	}
 
+	public String getLabel() {
+		return label.getText();
+	}
+	
 	public static DragableQuestion valueOf(Data data, DragContainer parent) {
 
 		return new DragableQuestion(data, parent);

@@ -9,6 +9,14 @@ public class GwtMultipleChoiceOption implements Serializable{
 	private String value;
 	private String key;
 
+	public static GwtMultipleChoiceOption valueOf(GwtMultipleChoiceOption option) {
+		
+		GwtMultipleChoiceOption newOption = new GwtMultipleChoiceOption();
+		newOption.setLabel(option.getLabel());
+		newOption.setValue(option.getValue());
+		return newOption;
+	}
+	
 	public String getLabel() {
 		return label;
 	}
@@ -55,4 +63,6 @@ public class GwtMultipleChoiceOption implements Serializable{
 		result = result * 17 + ObjectUtils.hashCode(value);
 		return result;
 	}
+
+
 }

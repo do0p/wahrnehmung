@@ -1,5 +1,6 @@
 package at.brandl.lws.notice.server.dao.ds;
 
+import static at.brandl.lws.notice.server.dao.ds.DsUtil.toKey;
 import static at.brandl.lws.notice.server.dao.ds.converter.GwtAnswerTemplateConverter.toEntity;
 import static at.brandl.lws.notice.server.dao.ds.converter.GwtMultipleChoiceOptionConverter.toEntity;
 import static at.brandl.lws.notice.server.dao.ds.converter.GwtQuestionConverter.toEntity;
@@ -8,8 +9,10 @@ import static at.brandl.lws.notice.server.dao.ds.converter.GwtQuestionGroupConve
 import static at.brandl.lws.notice.server.dao.ds.converter.GwtQuestionGroupConverter.toGwtQuestionGroup;
 import static at.brandl.lws.notice.server.dao.ds.converter.GwtQuestionnaireConverter.toEntity;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -56,24 +59,27 @@ public class FormDsWriter {
 
 		int order = 0;
 		Map<String, GwtQuestionGroup> persistedGroups = new HashMap<>();
-		if(persistedForm != null) {
-			for(GwtQuestionGroup group : persistedForm.getGroups()) {
+		if (persistedForm != null) {
+			for (GwtQuestionGroup group : persistedForm.getGroups()) {
 				persistedGroups.put(group.getKey(), group);
 			}
 		}
 		for (GwtQuestionGroup gwtGroup : gwtForm.getGroups()) {
 
-			GwtQuestionGroup persistedGroup = persistedGroups.remove(gwtGroup.getKey());
+			GwtQuestionGroup persistedGroup = persistedGroups.remove(gwtGroup
+					.getKey());
 			storeGroup(gwtGroup, formKey, order++, persistedGroup);
 		}
-		for(Entry<String, GwtQuestionGroup> groupToArchive : persistedGroups.entrySet()) {
+		for (Entry<String, GwtQuestionGroup> groupToArchive : persistedGroups
+				.entrySet()) {
 			try {
-				Entity entity = ds.get(DsUtil.toKey(groupToArchive.getKey())) ;
+				Entity entity = ds.get(DsUtil.toKey(groupToArchive.getKey()));
 				GwtQuestionGroup persistedGroup = toGwtQuestionGroup(entity);
 				persistedGroup.setArchiveDate(new Date());
 				ds.put(toEntity(persistedGroup, null, 0));
 			} catch (EntityNotFoundException e) {
-				throw new IllegalArgumentException("no group for key " + groupToArchive.getKey());
+				throw new IllegalArgumentException("no group for key "
+						+ groupToArchive.getKey());
 			}
 		}
 	}
@@ -84,8 +90,11 @@ public class FormDsWriter {
 		String key = gwtQuestion.getKey();
 
 		if (!Utils.isEmpty(key)) {
+
 			GwtQuestion storedQuestion = formReader.readQuestion(key);
-			if (gwtQuestion.equals(storedQuestion)) {
+			Key questionKey = toKey(key);
+			if (questionKey.getParent().equals(groupKey)
+					&& gwtQuestion.equals(storedQuestion)) {
 				return gwtQuestion;
 			}
 
@@ -112,8 +121,17 @@ public class FormDsWriter {
 
 	private GwtAnswerTemplate copy(GwtAnswerTemplate answerTemplate) {
 		if (answerTemplate instanceof GwtMultipleChoiceAnswerTemplate) {
-			return GwtMultipleChoiceAnswerTemplate
-					.valueOf((GwtMultipleChoiceAnswerTemplate) answerTemplate);
+			GwtMultipleChoiceAnswerTemplate multipleChoiceTemplate = (GwtMultipleChoiceAnswerTemplate) answerTemplate;
+			List<GwtMultipleChoiceOption> options = new ArrayList<>(
+					multipleChoiceTemplate.getOptions());
+
+			answerTemplate = GwtMultipleChoiceAnswerTemplate
+					.valueOf(multipleChoiceTemplate);
+			multipleChoiceTemplate.getOptions().clear();;
+			for (GwtMultipleChoiceOption option : options) {
+				multipleChoiceTemplate.addOption(GwtMultipleChoiceOption.valueOf(option));
+			}
+			return answerTemplate;
 		}
 		throw new IllegalArgumentException("unsupported answer template");
 	}
@@ -125,7 +143,8 @@ public class FormDsWriter {
 		ds.put(question);
 	}
 
-	private void storeGroup(GwtQuestionGroup gwtGroup, Key parent, int order, GwtQuestionGroup persistedGroup) {
+	private void storeGroup(GwtQuestionGroup gwtGroup, Key parent, int order,
+			GwtQuestionGroup persistedGroup) {
 
 		Entity group = toEntity(gwtGroup, parent, order);
 		ds.put(group);
@@ -133,8 +152,8 @@ public class FormDsWriter {
 		gwtGroup.setKey(toString(groupKey));
 
 		Map<String, GwtQuestion> persistedQuestions = new HashMap<>();
-		if(persistedGroup != null) {
-			for(GwtQuestion question : persistedGroup.getQuestions()) {
+		if (persistedGroup != null) {
+			for (GwtQuestion question : persistedGroup.getQuestions()) {
 				persistedQuestions.put(question.getKey(), question);
 			}
 		}
@@ -149,14 +168,17 @@ public class FormDsWriter {
 				gwtGroup.replaceQuestion(questionKey, storedQuestion);
 			}
 		}
-		for(Entry<String, GwtQuestion> questionToArchive : persistedQuestions.entrySet()) {
+		for (Entry<String, GwtQuestion> questionToArchive : persistedQuestions
+				.entrySet()) {
 			try {
-				Entity entity = ds.get(DsUtil.toKey(questionToArchive.getKey())) ;
+				Entity entity = ds
+						.get(DsUtil.toKey(questionToArchive.getKey()));
 				GwtQuestion persistedQuestion = toGwtQuestion(entity);
 				persistedQuestion.setArchiveDate(new Date());
 				ds.put(toEntity(persistedQuestion, null, 0));
 			} catch (EntityNotFoundException e) {
-				throw new IllegalArgumentException("no group for key " + questionToArchive.getKey());
+				throw new IllegalArgumentException("no group for key "
+						+ questionToArchive.getKey());
 			}
 		}
 	}

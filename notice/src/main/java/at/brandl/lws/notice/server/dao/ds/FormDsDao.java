@@ -57,7 +57,7 @@ public class FormDsDao extends AbstractDsDao {
 		return questionnaire;
 	}
 
-	public void storeQuestionnaire(GwtQuestionnaire gwtForm) {
+	public GwtQuestionnaire storeQuestionnaire(GwtQuestionnaire gwtForm) {
 
 		if (!GwtQuestionnaireValidator.valid(gwtForm)) {
 			throw new IllegalArgumentException("illegal form " + gwtForm);
@@ -72,6 +72,7 @@ public class FormDsDao extends AbstractDsDao {
 
 			transaction.commit();
 			updateCache(gwtForm);
+			return gwtForm;
 
 		} finally {
 			if (transaction.isActive()) {

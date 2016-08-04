@@ -10,6 +10,7 @@ import com.google.gwt.user.client.ui.Label;
 
 public class DragTemplate extends FocusPanel {
 
+	public static final String NEW_PREFIX = "NEW";
 	static final Logger LOGGER = Logger.getLogger("DragLogger");
 	private final String type;
 	private final String text;
@@ -28,7 +29,7 @@ public class DragTemplate extends FocusPanel {
 			@Override
 			public void onDragStart(DragStartEvent event) {
 //				LOGGER.log(Level.SEVERE, "in onDragStart of " + this);
-				event.setData(DragTargetLabel.DATA, new Data(text + count++, text).toString());
+				event.setData(DragTargetLabel.DATA, new Data(NEW_PREFIX + text + count++, text).toString());
 				event.setData(DragTargetLabel.TYPE, type);
 				event.getDataTransfer().setDragImage(getElement(), 10, 10);
 				event.stopPropagation();

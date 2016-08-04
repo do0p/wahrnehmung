@@ -30,12 +30,17 @@ public class FormServiceImpl extends RemoteServiceServlet implements
 	}
 
 	@Override
+	public GwtQuestionnaire storeForm(GwtQuestionnaire form) {
+
+		return formDao.storeQuestionnaire(form);
+	}
+	
+	@Override
 	public GwtQuestionnaire storeFormAsString(String formText, String sectionKey) {
 
 		GwtQuestionnaire questionnaire = formParser.parse(formText);
 		questionnaire.setSection(sectionKey);
-		formDao.storeQuestionnaire(questionnaire);
-		return questionnaire;
+		return formDao.storeQuestionnaire(questionnaire);
 	}
 
 	@Override
@@ -67,5 +72,7 @@ public class FormServiceImpl extends RemoteServiceServlet implements
 
 		return new ArrayList<GwtQuestionnaire>(titles.values());
 	}
+
+
 
 }

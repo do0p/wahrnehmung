@@ -1,5 +1,9 @@
 package at.brandl.lws.notice.client.utils;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.google.gwt.user.client.ui.Widget;
 
 public class DragableQuestionGroup extends Dragable<DragableQuestionGroup> {
 
@@ -59,6 +63,21 @@ public class DragableQuestionGroup extends Dragable<DragableQuestionGroup> {
 		vPanel.insert(DragableQuestion.valueOf(data, vPanel), widgetCount - 1);
 	}
 
+	public List<DragableQuestion> getQuestions() {
+		List<DragableQuestion> questions = new ArrayList<>();
+		for (int i = 0; i < vPanel.getWidgetCount(); i++) {
+			Widget widget = vPanel.getWidget(i);
+			if (widget instanceof DragableQuestion) {
+				questions.add((DragableQuestion) widget);
+			}
+		}
+		return questions;
+	}
+
+	public String getTitle() {
+		return title.getText();
+	}
+	
 	@Override
 	public String toString() {
 		return "DragableQuestionGroup: " + title.getText();

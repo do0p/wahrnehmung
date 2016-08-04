@@ -12,6 +12,8 @@ public interface FormService extends RemoteService {
 
 	GwtQuestionnaire storeFormAsString(String formText, String sectionKey);
 
+	GwtQuestionnaire storeForm(GwtQuestionnaire form);
+	
 	List<GwtQuestionnaire> getAllForms(String childKey);
 	
 	List<GwtQuestionnaire> getAllForms();

@@ -21,6 +21,7 @@ import at.brandl.lws.notice.model.GwtQuestionGroup;
 import at.brandl.lws.notice.model.GwtQuestionnaire;
 import at.brandl.lws.notice.shared.service.FormService;
 import at.brandl.lws.notice.shared.service.FormServiceAsync;
+import at.brandl.lws.notice.shared.validator.GwtQuestionnaireValidator;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -29,32 +30,33 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.Widget;
 
 public class DnDQuestionnaireAdmin extends AbstractAdminTab {
 
 	private final FormServiceAsync formService = GWT.create(FormService.class);
 	private final Map<String, GwtQuestionnaire> questionnaires = new HashMap<String, GwtQuestionnaire>();
 
+	private final DecisionBox decisionBox;
+
+	private GwtQuestionnaire questionnaire;
 	private DragContainer panel;
 	private SectionSelection sectionSelection;
 	private PopUp dialogBox;
 	private ListBox questionnaireListbox;
-	private final DecisionBox decisionBox;
-
-
-	// private FormPrinter formPrinter;
 
 	DnDQuestionnaireAdmin() {
 		super(false);
 
-		// formPrinter = new FormPrinter();
 		dialogBox = new PopUp();
-		
+
 		decisionBox = new DecisionBox();
 		decisionBox.setText(labels().questionDelWarning());
 
 		sectionSelection = new SectionSelection(dialogBox);
 
+		questionnaire = new GwtQuestionnaire();
+		
 		initPanel();
 
 		Grid selectionContainer = createSelectionContainer();
@@ -69,16 +71,23 @@ public class DnDQuestionnaireAdmin extends AbstractAdminTab {
 					GwtQuestionnaire gwtQuestionnaire = questionnaires
 							.get(questionnaireListbox.getValue(selectedIndex));
 					if (gwtQuestionnaire != null) {
-						sectionSelection.setSelected(gwtQuestionnaire
-								.getSection());
-						load(gwtQuestionnaire);
+						questionnaire = gwtQuestionnaire;
+						sectionSelection.setSelected(questionnaire.getSection());
+						load();
 					} else {
 						sectionSelection.reset();
 					}
 				}
 			}
 
+		});
+		
+		sectionSelection.addChangeHandler(new ChangeHandler() {
 			
+			@Override
+			public void onChange(ChangeEvent event) {
+				questionnaire.setSection(sectionSelection.getSelectedSectionKey());
+			}
 		});
 
 		setSpacing(Utils.SPACING);
@@ -127,16 +136,40 @@ public class DnDQuestionnaireAdmin extends AbstractAdminTab {
 
 	@Override
 	void save() {
-
-		// formService.storeFormAsString(panel.getText(),
-		// sectionSelection.getSelectedSectionKey(),
-		// new ErrorReportingCallback<GwtQuestionnaire>() {
-		// @Override
-		// public void onSuccess(GwtQuestionnaire result) {
-		// panel.setText(formPrinter.toString(result));
-		// sectionSelection.setSelected(result.getSection());
-		// }
-		// });
+//		copy panel values to questionnaire
+		Map<String, GwtQuestionGroup> groupMap = new HashMap<>();
+		for(GwtQuestionGroup group : questionnaire.getGroups()) {
+			groupMap.put(group.getKey(), group);
+		}
+		questionnaire.getGroups().clear();
+		
+		ChangeableLabel title = (ChangeableLabel) panel.getWidget(0);
+		questionnaire.setTitle(title.getText());
+		GwtQuestionGroup ungroupedQuestionsGroup = null;
+		for(int i = 1; i < panel.getWidgetCount(); i++) {
+			Widget widget = panel.getWidget(i);
+			if(widget instanceof DragableQuestionGroup) {
+				DragableQuestionGroup group = (DragableQuestionGroup) widget;
+			
+			} else if (widget instanceof DragableQuestion) {
+				if(ungroupedQuestionsGroup == null) {
+					ungroupedQuestionsGroup = new GwtQuestionGroup();
+					questionnaire.addQuestionGroup(ungroupedQuestionsGroup);
+				}
+				DragableQuestion question = (DragableQuestion) widget;
+			} 
+		}
+		
+		if (GwtQuestionnaireValidator.valid(questionnaire)) {
+			formService.storeForm(questionnaire,
+					new ErrorReportingCallback<GwtQuestionnaire>() {
+						@Override
+						public void onSuccess(GwtQuestionnaire result) {
+							questionnaire = result;
+							sectionSelection.setSelected(result.getSection());
+						}
+					});
+		}
 	}
 
 	private Grid createSelectionContainer() {
@@ -152,21 +185,25 @@ public class DnDQuestionnaireAdmin extends AbstractAdminTab {
 		}
 		return selectionContainer;
 	}
-	
-	private void load(GwtQuestionnaire gwtQuestionnaire) {
+
+	private void load() {
 		int index = 0;
-		panel.insert(new ChangeableLabel(gwtQuestionnaire.getTitle()), index++);
-		for(GwtQuestionGroup group : gwtQuestionnaire.getGroups()) {
+		panel.insert(new ChangeableLabel(questionnaire.getTitle()), index++);
+		for (GwtQuestionGroup group : questionnaire.getGroups()) {
 			String title = group.getTitle();
-			if(at.brandl.lws.notice.shared.Utils.isNotEmpty(title)) {
-				DragableQuestionGroup questionGroup = DragableQuestionGroup.valueOf(new Data(group.getKey(), title), panel);
-				for(GwtQuestion question : group.getQuestions()) {
-					questionGroup.addQuestion(new Data(question.getKey(), question.getLabel()));
+			if (at.brandl.lws.notice.shared.Utils.isNotEmpty(title)) {
+				DragableQuestionGroup questionGroup = DragableQuestionGroup
+						.valueOf(new Data(group.getKey(), title), panel);
+				for (GwtQuestion question : group.getQuestions()) {
+					questionGroup.addQuestion(new Data(question.getKey(),
+							question.getLabel()));
 				}
 				panel.insert(questionGroup, index++);
 			} else {
-				for(GwtQuestion question : group.getQuestions()) {
-					panel.insert(DragableQuestion.valueOf(new Data(question.getKey(), question.getLabel()), panel), index++);
+				for (GwtQuestion question : group.getQuestions()) {
+					panel.insert(DragableQuestion.valueOf(
+							new Data(question.getKey(), question.getLabel()),
+							panel), index++);
 				}
 			}
 		}
