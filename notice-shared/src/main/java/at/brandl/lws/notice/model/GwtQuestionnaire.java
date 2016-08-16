@@ -2,7 +2,9 @@ package at.brandl.lws.notice.model;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class GwtQuestionnaire implements Serializable {
 
@@ -125,8 +127,31 @@ public class GwtQuestionnaire implements Serializable {
 				}
 			}
 		}
-		System.err.println(String.format(
-				"Question with key %s is not in any group", toBeReplacedKey));
+		System.err.println("Question with key " + toBeReplacedKey
+				+ " is not in any group");
 	}
 
+	public void clear() {
+		title = null;
+		for(GwtQuestionGroup group : groups) {
+			group.clear();
+		}
+		groups.clear();
+	}
+
+	public Map<String, GwtQuestion> getAllQuestions() {
+		Map<String, GwtQuestion> questions = new HashMap<String, GwtQuestion>();
+		for(GwtQuestionGroup group : groups) {
+			questions.putAll(group.getAllQuestions());
+		}
+		return questions;
+	}
+	
+	public Map<String, GwtQuestionGroup> getAllGroups() {
+		Map<String, GwtQuestionGroup> result = new HashMap<String, GwtQuestionGroup>();
+		for(GwtQuestionGroup group : groups) {
+			result.put(group.getKey(), group);
+		}
+		return result;
+	}
 }

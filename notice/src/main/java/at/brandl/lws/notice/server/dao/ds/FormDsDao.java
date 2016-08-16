@@ -27,14 +27,12 @@ public class FormDsDao extends AbstractDsDao {
 		return new ArrayList<GwtQuestionnaire>(allForms.values());
 	}
 
-	
 	public GwtQuestionnaire getQuestionnaire(String key) {
 		DatastoreService ds = getDatastoreService();
 		FormDsReader reader = new FormDsReader(ds);
-		
+
 		return getQuestionnaire(key, reader);
 	}
-
 
 	public GwtQuestionnaire getQuestionnaire(GwtQuestionnaireAnswers answers) {
 
@@ -65,10 +63,11 @@ public class FormDsDao extends AbstractDsDao {
 
 		final DatastoreService datastoreService = getDatastoreService();
 
-		final Transaction transaction = datastoreService.beginTransaction(TransactionOptions.Builder.withXG(true));
+		final Transaction transaction = datastoreService
+				.beginTransaction(TransactionOptions.Builder.withXG(true));
 		try {
 
-			new FormDsWriter(datastoreService).writeForm(gwtForm); 
+			new FormDsWriter(datastoreService).writeForm(gwtForm);
 
 			transaction.commit();
 			updateCache(gwtForm);
@@ -80,7 +79,7 @@ public class FormDsDao extends AbstractDsDao {
 			}
 		}
 	}
-	
+
 	private GwtQuestionnaire getQuestionnaire(String key, FormDsReader reader) {
 
 		Map<String, GwtQuestionnaire> allForms = getAllQuestionnairesAsMap();
@@ -101,23 +100,28 @@ public class FormDsDao extends AbstractDsDao {
 
 	@SuppressWarnings("unchecked")
 	private Map<String, GwtQuestionnaire> getAllQuestionnairesAsMap() {
+		System.out.println("getAllQuestionnaires");
+		MemcacheService cache = getCache();
 		synchronized (ALL_FORMS) {
-			if (!getCache().contains(ALL_FORMS)) {
+			if (!cache.contains(ALL_FORMS)) {
 
 				DatastoreService ds = getDatastoreService();
 				List<GwtQuestionnaire> allForms = new FormDsReader(ds)
 						.readAllForms();
-
+				System.out.println("all forms from ds " + allForms.size());
 				Map<String, GwtQuestionnaire> questionnaires = new HashMap<String, GwtQuestionnaire>();
 				for (GwtQuestionnaire form : allForms) {
 					questionnaires.put(form.getKey(), form);
 				}
 
-				getCache().put(ALL_FORMS, questionnaires);
+				cache.put(ALL_FORMS, questionnaires);
 			}
 		}
-
-		return (Map<String, GwtQuestionnaire>) getCache().get(ALL_FORMS);
+		System.out.println("all forms from cache "
+				+ ((Map<String, GwtQuestionnaire>) cache.get(ALL_FORMS))
+						.size());
+		return new HashMap<>((Map<String, GwtQuestionnaire>) cache.get(
+				ALL_FORMS));
 	}
 
 	private void updateCache(GwtQuestionnaire gwtForm) {

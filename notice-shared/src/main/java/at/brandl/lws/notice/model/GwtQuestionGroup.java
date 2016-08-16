@@ -3,7 +3,9 @@ package at.brandl.lws.notice.model;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class GwtQuestionGroup implements Serializable {
 
@@ -82,11 +84,23 @@ public class GwtQuestionGroup implements Serializable {
 				return;
 			}
 		}
-		System.err.println(String.format(
-				"Question with key %s is not contained in group with key %s",
-				toBeReplacedKey, this.key));
+		System.err.println("Question with key " + toBeReplacedKey
+				+ " is not contained in group with key " + this.key);
 		questions.add(replacement);
 
+	}
+
+	public void clear() {
+		title = null;
+		questions.clear();
+	}
+
+	public Map<String, GwtQuestion> getAllQuestions() {
+		Map<String, GwtQuestion> result = new HashMap<String, GwtQuestion>();
+		for(GwtQuestion question : questions) {
+			result.put(question.getKey(), question);
+		}
+		return result;
 	}
 
 }
