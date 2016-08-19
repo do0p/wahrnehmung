@@ -44,14 +44,13 @@ public class FormDsDao extends AbstractDsDao {
 			String questionKey = answer.getQuestionKey();
 			String newestKey = questionnaire.getNewestVersion(questionKey);
 			if (newestKey == null) {
-				questionnaire.addArchivedQuestion(reader
+				questionnaire = questionnaire.addArchivedQuestion(reader
 						.readQuestion(questionKey));
 			} else if (!newestKey.equals(questionKey)) {
-				questionnaire.replace(newestKey,
+				questionnaire = questionnaire.replace(newestKey,
 						reader.readQuestion(questionKey));
 			}
 		}
-
 		return questionnaire;
 	}
 
@@ -62,7 +61,6 @@ public class FormDsDao extends AbstractDsDao {
 		}
 
 		final DatastoreService datastoreService = getDatastoreService();
-
 		final Transaction transaction = datastoreService
 				.beginTransaction(TransactionOptions.Builder.withXG(true));
 		try {
@@ -100,40 +98,42 @@ public class FormDsDao extends AbstractDsDao {
 
 	@SuppressWarnings("unchecked")
 	private Map<String, GwtQuestionnaire> getAllQuestionnairesAsMap() {
-		System.out.println("getAllQuestionnaires");
+		
 		MemcacheService cache = getCache();
+		Map<String, GwtQuestionnaire> questionnaires;
+		
 		synchronized (ALL_FORMS) {
-			if (!cache.contains(ALL_FORMS)) {
+			if (cache.contains(ALL_FORMS)) {
 
+				questionnaires = new HashMap<>(
+						(Map<String, GwtQuestionnaire>) cache.get(ALL_FORMS));
+				
+			} else {
+				
 				DatastoreService ds = getDatastoreService();
 				List<GwtQuestionnaire> allForms = new FormDsReader(ds)
 						.readAllForms();
-				System.out.println("all forms from ds " + allForms.size());
-				Map<String, GwtQuestionnaire> questionnaires = new HashMap<String, GwtQuestionnaire>();
+				questionnaires = new HashMap<String, GwtQuestionnaire>();
 				for (GwtQuestionnaire form : allForms) {
 					questionnaires.put(form.getKey(), form);
 				}
-
 				cache.put(ALL_FORMS, questionnaires);
 			}
 		}
-		System.out.println("all forms from cache "
-				+ ((Map<String, GwtQuestionnaire>) cache.get(ALL_FORMS))
-						.size());
-		return new HashMap<>((Map<String, GwtQuestionnaire>) cache.get(
-				ALL_FORMS));
+		return questionnaires;
 	}
 
 	private void updateCache(GwtQuestionnaire gwtForm) {
 		synchronized (ALL_FORMS) {
+			MemcacheService cache = getCache();
 			@SuppressWarnings("unchecked")
-			Map<String, GwtQuestionnaire> questionnaires = (Map<String, GwtQuestionnaire>) getCache()
+			Map<String, GwtQuestionnaire> questionnaires = (Map<String, GwtQuestionnaire>) cache
 					.get(ALL_FORMS);
 			if (questionnaires == null) {
 				questionnaires = new HashMap<>();
 			}
 			questionnaires.put(gwtForm.getKey(), gwtForm);
-			getCache().put(ALL_FORMS, questionnaires);
+			cache.put(ALL_FORMS, questionnaires);
 		}
 	}
 

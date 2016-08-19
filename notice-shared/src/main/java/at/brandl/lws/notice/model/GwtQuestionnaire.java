@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class GwtQuestionnaire implements Serializable {
+public class GwtQuestionnaire implements Serializable, Cloneable {
 
 	private static final long serialVersionUID = -7569171050607154080L;
 	private String title;
@@ -110,30 +110,35 @@ public class GwtQuestionnaire implements Serializable {
 		return null;
 	}
 
-	public void addArchivedQuestion(GwtQuestion archivedQuestion) {
-		if (archivedQuestions == null) {
-			archivedQuestions = new GwtQuestionGroup();
+	public GwtQuestionnaire addArchivedQuestion(GwtQuestion archivedQuestion) {
+		GwtQuestionnaire questionnaire = clone();
+		if (questionnaire.archivedQuestions == null) {
+			questionnaire.archivedQuestions = new GwtQuestionGroup();
 		}
-		archivedQuestions.addQuestion(archivedQuestion);
+		questionnaire.archivedQuestions.addQuestion(archivedQuestion);
+		return questionnaire;
 	}
 
-	public void replace(String toBeReplacedKey, GwtQuestion replacement) {
+	public GwtQuestionnaire replace(String toBeReplacedKey,
+			GwtQuestion replacement) {
 
-		for (GwtQuestionGroup group : groups) {
+		GwtQuestionnaire questionnaire = clone();
+		for (GwtQuestionGroup group : questionnaire.groups) {
 			for (GwtQuestion question : group.getQuestions()) {
 				if (toBeReplacedKey.equals(question.getKey())) {
 					group.replaceQuestion(toBeReplacedKey, replacement);
-					return;
+					return questionnaire;
 				}
 			}
 		}
 		System.err.println("Question with key " + toBeReplacedKey
 				+ " is not in any group");
+		return questionnaire;
 	}
 
 	public void clear() {
 		title = null;
-		for(GwtQuestionGroup group : groups) {
+		for (GwtQuestionGroup group : groups) {
 			group.clear();
 		}
 		groups.clear();
@@ -141,17 +146,33 @@ public class GwtQuestionnaire implements Serializable {
 
 	public Map<String, GwtQuestion> getAllQuestions() {
 		Map<String, GwtQuestion> questions = new HashMap<String, GwtQuestion>();
-		for(GwtQuestionGroup group : groups) {
+		for (GwtQuestionGroup group : groups) {
 			questions.putAll(group.getAllQuestions());
 		}
 		return questions;
 	}
-	
+
 	public Map<String, GwtQuestionGroup> getAllGroups() {
 		Map<String, GwtQuestionGroup> result = new HashMap<String, GwtQuestionGroup>();
-		for(GwtQuestionGroup group : groups) {
+		for (GwtQuestionGroup group : groups) {
 			result.put(group.getKey(), group);
 		}
 		return result;
+	}
+
+	public GwtQuestionnaire clone() {
+		try {
+			GwtQuestionnaire clone = (GwtQuestionnaire) super.clone();
+			List<GwtQuestionGroup> clonedGroups = new ArrayList<>();
+			for (GwtQuestionGroup group : clone.groups) {
+				clonedGroups.add(group.clone());
+			}
+			clone.groups = clonedGroups;
+			clone.archivedQuestions = clone.archivedQuestions == null ? null
+					: clone.archivedQuestions.clone();
+			return clone;
+		} catch (CloneNotSupportedException e) {
+			throw new AssertionError("clone is supported");
+		}
 	}
 }

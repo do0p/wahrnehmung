@@ -31,7 +31,6 @@ public class QuestionnaireServiceImpl extends RemoteServiceServlet implements
 	public Collection<GwtQuestionnaireAnswers> getQuestionnaireAnswers(String childKey) {
 
 		Collection<GwtQuestionnaireAnswers> allAnswers = questionnaireDao.getAllAnswers(childKey);
-		System.out.println("returning " + allAnswers);
 		return allAnswers;
 	}
 

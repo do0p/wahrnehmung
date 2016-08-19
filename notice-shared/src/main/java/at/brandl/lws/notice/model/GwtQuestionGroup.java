@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class GwtQuestionGroup implements Serializable {
+public class GwtQuestionGroup implements Serializable, Cloneable {
 
 	private static final long serialVersionUID = -2091436004837897401L;
 	private String title;
@@ -103,4 +103,20 @@ public class GwtQuestionGroup implements Serializable {
 		return result;
 	}
 
+	@Override
+	public GwtQuestionGroup clone(){
+		try {
+			GwtQuestionGroup clone = (GwtQuestionGroup) super.clone();
+			List<GwtQuestion> clonedQuestions = new ArrayList<>(clone.questions.size());
+			for(GwtQuestion question : clone.questions) {
+				clonedQuestions.add(question.clone());
+			}
+			clone.questions = clonedQuestions;
+			clone.archiveDate = clone.archiveDate == null ? null : (Date) clone.archiveDate.clone();
+			return clone;
+		} catch (CloneNotSupportedException e) {
+			throw new AssertionError("clone is supported", e);
+		}
+	}
+	
 }

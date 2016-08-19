@@ -48,7 +48,6 @@ public class QuestionnaireDsDao extends AbstractDsDao {
 			getCache().put(childKey, result);
 			dirtyMap.remove(childKey);
 		}
-		System.out.println("childKey: " +childKey+ " answers: " + result);
 		return result;
 	}
 

@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class GwtQuestion implements Serializable{
+public class GwtQuestion implements Serializable, Cloneable{
 
 	private static final long serialVersionUID = 4489992873551905987L;
 	private String label;
@@ -96,6 +96,17 @@ public class GwtQuestion implements Serializable{
 		return result;
 	}
 
-
+	@Override
+	public GwtQuestion clone() {
+		try {
+			GwtQuestion clone = (GwtQuestion) super.clone();
+			clone.template = clone.template.clone();
+			clone.archived = new ArrayList<>(clone.archived);
+			clone.archiveDate =  clone.archiveDate == null ? null : (Date) clone.archiveDate.clone();
+			return clone;
+		} catch (CloneNotSupportedException e) {
+			throw new AssertionError("clone is supported", e);
+		}
+	}
 
 }

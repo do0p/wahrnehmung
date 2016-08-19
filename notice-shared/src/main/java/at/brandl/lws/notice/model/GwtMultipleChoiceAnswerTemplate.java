@@ -60,4 +60,19 @@ public class GwtMultipleChoiceAnswerTemplate implements GwtAnswerTemplate{
 		return new GwtMultipleChoiceAnswer();
 	}
 
+	@Override
+	public GwtMultipleChoiceAnswerTemplate clone() {
+		try {
+			GwtMultipleChoiceAnswerTemplate clone = (GwtMultipleChoiceAnswerTemplate) super.clone();
+			List<GwtMultipleChoiceOption> clonedOptions = new ArrayList<>(clone.options.size());
+			for(GwtMultipleChoiceOption option : clone.options) {
+				clonedOptions.add(option.clone());
+			}
+			clone.options = clonedOptions;
+			return clone;
+		} catch (CloneNotSupportedException e) {
+			throw new AssertionError("clone is supported", e);
+		}
+	}
+	
 }

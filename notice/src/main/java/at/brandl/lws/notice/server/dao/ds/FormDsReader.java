@@ -25,6 +25,7 @@ import at.brandl.lws.notice.shared.util.Constants.Questionnaire;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
+import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
@@ -39,9 +40,8 @@ public class FormDsReader {
 
 	public List<GwtQuestionnaire> readAllForms() {
 		List<GwtQuestionnaire> questionnaires = new ArrayList<>();
-		PreparedQuery query = ds.prepare(new Query(Questionnaire.KIND)
-				.addSort(Questionnaire.CREATE_DATE));
-		for (Entity form : query.asIterable()) {
+		PreparedQuery query = ds.prepare(new Query(Questionnaire.KIND));
+		for (Entity form : query.asIterable(FetchOptions.Builder.withDefaults())) {
 			GwtQuestionnaire questionnaire = convertToQuestionnaire(form);
 			questionnaires.add(questionnaire);
 		}

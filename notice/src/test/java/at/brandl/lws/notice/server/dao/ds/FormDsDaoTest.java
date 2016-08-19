@@ -9,7 +9,6 @@ import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import at.brandl.lws.notice.model.GwtAnswer;
@@ -32,7 +31,6 @@ import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestC
 public class FormDsDaoTest extends AbstractDsDaoTest {
 
 	private static final String NEW_TITLE = "neuer title";
-	private static final String TITLE = "title";
 	private static final String NL = System.lineSeparator();
 
 	private FormDsDao formDao;
@@ -87,7 +85,7 @@ public class FormDsDaoTest extends AbstractDsDaoTest {
 		}
 
 	}
-
+	
 	@Test
 	public void worksWithoutCache() {
 
@@ -108,31 +106,6 @@ public class FormDsDaoTest extends AbstractDsDaoTest {
 		Assert.assertNotNull(storedForm);
 
 		Assert.assertEquals(form, storedForm);
-	}
-
-	@Test
-	@Ignore
-	public void getOldestFormFirst() {
-
-		GwtQuestionnaire form1 = new GwtQuestionnaire();
-		form1.setTitle(TITLE);
-		form1.setSection(KeyFactory.keyToString(sectionKey1));
-
-		GwtQuestionnaire form2 = new GwtQuestionnaire();
-		form2.setTitle(TITLE);
-		form2.setSection(KeyFactory.keyToString(sectionKey1));
-
-		formDao.storeQuestionnaire(form1);
-		formDao.storeQuestionnaire(form2);
-		String form1Key = form1.getKey();
-		String form2Key = form2.getKey();
-		Assert.assertNotEquals(form1Key, form2Key);
-
-		List<GwtQuestionnaire> allQuestionnaires = formDao
-				.getAllQuestionnaires();
-		Assert.assertEquals(2, allQuestionnaires.size());
-		Assert.assertEquals(form1Key, allQuestionnaires.get(0).getKey());
-		Assert.assertEquals(form2Key, allQuestionnaires.get(1).getKey());
 	}
 
 	@Test
@@ -327,6 +300,45 @@ public class FormDsDaoTest extends AbstractDsDaoTest {
 
 		questions = questionGroup.getQuestions();
 		Assert.assertEquals(questionsSize - 1, questions.size());
+	}
+
+	@Test
+	public void deleteAnsweredQuestion() {
+		formDao.storeQuestionnaire(form);
+
+		List<GwtQuestionGroup> groups = form.getGroups();
+		int groupSize = groups.size();
+		GwtQuestionGroup questionGroup1 = groups.get(0);
+		String groupKey1 = questionGroup1.getKey();
+		List<GwtQuestion> questionsOfGroup1 = questionGroup1.getQuestions();
+		int questionsSizeOfGroup1 = questionsOfGroup1.size();
+
+		GwtQuestionGroup questionGroup2 = groups.get(1);
+		String groupKey2 = questionGroup2.getKey();
+		List<GwtQuestion> questionsOfGroup2 = questionGroup2.getQuestions();
+		int questionsSizeOfGroup2 = questionsOfGroup1.size();
+		
+		GwtQuestion movedQuestion = questionsOfGroup1.remove(0);
+		questionsOfGroup2.add(movedQuestion);
+		
+		formDao.storeQuestionnaire(form);
+
+		form = formDao.getQuestionnaire(form.getKey());
+		groups = form.getGroups();
+		Assert.assertEquals(groupSize, groups.size());
+
+		questionGroup1 = groups.get(0);
+		Assert.assertEquals(groupKey1, questionGroup1.getKey());
+		questionsOfGroup1 = questionGroup1.getQuestions();
+		Assert.assertEquals(questionsSizeOfGroup1 - 1, questionsOfGroup1.size());
+		
+		questionGroup2 = groups.get(1);
+		Assert.assertEquals(groupKey2, questionGroup2.getKey());
+		questionsOfGroup2 = questionGroup2.getQuestions();
+		Assert.assertEquals(questionsSizeOfGroup2 + 1, questionsOfGroup2.size());
+		
+		GwtQuestion question = questionsOfGroup2.get(questionsSizeOfGroup2);
+		Assert.assertEquals(movedQuestion, question);
 	}
 	
 	@Test
