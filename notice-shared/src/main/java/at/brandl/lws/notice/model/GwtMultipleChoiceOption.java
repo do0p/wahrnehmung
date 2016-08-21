@@ -2,7 +2,7 @@ package at.brandl.lws.notice.model;
 
 import java.io.Serializable;
 
-public class GwtMultipleChoiceOption implements Serializable, Cloneable {
+public class GwtMultipleChoiceOption implements Serializable {
 
 	private static final long serialVersionUID = 8772529463120196686L;
 	private String label;
@@ -63,12 +63,11 @@ public class GwtMultipleChoiceOption implements Serializable, Cloneable {
 		return result;
 	}
 
-	@Override
 	public GwtMultipleChoiceOption clone() {
-		try {
-			return (GwtMultipleChoiceOption) super.clone();
-		} catch (CloneNotSupportedException e) {
-			throw new AssertionError("clone is supported", e);
-		}
+		GwtMultipleChoiceOption clone = new GwtMultipleChoiceOption();
+		clone.key = key;
+		clone.value = value;
+		clone.label = label;
+		return clone;
 	}
 }

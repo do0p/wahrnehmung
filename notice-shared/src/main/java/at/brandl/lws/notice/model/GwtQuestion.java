@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class GwtQuestion implements Serializable, Cloneable{
+public class GwtQuestion implements Serializable {
 
 	private static final long serialVersionUID = 4489992873551905987L;
 	private String label;
@@ -13,7 +13,7 @@ public class GwtQuestion implements Serializable, Cloneable{
 	private String key;
 	private List<String> archived = new ArrayList<>();
 	private Date archiveDate;
-	
+
 	public static GwtQuestion valueOf(GwtQuestion question) {
 		GwtQuestion gwtQuestion = new GwtQuestion();
 		gwtQuestion.setLabel(question.getLabel());
@@ -21,7 +21,7 @@ public class GwtQuestion implements Serializable, Cloneable{
 		gwtQuestion.setArchived(question.getArchived());
 		return gwtQuestion;
 	}
-	
+
 	public Date getArchiveDate() {
 		return archiveDate;
 	}
@@ -37,9 +37,9 @@ public class GwtQuestion implements Serializable, Cloneable{
 	public void addArchived(String archived) {
 		this.archived.add(archived);
 	}
-	
+
 	public void setArchived(List<String> archived) {
-		if(archived != null) {
+		if (archived != null) {
 			this.archived = archived;
 		}
 	}
@@ -50,9 +50,9 @@ public class GwtQuestion implements Serializable, Cloneable{
 
 	public void setTemplate(GwtAnswerTemplate template) {
 		this.template = template;
-		
+
 	}
-	
+
 	public String getLabel() {
 		return label;
 	}
@@ -60,7 +60,6 @@ public class GwtQuestion implements Serializable, Cloneable{
 	public void setLabel(String label) {
 		this.label = label;
 	}
-	
 
 	public void setKey(String key) {
 		this.key = key;
@@ -69,11 +68,11 @@ public class GwtQuestion implements Serializable, Cloneable{
 	public String getKey() {
 		return key;
 	}
-	
+
 	public boolean isArchived() {
 		return archiveDate != null;
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {
@@ -87,7 +86,7 @@ public class GwtQuestion implements Serializable, Cloneable{
 		result &= ObjectUtils.equals(template, other.template);
 		return result;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		int result = 37;
@@ -96,17 +95,21 @@ public class GwtQuestion implements Serializable, Cloneable{
 		return result;
 	}
 
-	@Override
 	public GwtQuestion clone() {
-		try {
-			GwtQuestion clone = (GwtQuestion) super.clone();
-			clone.template = clone.template.clone();
-			clone.archived = new ArrayList<>(clone.archived);
-			clone.archiveDate =  clone.archiveDate == null ? null : (Date) clone.archiveDate.clone();
-			return clone;
-		} catch (CloneNotSupportedException e) {
-			throw new AssertionError("clone is supported", e);
-		}
+
+		GwtAnswerTemplate clonedTemplate = template.clone();
+		ArrayList<String> clonedArchived = new ArrayList<>(archived);
+		Date clonedArchiveDate = archiveDate == null ? null : new Date(
+				archiveDate.getTime());
+
+		GwtQuestion clone = new GwtQuestion();
+		clone.key = key;
+		clone.label = label;
+		clone.template = clonedTemplate;
+		clone.archived = clonedArchived;
+		clone.archiveDate = clonedArchiveDate;
+		return clone;
+
 	}
 
 }

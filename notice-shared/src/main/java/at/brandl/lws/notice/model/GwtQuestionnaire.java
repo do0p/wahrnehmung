@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class GwtQuestionnaire implements Serializable, Cloneable {
+public class GwtQuestionnaire implements Serializable {
 
 	private static final long serialVersionUID = -7569171050607154080L;
 	private String title;
@@ -136,6 +136,10 @@ public class GwtQuestionnaire implements Serializable, Cloneable {
 		return questionnaire;
 	}
 
+	public GwtQuestionGroup getArchivedQuestionGroup() {
+		return archivedQuestions;
+	}
+
 	public void clear() {
 		title = null;
 		for (GwtQuestionGroup group : groups) {
@@ -161,18 +165,20 @@ public class GwtQuestionnaire implements Serializable, Cloneable {
 	}
 
 	public GwtQuestionnaire clone() {
-		try {
-			GwtQuestionnaire clone = (GwtQuestionnaire) super.clone();
-			List<GwtQuestionGroup> clonedGroups = new ArrayList<>();
-			for (GwtQuestionGroup group : clone.groups) {
-				clonedGroups.add(group.clone());
-			}
-			clone.groups = clonedGroups;
-			clone.archivedQuestions = clone.archivedQuestions == null ? null
-					: clone.archivedQuestions.clone();
-			return clone;
-		} catch (CloneNotSupportedException e) {
-			throw new AssertionError("clone is supported");
+		
+		List<GwtQuestionGroup> clonedGroups = new ArrayList<>();
+		for (GwtQuestionGroup group : groups) {
+			clonedGroups.add(group.clone());
 		}
+		GwtQuestionGroup clonedArchivedQuestions = archivedQuestions == null ? null
+				: archivedQuestions.clone();
+
+		GwtQuestionnaire clone = new GwtQuestionnaire();
+		clone.key = key;
+		clone.sectionKey = sectionKey;
+		clone.title = title;
+		clone.groups = clonedGroups;
+		clone.archivedQuestions = clonedArchivedQuestions;
+		return clone;
 	}
 }

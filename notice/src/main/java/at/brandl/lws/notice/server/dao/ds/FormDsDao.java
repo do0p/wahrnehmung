@@ -44,6 +44,7 @@ public class FormDsDao extends AbstractDsDao {
 			String questionKey = answer.getQuestionKey();
 			String newestKey = questionnaire.getNewestVersion(questionKey);
 			if (newestKey == null) {
+				System.out.println("add archived question " + questionKey);
 				questionnaire = questionnaire.addArchivedQuestion(reader
 						.readQuestion(questionKey));
 			} else if (!newestKey.equals(questionKey)) {

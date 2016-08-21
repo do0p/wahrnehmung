@@ -304,41 +304,47 @@ public class FormDsDaoTest extends AbstractDsDaoTest {
 
 	@Test
 	public void deleteAnsweredQuestion() {
+		
 		formDao.storeQuestionnaire(form);
 
 		List<GwtQuestionGroup> groups = form.getGroups();
 		int groupSize = groups.size();
-		GwtQuestionGroup questionGroup1 = groups.get(0);
-		String groupKey1 = questionGroup1.getKey();
-		List<GwtQuestion> questionsOfGroup1 = questionGroup1.getQuestions();
-		int questionsSizeOfGroup1 = questionsOfGroup1.size();
+		GwtQuestionGroup questionGroup = groups.get(0);
+		String groupKey = questionGroup.getKey();
 
-		GwtQuestionGroup questionGroup2 = groups.get(1);
-		String groupKey2 = questionGroup2.getKey();
-		List<GwtQuestion> questionsOfGroup2 = questionGroup2.getQuestions();
-		int questionsSizeOfGroup2 = questionsOfGroup1.size();
-		
-		GwtQuestion movedQuestion = questionsOfGroup1.remove(0);
-		questionsOfGroup2.add(movedQuestion);
-		
+		List<GwtQuestion> questions = questionGroup.getQuestions();
+		int questionsSize = questions.size();
+		GwtQuestion question = questions.get(0);
+		String questionKey = question.getKey();
+		String label = question.getLabel();
+		String answerTemplateKey = question.getAnswerTemplate().getKey();
+
+		GwtAnswer answer = new GwtMultipleChoiceAnswer();
+		answer.setQuestionKey(questionKey);
+		GwtQuestionnaireAnswers answers = new GwtQuestionnaireAnswers();
+		answers.setQuestionnaireKey(form.getKey());
+		answers.addAnswer(answer);
+
+		questions.remove(0);
 		formDao.storeQuestionnaire(form);
-
-		form = formDao.getQuestionnaire(form.getKey());
+		
+		form = formDao.getQuestionnaire(answers);
 		groups = form.getGroups();
 		Assert.assertEquals(groupSize, groups.size());
+		questionGroup = groups.get(0);
+		Assert.assertEquals(groupKey, questionGroup.getKey());
 
-		questionGroup1 = groups.get(0);
-		Assert.assertEquals(groupKey1, questionGroup1.getKey());
-		questionsOfGroup1 = questionGroup1.getQuestions();
-		Assert.assertEquals(questionsSizeOfGroup1 - 1, questionsOfGroup1.size());
+		questions = questionGroup.getQuestions();
+		Assert.assertEquals(questionsSize - 1, questions.size());
 		
-		questionGroup2 = groups.get(1);
-		Assert.assertEquals(groupKey2, questionGroup2.getKey());
-		questionsOfGroup2 = questionGroup2.getQuestions();
-		Assert.assertEquals(questionsSizeOfGroup2 + 1, questionsOfGroup2.size());
+		GwtQuestionGroup archivedQuestionGroup = form.getArchivedQuestionGroup();
+		List<GwtQuestion> archivedQuestions = archivedQuestionGroup.getQuestions();
+		Assert.assertEquals(1, archivedQuestions.size());
+		question = archivedQuestions.get(0);
+		Assert.assertEquals(label, question.getLabel());
+		Assert.assertEquals(questionKey, question.getKey());
+		Assert.assertEquals(answerTemplateKey, question.getAnswerTemplate().getKey());
 		
-		GwtQuestion question = questionsOfGroup2.get(questionsSizeOfGroup2);
-		Assert.assertEquals(movedQuestion, question);
 	}
 	
 	@Test
