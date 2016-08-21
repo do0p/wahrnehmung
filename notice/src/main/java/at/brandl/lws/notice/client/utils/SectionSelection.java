@@ -261,6 +261,9 @@ public class SectionSelection {
 
 	private void setSelectedInternal(String sectionKey) {
 		final List<Integer> indices = sectionSelectionMap.get(sectionKey);
+		if(indices == null || indices.isEmpty()) {
+			return;
+		}
 		for (int i = 0; i < indices.size(); i++) {
 			final SectionSelectionBox sectionSelectionBox = selectionBoxes
 					.get(i);

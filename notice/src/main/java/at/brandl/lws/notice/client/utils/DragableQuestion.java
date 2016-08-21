@@ -9,7 +9,7 @@ public class DragableQuestion extends Dragable<DragableQuestion> {
 
 	private DragableQuestion(Data data, DragContainer parent) {
 		super(data.getKey(), parent);
-		label = new ChangeableLabel(data.getValue());
+		label = new ChangeableLabel(data.getValue(), "groupQuestion");
 		add(label);
 	}
 

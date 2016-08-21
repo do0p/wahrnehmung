@@ -130,7 +130,7 @@ public class DnDQuestionnaireAdmin extends AbstractAdminTab {
 
 	private void initPanel() {
 		panel = new DragContainer(decisionBox);
-		panel.add(new ChangeableLabel("Titel"));
+		panel.add(new ChangeableLabel("Titel", "questionnaireHeading"));
 		panel.add(DragTargetLabel.valueOf("-- ende --", panel));
 		panel.setWidth("500px");
 	}
@@ -301,7 +301,7 @@ public class DnDQuestionnaireAdmin extends AbstractAdminTab {
 	private void load() {
 		panel.clear();
 		int index = 0;
-		panel.insert(new ChangeableLabel(questionnaire.getTitle()), index++);
+		panel.insert(new ChangeableLabel(questionnaire.getTitle(), "questionnaireHeading"), index++);
 		for (GwtQuestionGroup group : questionnaire.getGroups()) {
 			String title = group.getTitle();
 			if (at.brandl.lws.notice.shared.Utils.isNotEmpty(title)) {

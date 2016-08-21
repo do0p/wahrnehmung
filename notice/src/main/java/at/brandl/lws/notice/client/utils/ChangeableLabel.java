@@ -23,9 +23,11 @@ public class ChangeableLabel extends SimplePanel {
 	private static final Logger LOGGER = Logger.getLogger("DragLogger");
    
 	
-	public ChangeableLabel(String data) {
+	public ChangeableLabel(String data, String style) {
 		label = new Label(data);
+		label.setStyleName(style);
 		textBox = new TextBox();
+		textBox.setStyleName(style);
 		textBox.getElement().setDraggable(Element.DRAGGABLE_TRUE);
 //		textBox.getElement().setDraggable(Element.DRAGGABLE_FALSE);
 //		textBox.addMouseDownHandler(new MouseDownHandler() {

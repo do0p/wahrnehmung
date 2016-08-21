@@ -7,6 +7,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class DragableQuestionGroup extends Dragable<DragableQuestionGroup> {
 
+	private static final String STYLE = "groupHeading";
 	public static final String QUESTION_GROUP_LABEL = "question group";
 	private static final String SEPARATOR = "°°";
 
@@ -19,7 +20,7 @@ public class DragableQuestionGroup extends Dragable<DragableQuestionGroup> {
 		vPanel.setWidth("100%");
 
 		String[] dataArray = data.getValue().split(SEPARATOR);
-		title = new ChangeableLabel(dataArray[0]);
+		title = new ChangeableLabel(dataArray[0], STYLE + " questionGroup");
 		vPanel.add(title);
 
 		for (int i = 1; i < dataArray.length; i++) {
@@ -29,7 +30,9 @@ public class DragableQuestionGroup extends Dragable<DragableQuestionGroup> {
 			vPanel.add(question);
 		}
 
-		vPanel.add(DragTargetLabel.valueOf("end", vPanel));
+		DragTargetLabel endMarker = DragTargetLabel.valueOf("\u00af\u00af\u00af\u00af\u00af", vPanel);
+		endMarker.setStyleName(STYLE);
+		vPanel.add(endMarker);
 		add(vPanel);
 	}
 
