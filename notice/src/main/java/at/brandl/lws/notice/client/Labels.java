@@ -73,4 +73,6 @@ public interface Labels extends Messages {
 	String beginYear();
 	String beginGrade();
 	String questionDelWarning();
+	String questionLabel();
+	String questionGroupLabel();
 }

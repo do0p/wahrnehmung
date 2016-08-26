@@ -38,12 +38,12 @@ public class DragTemplate extends FocusPanel {
 		};
 	}
 
-	public static DragTemplate createQuestionTemplate() {
-		return new DragTemplate("question", DragableQuestion.QUESTION_LABEL);
+	public static DragTemplate createQuestionTemplate(String questionLabel) {
+		return new DragTemplate(questionLabel, DragableQuestion.QUESTION_LABEL);
 	}
 
-	public static DragTemplate createQuestionGroupTemplate() {
-		return new DragTemplate("question group",
+	public static DragTemplate createQuestionGroupTemplate(String questionGroupLabel) {
+		return new DragTemplate(questionGroupLabel,
 				DragableQuestionGroup.QUESTION_GROUP_LABEL);
 	}
 

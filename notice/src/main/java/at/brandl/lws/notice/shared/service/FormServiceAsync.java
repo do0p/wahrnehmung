@@ -13,7 +13,6 @@ public interface FormServiceAsync {
 	void storeForm(GwtQuestionnaire form, AsyncCallback<GwtQuestionnaire> callback);
 
 	void getAllForms(String childKey, AsyncCallback<List<GwtQuestionnaire>> callback);
-	
-	void getAllForms(AsyncCallback<List<GwtQuestionnaire>> callback);
-	
+
+//	void deleteForm(String formKey, AsyncCallback<Void> callback);
 }

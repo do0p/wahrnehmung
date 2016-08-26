@@ -16,5 +16,4 @@ public interface FormService extends RemoteService {
 	
 	List<GwtQuestionnaire> getAllForms(String childKey);
 	
-	List<GwtQuestionnaire> getAllForms();
 }

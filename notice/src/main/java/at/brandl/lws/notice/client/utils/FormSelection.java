@@ -30,6 +30,7 @@ public class FormSelection extends ListBox {
 	public FormSelection(PopUp dialogBox, ReadyListener readyListener) {
 		this.dialogBox = dialogBox;
 		this.readyListener = readyListener;
+		updateFormMap();
 	}
 
 	public GwtQuestionnaire getSelectedForm() {

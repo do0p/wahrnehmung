@@ -1,7 +1,6 @@
 package at.brandl.lws.notice.client.admin;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +15,9 @@ import at.brandl.lws.notice.client.utils.DragTargetLabel;
 import at.brandl.lws.notice.client.utils.DragTemplate;
 import at.brandl.lws.notice.client.utils.DragableQuestion;
 import at.brandl.lws.notice.client.utils.DragableQuestionGroup;
+import at.brandl.lws.notice.client.utils.FormSelection;
 import at.brandl.lws.notice.client.utils.PopUp;
+import at.brandl.lws.notice.client.utils.ReadyListener;
 import at.brandl.lws.notice.client.utils.SectionSelection;
 import at.brandl.lws.notice.client.utils.SectionSelectionBox;
 import at.brandl.lws.notice.client.utils.Utils;
@@ -33,16 +34,16 @@ import at.brandl.lws.notice.shared.validator.GwtQuestionnaireValidator;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.CellPanel;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-public class DnDQuestionnaireAdmin extends AbstractAdminTab {
+public class DnDQuestionnaireAdmin extends AbstractAdminTab implements
+		ReadyListener {
 
 	private final FormServiceAsync formService = GWT.create(FormService.class);
-	private final Map<String, GwtQuestionnaire> questionnaires = new HashMap<String, GwtQuestionnaire>();
 
 	private final DecisionBox decisionBox;
 
@@ -50,45 +51,35 @@ public class DnDQuestionnaireAdmin extends AbstractAdminTab {
 	private DragContainer panel;
 	private SectionSelection sectionSelection;
 	private PopUp dialogBox;
-	private ListBox questionnaireListbox;
+	private FormSelection formSelection;
 
 	Logger logger = Logger.getLogger("DnDQuestionnaireAdmin");
+	private boolean formSelectionReady;
 
 	DnDQuestionnaireAdmin() {
+		
 		super(false);
 
 		dialogBox = new PopUp();
-
 		decisionBox = new DecisionBox();
 		decisionBox.setText(labels().questionDelWarning());
-
 		sectionSelection = new SectionSelection(dialogBox);
-
 		questionnaire = new GwtQuestionnaire();
-
+		panel = new DragContainer(decisionBox);
+		
 		initPanel();
 
-		Grid selectionContainer = createSelectionContainer();
-		questionnaireListbox = new ListBox();
-		initQuestionnaireListbox();
-		questionnaireListbox.addChangeHandler(new ChangeHandler() {
+		formSelection = new FormSelection(dialogBox, this);
+		formSelection.setSize(Utils.NAMESELECTION_WIDTH + Utils.PIXEL,
+				Utils.ROW_HEIGHT + Utils.PIXEL);
+
+		formSelection.addChangeHandler(new ChangeHandler() {
 
 			@Override
 			public void onChange(ChangeEvent event) {
-				int selectedIndex = questionnaireListbox.getSelectedIndex();
-				if (selectedIndex >= 0) {
-					GwtQuestionnaire gwtQuestionnaire = questionnaires
-							.get(questionnaireListbox.getValue(selectedIndex));
-					if (gwtQuestionnaire != null) {
-						questionnaire = gwtQuestionnaire;
-						sectionSelection.setSelected(questionnaire.getSection());
-						load();
-					} else {
-						sectionSelection.reset();
-					}
-				}
+				updatePanel();
+				updateButtonPanel();
 			}
-
 		});
 
 		sectionSelection.addChangeHandler(new ChangeHandler() {
@@ -97,59 +88,77 @@ public class DnDQuestionnaireAdmin extends AbstractAdminTab {
 			public void onChange(ChangeEvent event) {
 				questionnaire.setSection(sectionSelection
 						.getSelectedSectionKey());
+				updateButtonPanel();
 			}
 		});
 
 		setSpacing(Utils.SPACING);
-		HorizontalPanel horizontalPanel = new HorizontalPanel();
-		horizontalPanel.add(questionnaireListbox);
-		horizontalPanel.add(selectionContainer);
-		add(horizontalPanel);
-		add(panel);
+		add(createSelectionContainer(formSelection, sectionSelection));
+		
+		CellPanel content = new HorizontalPanel();
+		content.setWidth("100%");
+		content.add(panel);
+		content.setSpacing(Utils.SPACING);
+		panel.setWidth(Utils.QUESTIONNAIRE_WIDTH + Utils.PIXEL);
+		CellPanel templates = new VerticalPanel();
+		templates.setSpacing(Utils.SPACING);
+		
+		DragTemplate questionTemplate = DragTemplate.createQuestionTemplate(labels().questionLabel());
+		questionTemplate.setStyleName("roundedBox");
+		templates.add(questionTemplate);
+		DragTemplate questionGroupTemplate = DragTemplate.createQuestionGroupTemplate(labels().questionGroupLabel());
+		questionGroupTemplate.setStyleName("roundedBox");
+		templates.add(questionGroupTemplate);
+		content.add(templates);
+		add(content);
 
-		createTestSetup();
 		add(getButtonPanel());
-
-		formService.getAllForms(new AsyncCallback<List<GwtQuestionnaire>>() {
-
-			@Override
-			public void onSuccess(List<GwtQuestionnaire> result) {
-				initQuestionnaireListbox();
-				for (GwtQuestionnaire questionnaire : result) {
-					questionnaires.put(questionnaire.getKey(), questionnaire);
-					questionnaireListbox.addItem(questionnaire.getTitle(),
-							questionnaire.getKey());
-				}
-			}
-
-			@Override
-			public void onFailure(Throwable caught) {
-			}
-		});
+		updateButtonPanel();
 	}
-
-	private void initPanel() {
-		panel = new DragContainer(decisionBox);
-		panel.add(new ChangeableLabel("Titel", "questionnaireHeading"));
-		panel.add(DragTargetLabel.valueOf("-- ende --", panel));
-		panel.setWidth("500px");
+	
+	@Override
+	void reset() {
+		initPanel();
+		updatePanel();
+		updateButtonPanel();
 	}
-
-	private void initQuestionnaireListbox() {
-		questionnaireListbox.clear();
-		questionnaireListbox.addItem("choose a questionnaire", "nope");
+	
+	@Override
+	boolean enableSave() {
+		return panel.getWidgetCount() > 2 && at.brandl.lws.notice.shared.Utils.isNotEmpty(sectionSelection.getSelectedSectionKey());
 	}
-
-	private void createTestSetup() {
-		add(DragTemplate.createQuestionTemplate());
-		add(DragTemplate.createQuestionGroupTemplate());
+	
+	@Override
+	boolean enableCancel() {
+		return panel.getWidgetCount() > 2 || at.brandl.lws.notice.shared.Utils.isNotEmpty(sectionSelection.getSelectedSectionKey()) || formSelection.getSelectedForm() != null;
 	}
-
+	
 	@Override
 	void save() {
 		logger.log(Level.INFO, "in save - info");
 
 		// store current state of questionnaire
+		updateQuestionnaire(panel, questionnaire);
+
+		logger.log(Level.INFO, "before store");
+
+		if (GwtQuestionnaireValidator.valid(questionnaire)) {
+			formService.storeForm(questionnaire,
+					new ErrorReportingCallback<GwtQuestionnaire>() {
+						@Override
+						public void onSuccess(GwtQuestionnaire result) {
+							questionnaire = result;
+							sectionSelection.setSelected(result.getSection());
+							load();
+						}
+					});
+		} else {
+			logger.log(Level.INFO, "questionnaire is invalid");
+		}
+	}
+
+	private void updateQuestionnaire(DragContainer panel, GwtQuestionnaire questionnaire) {
+
 		Map<String, GwtQuestionGroup> groupMap = questionnaire.getAllGroups();
 		Map<String, GwtQuestion> questionMap = questionnaire.getAllQuestions();
 		List<GwtQuestionGroup> ungroupedQuestionGroups = getGroupsWithoutTitle(groupMap);
@@ -163,7 +172,7 @@ public class DnDQuestionnaireAdmin extends AbstractAdminTab {
 
 		GwtQuestionGroup ungroupedQuestionsGroup = null;
 		for (int i = 1; i < panel.getWidgetCount(); i++) {
-			
+
 			Widget widget = panel.getWidget(i);
 			if (widget instanceof DragableQuestionGroup) {
 
@@ -182,7 +191,6 @@ public class DnDQuestionnaireAdmin extends AbstractAdminTab {
 					gwtGroup.addQuestion(gwtQuestion);
 				}
 
-
 			} else if (widget instanceof DragableQuestion) {
 
 				if (ungroupedQuestionsGroup == null) {
@@ -192,7 +200,7 @@ public class DnDQuestionnaireAdmin extends AbstractAdminTab {
 					} else {
 						ungroupedQuestionsGroup = new GwtQuestionGroup();
 					}
-					
+
 					questionnaire.addQuestionGroup(ungroupedQuestionsGroup);
 				}
 
@@ -201,22 +209,22 @@ public class DnDQuestionnaireAdmin extends AbstractAdminTab {
 				ungroupedQuestionsGroup.addQuestion(gwtQuestion);
 			}
 		}
+	}
 
-		logger.log(Level.INFO, "before store");
+	@Override
+	public void notifyReady() {
 
-		if (GwtQuestionnaireValidator.valid(questionnaire)) {
-			formService.storeForm(questionnaire,
-					new ErrorReportingCallback<GwtQuestionnaire>() {
-						@Override
-						public void onSuccess(GwtQuestionnaire result) {
-							questionnaire = result;
-							sectionSelection.setSelected(result.getSection());
-							load();
-						}
-					});
-		} else {
-			logger.log(Level.INFO, "questionnaire is invalid");
+		if (!formSelectionReady) {
+			formSelectionReady = true;
+			updateState();
 		}
+	}
+
+	private void initPanel() {
+		panel.clear();
+		panel.add(new ChangeableLabel("Titel", "questionnaireHeading"));
+		panel.add(DragTargetLabel.valueOf("~~~~", panel));
+		panel.setStyleName("questionnaireScrollPanel");
 	}
 
 	private List<GwtQuestionGroup> getGroupsWithoutTitle(
@@ -267,13 +275,13 @@ public class DnDQuestionnaireAdmin extends AbstractAdminTab {
 	private GwtAnswerTemplate createDefaultTemplate() {
 		GwtMultipleChoiceAnswerTemplate template = new GwtMultipleChoiceAnswerTemplate();
 		template.addOption(createMultipleChoiceOption("kennen gelernt", "k"));
-		template.addOption(createMultipleChoiceOption("im Üben","u"));
-		template.addOption(createMultipleChoiceOption("sicher","s"));
+		template.addOption(createMultipleChoiceOption("im Üben", "u"));
+		template.addOption(createMultipleChoiceOption("sicher", "s"));
 		return template;
 	}
 
-	private GwtMultipleChoiceOption createMultipleChoiceOption(
-			String label, String value) {
+	private GwtMultipleChoiceOption createMultipleChoiceOption(String label,
+			String value) {
 		GwtMultipleChoiceOption option = new GwtMultipleChoiceOption();
 		option.setValue(value);
 		option.setLabel(label);
@@ -284,12 +292,13 @@ public class DnDQuestionnaireAdmin extends AbstractAdminTab {
 		return key.startsWith(DragTemplate.NEW_PREFIX);
 	}
 
-	private Grid createSelectionContainer() {
+	private Grid createSelectionContainer(Widget formSelection, SectionSelection sectionSelection) {
 		final List<SectionSelectionBox> sectionSelectionBoxes = sectionSelection
 				.getSectionSelectionBoxes();
 		final Grid selectionContainer = new Grid(1,
-				sectionSelectionBoxes.size());
-		int i = 0;
+				sectionSelectionBoxes.size() + 1);
+		selectionContainer.setWidget(0, 0, formSelection);
+		int i = 1;
 		for (SectionSelectionBox sectionSelectionBox : sectionSelectionBoxes) {
 			sectionSelectionBox.setSize(Utils.LISTBOX_WIDTH + Utils.PIXEL,
 					Utils.ROW_HEIGHT + Utils.PIXEL);
@@ -301,7 +310,8 @@ public class DnDQuestionnaireAdmin extends AbstractAdminTab {
 	private void load() {
 		panel.clear();
 		int index = 0;
-		panel.insert(new ChangeableLabel(questionnaire.getTitle(), "questionnaireHeading"), index++);
+		panel.insert(new ChangeableLabel(questionnaire.getTitle(),
+				"questionnaireHeading"), index++);
 		for (GwtQuestionGroup group : questionnaire.getGroups()) {
 			String title = group.getTitle();
 			if (at.brandl.lws.notice.shared.Utils.isNotEmpty(title)) {
@@ -320,5 +330,20 @@ public class DnDQuestionnaireAdmin extends AbstractAdminTab {
 				}
 			}
 		}
+	}
+
+	private void updatePanel() {
+		GwtQuestionnaire gwtQuestionnaire = formSelection.getSelectedForm();
+		if (gwtQuestionnaire != null) {
+			questionnaire = gwtQuestionnaire;
+			sectionSelection.setSelected(questionnaire.getSection());
+			load();
+		} else {
+			sectionSelection.reset();
+		}
+	}
+
+	private void updateState() {
+		updatePanel();
 	}
 }

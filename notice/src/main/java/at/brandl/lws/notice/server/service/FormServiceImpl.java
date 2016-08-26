@@ -11,6 +11,7 @@ import at.brandl.lws.notice.model.GwtQuestionnaireAnswers;
 import at.brandl.lws.notice.server.dao.DaoRegistry;
 import at.brandl.lws.notice.server.dao.ds.FormDsDao;
 import at.brandl.lws.notice.server.dao.ds.QuestionnaireDsDao;
+import at.brandl.lws.notice.shared.Utils;
 import at.brandl.lws.notice.shared.service.FormService;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
@@ -45,32 +46,22 @@ public class FormServiceImpl extends RemoteServiceServlet implements
 
 	@Override
 	public List<GwtQuestionnaire> getAllForms(String childKey) {
-		
+
 		Map<String, GwtQuestionnaire> titles = new HashMap<String, GwtQuestionnaire>();
 
 		for (GwtQuestionnaire form : formDao.getAllQuestionnaires()) {
 			titles.put(form.getTitle(), form);
 		}
 
-		Collection<GwtQuestionnaireAnswers> allAnswers = questionnaireDao
-				.getAllAnswers(childKey);
-		for (GwtQuestionnaireAnswers answers : allAnswers) {
-			GwtQuestionnaire form = formDao.getQuestionnaire(answers);
-			titles.put(form.getTitle(), form);
+		if (Utils.isNotEmpty(childKey)) {
+			Collection<GwtQuestionnaireAnswers> allAnswers = questionnaireDao
+					.getAllAnswers(childKey);
+			for (GwtQuestionnaireAnswers answers : allAnswers) {
+				GwtQuestionnaire form = formDao.getQuestionnaire(answers);
+				titles.put(form.getTitle(), form);
+			}
 		}
 
 		return new ArrayList<GwtQuestionnaire>(titles.values());
 	}
-
-	@Override
-	public List<GwtQuestionnaire> getAllForms() {
-		Map<String, GwtQuestionnaire> titles = new HashMap<String, GwtQuestionnaire>();
-
-		for (GwtQuestionnaire form : formDao.getAllQuestionnaires()) {
-			titles.put(form.getTitle(), form);
-		}
-
-		return new ArrayList<GwtQuestionnaire>(titles.values());
-	}
-
 }
