@@ -2,11 +2,14 @@ package at.brandl.lws.notice.client.utils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.google.gwt.user.client.ui.Widget;
 
 public class DragableQuestionGroup extends Dragable<DragableQuestionGroup> {
 
+	private static final Logger LOGGER = Logger.getLogger("DragableQuestionGroup");
 	private static final String STYLE = "groupHeading";
 	public static final String QUESTION_GROUP_LABEL = "question group";
 	private static final String SEPARATOR = "°°";
@@ -21,6 +24,9 @@ public class DragableQuestionGroup extends Dragable<DragableQuestionGroup> {
 
 		String[] dataArray = data.getValue().split(SEPARATOR);
 		title = new ChangeableLabel(dataArray[0], STYLE + " questionGroup");
+		for(ChangeListener listener : parent.getChangeListeners()) {
+			title.registerChangeListener(listener);
+		}
 		vPanel.add(title);
 
 		for (int i = 1; i < dataArray.length; i++) {
@@ -84,5 +90,19 @@ public class DragableQuestionGroup extends Dragable<DragableQuestionGroup> {
 	@Override
 	public String toString() {
 		return "DragableQuestionGroup: " + title.getText();
+	}
+	
+	@Override
+	public void registerChangeListener(ChangeListener listener) {
+		super.registerChangeListener(listener);
+		for (int i = 0; i < vPanel.getWidgetCount(); i++) {
+			Widget widget = vPanel.getWidget(i);
+			if (widget instanceof ChangesAware) {
+				LOGGER.log(Level.INFO, "register listener on child " + widget);
+				((ChangesAware) widget).registerChangeListener(listener);
+			} else {
+				LOGGER.log(Level.INFO, "not register listener on child " + widget);
+			}
+		}
 	}
 }

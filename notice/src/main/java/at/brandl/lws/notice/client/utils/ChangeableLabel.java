@@ -1,5 +1,7 @@
 package at.brandl.lws.notice.client.utils;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -15,12 +17,13 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 
-public class ChangeableLabel extends SimplePanel {
+public class ChangeableLabel extends SimplePanel implements ChangesAware {
 
+	private static final Logger LOGGER = Logger.getLogger("ChangeableLabel");
+	private final Collection<ChangeListener> listeners = new ArrayList<>(); 
 	private Label label;
 	private TextBox textBox;
 
-	private static final Logger LOGGER = Logger.getLogger("DragLogger");
    
 	
 	public ChangeableLabel(String data, String style) {
@@ -40,7 +43,7 @@ public class ChangeableLabel extends SimplePanel {
 			
 			@Override
 			public void onDragStart(DragStartEvent event) {
-				LOGGER.log(Level.SEVERE, "in onDragStart of " + this);
+				LOGGER.log(Level.FINE, "in onDragStart of " + this);
 				event.preventDefault();
 				event.stopPropagation();
 			}
@@ -58,10 +61,11 @@ public class ChangeableLabel extends SimplePanel {
 			@Override
 			public void onKeyDown(KeyDownEvent event) {
 				int charCode = event.getNativeKeyCode();
-				LOGGER.log(Level.SEVERE, "keycode: " + charCode);
+				LOGGER.log(Level.FINE, "keycode: " + charCode);
 				if (KeyCodes.KEY_ENTER == charCode) {
 					label.setText(textBox.getText());
 					setWidget(label);
+					notifyChanges();
 				} else if (KeyCodes.KEY_ESCAPE == charCode) {
 					setWidget(label);
 				}
@@ -79,5 +83,19 @@ public class ChangeableLabel extends SimplePanel {
 	@Override
 	public String toString() {
 		return "ChangeableLabel: " + label.getText();
+	}
+
+	@Override
+	public void registerChangeListener(ChangeListener listener) {
+		LOGGER.log(Level.INFO, "register listener " + listener);
+		listeners.add(listener);
+	}
+	
+	private void notifyChanges() {
+		LOGGER.log(Level.INFO, "notify listeners");
+		for (ChangeListener listener : listeners) {
+			LOGGER.log(Level.INFO, "notify listener " + listener);
+			listener.notifyChange();
+		}
 	}
 }

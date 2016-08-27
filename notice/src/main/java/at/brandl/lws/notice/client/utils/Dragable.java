@@ -1,5 +1,10 @@
 package at.brandl.lws.notice.client.utils;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -8,9 +13,12 @@ import com.google.gwt.event.dom.client.DragEndHandler;
 import com.google.gwt.event.dom.client.DragStartEvent;
 import com.google.gwt.event.dom.client.DragStartHandler;
 
-abstract class Dragable<T extends Dragable<T>> extends DragTarget<T> {
+abstract class Dragable<T extends Dragable<T>> extends DragTarget<T> implements
+		ChangesAware {
 
+	private static final Logger LOGGER = Logger.getLogger("Dragable");
 	private final String key;
+	private final Collection<ChangeListener> listeners = new ArrayList<>();
 
 	Dragable(String key, DragContainer parent) {
 		super(parent);
@@ -18,13 +26,16 @@ abstract class Dragable<T extends Dragable<T>> extends DragTarget<T> {
 		getElement().setDraggable(Element.DRAGGABLE_TRUE);
 		addDragStartHandler(getDragStartHandler());
 		addDragEndHandler(getDragEndHandler());
+		for(ChangeListener listener : parent.getChangeListeners()) {
+			registerListenerInternal(listener);
+		}
 	}
 
 	abstract Data getData();
 
 	abstract String getType();
 
-	DragStartHandler getDragStartHandler() {
+	final DragStartHandler getDragStartHandler() {
 		return new DragStartHandler() {
 			@Override
 			public void onDragStart(DragStartEvent event) {
@@ -39,7 +50,7 @@ abstract class Dragable<T extends Dragable<T>> extends DragTarget<T> {
 		};
 	}
 
-	DragEndHandler getDragEndHandler() {
+	final DragEndHandler getDragEndHandler() {
 		return new DragEndHandler() {
 			@Override
 			public void onDragEnd(DragEndEvent event) {
@@ -56,11 +67,29 @@ abstract class Dragable<T extends Dragable<T>> extends DragTarget<T> {
 					});
 				}
 				event.stopPropagation();
+				notifyChanges();
 			}
+
 		};
 	}
 
 	public String getKey() {
 		return key;
+	}
+
+	@Override
+	public void registerChangeListener(ChangeListener listener) {
+		registerListenerInternal(listener);
+	}
+
+	private void registerListenerInternal(ChangeListener listener) {
+		LOGGER.log(Level.INFO, "register listener " + listener);
+		listeners.add(listener);
+	}
+
+	protected final void notifyChanges() {
+		for (ChangeListener listener : listeners) {
+			listener.notifyChange();
+		}
 	}
 }

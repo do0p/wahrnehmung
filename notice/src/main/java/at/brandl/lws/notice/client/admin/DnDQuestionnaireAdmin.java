@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import at.brandl.lws.notice.client.utils.ChangeListener;
 import at.brandl.lws.notice.client.utils.ChangeableLabel;
 import at.brandl.lws.notice.client.utils.Data;
 import at.brandl.lws.notice.client.utils.DecisionBox;
@@ -41,8 +42,9 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class DnDQuestionnaireAdmin extends AbstractAdminTab implements
-		ReadyListener {
+		ReadyListener, ChangeListener {
 
+	private static final Logger LOGGER = Logger.getLogger("DnDQuestionnaireAdmin");
 	private final FormServiceAsync formService = GWT.create(FormService.class);
 
 	private final DecisionBox decisionBox;
@@ -52,23 +54,29 @@ public class DnDQuestionnaireAdmin extends AbstractAdminTab implements
 	private SectionSelection sectionSelection;
 	private PopUp dialogBox;
 	private FormSelection formSelection;
+	private boolean changes;
 
-	Logger logger = Logger.getLogger("DnDQuestionnaireAdmin");
 	private boolean formSelectionReady;
-
+	private static int instanceCount;
+	private int instanceNo;
+	
 	DnDQuestionnaireAdmin() {
-		
+
 		super(false);
 
+		instanceNo = instanceCount++;
+		
 		dialogBox = new PopUp();
 		decisionBox = new DecisionBox();
 		decisionBox.setText(labels().questionDelWarning());
 		sectionSelection = new SectionSelection(dialogBox);
 		questionnaire = new GwtQuestionnaire();
 		panel = new DragContainer(decisionBox);
-		
+
 		initPanel();
 
+		panel.registerChangeListener(this);
+		
 		formSelection = new FormSelection(dialogBox, this);
 		formSelection.setSize(Utils.NAMESELECTION_WIDTH + Utils.PIXEL,
 				Utils.ROW_HEIGHT + Utils.PIXEL);
@@ -89,12 +97,13 @@ public class DnDQuestionnaireAdmin extends AbstractAdminTab implements
 				questionnaire.setSection(sectionSelection
 						.getSelectedSectionKey());
 				updateButtonPanel();
+				changes = true;
 			}
 		});
 
 		setSpacing(Utils.SPACING);
 		add(createSelectionContainer(formSelection, sectionSelection));
-		
+
 		CellPanel content = new HorizontalPanel();
 		content.setWidth("100%");
 		content.add(panel);
@@ -102,11 +111,13 @@ public class DnDQuestionnaireAdmin extends AbstractAdminTab implements
 		panel.setWidth(Utils.QUESTIONNAIRE_WIDTH + Utils.PIXEL);
 		CellPanel templates = new VerticalPanel();
 		templates.setSpacing(Utils.SPACING);
-		
-		DragTemplate questionTemplate = DragTemplate.createQuestionTemplate(labels().questionLabel());
+
+		DragTemplate questionTemplate = DragTemplate
+				.createQuestionTemplate(labels().questionLabel());
 		questionTemplate.setStyleName("roundedBox");
 		templates.add(questionTemplate);
-		DragTemplate questionGroupTemplate = DragTemplate.createQuestionGroupTemplate(labels().questionGroupLabel());
+		DragTemplate questionGroupTemplate = DragTemplate
+				.createQuestionGroupTemplate(labels().questionGroupLabel());
 		questionGroupTemplate.setStyleName("roundedBox");
 		templates.add(questionGroupTemplate);
 		content.add(templates);
@@ -115,32 +126,36 @@ public class DnDQuestionnaireAdmin extends AbstractAdminTab implements
 		add(getButtonPanel());
 		updateButtonPanel();
 	}
-	
+
 	@Override
 	void reset() {
 		initPanel();
 		updatePanel();
 		updateButtonPanel();
+		changes = false;
 	}
-	
+
 	@Override
 	boolean enableSave() {
-		return panel.getWidgetCount() > 2 && at.brandl.lws.notice.shared.Utils.isNotEmpty(sectionSelection.getSelectedSectionKey());
+		return changes
+				&& panel.getWidgetCount() > 2
+				&& at.brandl.lws.notice.shared.Utils
+						.isNotEmpty(sectionSelection.getSelectedSectionKey());
 	}
-	
+
 	@Override
 	boolean enableCancel() {
-		return panel.getWidgetCount() > 2 || at.brandl.lws.notice.shared.Utils.isNotEmpty(sectionSelection.getSelectedSectionKey()) || formSelection.getSelectedForm() != null;
+		return changes && panel.getWidgetCount() > 2;
 	}
-	
+
 	@Override
 	void save() {
-		logger.log(Level.INFO, "in save - info");
+		LOGGER.log(Level.INFO, "in save - info");
 
 		// store current state of questionnaire
 		updateQuestionnaire(panel, questionnaire);
 
-		logger.log(Level.INFO, "before store");
+		LOGGER.log(Level.INFO, "before store");
 
 		if (GwtQuestionnaireValidator.valid(questionnaire)) {
 			formService.storeForm(questionnaire,
@@ -150,14 +165,17 @@ public class DnDQuestionnaireAdmin extends AbstractAdminTab implements
 							questionnaire = result;
 							sectionSelection.setSelected(result.getSection());
 							load();
+							changes = false;
+							updateButtonPanel();
 						}
 					});
 		} else {
-			logger.log(Level.INFO, "questionnaire is invalid");
+			LOGGER.log(Level.INFO, "questionnaire is invalid");
 		}
 	}
 
-	private void updateQuestionnaire(DragContainer panel, GwtQuestionnaire questionnaire) {
+	private void updateQuestionnaire(DragContainer panel,
+			GwtQuestionnaire questionnaire) {
 
 		Map<String, GwtQuestionGroup> groupMap = questionnaire.getAllGroups();
 		Map<String, GwtQuestion> questionMap = questionnaire.getAllQuestions();
@@ -221,10 +239,10 @@ public class DnDQuestionnaireAdmin extends AbstractAdminTab implements
 	}
 
 	private void initPanel() {
-		panel.clear();
 		panel.add(new ChangeableLabel("Titel", "questionnaireHeading"));
 		panel.add(DragTargetLabel.valueOf("~~~~", panel));
 		panel.setStyleName("questionnaireScrollPanel");
+		changes = false;
 	}
 
 	private List<GwtQuestionGroup> getGroupsWithoutTitle(
@@ -292,7 +310,8 @@ public class DnDQuestionnaireAdmin extends AbstractAdminTab implements
 		return key.startsWith(DragTemplate.NEW_PREFIX);
 	}
 
-	private Grid createSelectionContainer(Widget formSelection, SectionSelection sectionSelection) {
+	private Grid createSelectionContainer(Widget formSelection,
+			SectionSelection sectionSelection) {
 		final List<SectionSelectionBox> sectionSelectionBoxes = sectionSelection
 				.getSectionSelectionBoxes();
 		final Grid selectionContainer = new Grid(1,
@@ -330,6 +349,7 @@ public class DnDQuestionnaireAdmin extends AbstractAdminTab implements
 				}
 			}
 		}
+		panel.add(DragTargetLabel.valueOf("~~~~", panel));
 	}
 
 	private void updatePanel() {
@@ -340,10 +360,26 @@ public class DnDQuestionnaireAdmin extends AbstractAdminTab implements
 			load();
 		} else {
 			sectionSelection.reset();
+			panel.clear();
+			initPanel();
 		}
+		changes = false;
 	}
 
 	private void updateState() {
 		updatePanel();
+	}
+
+	@Override
+	public void notifyChange() {
+		LOGGER.log(Level.INFO, "got notified of changes");
+		changes = true;
+		updateButtonPanel();
+	}
+	
+	@Override
+	public String toString() {
+	
+		return "DnDQuestionnaireAdmin" + instanceNo;
 	}
 }
