@@ -20,12 +20,10 @@ public class FormServiceImpl extends RemoteServiceServlet implements
 		FormService {
 
 	private static final long serialVersionUID = -1963083487479617418L;
-	private final FormParser formParser;
 	private final FormDsDao formDao;
 	private final QuestionnaireDsDao questionnaireDao;
 
 	public FormServiceImpl() {
-		formParser = new FormParser();
 		formDao = DaoRegistry.get(FormDsDao.class);
 		questionnaireDao = DaoRegistry.get(QuestionnaireDsDao.class);
 	}
@@ -34,14 +32,6 @@ public class FormServiceImpl extends RemoteServiceServlet implements
 	public GwtQuestionnaire storeForm(GwtQuestionnaire form) {
 
 		return formDao.storeQuestionnaire(form);
-	}
-
-	@Override
-	public GwtQuestionnaire storeFormAsString(String formText, String sectionKey) {
-
-		GwtQuestionnaire questionnaire = formParser.parse(formText);
-		questionnaire.setSection(sectionKey);
-		return formDao.storeQuestionnaire(questionnaire);
 	}
 
 	@Override

@@ -1,4 +1,4 @@
-package at.brandl.lws.notice.client.form;
+package at.brandl.lws.notice.server.dao.ds;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -21,7 +21,6 @@ import at.brandl.lws.notice.model.GwtMultipleChoiceOption;
 import at.brandl.lws.notice.model.GwtQuestion;
 import at.brandl.lws.notice.model.GwtQuestionGroup;
 import at.brandl.lws.notice.model.GwtQuestionnaire;
-import at.brandl.lws.notice.server.service.FormParser;
 
 @Ignore
 public class FormParserTest {

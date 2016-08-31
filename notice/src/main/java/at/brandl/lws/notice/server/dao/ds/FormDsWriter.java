@@ -15,6 +15,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import at.brandl.lws.notice.model.GwtAnswerTemplate;
 import at.brandl.lws.notice.model.GwtMultipleChoiceAnswerTemplate;
@@ -31,6 +33,7 @@ import com.google.appengine.api.datastore.Key;
 
 public class FormDsWriter {
 
+	private static final Logger LOGGER = Logger.getLogger("FormDsWriter");
 	private final DatastoreService ds;
 	private FormDsReader formReader;
 
@@ -41,15 +44,21 @@ public class FormDsWriter {
 
 	public void writeForm(GwtQuestionnaire gwtForm) {
 
+		LOGGER.log(Level.INFO, "write form: " + gwtForm.getTitle());
 		String key = gwtForm.getKey();
 		GwtQuestionnaire persistedForm = null;
 		if (Utils.isNotEmpty(key)) {
+			LOGGER.log(Level.INFO, "form has key");
 			try {
 				persistedForm = formReader.readForm(key);
 			} catch (EntityNotFoundException e) {
 				System.err.println("no form for key " + key);
 				throw new IllegalArgumentException("no form for key " + key, e);
 			}
+		} else if (existsFormWithTitle(gwtForm.getTitle())) {
+			LOGGER.log(Level.INFO, "form already exists");
+			throw new IllegalArgumentException("form with title "
+					+ gwtForm.getTitle() + " already exists");
 		}
 
 		Entity form = toEntity(gwtForm);
@@ -82,6 +91,15 @@ public class FormDsWriter {
 						+ groupToArchive.getKey());
 			}
 		}
+	}
+
+	private boolean existsFormWithTitle(String title) {
+		for (GwtQuestionnaire form : formReader.readAllForms()) {
+			if (form.getTitle().trim().equals(title.trim())) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private GwtQuestion storeQuestion(GwtQuestion gwtQuestion, Key groupKey,
@@ -127,9 +145,11 @@ public class FormDsWriter {
 
 			answerTemplate = GwtMultipleChoiceAnswerTemplate
 					.valueOf(multipleChoiceTemplate);
-			multipleChoiceTemplate.getOptions().clear();;
+			multipleChoiceTemplate.getOptions().clear();
+			;
 			for (GwtMultipleChoiceOption option : options) {
-				multipleChoiceTemplate.addOption(GwtMultipleChoiceOption.valueOf(option));
+				multipleChoiceTemplate.addOption(GwtMultipleChoiceOption
+						.valueOf(option));
 			}
 			return answerTemplate;
 		}

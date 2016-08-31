@@ -1,4 +1,4 @@
-package at.brandl.lws.notice.server.service;
+package at.brandl.lws.notice.server.dao.ds;
 
 import java.io.BufferedReader;
 import java.io.IOException;

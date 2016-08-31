@@ -10,9 +10,7 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RemoteServiceRelativePath("form")
 public interface FormService extends RemoteService {
 
-	GwtQuestionnaire storeFormAsString(String formText, String sectionKey);
-
-	GwtQuestionnaire storeForm(GwtQuestionnaire form);
+	GwtQuestionnaire storeForm(GwtQuestionnaire form) throws IllegalArgumentException;
 	
 	List<GwtQuestionnaire> getAllForms(String childKey);
 	
