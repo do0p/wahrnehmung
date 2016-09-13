@@ -30,6 +30,7 @@ public class FormSelection extends ListBox {
 	public FormSelection(PopUp dialogBox, ReadyListener readyListener) {
 		this.dialogBox = dialogBox;
 		this.readyListener = readyListener;
+		updateFormMap();
 	}
 
 	public GwtQuestionnaire getSelectedForm() {
@@ -41,7 +42,16 @@ public class FormSelection extends ListBox {
 		return null;
 	}
 
-	private void updateFormMap() {
+	public void setSelectedForm(GwtQuestionnaire form) {
+		
+		for(int i = 1; i < getItemCount(); i++) {
+			if(getValue(i).equals(form.getTitle())) {
+				setSelectedIndex(i);
+			}
+		}
+	}
+	
+	public void updateFormMap() {
 
 		formService.getAllForms(childKey, new AsyncCallback<List<GwtQuestionnaire>>() {
 

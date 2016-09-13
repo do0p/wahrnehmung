@@ -11,8 +11,8 @@ public class GwtQuestionnaire implements Serializable {
 	private static final long serialVersionUID = -7569171050607154080L;
 	private String title;
 	private String sectionKey;
-	private List<GwtQuestionGroup> groups = new ArrayList<GwtQuestionGroup>();
-	private Map<String, GwtQuestion> questions = new HashMap<String, GwtQuestion>();
+	private List<GwtQuestionGroup> groups = new ArrayList<>();
+	private GwtQuestionGroup archivedQuestions;
 	private String key;
 
 	public String getTitle() {
@@ -36,24 +36,16 @@ public class GwtQuestionnaire implements Serializable {
 	}
 
 	public void setGroups(List<GwtQuestionGroup> groups) {
-		
+
 		this.groups.clear();
-		for(GwtQuestionGroup group : groups) {
+		for (GwtQuestionGroup group : groups) {
 			addQuestionGroup(group);
 		}
 	}
 
 	public void addQuestionGroup(GwtQuestionGroup group) {
-		
-		groups.add(group);
-		addQuestions(group);
-	}
 
-	private void addQuestions(GwtQuestionGroup group) {
-		
-		for(GwtQuestion question : group.getQuestions()) {
-			questions.put(question.getKey(), question);
-		}
+		groups.add(group);
 	}
 
 	public String getKey() {
@@ -78,7 +70,7 @@ public class GwtQuestionnaire implements Serializable {
 		result &= ObjectUtils.equals(groups, other.groups);
 		return result;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		int result = 37;
@@ -90,7 +82,103 @@ public class GwtQuestionnaire implements Serializable {
 
 	public GwtQuestion getQuestion(String questionKey) {
 
-		return questions.get(questionKey);
+		for (GwtQuestionGroup group : groups) {
+			for (GwtQuestion question : group.getQuestions()) {
+				if (questionKey.equals(question.getKey())) {
+					return question;
+				}
+			}
+		}
+		return null;
 	}
 
+	public String getNewestVersion(String questionKey) {
+
+		for (GwtQuestionGroup group : groups) {
+			for (GwtQuestion question : group.getQuestions()) {
+				String newestKey = question.getKey();
+				if (questionKey.equals(newestKey)) {
+					return newestKey;
+				}
+				for (String archived : question.getArchived()) {
+					if (questionKey.equals(archived)) {
+						return newestKey;
+					}
+				}
+			}
+		}
+		return null;
+	}
+
+	public GwtQuestionnaire addArchivedQuestion(GwtQuestion archivedQuestion) {
+		GwtQuestionnaire questionnaire = clone();
+		if (questionnaire.archivedQuestions == null) {
+			questionnaire.archivedQuestions = new GwtQuestionGroup();
+		}
+		questionnaire.archivedQuestions.addQuestion(archivedQuestion);
+		return questionnaire;
+	}
+
+	public GwtQuestionnaire replace(String toBeReplacedKey,
+			GwtQuestion replacement) {
+
+		GwtQuestionnaire questionnaire = clone();
+		for (GwtQuestionGroup group : questionnaire.groups) {
+			for (GwtQuestion question : group.getQuestions()) {
+				if (toBeReplacedKey.equals(question.getKey())) {
+					group.replaceQuestion(toBeReplacedKey, replacement);
+					return questionnaire;
+				}
+			}
+		}
+		System.err.println("Question with key " + toBeReplacedKey
+				+ " is not in any group");
+		return questionnaire;
+	}
+
+	public GwtQuestionGroup getArchivedQuestionGroup() {
+		return archivedQuestions;
+	}
+
+	public void clear() {
+		title = null;
+		for (GwtQuestionGroup group : groups) {
+			group.clear();
+		}
+		groups.clear();
+	}
+
+	public Map<String, GwtQuestion> getAllQuestions() {
+		Map<String, GwtQuestion> questions = new HashMap<String, GwtQuestion>();
+		for (GwtQuestionGroup group : groups) {
+			questions.putAll(group.getAllQuestions());
+		}
+		return questions;
+	}
+
+	public Map<String, GwtQuestionGroup> getAllGroups() {
+		Map<String, GwtQuestionGroup> result = new HashMap<String, GwtQuestionGroup>();
+		for (GwtQuestionGroup group : groups) {
+			result.put(group.getKey(), group);
+		}
+		return result;
+	}
+
+	public GwtQuestionnaire clone() {
+		
+		List<GwtQuestionGroup> clonedGroups = new ArrayList<>();
+		for (GwtQuestionGroup group : groups) {
+			clonedGroups.add(group.clone());
+		}
+		GwtQuestionGroup clonedArchivedQuestions = archivedQuestions == null ? null
+				: archivedQuestions.clone();
+
+		GwtQuestionnaire clone = new GwtQuestionnaire();
+		clone.key = key;
+		clone.sectionKey = sectionKey;
+		clone.title = title;
+		clone.groups = clonedGroups;
+		clone.archivedQuestions = clonedArchivedQuestions;
+		return clone;
+	}
 }

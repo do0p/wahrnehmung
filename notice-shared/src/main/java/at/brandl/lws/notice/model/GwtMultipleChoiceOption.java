@@ -2,12 +2,20 @@ package at.brandl.lws.notice.model;
 
 import java.io.Serializable;
 
-public class GwtMultipleChoiceOption implements Serializable{
+public class GwtMultipleChoiceOption implements Serializable {
 
 	private static final long serialVersionUID = 8772529463120196686L;
 	private String label;
 	private String value;
 	private String key;
+
+	public static GwtMultipleChoiceOption valueOf(GwtMultipleChoiceOption option) {
+
+		GwtMultipleChoiceOption newOption = new GwtMultipleChoiceOption();
+		newOption.setLabel(option.getLabel());
+		newOption.setValue(option.getValue());
+		return newOption;
+	}
 
 	public String getLabel() {
 		return label;
@@ -24,7 +32,6 @@ public class GwtMultipleChoiceOption implements Serializable{
 	public void setValue(String value) {
 		this.value = value;
 	}
-	
 
 	public void setKey(String key) {
 		this.key = key;
@@ -33,7 +40,7 @@ public class GwtMultipleChoiceOption implements Serializable{
 	public String getKey() {
 		return key;
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {
@@ -47,12 +54,20 @@ public class GwtMultipleChoiceOption implements Serializable{
 		result &= ObjectUtils.equals(value, other.value);
 		return result;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		int result = 37;
 		result = result * 17 + ObjectUtils.hashCode(label);
 		result = result * 17 + ObjectUtils.hashCode(value);
 		return result;
+	}
+
+	public GwtMultipleChoiceOption clone() {
+		GwtMultipleChoiceOption clone = new GwtMultipleChoiceOption();
+		clone.key = key;
+		clone.value = value;
+		clone.label = label;
+		return clone;
 	}
 }

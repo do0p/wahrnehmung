@@ -1,6 +1,8 @@
 package at.brandl.lws.notice.server.service;
 
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import at.brandl.lws.notice.model.Authorization;
 import at.brandl.lws.notice.model.BeobachtungsFilter;
@@ -29,6 +31,7 @@ import com.google.gwt.view.client.Range;
 public class WahrnehmungsServiceImpl extends RemoteServiceServlet implements
 		WahrnehmungsService {
 
+	private static final Logger LOGGER = Logger.getLogger(WahrnehmungsServiceImpl.class.getCanonicalName());
 	private static final String UPLOAD_URL = "/wahrnehmung/upload";
 	private static final long serialVersionUID = 6513086238987365801L;
 
@@ -52,6 +55,7 @@ public class WahrnehmungsServiceImpl extends RemoteServiceServlet implements
 
 	@Override
 	public void storeBeobachtung(GwtBeobachtung beobachtung) {
+		LOGGER.log(Level.FINE, "groupActivity: " + beobachtung.isGroupActivity());
 		if (!GwtBeobachtungValidator.valid(beobachtung)) {
 			throw new IllegalArgumentException("incomplete beobachtung");
 		}
@@ -61,7 +65,7 @@ public class WahrnehmungsServiceImpl extends RemoteServiceServlet implements
 		for (String additionalChildKey : beobachtung.getAdditionalChildKeys()) {
 			beobachtung.setKey(null);
 			beobachtung.setChildKey(additionalChildKey);
-			storeBeobachtung(beobachtung, currentUser, masterBeobachtungsKey);
+			storeBeobachtung(beobachtung, currentUser, beobachtung.isGroupActivity() ? masterBeobachtungsKey : null);
 		}
 	}
 

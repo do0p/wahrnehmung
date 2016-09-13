@@ -94,6 +94,14 @@ public abstract class AbstractDsDaoTest {
 		Assert.assertNull(cache.get(key));
 	}
 
+	protected Object getCacheEntry(String key) {
+		return cache.get(key);
+	}
+	
+	protected void putCacheEntry(String key, Object object) {
+		cache.put(key, object);
+	}
+	
 	protected void assertDatastoreContainsNot(String key) {
 		try {
 			Assert.assertNull(datastore.get(toKey(key)));

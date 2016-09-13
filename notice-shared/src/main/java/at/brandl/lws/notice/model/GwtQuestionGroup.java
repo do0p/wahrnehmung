@@ -2,7 +2,10 @@ package at.brandl.lws.notice.model;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class GwtQuestionGroup implements Serializable {
 
@@ -10,6 +13,15 @@ public class GwtQuestionGroup implements Serializable {
 	private String title;
 	private List<GwtQuestion> questions = new ArrayList<GwtQuestion>();
 	private String key;
+	private Date archiveDate;
+
+	public Date getArchiveDate() {
+		return archiveDate;
+	}
+
+	public void setArchiveDate(Date archived) {
+		this.archiveDate = archived;
+	}
 
 	public String getTitle() {
 		return title;
@@ -31,7 +43,6 @@ public class GwtQuestionGroup implements Serializable {
 		questions.add(question);
 	}
 
-
 	public void setKey(String key) {
 		this.key = key;
 	}
@@ -39,7 +50,11 @@ public class GwtQuestionGroup implements Serializable {
 	public String getKey() {
 		return key;
 	}
-	
+
+	public boolean isArchived() {
+		return archiveDate != null;
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {
@@ -53,13 +68,56 @@ public class GwtQuestionGroup implements Serializable {
 		result &= ObjectUtils.equals(questions, other.questions);
 		return result;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		int result = 37;
 		result = result * 17 + ObjectUtils.hashCode(questions);
 		result = result * 17 + ObjectUtils.hashCode(title);
 		return result;
+	}
+
+	public void replaceQuestion(String toBeReplacedKey, GwtQuestion replacement) {
+		for (int i = 0; i < questions.size(); i++) {
+			if (toBeReplacedKey.equals(questions.get(i).getKey())) {
+				questions.set(i, replacement);
+				return;
+			}
+		}
+		System.err.println("Question with key " + toBeReplacedKey
+				+ " is not contained in group with key " + this.key);
+		questions.add(replacement);
+
+	}
+
+	public void clear() {
+		title = null;
+		questions.clear();
+	}
+
+	public Map<String, GwtQuestion> getAllQuestions() {
+		Map<String, GwtQuestion> result = new HashMap<String, GwtQuestion>();
+		for (GwtQuestion question : questions) {
+			result.put(question.getKey(), question);
+		}
+		return result;
+	}
+
+	public GwtQuestionGroup clone() {
+		
+		List<GwtQuestion> clonedQuestions = new ArrayList<>(questions.size());
+		for (GwtQuestion question : questions) {
+			clonedQuestions.add(question.clone());
+		}
+		Date clonedArchiveDate = archiveDate == null ? null : new Date(
+				archiveDate.getTime());
+
+		GwtQuestionGroup clone = new GwtQuestionGroup();
+		clone.title = title;
+		clone.key = key;
+		clone.questions = clonedQuestions;
+		clone.archiveDate = clonedArchiveDate;
+		return clone;
 	}
 
 }

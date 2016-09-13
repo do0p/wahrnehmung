@@ -75,6 +75,7 @@ public class Constants {
 		public static final String TITLE = "title";
 		public static final String SECTION = "sectionKey";
 		public static final String CREATE_DATE = "createDate";
+		public static final String UPDATE_DATE = "updateDate";
 
 		public static class Cache {
 
@@ -87,6 +88,7 @@ public class Constants {
 		public static final String KIND = "QuestionGroupDs";
 		public static final String TITLE = "title";
 		public static final String ORDER = "order";
+		public static String ARCHIVE_DATE = "archived";
 	}
 
 	public static class Question {
@@ -94,6 +96,8 @@ public class Constants {
 		public static final String KIND = "QuestionDs";
 		public static final String LABEL = "label";
 		public static final String ORDER = "order";
+		public static final String REPLACED = "replaced";
+		public static final String ARCHIVE_DATE = "archived";
 	}
 
 	public static class AnswerTemplate {
@@ -129,6 +133,7 @@ public class Constants {
 		public static final String USER = "user";
 		public static final String VALUE = "value";
 		public static final String TYPE = "type";
+		public static final String CREATE_DATE = "createDate";
 	}
 
 	public static final String MULTIPLE_CHOICE = "multipleChoice";

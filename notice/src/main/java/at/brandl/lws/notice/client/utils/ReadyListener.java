@@ -1,6 +1,6 @@
 package at.brandl.lws.notice.client.utils;
 
-public interface ReadyListener {
 
+public interface ReadyListener {
 	void notifyReady();
 }

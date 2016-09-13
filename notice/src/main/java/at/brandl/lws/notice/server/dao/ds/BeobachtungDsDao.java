@@ -450,7 +450,7 @@ public class BeobachtungDsDao extends AbstractDsDao {
 				setParentSections(section, gwtBeobachtung, sectionToBeobachtung);
 			} catch (RuntimeException e) {
 				System.err.println("got exception while mapping notice "
-						+ toString(beobachtung.getKey()) + ": "
+						+ DsUtil.toString(beobachtung.getKey()) + ": "
 						+ e.getMessage());
 			}
 		}
@@ -459,7 +459,7 @@ public class BeobachtungDsDao extends AbstractDsDao {
 
 	private Iterable<Entity> queryAllBeobachtungen(String childKey,
 			String sectionKey, Date oldestEntry, boolean archived) {
-		Query query = new Query(getBeobachtungKind(archived), toKey(childKey));
+		Query query = new Query(getBeobachtungKind(archived), DsUtil.toKey(childKey));
 		Filter filter = createFilter(sectionKey, oldestEntry);
 		if (filter != null) {
 			query.setFilter(filter);
@@ -539,7 +539,7 @@ public class BeobachtungDsDao extends AbstractDsDao {
 
 	public GwtBeobachtung getBeobachtung(String beobachtungsKey,
 			boolean archived) {
-		return toGwt(getCachedEntity(toKey(beobachtungsKey),
+		return toGwt(getCachedEntity(DsUtil.toKey(beobachtungsKey),
 				getCacheName(archived)));
 	}
 
@@ -563,19 +563,19 @@ public class BeobachtungDsDao extends AbstractDsDao {
 		setUpdateNeeded(gwtBeobachtung.getChildKey());
 		if (masterBeobachtungsKey != null) {
 			Entity beobachtungsGroup = new Entity(NoticeGroup.KIND,
-					toKey(masterBeobachtungsKey));
+					DsUtil.toKey(masterBeobachtungsKey));
 			beobachtungsGroup.setProperty(NoticeGroup.BEOBACHTUNG,
 					beobachtung.getKey());
 			getDatastoreService().put(beobachtungsGroup);
 		}
-		String key = toString(beobachtung.getKey());
+		String key = DsUtil.toString(beobachtung.getKey());
 		gwtBeobachtung.setKey(key);
 	}
 
 	public synchronized void deleteAllFromChild(String childKey) {
 
 		DatastoreService ds = getDatastoreService();
-		Query query = new Query(getBeobachtungKind(false), toKey(childKey))
+		Query query = new Query(getBeobachtungKind(false), DsUtil.toKey(childKey))
 				.setKeysOnly();
 		Transaction transaction = ds.beginTransaction();
 		try {
@@ -595,7 +595,7 @@ public class BeobachtungDsDao extends AbstractDsDao {
 	public synchronized void deleteBeobachtung(String beobachtungsKey) {
 
 		GwtBeobachtung beobachtung = getBeobachtung(beobachtungsKey, false);
-		deleteEntity(toKey(beobachtungsKey), getCacheName(false));
+		deleteEntity(DsUtil.toKey(beobachtungsKey), getCacheName(false));
 		setUpdateNeeded(beobachtung.getChildKey());
 	}
 
@@ -616,12 +616,12 @@ public class BeobachtungDsDao extends AbstractDsDao {
 
 	private FilterPredicate createSectionFilter(String sectionKey) {
 		return new Query.FilterPredicate(Notice.SECTION, FilterOperator.EQUAL,
-				toKey(sectionKey));
+				DsUtil.toKey(sectionKey));
 	}
 
 	private GwtBeobachtung toGwt(Entity entity) {
-		String childKey = toString(entity.getParent());
-		String sectionKey = toString((Key) entity.getProperty(Notice.SECTION));
+		String childKey = DsUtil.toString(entity.getParent());
+		String sectionKey = DsUtil.toString((Key) entity.getProperty(Notice.SECTION));
 		String duration = (String) entity.getProperty(Notice.DURATION);
 		String social = (String) entity.getProperty(Notice.SOCIAL);
 		Date date = (Date) entity.getProperty(Notice.DATE);
@@ -633,7 +633,7 @@ public class BeobachtungDsDao extends AbstractDsDao {
 		} else {
 			userEmail = "Anonym";
 			System.err.println("no user for notice "
-					+ toString(entity.getKey()));
+					+ DsUtil.toString(entity.getKey()));
 		}
 		String childName = DaoRegistry.get(ChildDsDao.class).getChildName(
 				childKey);
@@ -641,7 +641,7 @@ public class BeobachtungDsDao extends AbstractDsDao {
 				.getSectionName(sectionKey);
 
 		GwtBeobachtung beobachtung = new GwtBeobachtung();
-		beobachtung.setKey(toString(entity.getKey()));
+		beobachtung.setKey(DsUtil.toString(entity.getKey()));
 		beobachtung.setChildKey(childKey);
 		beobachtung.setSectionKey(sectionKey);
 		beobachtung.setDate(date);
@@ -664,12 +664,12 @@ public class BeobachtungDsDao extends AbstractDsDao {
 		Entity entity;
 		if (key == null) {
 			entity = new Entity(getBeobachtungKind(archived),
-					toKey(gwtBeobachtung.getChildKey()));
+					DsUtil.toKey(gwtBeobachtung.getChildKey()));
 		} else {
-			entity = new Entity(toKey(key));
+			entity = new Entity(DsUtil.toKey(key));
 		}
 		entity.setProperty(Notice.SECTION,
-				toKey(gwtBeobachtung.getSectionKey()));
+				DsUtil.toKey(gwtBeobachtung.getSectionKey()));
 		entity.setProperty(Notice.DATE, gwtBeobachtung.getDate());
 		String text = gwtBeobachtung.getText();
 		entity.setProperty(Notice.TEXT, new Text(text));
@@ -875,7 +875,7 @@ public class BeobachtungDsDao extends AbstractDsDao {
 
 	private Iterable<Entity> getAllBeobachtungenBefore(Date endDate,
 			String childKey, DatastoreService ds) {
-		Query query = new Query(getBeobachtungKind(false), toKey(childKey))
+		Query query = new Query(getBeobachtungKind(false), DsUtil.toKey(childKey))
 				.setFilter(new FilterPredicate(Notice.DATE,
 						FilterOperator.LESS_THAN, endDate));
 		return ds.prepare(query).asIterable();

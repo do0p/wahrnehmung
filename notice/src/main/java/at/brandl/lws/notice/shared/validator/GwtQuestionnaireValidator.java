@@ -16,7 +16,7 @@ public class GwtQuestionnaireValidator {
 			for (GwtQuestionGroup group : questionnaire.getGroups()) {
 				for (GwtQuestion question : group.getQuestions()) {
 					result &= Utils.isNotEmpty(question.getLabel());
-					result &= question.getTemplate() != null;
+					result &= question.getAnswerTemplate() != null;
 					if (!result) {
 						break;
 					}

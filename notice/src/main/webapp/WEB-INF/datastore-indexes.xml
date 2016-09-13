@@ -19,6 +19,11 @@
         <property name="date" direction="asc"/>
     </datastore-index>
     
+    <datastore-index kind="BeobachtungArchiveDs" ancestor="true" source="manual">
+        <property name="sectionKey" direction="asc"/>
+        <property name="date" direction="asc"/>
+    </datastore-index>
+    
     <datastore-index kind="QuestionGroupDs" ancestor="true" source="manual">
         <property name="order" direction="asc"/>
     </datastore-index>

@@ -1,6 +1,7 @@
 package at.brandl.lws.notice.shared.validator;
 
 import at.brandl.lws.notice.model.GwtBeobachtung;
+import at.brandl.lws.notice.shared.Utils;
 
 public class GwtBeobachtungValidator {
 
@@ -10,6 +11,6 @@ public class GwtBeobachtungValidator {
 		return beobachtung.getChildKey() != null
 				&& beobachtung.getDate() != null
 				&& beobachtung.getSectionKey() != null
-				&& (beobachtung.isCountOnly() ? true : !(text == null || text.trim().isEmpty()));
+				&& (beobachtung.isCountOnly() ? true : Utils.isNotEmpty(text));
 	}
 }

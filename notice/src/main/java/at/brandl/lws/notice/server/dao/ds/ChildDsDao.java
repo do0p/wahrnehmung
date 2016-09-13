@@ -74,7 +74,7 @@ public class ChildDsDao extends AbstractDsDao {
 
 			datastoreService.put(child);
 			transaction.commit();
-			gwtChild.setKey(toString(child.getKey()));
+			gwtChild.setKey(DsUtil.toString(child.getKey()));
 			insertIntoCache(child, Cache.NAME);
 			dirty = true;
 			
@@ -86,16 +86,16 @@ public class ChildDsDao extends AbstractDsDao {
 	}
 
 	public void deleteChild(String childKey) {
-		deleteEntity(toKey(childKey), Cache.NAME);
+		deleteEntity(DsUtil.toKey(childKey), Cache.NAME);
 		dirty = true;
 	}
 
 	public GwtChild getChild(String key) {
-		return toGwt(getCachedEntity(toKey(key), Cache.NAME));
+		return toGwt(getCachedEntity(DsUtil.toKey(key), Cache.NAME));
 	}
 
 	public String getChildName(String childKey) {
-		return formatChildName(getCachedEntity(toKey(childKey), Cache.NAME));
+		return formatChildName(getCachedEntity(DsUtil.toKey(childKey), Cache.NAME));
 	}
 
 	private boolean exists(Entity child, DatastoreService datastoreService) {
@@ -127,7 +127,7 @@ public class ChildDsDao extends AbstractDsDao {
 	@SuppressWarnings("unchecked")
 	private GwtChild toGwt(Entity child) {
 		final GwtChild gwtChild = new GwtChild();
-		gwtChild.setKey(toString(child.getKey()));
+		gwtChild.setKey(DsUtil.toString(child.getKey()));
 		gwtChild.setFirstName((String) child.getProperty(Child.FIRSTNAME));
 		gwtChild.setLastName((String) child.getProperty(Child.LASTNAME));
 		gwtChild.setBirthDay((Date) child.getProperty(Child.BIRTHDAY));
@@ -144,7 +144,7 @@ public class ChildDsDao extends AbstractDsDao {
 		if (key == null) {
 			child = new Entity(Child.KIND);
 		} else {
-			child = new Entity(toKey(key));
+			child = new Entity(DsUtil.toKey(key));
 		}
 		child.setProperty(Child.FIRSTNAME, gwtChild.getFirstName());
 		child.setProperty(Child.LASTNAME, gwtChild.getLastName());

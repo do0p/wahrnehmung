@@ -3,6 +3,7 @@ package at.brandl.lws.notice.client;
 import java.util.Date;
 
 import com.google.gwt.i18n.client.Messages;
+import com.google.gwt.safehtml.shared.SafeHtml;
 
 public interface Labels extends Messages {
 	String children();
@@ -72,4 +73,8 @@ public interface Labels extends Messages {
 	String documentationDelWarning();
 	String beginYear();
 	String beginGrade();
+	String questionDelWarning();
+	String questionLabel();
+	String questionGroupLabel();
+	String groupActivity();
 }

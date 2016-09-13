@@ -58,7 +58,7 @@ public class FormFactory {
 
 	public Widget createAnswerTemplate(GwtQuestion question) {
 
-		GwtAnswerTemplate template = question.getTemplate();
+		GwtAnswerTemplate template = question.getAnswerTemplate();
 		if (template instanceof GwtMultipleChoiceAnswerTemplate) {
 
 			Panel panel = new VerticalPanel();
