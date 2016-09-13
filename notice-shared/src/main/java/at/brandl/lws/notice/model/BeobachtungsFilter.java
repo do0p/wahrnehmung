@@ -27,6 +27,16 @@ public class BeobachtungsFilter implements Serializable {
 	private String user;
 	
 	private boolean archived;
+	
+	private boolean aggregateSectionEntries;
+
+	public boolean isAggregateSectionEntries() {
+		return aggregateSectionEntries;
+	}
+
+	public void setAggregateSectionEntries(boolean aggregateSectionEntries) {
+		this.aggregateSectionEntries = aggregateSectionEntries;
+	}
 
 	public String getUser() {
 		return user;
@@ -113,6 +123,7 @@ public class BeobachtungsFilter implements Serializable {
 		result = prime * result + Arrays.hashCode(timeRange);
 		result = prime * result + ((user == null) ? 0 : user.hashCode());
 		result = prime * result + (archived ? 1 : 0);
+		result = prime * result + (aggregateSectionEntries ? 1 : 0);
 		return result;
 	}
 
@@ -127,6 +138,9 @@ public class BeobachtungsFilter implements Serializable {
 		BeobachtungsFilter other = (BeobachtungsFilter) obj;
 		if(archived != other.archived) 
 			return false;
+		if(aggregateSectionEntries != other.aggregateSectionEntries) {
+			return false;
+		}
 		if (childKey == null) {
 			if (other.childKey != null)
 				return false;

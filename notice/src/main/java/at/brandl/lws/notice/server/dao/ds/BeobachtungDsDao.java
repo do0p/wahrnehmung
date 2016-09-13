@@ -244,7 +244,7 @@ public class BeobachtungDsDao extends AbstractDsDao {
 			String childKey, BeobachtungsFilter filter, Date oldestEntry) {
 
 		Multimap<String, GwtBeobachtung> allBeobachtungen = getAllGwtBeobachtungen(
-				childKey, filter.getSectionKey(), oldestEntry,
+				childKey, filter.getSectionKey(), filter.isAggregateSectionEntries(), oldestEntry,
 				filter.isArchived());
 
 		GwtChild child = childDao.getChild(childKey);
@@ -389,7 +389,7 @@ public class BeobachtungDsDao extends AbstractDsDao {
 
 	@SuppressWarnings("unchecked")
 	private Multimap<String, GwtBeobachtung> getAllGwtBeobachtungen(
-			String childKey, String sectionKey, Date oldestEntry,
+			String childKey, String sectionKey, boolean aggregateSections, Date oldestEntry,
 			boolean archived) {
 		MemcacheService cache = getCache(getCacheName(archived));
 		Multimap<String, GwtBeobachtung> result = null;

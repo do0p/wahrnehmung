@@ -3,6 +3,7 @@ package at.brandl.lws.notice.server.dao.ds;
 import static at.brandl.lws.notice.TestUtils.createBeobachtung;
 import static at.brandl.lws.notice.TestUtils.createBeobachtungEntity;
 import static at.brandl.lws.notice.TestUtils.createChildEntity;
+import static at.brandl.lws.notice.TestUtils.createFilter;
 import static at.brandl.lws.notice.TestUtils.createFilterWithSummaries;
 import static at.brandl.lws.notice.TestUtils.createSectionEntity;
 import static at.brandl.lws.notice.TestUtils.createUser;
@@ -113,17 +114,13 @@ public class BeobachtungDsDaoWithSummariesTest extends AbstractDsDaoTest {
 
 	@Test
 	public void testDelete() {
-		Assert.assertEquals(
-				6,
-				beobachtungsDao.getRowCount(
-						createFilterWithSummaries(child1Key, null)));
+		Assert.assertEquals(6, beobachtungsDao
+				.getRowCount(createFilterWithSummaries(child1Key, null)));
 
 		beobachtungsDao.deleteAllFromChild(child1Key.toString());
 
-		Assert.assertEquals(
-				0,
-				beobachtungsDao.getRowCount(
-						createFilterWithSummaries(child1Key, null)));
+		Assert.assertEquals(0, beobachtungsDao
+				.getRowCount(createFilterWithSummaries(child1Key, null)));
 	}
 
 	@Test
@@ -133,8 +130,8 @@ public class BeobachtungDsDaoWithSummariesTest extends AbstractDsDaoTest {
 						range);
 		for (GwtBeobachtung beobachtung : beobachtungen) {
 			if (beobachtung.getKey() != null) {
-				Assert.assertEquals(beobachtung,
-						beobachtungsDao.getBeobachtung(beobachtung.getKey(), false));
+				Assert.assertEquals(beobachtung, beobachtungsDao
+						.getBeobachtung(beobachtung.getKey(), false));
 			}
 		}
 	}
@@ -144,19 +141,28 @@ public class BeobachtungDsDaoWithSummariesTest extends AbstractDsDaoTest {
 		BeobachtungsFilter filter = new BeobachtungsFilter();
 		filter.setShowSummaries(true);
 		filter.setSectionKey(section1Key);
-		List<GwtBeobachtung> beobachtungen = beobachtungsDao.getBeobachtungen(filter, range);
+		List<GwtBeobachtung> beobachtungen = beobachtungsDao.getBeobachtungen(
+				filter, range);
 		Assert.assertEquals(4, beobachtungen.size());
 	}
-	
+
+	@Test
+	public void testGetForSectionAggregate() {
+
+		BeobachtungsFilter filter = createFilterWithSummaries(null, section3Key);
+		filter.setOver12(true);
+		filter.setUnder12(true);
+		Assert.assertEquals(8,beobachtungsDao.getBeobachtungen(filter, range).size());
+	}
+
 	@Test
 	public void testGetForFilter() {
 
 		Assert.assertEquals(
 				6,
-				beobachtungsDao
-						.getBeobachtungen(
-								createFilterWithSummaries(child1Key, null),
-								range).size());
+				beobachtungsDao.getBeobachtungen(
+						createFilterWithSummaries(child1Key, null), range)
+						.size());
 		Assert.assertEquals(
 				2,
 				beobachtungsDao.getBeobachtungen(
@@ -164,17 +170,12 @@ public class BeobachtungDsDaoWithSummariesTest extends AbstractDsDaoTest {
 						range).size());
 		BeobachtungsFilter filter = createFilterWithSummaries(child1Key, null);
 		filter.setUser(user1.getEmail());
-		Assert.assertEquals(
-				4,
-				beobachtungsDao.getBeobachtungen(
-						filter, range).size());
+		Assert.assertEquals(4, beobachtungsDao.getBeobachtungen(filter, range)
+				.size());
 		filter = createFilterWithSummaries(child1Key, section2Key);
 		filter.setUser(user1.getEmail());
-		Assert.assertEquals(
-				2,
-				beobachtungsDao.getBeobachtungen(
-						filter,
-						range).size());
+		Assert.assertEquals(2, beobachtungsDao.getBeobachtungen(filter, range)
+				.size());
 
 		Assert.assertEquals(
 				2,
@@ -196,31 +197,28 @@ public class BeobachtungDsDaoWithSummariesTest extends AbstractDsDaoTest {
 	@Test
 	public void testRange() {
 		assertEquals(beobachtungsDao.getBeobachtungen(
-				createFilterWithSummaries(child1Key, null), new Range(4, 2)), beobachtung2, beobachtung1);
+				createFilterWithSummaries(child1Key, null), new Range(4, 2)),
+				beobachtung2, beobachtung1);
 		assertEquals(beobachtungsDao.getBeobachtungen(
-				createFilterWithSummaries(child1Key, null), new Range(5, 10)), beobachtung1);
+				createFilterWithSummaries(child1Key, null), new Range(5, 10)),
+				beobachtung1);
 		assertEquals(beobachtungsDao.getBeobachtungen(
-				createFilterWithSummaries(child1Key, null), new Range(3, 1)), beobachtung3);
+				createFilterWithSummaries(child1Key, null), new Range(3, 1)),
+				beobachtung3);
 	}
 
 	@Test
 	public void testRowCount() {
 		BeobachtungsFilter filter = createFilterWithSummaries(child1Key, null);
 		filter.setUser(user1.getEmail());
-		Assert.assertEquals(
-				4,
-				beobachtungsDao.getRowCount(
-						filter));
-		Assert.assertEquals(
-				6,
-				beobachtungsDao.getRowCount(
-						createFilterWithSummaries(child1Key, null)));
-		Assert.assertEquals(2, beobachtungsDao.getRowCount(
-				createFilterWithSummaries(child1Key, section1Key)));
+		Assert.assertEquals(4, beobachtungsDao.getRowCount(filter));
+		Assert.assertEquals(6, beobachtungsDao
+				.getRowCount(createFilterWithSummaries(child1Key, null)));
+		Assert.assertEquals(2, beobachtungsDao
+				.getRowCount(createFilterWithSummaries(child1Key, section1Key)));
 		filter = createFilterWithSummaries(child1Key, section2Key);
 		filter.setUser(user1.getEmail());
-		Assert.assertEquals(2, beobachtungsDao.getRowCount(
-				filter));
+		Assert.assertEquals(2, beobachtungsDao.getRowCount(filter));
 	}
 
 	@Test
@@ -318,8 +316,7 @@ public class BeobachtungDsDaoWithSummariesTest extends AbstractDsDaoTest {
 				filter, range);
 		Assert.assertEquals(7, beobachtungen.size());
 	}
-	
-	
+
 	@Override
 	protected String getMemCacheServiceName() {
 		return BeobachtungDsDao.getCacheName(false);

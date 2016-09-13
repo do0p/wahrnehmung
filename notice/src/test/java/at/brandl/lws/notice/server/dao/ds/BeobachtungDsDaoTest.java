@@ -124,6 +124,18 @@ public class BeobachtungDsDaoTest extends AbstractDsDaoTest {
 	}
 
 	@Test
+	public void testGetForSectionAggregate() {
+
+		BeobachtungsFilter filter = createFilter(null, section3Key);
+		filter.setOver12(true);
+		filter.setUnder12(true);
+		assertEquals(beobachtungsDao.getBeobachtungen(filter, range),
+				beobachtung4, beobachtung3, beobachtung2, beobachtung1);
+
+	}
+	
+	
+	@Test
 	public void testGetForFilter() {
 
 		assertEquals(beobachtungsDao.getBeobachtungen(
@@ -168,17 +180,14 @@ public class BeobachtungDsDaoTest extends AbstractDsDaoTest {
 	@Test(expected=IllegalArgumentException.class)
 	public void searchAllWithoutFilter() {
 		BeobachtungsFilter filter = new BeobachtungsFilter();
-		List<GwtBeobachtung> beobachtungen = beobachtungsDao.getBeobachtungen(filter, range);
-		Assert.assertTrue(beobachtungen.isEmpty());
-		
+		beobachtungsDao.getBeobachtungen(filter, range);
 	}
 
 	@Test(expected=IllegalArgumentException.class)
 	public void searchInFirstLevelSection() {
 		BeobachtungsFilter filter = new BeobachtungsFilter();
 		filter.setSectionKey(section3Key);
-		List<GwtBeobachtung> beobachtungen = beobachtungsDao.getBeobachtungen(filter, range);
-		Assert.assertEquals(2, beobachtungen.size());
+		beobachtungsDao.getBeobachtungen(filter, range);
 	}
 	
 	@Test
