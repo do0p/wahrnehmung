@@ -75,6 +75,15 @@ public class GwtBeobachtung implements Serializable, Comparable<GwtBeobachtung> 
 	private List<GwtFileInfo> fileInfos = new ArrayList<GwtFileInfo>();
 	private boolean countOnly;
 	private boolean archived;
+	private boolean groupActivity;
+
+	public boolean isGroupActivity() {
+		return groupActivity;
+	}
+
+	public void setGroupActivity(boolean groupActivity) {
+		this.groupActivity = groupActivity;
+	}
 
 	public void setText(String text) {
 		this.text = text;

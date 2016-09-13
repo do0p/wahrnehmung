@@ -3,6 +3,8 @@ package at.brandl.lws.notice.client;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import at.brandl.lws.notice.client.utils.DecisionBox;
 import at.brandl.lws.notice.client.utils.FileUploadForm;
@@ -50,6 +52,8 @@ import com.google.gwt.user.datepicker.client.DateBox;
 
 public class EditContent extends HorizontalPanel {
 
+	private static final Logger LOGGER = Logger.getLogger(EditContent.class.getCanonicalName());
+	
 	private final Labels labels = (Labels) GWT.create(Labels.class);
 	private final WahrnehmungsServiceAsync wahrnehmungService = (WahrnehmungsServiceAsync) GWT
 			.create(WahrnehmungsService.class);
@@ -69,6 +73,7 @@ public class EditContent extends HorizontalPanel {
 	private final DecisionBox decisionBox;
 	private final FileUploadForm uploadForm;
 	private final CheckBox countOnly;
+	private CheckBox groupActivity;
 
 	private boolean changes;
 	private RichTextToolbar toolbar;
@@ -79,6 +84,7 @@ public class EditContent extends HorizontalPanel {
 		beobachtung = new GwtBeobachtung();
 
 		countOnly = new CheckBox(labels.countOnly());
+		groupActivity = new CheckBox(labels.groupActivity());
 		textArea = new RichTextArea();
 		toolbar = new RichTextToolbar(textArea);
 		uploadForm = new FileUploadForm();
@@ -113,6 +119,15 @@ public class EditContent extends HorizontalPanel {
 			}
 		});
 
+		groupActivity.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+
+			@Override
+			public void onValueChange(ValueChangeEvent<Boolean> event) {
+				beobachtung.setGroupActivity(groupActivity.getValue());
+				LOGGER.log(Level.FINE, "groupActivity value changed to " + beobachtung.isGroupActivity());
+			}
+		});
+		
 		additionalNames.setMultipleSelect(true);
 
 		nameSelection.addSelectionHandler(new SelectionHandler<Suggestion>() {
@@ -120,6 +135,9 @@ public class EditContent extends HorizontalPanel {
 			public void onSelection(SelectionEvent<Suggestion> event) {
 				markChanged();
 				addNameToList();
+				if(additionalNames.getItemCount() == 2) {
+					groupActivity.setValue(Boolean.TRUE, true);
+				}
 				updateState();
 			}
 
@@ -135,6 +153,9 @@ public class EditContent extends HorizontalPanel {
 		nameRemoveButton.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent arg0) {
 				removeNameFromList();
+				if(additionalNames.getItemCount() < 2) {
+					groupActivity.setValue(Boolean.FALSE, true);
+				}
 				updateState();
 			}
 
@@ -325,7 +346,8 @@ public class EditContent extends HorizontalPanel {
 		VerticalPanel contentContainer = new VerticalPanel();
 		contentContainer.setSpacing(Utils.SPACING);
 
-		contentContainer.add(countOnly);
+		final Panel optionsContainer = createOptionsContainer();
+		contentContainer.add(optionsContainer);
 
 		final Panel selectionContainer = createSelectionContainer();
 		contentContainer.add(selectionContainer);
@@ -342,6 +364,13 @@ public class EditContent extends HorizontalPanel {
 		Utils.formatCenter(contentContainer, buttonContainer);
 
 		return contentContainer;
+	}
+
+	private Panel createOptionsContainer() {
+		Grid optionsContainer = new Grid(1, 2);
+		optionsContainer.setWidget(0, 0, countOnly);
+		optionsContainer.setWidget(0, 1, groupActivity);
+		return optionsContainer;
 	}
 
 	private Grid createTextArea() {
@@ -415,6 +444,7 @@ public class EditContent extends HorizontalPanel {
 	}
 
 	private void clearForNext() {
+		groupActivity.setValue(Boolean.FALSE);
 		nameSelection.reset();
 		durationSelection.setSelectedIndex(0);
 		socialSelection.setSelectedIndex(0);
@@ -519,7 +549,12 @@ public class EditContent extends HorizontalPanel {
 		durationSelection.setEnabled(enableDurationSelection());
 		durationSelection.setVisible(enableDurationSelection());
 		uploadForm.setEnabled(enableFileUpload());
+		groupActivity.setEnabled(enableGroupActivity());
 		// uploadForm.setVisible(enableFileUpload());
+	}
+
+	private boolean enableGroupActivity() {
+		return additionalNames.getItemCount() > 1;
 	}
 
 	private boolean enableFileUpload() {
