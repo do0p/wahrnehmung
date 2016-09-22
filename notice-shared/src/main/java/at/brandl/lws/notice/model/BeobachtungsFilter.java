@@ -171,6 +171,18 @@ public class BeobachtungsFilter implements Serializable {
 		this.archived = archived;
 	}
 
+	@Override
+	public String toString() {
+		return "BeobachtungsFilter [childKey=" + childKey + ", sectionKey="
+				+ sectionKey + ", timeRange=" + Arrays.toString(timeRange)
+				+ ", showEmptyEntries=" + showEmptyEntries + ", showSummaries="
+				+ showSummaries + ", sinceLastDevelopmementDialogue="
+				+ sinceLastDevelopmementDialogue + ", under12=" + under12
+				+ ", over12=" + over12 + ", user=" + user + ", archived="
+				+ archived + ", aggregateSectionEntries="
+				+ aggregateSectionEntries + "]";
+	}
+
 	
 	
 

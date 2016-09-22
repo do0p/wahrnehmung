@@ -18,6 +18,7 @@ import at.brandl.lws.notice.server.dao.DaoRegistry;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.Filter;
 import com.google.appengine.api.datastore.Transaction;
@@ -64,6 +65,9 @@ public class SectionDsDao extends AbstractDsDao {
 		if (children == null) {
 			return new HashSet<String>();
 		}
+		for(String sectionKey : children)
+		System.out.print(KeyFactory.stringToKey(sectionKey) + " ");
+		System.out.println();
 		return new HashSet<String>(children);
 	}
 

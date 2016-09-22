@@ -244,7 +244,8 @@ public class BeobachtungDsDao extends AbstractDsDao {
 			String childKey, BeobachtungsFilter filter, Date oldestEntry) {
 
 		Multimap<String, GwtBeobachtung> allBeobachtungen = getAllGwtBeobachtungen(
-				childKey, filter.getSectionKey(), filter.isAggregateSectionEntries(), oldestEntry,
+				childKey, filter.getSectionKey(),
+				filter.isAggregateSectionEntries(), oldestEntry,
 				filter.isArchived());
 
 		GwtChild child = childDao.getChild(childKey);
@@ -341,9 +342,13 @@ public class BeobachtungDsDao extends AbstractDsDao {
 					return false;
 				}
 
-				if (filter.getSectionKey() != null
-						&& !filter.getSectionKey().equals(
-								beobachtung.getSectionKey())) {
+				String filteredSectionKey = filter.getSectionKey();
+				String beobachtungSectionKey = beobachtung.getSectionKey();
+				if (!(filteredSectionKey == null
+						|| filteredSectionKey.equals(beobachtungSectionKey)
+						|| (filter.isAggregateSectionEntries() && sectionDao
+								.getAllChildKeys(filteredSectionKey).contains(
+										beobachtungSectionKey)))) {
 					return false;
 				}
 
@@ -389,12 +394,13 @@ public class BeobachtungDsDao extends AbstractDsDao {
 
 	@SuppressWarnings("unchecked")
 	private Multimap<String, GwtBeobachtung> getAllGwtBeobachtungen(
-			String childKey, String sectionKey, boolean aggregateSections, Date oldestEntry,
-			boolean archived) {
+			String childKey, String sectionKey, boolean aggregateSections,
+			Date oldestEntry, boolean archived) {
 		MemcacheService cache = getCache(getCacheName(archived));
 		Multimap<String, GwtBeobachtung> result = null;
 
-		String key = createKey(childKey, sectionKey, oldestEntry);
+		String key = createKey(childKey, sectionKey, oldestEntry,
+				aggregateSections);
 		if (!updateNeeded(childKey)) {
 			if (cache.contains(key)) {
 				result = (Multimap<String, GwtBeobachtung>) cache.get(key);
@@ -410,8 +416,8 @@ public class BeobachtungDsDao extends AbstractDsDao {
 			synchronized (this) {
 
 				setUpdated(childKey);
-				result = getAllBeobachtungen(childKey, sectionKey, oldestEntry,
-						archived);
+				result = getAllBeobachtungen(childKey, sectionKey,
+						aggregateSections, oldestEntry, archived);
 				cache.put(key, result);
 
 			}
@@ -420,21 +426,22 @@ public class BeobachtungDsDao extends AbstractDsDao {
 	}
 
 	private String createKey(String childKey, String sectionKey,
-			Date oldestEntry) {
+			Date oldestEntry, boolean aggregateSections) {
 		return childKey + (oldestEntry == null ? "" : oldestEntry.getTime())
-				+ (sectionKey == null ? "" : sectionKey);
+				+ (sectionKey == null ? "" : sectionKey)
+				+ (aggregateSections ? "as" : "na");
 	}
 
 	private Multimap<String, GwtBeobachtung> getAllBeobachtungen(
-			String childKey, String sectionKey, Date oldestEntry,
-			boolean archived) {
+			String childKey, String sectionKey, boolean aggregateSections,
+			Date oldestEntry, boolean archived) {
 
 		Multimap<String, GwtBeobachtung> sectionToBeobachtung = ArrayListMultimap
 				.<String, GwtBeobachtung> create(EXPECTED_SECTION_PER_CHILD,
 						EXPECTED_BEOBACHTUNG_PER_SECTION);
 
 		for (Entity beobachtung : queryAllBeobachtungen(childKey, sectionKey,
-				oldestEntry, archived)) {
+				aggregateSections, oldestEntry, archived)) {
 			try {
 				GwtBeobachtung gwtBeobachtung = toGwt(beobachtung);
 				gwtBeobachtung.setArchived(archived);
@@ -458,25 +465,29 @@ public class BeobachtungDsDao extends AbstractDsDao {
 	}
 
 	private Iterable<Entity> queryAllBeobachtungen(String childKey,
-			String sectionKey, Date oldestEntry, boolean archived) {
-		Query query = new Query(getBeobachtungKind(archived), DsUtil.toKey(childKey));
-		Filter filter = createFilter(sectionKey, oldestEntry);
+			String sectionKey, boolean aggregateSections, Date oldestEntry,
+			boolean archived) {
+		Query query = new Query(getBeobachtungKind(archived),
+				DsUtil.toKey(childKey));
+		Filter filter = createFilter(sectionKey, aggregateSections, oldestEntry);
 		if (filter != null) {
 			query.setFilter(filter);
 		}
 		return getDatastoreService().prepare(query).asIterable();
 	}
 
-	private Filter createFilter(String sectionKey, Date oldestEntry) {
+	private Filter createFilter(String sectionKey, boolean aggregateSections,
+			Date oldestEntry) {
 		Filter filter = null;
 		if (oldestEntry != null) {
 			filter = new FilterPredicate(Notice.DATE,
 					FilterOperator.GREATER_THAN, oldestEntry);
 		}
-		Filter sectionFilter = null;
 		if (sectionKey != null) {
-			sectionFilter = new FilterPredicate(Notice.SECTION,
-					FilterOperator.EQUAL, KeyFactory.stringToKey(sectionKey));
+
+			Filter sectionFilter = createSectionFilter(sectionKey,
+					aggregateSections);
+
 			if (filter == null) {
 				filter = sectionFilter;
 			} else {
@@ -485,6 +496,30 @@ public class BeobachtungDsDao extends AbstractDsDao {
 			}
 		}
 		return filter;
+	}
+
+	private Filter createSectionFilter(String sectionKey,
+			boolean aggregateSections) {
+
+		Filter sectionFilter = new FilterPredicate(Notice.SECTION,
+				FilterOperator.EQUAL, KeyFactory.stringToKey(sectionKey));
+		if (!aggregateSections) {
+			return sectionFilter;
+		}
+		Set<String> childSectionKeys = sectionDao.getAllChildKeys(sectionKey);
+		if (!childSectionKeys.isEmpty()) {
+			List<Filter> allSectionFilters = new ArrayList<>();
+			allSectionFilters.add(sectionFilter);
+			for (String childSectionKey : childSectionKeys) {
+				allSectionFilters.add(new FilterPredicate(Notice.SECTION,
+						FilterOperator.EQUAL, KeyFactory
+								.stringToKey(childSectionKey)));
+			}
+
+			sectionFilter = new CompositeFilter(CompositeFilterOperator.OR,
+					allSectionFilters);
+		}
+		return sectionFilter;
 	}
 
 	private Date shortListLimit() {
@@ -575,8 +610,8 @@ public class BeobachtungDsDao extends AbstractDsDao {
 	public synchronized void deleteAllFromChild(String childKey) {
 
 		DatastoreService ds = getDatastoreService();
-		Query query = new Query(getBeobachtungKind(false), DsUtil.toKey(childKey))
-				.setKeysOnly();
+		Query query = new Query(getBeobachtungKind(false),
+				DsUtil.toKey(childKey)).setKeysOnly();
 		Transaction transaction = ds.beginTransaction();
 		try {
 			Iterable<Entity> allBeobachtungen = ds.prepare(query).asIterable();
@@ -621,7 +656,8 @@ public class BeobachtungDsDao extends AbstractDsDao {
 
 	private GwtBeobachtung toGwt(Entity entity) {
 		String childKey = DsUtil.toString(entity.getParent());
-		String sectionKey = DsUtil.toString((Key) entity.getProperty(Notice.SECTION));
+		String sectionKey = DsUtil.toString((Key) entity
+				.getProperty(Notice.SECTION));
 		String duration = (String) entity.getProperty(Notice.DURATION);
 		String social = (String) entity.getProperty(Notice.SOCIAL);
 		Date date = (Date) entity.getProperty(Notice.DATE);
@@ -875,9 +911,9 @@ public class BeobachtungDsDao extends AbstractDsDao {
 
 	private Iterable<Entity> getAllBeobachtungenBefore(Date endDate,
 			String childKey, DatastoreService ds) {
-		Query query = new Query(getBeobachtungKind(false), DsUtil.toKey(childKey))
-				.setFilter(new FilterPredicate(Notice.DATE,
-						FilterOperator.LESS_THAN, endDate));
+		Query query = new Query(getBeobachtungKind(false),
+				DsUtil.toKey(childKey)).setFilter(new FilterPredicate(
+				Notice.DATE, FilterOperator.LESS_THAN, endDate));
 		return ds.prepare(query).asIterable();
 	}
 

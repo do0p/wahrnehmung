@@ -62,6 +62,7 @@ public class Search extends VerticalPanel {
 		PopUp dialogBox = new PopUp();
 		final RichTextArea textArea = new RichTextArea();
 		this.filter = new BeobachtungsFilter();
+		this.filter.setAggregateSectionEntries(true);
 		this.nameSelection = new NameSelection(dialogBox);
 		nameSelection.addSelectionHandler(new SelectionHandler<Suggestion>() {
 			@Override

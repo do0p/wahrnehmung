@@ -129,6 +129,7 @@ public class BeobachtungDsDaoTest extends AbstractDsDaoTest {
 		BeobachtungsFilter filter = createFilter(null, section3Key);
 		filter.setOver12(true);
 		filter.setUnder12(true);
+		filter.setAggregateSectionEntries(true);
 		assertEquals(beobachtungsDao.getBeobachtungen(filter, range),
 				beobachtung4, beobachtung3, beobachtung2, beobachtung1);
 
