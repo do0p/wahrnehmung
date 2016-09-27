@@ -17,5 +17,11 @@
 			<context-root>/notice-service</context-root>
 		</web>
 	</module>
+	<module>
+		<web>
+			<web-uri>interaction-service-${project.version}.war</web-uri>
+			<context-root>/interaction-service</context-root>
+		</web>
+	</module>	
 	<library-directory>lib</library-directory>
 </application>
