@@ -1,5 +1,6 @@
 package at.brandl.lws.notice.client;
 
+import java.util.Date;
 import java.util.List;
 
 import at.brandl.lws.notice.client.utils.DecisionBox;
@@ -36,7 +37,7 @@ public class Documentation extends VerticalPanel {
 			.create(DocsService.class);
 
 	private final NameSelection nameSelection;
-	private int year = 2015;
+	private int year;
 	private Button printButton;
 	private String selectedChidKey;
 	private PopUp dialogBox;
@@ -58,7 +59,20 @@ public class Documentation extends VerticalPanel {
 				updateButtonState();
 			}
 		});
+		year = calcSchoolYear();
+	}
 
+	/**
+	 * The school year is the year the of the start of the period. 
+	 * For example period = 2016 / 2017, the school year is 2016.
+	 * @return the school year
+	 */
+	private int calcSchoolYear() {
+		Date date = new Date();
+		int year = date.getYear() + 1900;
+		int month = date.getMonth();
+		year = month < 9 ? year - 1 : year;
+		return year;
 	}
 
 	private void updateButtonState() {

@@ -257,6 +257,9 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 		ArrayList<Object> sectionOrder = new ArrayList<>();
 		parentMap.put(ORDER_NAME, sectionOrder);
 		for (GwtSection section : sections) {
+			if(isArchived(section)) {
+				continue;
+			}
 			LinkedHashMap<String, Object> childMap = new LinkedHashMap<>();
 			childMap.put(TEXT_NAME, new ArrayList<>());
 			childMap.putAll(createMap(section.getKey(), childSections));
@@ -266,6 +269,10 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 		}
 
 		return parentMap;
+	}
+
+	private boolean isArchived(GwtSection section) {
+		return Boolean.TRUE.equals(section.getArchived());
 	}
 
 	private void addNotice(Map<String, Object> notices, GwtBeobachtung notice) {
