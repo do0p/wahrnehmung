@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import at.brandl.lws.notice.dao.AbstractDsDao;
 import at.brandl.lws.notice.model.GwtFileInfo;
 import at.brandl.lws.notice.shared.Config;
 

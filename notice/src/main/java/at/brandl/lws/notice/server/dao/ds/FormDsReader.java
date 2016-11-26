@@ -1,6 +1,6 @@
 package at.brandl.lws.notice.server.dao.ds;
 
-import static at.brandl.lws.notice.server.dao.ds.DsUtil.toKey;
+import static at.brandl.lws.notice.dao.DsUtil.toKey;
 import static at.brandl.lws.notice.server.dao.ds.converter.GwtAnswerTemplateConverter.toGwtAnswerTemplate;
 import static at.brandl.lws.notice.server.dao.ds.converter.GwtMultipleChoiceOptionConverter.toGwtMultipleChoiceOption;
 import static at.brandl.lws.notice.server.dao.ds.converter.GwtQuestionConverter.toGwtQuestion;
@@ -10,6 +10,7 @@ import static at.brandl.lws.notice.server.dao.ds.converter.GwtQuestionnaireConve
 import java.util.ArrayList;
 import java.util.List;
 
+import at.brandl.lws.notice.dao.DsUtil;
 import at.brandl.lws.notice.model.GwtAnswerTemplate;
 import at.brandl.lws.notice.model.GwtMultipleChoiceAnswerTemplate;
 import at.brandl.lws.notice.model.GwtMultipleChoiceOption;

@@ -16,9 +16,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import at.brandl.lws.notice.TestUtils;
+import at.brandl.lws.notice.dao.DaoRegistry;
 import at.brandl.lws.notice.model.BeobachtungsFilter;
 import at.brandl.lws.notice.model.GwtBeobachtung;
-import at.brandl.lws.notice.server.dao.DaoRegistry;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.users.User;

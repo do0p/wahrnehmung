@@ -11,6 +11,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import at.brandl.lws.notice.dao.DaoRegistry;
 import at.brandl.lws.notice.model.GwtAnswer;
 import at.brandl.lws.notice.model.GwtAnswerTemplate;
 import at.brandl.lws.notice.model.GwtMultipleChoiceAnswer;
@@ -20,7 +21,6 @@ import at.brandl.lws.notice.model.GwtQuestion;
 import at.brandl.lws.notice.model.GwtQuestionGroup;
 import at.brandl.lws.notice.model.GwtQuestionnaire;
 import at.brandl.lws.notice.model.GwtQuestionnaireAnswers;
-import at.brandl.lws.notice.server.dao.DaoRegistry;
 import at.brandl.lws.notice.shared.util.Constants.Questionnaire.Cache;
 
 import com.google.appengine.api.datastore.Key;

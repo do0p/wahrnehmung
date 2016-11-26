@@ -2,8 +2,8 @@ package at.brandl.lws.notice.server.service;
 
 import java.util.Collection;
 
+import at.brandl.lws.notice.dao.DaoRegistry;
 import at.brandl.lws.notice.model.GwtQuestionnaireAnswers;
-import at.brandl.lws.notice.server.dao.DaoRegistry;
 import at.brandl.lws.notice.server.dao.ds.QuestionnaireDsDao;
 import at.brandl.lws.notice.shared.service.QuestionnaireService;
 

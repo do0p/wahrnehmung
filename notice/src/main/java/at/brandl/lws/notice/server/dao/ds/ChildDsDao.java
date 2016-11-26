@@ -10,6 +10,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import at.brandl.lws.notice.dao.AbstractDsDao;
+import at.brandl.lws.notice.dao.DsUtil;
 import at.brandl.lws.notice.model.GwtChild;
 import at.brandl.lws.notice.shared.util.Constants.Child;
 import at.brandl.lws.notice.shared.util.Constants.Child.Cache;

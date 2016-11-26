@@ -9,7 +9,13 @@
   	<packaging>war</packaging>
 
 	<dependencies>
+
 		<!-- Compile/runtime dependencies -->
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>notice-shared</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>com.google.appengine</groupId>
 			<artifactId>appengine-api-1.0-sdk</artifactId>
@@ -47,11 +53,7 @@
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>notice-shared</artifactId>
-			<version>${project.version}</version>
-		</dependency>
+
 	</dependencies>
 
 	<build>

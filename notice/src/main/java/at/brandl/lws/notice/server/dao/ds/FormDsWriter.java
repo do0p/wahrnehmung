@@ -1,6 +1,6 @@
 package at.brandl.lws.notice.server.dao.ds;
 
-import static at.brandl.lws.notice.server.dao.ds.DsUtil.toKey;
+import static at.brandl.lws.notice.dao.DsUtil.toKey;
 import static at.brandl.lws.notice.server.dao.ds.converter.GwtAnswerTemplateConverter.toEntity;
 import static at.brandl.lws.notice.server.dao.ds.converter.GwtMultipleChoiceOptionConverter.toEntity;
 import static at.brandl.lws.notice.server.dao.ds.converter.GwtQuestionConverter.toEntity;
@@ -18,6 +18,7 @@ import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import at.brandl.lws.notice.dao.DsUtil;
 import at.brandl.lws.notice.model.GwtAnswerTemplate;
 import at.brandl.lws.notice.model.GwtMultipleChoiceAnswerTemplate;
 import at.brandl.lws.notice.model.GwtMultipleChoiceOption;

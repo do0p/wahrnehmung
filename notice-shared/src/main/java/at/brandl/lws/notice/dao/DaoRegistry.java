@@ -1,4 +1,4 @@
-package at.brandl.lws.notice.server.dao;
+package at.brandl.lws.notice.dao;
 
 import java.util.HashMap;
 import java.util.Map;

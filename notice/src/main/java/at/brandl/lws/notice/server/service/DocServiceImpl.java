@@ -24,6 +24,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.safety.Whitelist;
 import org.jsoup.select.NodeTraversor;
 
+import at.brandl.lws.notice.dao.DaoRegistry;
 import at.brandl.lws.notice.model.BackendServiceException;
 import at.brandl.lws.notice.model.BeobachtungsFilter;
 import at.brandl.lws.notice.model.DocumentationAlreadyExistsException;
@@ -33,7 +34,6 @@ import at.brandl.lws.notice.model.GwtDocumentation;
 import at.brandl.lws.notice.model.GwtSection;
 import at.brandl.lws.notice.model.GwtSummary;
 import at.brandl.lws.notice.model.UserGrantRequiredException;
-import at.brandl.lws.notice.server.dao.DaoRegistry;
 import at.brandl.lws.notice.server.dao.ds.BeobachtungDsDao;
 import at.brandl.lws.notice.server.dao.ds.ChildDsDao;
 import at.brandl.lws.notice.server.dao.ds.SectionDsDao;

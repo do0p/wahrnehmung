@@ -22,6 +22,9 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
+import at.brandl.lws.notice.dao.AbstractDsDao;
+import at.brandl.lws.notice.dao.DaoRegistry;
+import at.brandl.lws.notice.dao.DsUtil;
 import at.brandl.lws.notice.model.BeobachtungsFilter;
 import at.brandl.lws.notice.model.GwtBeobachtung;
 import at.brandl.lws.notice.model.GwtBeobachtung.DurationEnum;
@@ -29,7 +32,6 @@ import at.brandl.lws.notice.model.GwtBeobachtung.SocialEnum;
 import at.brandl.lws.notice.model.GwtChild;
 import at.brandl.lws.notice.model.GwtSection;
 import at.brandl.lws.notice.model.GwtSummary;
-import at.brandl.lws.notice.server.dao.DaoRegistry;
 import at.brandl.lws.notice.shared.util.Constants.ArchiveNotice;
 import at.brandl.lws.notice.shared.util.Constants.ArchiveNoticeGroup;
 import at.brandl.lws.notice.shared.util.Constants.Notice;

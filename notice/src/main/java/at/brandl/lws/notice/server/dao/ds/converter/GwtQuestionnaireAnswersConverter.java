@@ -1,7 +1,7 @@
 package at.brandl.lws.notice.server.dao.ds.converter;
 
+import at.brandl.lws.notice.dao.DsUtil;
 import at.brandl.lws.notice.model.GwtQuestionnaireAnswers;
-import at.brandl.lws.notice.server.dao.ds.DsUtil;
 import at.brandl.lws.notice.shared.util.Constants.QuestionnaireAnswers;
 
 import com.google.appengine.api.datastore.Entity;

@@ -9,10 +9,10 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import at.brandl.lws.notice.dao.DaoRegistry;
 import at.brandl.lws.notice.model.GwtAnswer;
 import at.brandl.lws.notice.model.GwtMultipleChoiceAnswer;
 import at.brandl.lws.notice.model.GwtQuestionnaireAnswers;
-import at.brandl.lws.notice.server.dao.DaoRegistry;
 import at.brandl.lws.notice.shared.util.Constants.Child;
 import at.brandl.lws.notice.shared.util.Constants.Question;
 import at.brandl.lws.notice.shared.util.Constants.Questionnaire;

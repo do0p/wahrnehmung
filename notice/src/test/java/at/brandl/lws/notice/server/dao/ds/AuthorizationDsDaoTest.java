@@ -8,8 +8,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import at.brandl.lws.notice.dao.DaoRegistry;
 import at.brandl.lws.notice.model.Authorization;
-import at.brandl.lws.notice.server.dao.DaoRegistry;
 
 import com.google.appengine.api.users.User;
 

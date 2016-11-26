@@ -5,6 +5,7 @@ import static com.google.appengine.api.datastore.FetchOptions.Builder.withDefaul
 import java.util.ArrayList;
 import java.util.Collection;
 
+import at.brandl.lws.notice.dao.AbstractDsDao;
 import at.brandl.lws.notice.model.Authorization;
 
 import com.google.appengine.api.datastore.Entity;

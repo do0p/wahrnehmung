@@ -1,4 +1,4 @@
-package at.brandl.lws.notice.server.dao.ds;
+package at.brandl.lws.notice.dao;
 
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;

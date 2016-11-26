@@ -1,6 +1,4 @@
-package at.brandl.lws.notice.server.dao.ds;
-
-import at.brandl.lws.notice.server.dao.AbstractDao;
+package at.brandl.lws.notice.dao;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
