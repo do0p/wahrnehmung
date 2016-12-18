@@ -66,18 +66,19 @@
 		<url-pattern>/removeOrphanedGroups</url-pattern>
 	</servlet-mapping>
 	
-	
-	
 	<security-constraint>
 		<web-resource-collection>
 			<web-resource-name>/*</web-resource-name>
 			<url-pattern>/*</url-pattern>
 		</web-resource-collection>
-		<user-data-constraint>
+		<auth-constraint>
+            <role-name>admin</role-name>
+        </auth-constraint>
+      	<user-data-constraint>
 			<transport-guarantee>CONFIDENTIAL</transport-guarantee>
 		</user-data-constraint>
 	</security-constraint>
-
+	
 	<servlet>
 		<servlet-name>SystemServiceServlet</servlet-name>
 		<servlet-class>com.google.api.server.spi.SystemServiceServlet</servlet-class>
