@@ -61,6 +61,7 @@
 						<jvmFlag>-Xdebug</jvmFlag>
 						<jvmFlag>-Xrunjdwp:transport=dt_socket,address=1044,server=y,suspend=n
 						</jvmFlag>
+						<jvmFlag>-Dcom.google.appengine.devappserver_module.interaction-service.port=9090</jvmFlag>
 					</jvmFlags>
 					<disableUpdateCheck>true</disableUpdateCheck>
 				</configuration>

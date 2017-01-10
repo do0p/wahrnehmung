@@ -1,17 +1,17 @@
 package at.brandl.lws.notice.interaction.servlet;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.Date;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.google.api.client.json.JsonGenerator;
-import com.google.api.client.json.jackson2.JacksonFactory;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
 
 import at.brandl.lws.notice.interaction.dao.InteractionDsDao;
 
@@ -38,10 +38,31 @@ public class InteractionServlet extends HttpServlet {
 
 		Map<String, Integer> interactions = interactionDao.getInteractions(childKey, fromDate, toDate);
 
-		
-		JsonGenerator generator = JacksonFactory.getDefaultInstance().createJsonGenerator(resp.getOutputStream(), Charset.forName("UTF-8"));
-		generator.serialize(interactions);
-		resp.flushBuffer();
+		JsonGenerator generator = new JsonFactory().createGenerator(resp.getOutputStream());
+		writeBegin(generator);
+		for (Entry<String, Integer> interaction : interactions.entrySet()) {
+			writeEntry(generator, interaction);
+		}
+		writeEnd(generator);
+		generator.close();
+	}
+
+	private void writeEnd(JsonGenerator generator) throws IOException {
+		generator.writeEndArray();
+		generator.writeEndObject();
+	}
+
+	private void writeEntry(JsonGenerator generator, Entry<String, Integer> interaction) throws IOException {
+		generator.writeStartObject();
+		generator.writeFieldName(interaction.getKey());
+		generator.writeNumber(interaction.getValue());
+		generator.writeEndObject();
+	}
+
+	private void writeBegin(JsonGenerator generator) throws IOException {
+		generator.writeStartObject();
+		generator.writeFieldName("interactions");
+		generator.writeStartArray();
 	}
 
 	private Date getDateValue(HttpServletRequest req, String paramName) {

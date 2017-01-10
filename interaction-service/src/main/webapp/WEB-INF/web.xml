@@ -4,6 +4,15 @@
 	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
 	version="3.0">
 	
+	<filter>
+		<filter-name>corsFilter</filter-name>
+		<filter-class>at.brandl.lws.notice.interaction.filter.CORSFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>corsFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+	
 	<servlet>
 		<servlet-name>interactionsServlet</servlet-name>
 		<servlet-class>at.brandl.lws.notice.interaction.servlet.InteractionServlet</servlet-class>
@@ -13,14 +22,23 @@
 		<url-pattern>/interactions</url-pattern>
 	</servlet-mapping>
 	
+	<servlet>
+		<servlet-name>storeInteractionsServlet</servlet-name>
+		<servlet-class>at.brandl.lws.notice.interaction.servlet.StoreInteractionServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>storeInteractionsServlet</servlet-name>
+		<url-pattern>/storeInteraction</url-pattern>
+	</servlet-mapping>
+	
 	<security-constraint>
 		<web-resource-collection>
 			<web-resource-name>/*</web-resource-name>
 			<url-pattern>/*</url-pattern>
 		</web-resource-collection>
-		<auth-constraint>
+ 		<auth-constraint>
             <role-name>admin</role-name>
-        </auth-constraint>
+        </auth-constraint> 
 		<user-data-constraint>
 			<transport-guarantee>CONFIDENTIAL</transport-guarantee>
 		</user-data-constraint>

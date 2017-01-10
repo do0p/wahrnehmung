@@ -7,4 +7,9 @@
 			<task-age-limit>2d</task-age-limit>
 		</retry-parameters>
 	</queue>
+	<queue>
+		<name>interaction</name>
+		<target>interaction-service</target>
+		<rate>10/s</rate>
+	</queue>
 </queue-entries>

@@ -1,7 +1,6 @@
 package at.brandl.lws.notice.interaction.dao;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -10,6 +9,7 @@ import java.util.Map;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.CompositeFilter;
@@ -61,25 +61,22 @@ public class InteractionDsDao extends AbstractDsDao {
 		if (filters.isEmpty()) {
 			return null;
 		}
-	
+
 		if (filters.size() == 1) {
 			return filters.get(0);
 		}
-		
+
 		return new CompositeFilter(CompositeFilterOperator.AND, filters);
 	}
 
-	public void storeInteraction(String childKey, String childKeyOther, Date date, Integer count) {
-
-		// date = normalizeDate(date);
+	public void incrementInteraction(String childKey, String childKeyOther, Date date, int increment) {
 		DatastoreService datastoreService = getDatastoreService();
 		Transaction transaction = datastoreService.beginTransaction(TransactionOptions.Builder.withXG(true));
 		try {
 
-			storeInteractionInDs(datastoreService, childKey, childKeyOther, count, date);
-			storeInteractionInDs(datastoreService, childKeyOther, childKey, count, date);
+			incrementInteractionInDs(datastoreService, childKey, childKeyOther, increment, date);
+			incrementInteractionInDs(datastoreService, childKeyOther, childKey, increment, date);
 			transaction.commit();
-
 		} finally {
 			if (transaction.isActive()) {
 				transaction.rollback();
@@ -106,17 +103,55 @@ public class InteractionDsDao extends AbstractDsDao {
 		result.put(partner, count);
 	}
 
-	private void storeInteractionInDs(DatastoreService datastoreService, String childKey, String childKeyOther,
-			Integer count, Date date) {
-		final Entity interaction = toEntity(childKey, childKeyOther, count, date);
+	private void incrementInteractionInDs(DatastoreService datastoreService, String childKey, String childKeyOther,
+			int increment, Date date) {
 
-		// if (exists(interaction, datastoreService)) {
-		// transaction.rollback();
-		// throw new IllegalArgumentException(interaction
-		// + " existiert bereits!");
-		// }
+		Entity entity = getInteraction(datastoreService, childKey, childKeyOther, date);
+		entity.setProperty(Interaction.COUNT, getCount(entity) + increment);
+		datastoreService.put(entity);
+	}
 
-		datastoreService.put(interaction);
+	private Entity getInteraction(DatastoreService datastoreService, String childKey, String childKeyOther, Date date) {
+		
+		PreparedQuery preparedQuery = datastoreService.prepare(createQueryForInteraction(childKey, childKeyOther, date));
+		List<Entity> result = preparedQuery.asList(FetchOptions.Builder.withDefaults());
+
+		if (result.isEmpty()) {
+			return toEntity(childKey, childKeyOther, 0, date);
+		}
+
+		if (result.size() > 1) {
+			sumUp(datastoreService, result);
+		}
+
+		return result.get(0);
+	}
+
+	private Query createQueryForInteraction(String childKey, String childKeyOther, Date date) {
+		List<Filter> filters = new ArrayList<>();
+		filters.add(new FilterPredicate(Interaction.DATE, FilterOperator.EQUAL, date));
+		filters.add(new FilterPredicate(Interaction.PARTNER, FilterOperator.EQUAL, DsUtil.toKey(childKeyOther)));
+		Filter filter = new CompositeFilter(CompositeFilterOperator.AND, filters);
+
+		Query query = new Query(Interaction.KIND).setAncestor(DsUtil.toKey(childKey));
+		query.setFilter(filter);
+		return query;
+	}
+
+	private void sumUp(DatastoreService datastoreService, List<Entity> result) {
+		int count = 0;
+		for (int i = 0; i < result.size(); i++) {
+			Entity entity = result.get(i);
+			count += getCount(entity);
+			if (i > 0) {
+				datastoreService.delete(entity.getKey());
+			}
+		}
+		result.get(0).setProperty(Interaction.COUNT, count);
+	}
+
+	private int getCount(Entity entity) {
+		return ((Number) entity.getProperty(Interaction.COUNT)).intValue();
 	}
 
 	private Entity toEntity(String childKey, String childOtherKey, Integer count, Date date) {

@@ -65,11 +65,11 @@ public class InteractionDsDaoTest {
 
 	@Test
 	public void storeInteraction() {
-		
-		interactionDao.storeInteraction(childKey1, childKey2, DATE1, COUNT1);
-		interactionDao.storeInteraction(childKey1, childKey2, DATE2, COUNT2);
-		interactionDao.storeInteraction(childKey1, childKey2, DATE2, COUNT3);
-		interactionDao.storeInteraction(childKey1, childKey3, DATE1, COUNT3);
+
+		interactionDao.incrementInteraction(childKey1, childKey2, DATE1, COUNT1);
+		interactionDao.incrementInteraction(childKey1, childKey2, DATE2, COUNT2);
+		interactionDao.incrementInteraction(childKey1, childKey2, DATE2, COUNT3);
+		interactionDao.incrementInteraction(childKey1, childKey3, DATE1, COUNT3);
 
 		// without filter
 		Map<String, Integer> interactions = interactionDao.getInteractions(childKey1, null, null);
@@ -78,19 +78,29 @@ public class InteractionDsDaoTest {
 		interactions = interactionDao.getInteractions(childKey2, null, null);
 		assertInteraction(interactions, childKey1, COUNT1 + COUNT2 + COUNT3);
 		interactions = interactionDao.getInteractions(childKey3, null, null);
-		assertInteraction(interactions, childKey1,  COUNT3);
-		
+		assertInteraction(interactions, childKey1, COUNT3);
+
 		// with date filter
 		interactions = interactionDao.getInteractions(childKey1, null, DATE1);
-		assertInteraction(interactions, childKey2, COUNT1 );
+		assertInteraction(interactions, childKey2, COUNT1);
 		interactions = interactionDao.getInteractions(childKey1, DATE1, DATE1);
-		assertInteraction(interactions, childKey2, COUNT1 );
+		assertInteraction(interactions, childKey2, COUNT1);
 		interactions = interactionDao.getInteractions(childKey1, DATE2, null);
-		assertInteraction(interactions, childKey2, COUNT2 +  COUNT3 );
+		assertInteraction(interactions, childKey2, COUNT2 + COUNT3);
 	}
 
-	private void assertInteraction(Map<String, Integer> interactions, String partnerKey,
-			Integer count) {
+	@Test
+	public void incrementInteraction() {
+
+		interactionDao.incrementInteraction(childKey1, childKey2, DATE1, COUNT1);
+		interactionDao.incrementInteraction(childKey1, childKey2, DATE1, COUNT1);
+
+		// with date filter
+		Map<String, Integer> interactions = interactionDao.getInteractions(childKey1, DATE1, DATE1);
+		assertInteraction(interactions, childKey2, COUNT1 * 2);
+	}
+
+	private void assertInteraction(Map<String, Integer> interactions, String partnerKey, Integer count) {
 
 		Assert.assertNotNull(interactions);
 		Assert.assertEquals(count, interactions.get(partnerKey));

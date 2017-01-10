@@ -2,6 +2,7 @@ package at.brandl.lws.notice.client.utils;
 
 import at.brandl.lws.notice.client.Documentation;
 import at.brandl.lws.notice.client.EditContent;
+import at.brandl.lws.notice.client.Interactions;
 import at.brandl.lws.notice.client.Labels;
 import at.brandl.lws.notice.client.Questionnaire;
 import at.brandl.lws.notice.client.Search;
@@ -21,6 +22,7 @@ public class Navigation extends HorizontalPanel {
 	static final String NEW_ENTRY = "new";
 	private static final String FORM_ENTRY = "form";
 	private static final String LIST_ENTRY = "list";
+	private static final String INTERACTIONS_ENTRY = "interactions";
 	public static final String DOCUMENTATION_ENTRY = "documentation";
 
 	private final Authorization authorization;
@@ -31,12 +33,15 @@ public class Navigation extends HorizontalPanel {
 	private Documentation documentation;
 	private Questionnaire questionnaire;
 
+	private Interactions interactions;
+
 	public Navigation(Authorization authorization) {
 		this.authorization = authorization;
 		setSpacing(10);
 		add(new Hyperlink(labels.notice(), NEW_ENTRY));
 		add(new Hyperlink(labels.questionnaire(), FORM_ENTRY));
 		add(new Hyperlink(labels.search(), LIST_ENTRY));
+		add(new Hyperlink(labels.interactions(), INTERACTIONS_ENTRY));
 		if ((authorization.isAdmin()) || (authorization.isSeeAll())) {
 			add(new Hyperlink(labels.documentation(), DOCUMENTATION_ENTRY));
 		}
@@ -59,6 +64,9 @@ public class Navigation extends HorizontalPanel {
 		if (token.equals(LIST_ENTRY)) {
 			return getSearch();
 		}
+		if (token.equals(INTERACTIONS_ENTRY)) {
+			return getInteractions();
+		}
 		if (token.equals(DOCUMENTATION_ENTRY)) {
 			return getDocumentation();
 		}
@@ -66,6 +74,13 @@ public class Navigation extends HorizontalPanel {
 			return getAdminContent();
 		}
 		return null;
+	}
+
+	private Widget getInteractions() {
+		if(interactions == null) {
+			interactions = new Interactions(authorization);
+		}
+		return interactions;
 	}
 
 	private Documentation getDocumentation() {
