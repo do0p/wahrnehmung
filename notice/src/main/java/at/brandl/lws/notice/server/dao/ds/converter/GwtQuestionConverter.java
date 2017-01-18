@@ -5,12 +5,12 @@ import static at.brandl.lws.notice.dao.DsUtil.toKey;
 import java.util.Date;
 import java.util.List;
 
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.Key;
+
 import at.brandl.lws.notice.dao.DsUtil;
 import at.brandl.lws.notice.model.GwtQuestion;
 import at.brandl.lws.notice.shared.util.Constants.Question;
-
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.Key;
 
 public class GwtQuestionConverter {
 

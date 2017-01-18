@@ -12,14 +12,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import at.brandl.lws.notice.shared.util.Constants.ArchiveNotice;
-import at.brandl.lws.notice.shared.util.Constants.ArchiveNoticeGroup;
-import at.brandl.lws.notice.shared.util.Constants.Child;
-import at.brandl.lws.notice.shared.util.Constants.MigrationKeyMapping;
-import at.brandl.lws.notice.shared.util.Constants.MigrationKeyMapping.KeyMappingType;
-import at.brandl.lws.notice.shared.util.Constants.Notice;
-import at.brandl.lws.notice.shared.util.Constants.NoticeGroup;
-
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
@@ -30,6 +22,14 @@ import com.google.appengine.api.datastore.Query;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalMemcacheServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
+
+import at.brandl.lws.notice.shared.util.Constants.ArchiveNotice;
+import at.brandl.lws.notice.shared.util.Constants.ArchiveNoticeGroup;
+import at.brandl.lws.notice.shared.util.Constants.Child;
+import at.brandl.lws.notice.shared.util.Constants.MigrationKeyMapping;
+import at.brandl.lws.notice.shared.util.Constants.MigrationKeyMapping.KeyMappingType;
+import at.brandl.lws.notice.shared.util.Constants.Notice;
+import at.brandl.lws.notice.shared.util.Constants.NoticeGroup;
 
 public class NoticeArchiveDsDaoTest {
 

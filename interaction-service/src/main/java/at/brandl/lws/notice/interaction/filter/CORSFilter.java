@@ -19,11 +19,12 @@ public class CORSFilter implements Filter {
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+		System.err.println("in filter of " + getClass().getName());
 		if(response instanceof HttpServletResponse) {
+			System.err.println("adding cors");
 			((HttpServletResponse) response).addHeader("Access-Control-Allow-Credentials", "true");
 			((HttpServletResponse) response).addHeader("Access-Control-Allow-Origin", "*");
 		}
-		System.err.println("in filter of " + getClass().getName());
 		chain.doFilter(request, response);
 	}
 

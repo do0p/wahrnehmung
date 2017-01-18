@@ -3,11 +3,6 @@ package at.brandl.lws.notice.client.utils;
 import java.util.ArrayList;
 import java.util.List;
 
-import at.brandl.lws.notice.client.Labels;
-import at.brandl.lws.notice.model.GwtFileInfo;
-import at.brandl.lws.notice.shared.service.WahrnehmungsService;
-import at.brandl.lws.notice.shared.service.WahrnehmungsServiceAsync;
-
 import com.google.gwt.cell.client.ActionCell;
 import com.google.gwt.cell.client.ActionCell.Delegate;
 import com.google.gwt.cell.client.ImageCell;
@@ -28,6 +23,11 @@ import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.ListDataProvider;
+
+import at.brandl.lws.notice.client.Labels;
+import at.brandl.lws.notice.model.GwtFileInfo;
+import at.brandl.lws.notice.shared.service.WahrnehmungsService;
+import at.brandl.lws.notice.shared.service.WahrnehmungsServiceAsync;
 
 public class FileUploadForm extends FormPanel {
 

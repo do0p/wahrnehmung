@@ -4,14 +4,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.ListBox;
+
 import at.brandl.lws.notice.client.Labels;
 import at.brandl.lws.notice.model.GwtQuestionnaire;
 import at.brandl.lws.notice.shared.service.FormService;
 import at.brandl.lws.notice.shared.service.FormServiceAsync;
-
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.ListBox;
 
 public class FormSelection extends ListBox {
 

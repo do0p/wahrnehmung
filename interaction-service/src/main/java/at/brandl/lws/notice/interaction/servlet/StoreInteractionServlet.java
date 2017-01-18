@@ -24,7 +24,7 @@ public class StoreInteractionServlet extends HttpServlet {
 
 	
 	@Override
-	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
 		String[] childKeys = req.getParameterValues(KEY_PARAM);
 		if (childKeys == null) {

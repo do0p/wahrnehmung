@@ -11,12 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import at.brandl.lws.notice.dao.AbstractDsDao;
-import at.brandl.lws.notice.dao.DaoRegistry;
-import at.brandl.lws.notice.dao.DsUtil;
-import at.brandl.lws.notice.model.GwtSection;
-import at.brandl.lws.notice.model.ObjectUtils;
-
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
@@ -24,6 +18,12 @@ import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.Filter;
 import com.google.appengine.api.datastore.Transaction;
+
+import at.brandl.lws.notice.dao.AbstractDsDao;
+import at.brandl.lws.notice.dao.DaoRegistry;
+import at.brandl.lws.notice.dao.DsUtil;
+import at.brandl.lws.notice.model.GwtSection;
+import at.brandl.lws.notice.model.ObjectUtils;
 
 public class SectionDsDao extends AbstractDsDao {
 

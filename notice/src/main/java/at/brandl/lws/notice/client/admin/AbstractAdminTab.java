@@ -2,10 +2,6 @@ package at.brandl.lws.notice.client.admin;
 
 import java.util.Date;
 
-import at.brandl.lws.notice.client.Labels;
-import at.brandl.lws.notice.client.utils.PopUp;
-import at.brandl.lws.notice.client.utils.Utils;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -23,6 +19,10 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.ValueBoxBase;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.datepicker.client.DateBox;
+
+import at.brandl.lws.notice.client.Labels;
+import at.brandl.lws.notice.client.utils.PopUp;
+import at.brandl.lws.notice.client.utils.Utils;
 
 abstract class AbstractAdminTab extends VerticalPanel {
 

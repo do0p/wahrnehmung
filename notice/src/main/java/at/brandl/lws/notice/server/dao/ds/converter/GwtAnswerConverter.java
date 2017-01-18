@@ -2,15 +2,15 @@ package at.brandl.lws.notice.server.dao.ds.converter;
 
 import java.util.Date;
 
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.users.User;
+
 import at.brandl.lws.notice.dao.DsUtil;
 import at.brandl.lws.notice.model.GwtAnswer;
 import at.brandl.lws.notice.model.GwtMultipleChoiceAnswer;
 import at.brandl.lws.notice.shared.util.Constants;
 import at.brandl.lws.notice.shared.util.Constants.QuestionnaireAnswer;
-
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.users.User;
 
 public class GwtAnswerConverter {
 

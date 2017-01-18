@@ -15,14 +15,14 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.users.User;
+import com.google.gwt.view.client.Range;
+
 import at.brandl.lws.notice.TestUtils;
 import at.brandl.lws.notice.dao.DaoRegistry;
 import at.brandl.lws.notice.model.BeobachtungsFilter;
 import at.brandl.lws.notice.model.GwtBeobachtung;
-
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.users.User;
-import com.google.gwt.view.client.Range;
 
 public class BeobachtungDsDaoWithSummariesTest extends AbstractDsDaoTest {
 

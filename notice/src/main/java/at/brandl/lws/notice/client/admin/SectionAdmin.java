@@ -6,12 +6,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import at.brandl.lws.notice.client.utils.DecisionBox;
-import at.brandl.lws.notice.client.utils.Utils;
-import at.brandl.lws.notice.model.GwtSection;
-import at.brandl.lws.notice.shared.service.SectionService;
-import at.brandl.lws.notice.shared.service.SectionServiceAsync;
-
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.gwt.core.client.GWT;
@@ -26,6 +20,12 @@ import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Tree;
 import com.google.gwt.user.client.ui.TreeItem;
+
+import at.brandl.lws.notice.client.utils.DecisionBox;
+import at.brandl.lws.notice.client.utils.Utils;
+import at.brandl.lws.notice.model.GwtSection;
+import at.brandl.lws.notice.shared.service.SectionService;
+import at.brandl.lws.notice.shared.service.SectionServiceAsync;
 
 public class SectionAdmin extends AbstractAdminTab {
 

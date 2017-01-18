@@ -2,9 +2,9 @@ package at.brandl.lws.notice.shared.service;
 
 import java.util.Collection;
 
-import at.brandl.lws.notice.model.Authorization;
-
 import com.google.gwt.user.client.rpc.AsyncCallback;
+
+import at.brandl.lws.notice.model.Authorization;
 
 public interface AuthorizationServiceAsync {
 

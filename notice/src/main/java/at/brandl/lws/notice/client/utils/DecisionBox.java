@@ -1,8 +1,6 @@
 package at.brandl.lws.notice.client.utils;
 
 
-import at.brandl.lws.notice.client.Labels;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -12,6 +10,8 @@ import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
+
+import at.brandl.lws.notice.client.Labels;
 
 public class DecisionBox extends DialogBox {
 

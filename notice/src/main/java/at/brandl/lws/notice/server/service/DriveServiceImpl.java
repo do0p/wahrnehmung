@@ -9,9 +9,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import at.brandl.lws.notice.model.BackendServiceException;
-import at.brandl.lws.notice.shared.Config;
-
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.ByteArrayContent;
 import com.google.api.services.drive.Drive;
@@ -21,6 +18,9 @@ import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
 import com.google.api.services.drive.model.ParentReference;
 import com.google.api.services.drive.model.Permission;
+
+import at.brandl.lws.notice.model.BackendServiceException;
+import at.brandl.lws.notice.shared.Config;
 
 public class DriveServiceImpl {
 

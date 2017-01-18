@@ -22,22 +22,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
-import at.brandl.lws.notice.dao.AbstractDsDao;
-import at.brandl.lws.notice.dao.DaoRegistry;
-import at.brandl.lws.notice.dao.DsUtil;
-import at.brandl.lws.notice.model.BeobachtungsFilter;
-import at.brandl.lws.notice.model.GwtBeobachtung;
-import at.brandl.lws.notice.model.GwtBeobachtung.DurationEnum;
-import at.brandl.lws.notice.model.GwtBeobachtung.SocialEnum;
-import at.brandl.lws.notice.model.GwtChild;
-import at.brandl.lws.notice.model.GwtSection;
-import at.brandl.lws.notice.model.GwtSummary;
-import at.brandl.lws.notice.shared.util.Constants.ArchiveNotice;
-import at.brandl.lws.notice.shared.util.Constants.ArchiveNoticeGroup;
-import at.brandl.lws.notice.shared.util.Constants.Notice;
-import at.brandl.lws.notice.shared.util.Constants.Notice.Cache;
-import at.brandl.lws.notice.shared.util.Constants.NoticeGroup;
-
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.FetchOptions;
@@ -59,6 +43,22 @@ import com.google.gwt.thirdparty.guava.common.collect.ArrayListMultimap;
 import com.google.gwt.thirdparty.guava.common.collect.Multimap;
 import com.google.gwt.thirdparty.guava.common.collect.Multimaps;
 import com.google.gwt.view.client.Range;
+
+import at.brandl.lws.notice.dao.AbstractDsDao;
+import at.brandl.lws.notice.dao.DaoRegistry;
+import at.brandl.lws.notice.dao.DsUtil;
+import at.brandl.lws.notice.model.BeobachtungsFilter;
+import at.brandl.lws.notice.model.GwtBeobachtung;
+import at.brandl.lws.notice.model.GwtBeobachtung.DurationEnum;
+import at.brandl.lws.notice.model.GwtBeobachtung.SocialEnum;
+import at.brandl.lws.notice.model.GwtChild;
+import at.brandl.lws.notice.model.GwtSection;
+import at.brandl.lws.notice.model.GwtSummary;
+import at.brandl.lws.notice.shared.util.Constants.ArchiveNotice;
+import at.brandl.lws.notice.shared.util.Constants.ArchiveNoticeGroup;
+import at.brandl.lws.notice.shared.util.Constants.Notice;
+import at.brandl.lws.notice.shared.util.Constants.Notice.Cache;
+import at.brandl.lws.notice.shared.util.Constants.NoticeGroup;
 
 public class BeobachtungDsDao extends AbstractDsDao {
 

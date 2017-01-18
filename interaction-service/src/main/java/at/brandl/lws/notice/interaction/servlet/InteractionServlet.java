@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.google.appengine.api.utils.SystemProperty;
 
 import at.brandl.lws.notice.interaction.dao.InteractionDsDao;
 
@@ -23,11 +24,22 @@ public class InteractionServlet extends HttpServlet {
 	private static final String TO_PARAM = "to";
 	private static final long serialVersionUID = -7318489147891141902L;
 
+	
 	private InteractionDsDao interactionDao = new InteractionDsDao();
-
+	private String appId = SystemProperty.applicationId.get();
+	
+	
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
+		
+		String inboundAppId = req.getHeader("X-Appengine-Inbound-Appid");
+		if(!appId.equals(inboundAppId)) {
+			System.err.println(inboundAppId + " not allowed in " + appId);
+			resp.sendError(403);
+			return;
+		}
+		
 		String childKey = req.getParameter(KEY_PARAM);
 		if (childKey == null) {
 			throw new IllegalArgumentException("childKey is missing");
@@ -49,7 +61,7 @@ public class InteractionServlet extends HttpServlet {
 
 	private void writeEnd(JsonGenerator generator) throws IOException {
 		generator.writeEndArray();
-		generator.writeEndObject();
+//		generator.writeEndObject();
 	}
 
 	private void writeEntry(JsonGenerator generator, Entry<String, Integer> interaction) throws IOException {
@@ -60,8 +72,8 @@ public class InteractionServlet extends HttpServlet {
 	}
 
 	private void writeBegin(JsonGenerator generator) throws IOException {
-		generator.writeStartObject();
-		generator.writeFieldName("interactions");
+//		generator.writeStartObject();
+//		generator.writeFieldName("interactions");
 		generator.writeStartArray();
 	}
 

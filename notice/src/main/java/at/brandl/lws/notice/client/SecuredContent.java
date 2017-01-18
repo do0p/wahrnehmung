@@ -1,13 +1,13 @@
 package at.brandl.lws.notice.client;
 
-import at.brandl.lws.notice.model.Authorization;
-import at.brandl.lws.notice.shared.service.AuthorizationService;
-import at.brandl.lws.notice.shared.service.AuthorizationServiceAsync;
-
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+
+import at.brandl.lws.notice.model.Authorization;
+import at.brandl.lws.notice.shared.service.AuthorizationService;
+import at.brandl.lws.notice.shared.service.AuthorizationServiceAsync;
 
 public abstract class SecuredContent implements EntryPoint {
 

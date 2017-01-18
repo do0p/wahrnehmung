@@ -1,5 +1,10 @@
 package at.brandl.lws.notice.client.utils;
 
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Hyperlink;
+import com.google.gwt.user.client.ui.Widget;
+
 import at.brandl.lws.notice.client.Documentation;
 import at.brandl.lws.notice.client.EditContent;
 import at.brandl.lws.notice.client.Interactions;
@@ -8,11 +13,6 @@ import at.brandl.lws.notice.client.Questionnaire;
 import at.brandl.lws.notice.client.Search;
 import at.brandl.lws.notice.client.admin.AdminContent;
 import at.brandl.lws.notice.model.Authorization;
-
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Hyperlink;
-import com.google.gwt.user.client.ui.Widget;
 
 public class Navigation extends HorizontalPanel {
 

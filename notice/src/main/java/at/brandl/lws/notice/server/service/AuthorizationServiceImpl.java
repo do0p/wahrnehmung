@@ -2,15 +2,15 @@ package at.brandl.lws.notice.server.service;
 
 import java.util.Collection;
 
-import at.brandl.lws.notice.dao.DaoRegistry;
-import at.brandl.lws.notice.model.Authorization;
-import at.brandl.lws.notice.server.dao.ds.AuthorizationDsDao;
-import at.brandl.lws.notice.shared.service.AuthorizationService;
-
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
+
+import at.brandl.lws.notice.dao.DaoRegistry;
+import at.brandl.lws.notice.model.Authorization;
+import at.brandl.lws.notice.server.dao.ds.AuthorizationDsDao;
+import at.brandl.lws.notice.shared.service.AuthorizationService;
 
 public class AuthorizationServiceImpl extends RemoteServiceServlet implements
 		AuthorizationService {

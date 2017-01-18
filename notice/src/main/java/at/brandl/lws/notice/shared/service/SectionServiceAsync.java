@@ -2,9 +2,9 @@ package at.brandl.lws.notice.shared.service;
 
 import java.util.List;
 
-import at.brandl.lws.notice.model.GwtSection;
-
 import com.google.gwt.user.client.rpc.AsyncCallback;
+
+import at.brandl.lws.notice.model.GwtSection;
 
 public interface SectionServiceAsync {
 

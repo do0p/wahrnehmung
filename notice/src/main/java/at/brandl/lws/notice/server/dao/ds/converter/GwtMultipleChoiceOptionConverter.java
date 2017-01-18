@@ -1,12 +1,13 @@
 package at.brandl.lws.notice.server.dao.ds.converter;
 
 import static at.brandl.lws.notice.dao.DsUtil.toKey;
-import at.brandl.lws.notice.dao.DsUtil;
-import at.brandl.lws.notice.model.GwtMultipleChoiceOption;
-import at.brandl.lws.notice.shared.util.Constants.MultipleChoiceOption;
 
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
+
+import at.brandl.lws.notice.dao.DsUtil;
+import at.brandl.lws.notice.model.GwtMultipleChoiceOption;
+import at.brandl.lws.notice.shared.util.Constants.MultipleChoiceOption;
 
 public class GwtMultipleChoiceOptionConverter {
 

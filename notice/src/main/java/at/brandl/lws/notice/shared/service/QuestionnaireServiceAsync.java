@@ -2,9 +2,9 @@ package at.brandl.lws.notice.shared.service;
 
 import java.util.Collection;
 
-import at.brandl.lws.notice.model.GwtQuestionnaireAnswers;
-
 import com.google.gwt.user.client.rpc.AsyncCallback;
+
+import at.brandl.lws.notice.model.GwtQuestionnaireAnswers;
 
 public interface QuestionnaireServiceAsync {
 

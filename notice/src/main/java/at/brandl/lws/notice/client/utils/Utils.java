@@ -4,18 +4,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 
-import at.brandl.lws.notice.model.GwtAnswer;
-import at.brandl.lws.notice.model.GwtAnswerTemplate;
-import at.brandl.lws.notice.model.GwtBeobachtung;
-import at.brandl.lws.notice.model.GwtChild;
-import at.brandl.lws.notice.model.GwtMultipleChoiceAnswer;
-import at.brandl.lws.notice.model.GwtMultipleChoiceAnswerTemplate;
-import at.brandl.lws.notice.model.GwtMultipleChoiceOption;
-import at.brandl.lws.notice.model.GwtQuestion;
-import at.brandl.lws.notice.model.GwtQuestionGroup;
-import at.brandl.lws.notice.model.GwtQuestionnaire;
-import at.brandl.lws.notice.model.GwtQuestionnaireAnswers;
-
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -28,6 +16,18 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.datepicker.client.DateBox;
 import com.google.gwt.user.datepicker.client.DateBox.Format;
+
+import at.brandl.lws.notice.model.GwtAnswer;
+import at.brandl.lws.notice.model.GwtAnswerTemplate;
+import at.brandl.lws.notice.model.GwtBeobachtung;
+import at.brandl.lws.notice.model.GwtChild;
+import at.brandl.lws.notice.model.GwtMultipleChoiceAnswer;
+import at.brandl.lws.notice.model.GwtMultipleChoiceAnswerTemplate;
+import at.brandl.lws.notice.model.GwtMultipleChoiceOption;
+import at.brandl.lws.notice.model.GwtQuestion;
+import at.brandl.lws.notice.model.GwtQuestionGroup;
+import at.brandl.lws.notice.model.GwtQuestionnaire;
+import at.brandl.lws.notice.model.GwtQuestionnaireAnswers;
 
 public class Utils {
 	private static final String TITLE = "h3";

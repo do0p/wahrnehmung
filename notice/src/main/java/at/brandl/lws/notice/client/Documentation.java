@@ -2,18 +2,6 @@ package at.brandl.lws.notice.client;
 
 import java.util.List;
 
-import at.brandl.lws.notice.client.utils.DecisionBox;
-import at.brandl.lws.notice.client.utils.NameSelection;
-import at.brandl.lws.notice.client.utils.Navigation;
-import at.brandl.lws.notice.client.utils.PopUp;
-import at.brandl.lws.notice.client.utils.Utils;
-import at.brandl.lws.notice.model.Authorization;
-import at.brandl.lws.notice.model.DocumentationAlreadyExistsException;
-import at.brandl.lws.notice.model.GwtDocumentation;
-import at.brandl.lws.notice.model.UserGrantRequiredException;
-import at.brandl.lws.notice.shared.service.DocsService;
-import at.brandl.lws.notice.shared.service.DocsServiceAsync;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -28,6 +16,18 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+
+import at.brandl.lws.notice.client.utils.DecisionBox;
+import at.brandl.lws.notice.client.utils.NameSelection;
+import at.brandl.lws.notice.client.utils.Navigation;
+import at.brandl.lws.notice.client.utils.PopUp;
+import at.brandl.lws.notice.client.utils.Utils;
+import at.brandl.lws.notice.model.Authorization;
+import at.brandl.lws.notice.model.DocumentationAlreadyExistsException;
+import at.brandl.lws.notice.model.GwtDocumentation;
+import at.brandl.lws.notice.model.UserGrantRequiredException;
+import at.brandl.lws.notice.shared.service.DocsService;
+import at.brandl.lws.notice.shared.service.DocsServiceAsync;
 
 public class Documentation extends VerticalPanel {
 

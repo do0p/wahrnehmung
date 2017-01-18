@@ -8,10 +8,10 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.google.appengine.api.users.User;
+
 import at.brandl.lws.notice.dao.DaoRegistry;
 import at.brandl.lws.notice.model.Authorization;
-
-import com.google.appengine.api.users.User;
 
 public class AuthorizationDsDaoTest extends AbstractDsDaoTest {
 

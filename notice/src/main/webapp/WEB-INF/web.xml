@@ -76,6 +76,14 @@
 		<servlet-name>docOAuthCallbackServlet</servlet-name>
 		<servlet-class>at.brandl.lws.notice.server.service.DocsOauthCallbackService</servlet-class>
 	</servlet>
+	<servlet-mapping>
+		<servlet-name>interactionsServlet</servlet-name>
+		<url-pattern>/wahrnehmung/interactions</url-pattern>
+	</servlet-mapping>
+	<servlet>
+		<servlet-name>interactionsServlet</servlet-name>
+		<servlet-class>at.brandl.lws.notice.server.service.InteractionServiceImpl</servlet-class>
+	</servlet>
 
 	<security-constraint>
 		<web-resource-collection>

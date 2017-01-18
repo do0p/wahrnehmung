@@ -1,13 +1,11 @@
 package at.brandl.lws.notice.client;
 
+import java.util.List;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
-import com.google.gwt.http.client.Request;
-import com.google.gwt.http.client.RequestBuilder;
-import com.google.gwt.http.client.RequestCallback;
-import com.google.gwt.http.client.RequestException;
-import com.google.gwt.http.client.Response;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -15,11 +13,15 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import at.brandl.lws.notice.client.utils.NameSelection;
 import at.brandl.lws.notice.client.utils.PopUp;
 import at.brandl.lws.notice.model.Authorization;
+import at.brandl.lws.notice.model.GwtInteraction;
+import at.brandl.lws.notice.shared.service.InteractionService;
+import at.brandl.lws.notice.shared.service.InteractionServiceAsync;
 
 public class Interactions extends VerticalPanel {
 
 	private final Labels labels = (Labels) GWT.create(Labels.class);
-
+	private final InteractionServiceAsync interactionService = (InteractionServiceAsync) GWT
+			.create(InteractionService.class);
 	private final NameSelection nameSelection;
 
 	private TextArea textArea;
@@ -31,31 +33,28 @@ public class Interactions extends VerticalPanel {
 		nameSelection.addSelectionHandler(new SelectionHandler<Suggestion>() {
 			@Override
 			public void onSelection(SelectionEvent<Suggestion> event) {
-				fetch(nameSelection.getSelectedChildKey());
+				fetch();
 			}
 		});
 		add(nameSelection);
 		add(textArea);
 	}
 
-	private void fetch(String childKey) {
+	private void fetch() {
 
-		String url = "http://localhost:9090/interactions?childKey=" + childKey;
-		RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, url);
-
-		try {
-			builder.sendRequest(null, new RequestCallback() {
-				public void onError(Request request, Throwable exception) {
-					textArea.setText(exception.getMessage());
-				}
-
-				public void onResponseReceived(Request request, Response response) {
-					textArea.setText(response.getText());
-				}
-			});
-		} catch (RequestException e) {
-			textArea.setText(e.getMessage());
-		}
+		interactionService.getInteractions(nameSelection.getSelectedChildKey(), new AsyncCallback<List<GwtInteraction>>() {
+			
+			@Override
+			public void onSuccess(List<GwtInteraction> result) {
+				textArea.setValue(result.toString());
+			}
+			
+			@Override
+			public void onFailure(Throwable caught) {
+				textArea.setValue(caught.getMessage());
+				
+			}
+		});
 
 	}
 

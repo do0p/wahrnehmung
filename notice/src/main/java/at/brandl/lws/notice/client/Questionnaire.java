@@ -5,23 +5,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import at.brandl.lws.notice.client.utils.ChangeListener;
-import at.brandl.lws.notice.client.utils.DecisionBox;
-import at.brandl.lws.notice.client.utils.FormSelection;
-import at.brandl.lws.notice.client.utils.NameSelection;
-import at.brandl.lws.notice.client.utils.PopUp;
-import at.brandl.lws.notice.client.utils.Print;
-import at.brandl.lws.notice.client.utils.QuestionnairePanel;
-import at.brandl.lws.notice.client.utils.ReadyListener;
-import at.brandl.lws.notice.client.utils.Utils;
-import at.brandl.lws.notice.model.Authorization;
-import at.brandl.lws.notice.model.GwtAnswer;
-import at.brandl.lws.notice.model.GwtQuestionnaire;
-import at.brandl.lws.notice.model.GwtQuestionnaireAnswers;
-import at.brandl.lws.notice.shared.service.QuestionnaireService;
-import at.brandl.lws.notice.shared.service.QuestionnaireServiceAsync;
-import at.brandl.lws.notice.shared.validator.GwtQuestionnaireAnswersValidator;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -39,6 +22,23 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.datepicker.client.DateBox;
+
+import at.brandl.lws.notice.client.utils.ChangeListener;
+import at.brandl.lws.notice.client.utils.DecisionBox;
+import at.brandl.lws.notice.client.utils.FormSelection;
+import at.brandl.lws.notice.client.utils.NameSelection;
+import at.brandl.lws.notice.client.utils.PopUp;
+import at.brandl.lws.notice.client.utils.Print;
+import at.brandl.lws.notice.client.utils.QuestionnairePanel;
+import at.brandl.lws.notice.client.utils.ReadyListener;
+import at.brandl.lws.notice.client.utils.Utils;
+import at.brandl.lws.notice.model.Authorization;
+import at.brandl.lws.notice.model.GwtAnswer;
+import at.brandl.lws.notice.model.GwtQuestionnaire;
+import at.brandl.lws.notice.model.GwtQuestionnaireAnswers;
+import at.brandl.lws.notice.shared.service.QuestionnaireService;
+import at.brandl.lws.notice.shared.service.QuestionnaireServiceAsync;
+import at.brandl.lws.notice.shared.validator.GwtQuestionnaireAnswersValidator;
 
 public class Questionnaire extends VerticalPanel implements ChangeListener,
 		ReadyListener {

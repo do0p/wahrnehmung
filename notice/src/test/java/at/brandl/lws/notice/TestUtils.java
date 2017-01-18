@@ -6,6 +6,12 @@ import java.util.Date;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
+import com.google.appengine.api.datastore.Text;
+import com.google.appengine.api.users.User;
+
 import at.brandl.lws.notice.model.Authorization;
 import at.brandl.lws.notice.model.BeobachtungsFilter;
 import at.brandl.lws.notice.model.GwtBeobachtung;
@@ -18,12 +24,6 @@ import at.brandl.lws.notice.server.dao.ds.SectionDsDao;
 import at.brandl.lws.notice.shared.util.Constants;
 import at.brandl.lws.notice.shared.util.Constants.Child;
 import at.brandl.lws.notice.shared.util.Constants.Notice;
-
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
-import com.google.appengine.api.datastore.Text;
-import com.google.appengine.api.users.User;
 
 public class TestUtils {
 

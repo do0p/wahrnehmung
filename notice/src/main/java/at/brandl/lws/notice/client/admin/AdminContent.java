@@ -1,11 +1,11 @@
 package at.brandl.lws.notice.client.admin;
 
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.ui.TabPanel;
+
 import at.brandl.lws.notice.client.Labels;
 import at.brandl.lws.notice.client.utils.Utils;
 import at.brandl.lws.notice.model.Authorization;
-
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.ui.TabPanel;
 
 public class AdminContent extends TabPanel {
 

@@ -8,11 +8,11 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import at.brandl.lws.notice.dao.DaoRegistry;
-import at.brandl.lws.notice.model.GwtFileInfo;
-
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
+
+import at.brandl.lws.notice.dao.DaoRegistry;
+import at.brandl.lws.notice.model.GwtFileInfo;
 
 public class FileDsDaoTest extends AbstractDsDaoTest {
 
