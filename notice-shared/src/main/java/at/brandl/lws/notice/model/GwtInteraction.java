@@ -4,9 +4,20 @@ import java.io.Serializable;
 
 public class GwtInteraction implements Serializable, Comparable<GwtInteraction> {
 
+	private static final long serialVersionUID = -7325835640416711780L;
+	private String childKey;
 	private String childName;
 	private int count;
 
+	public String getChildKey() {
+		return childKey;
+	}
+
+	public void setChildKey(String childKey) {
+		this.childKey = childKey;
+	}
+
+	
 	public String getChildName() {
 		return childName;
 	}

@@ -6,6 +6,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.fasterxml.jackson.core.JsonFactory;
@@ -29,7 +30,7 @@ public class InteractionServiceImpl extends RemoteServiceServlet implements Inte
 
 	@Override
 	public List<GwtInteraction> getInteractions(String childKey) throws IOException {
-		
+
 		URLConnection con = createUrlConnection(childKey);
 		return parseResponse(con);
 	}
@@ -41,20 +42,24 @@ public class InteractionServiceImpl extends RemoteServiceServlet implements Inte
 		while (JsonToken.START_OBJECT.equals(parser.nextToken())) {
 			GwtInteraction interaction = new GwtInteraction();
 			parser.nextToken(); // childKey as fieldname
-			interaction.setChildName(getChildName(parser.getText()));
+			String childKey = parser.getText();
+			interaction.setChildKey(childKey);
+			interaction.setChildName(getChildName(childKey));
 			parser.nextToken(); // count as value
 			interaction.setCount(parser.getIntValue());
 			parser.nextToken(); // end object
 			interactions.add(interaction);
 		}
+		Collections.sort(interactions);
 		return interactions;
 	}
 
 	private URLConnection createUrlConnection(String childKey) throws MalformedURLException, IOException {
-		
-		URL url = new URL("https://interaction-service-dot-" + Config.getInstance().getApplicationName()
-				+ ".appspot.com/interactions?childKey=" + childKey);
-		System.err.println("opening connection to " + url);
+
+		// String host = "http://localhost:9090";
+		String host = "https://interaction-service-dot-" + Config.getInstance().getApplicationName() + ".appspot.com";
+		URL url = new URL(host + "/interactions?childKey=" + childKey);
+		// System.err.println("opening connection to " + url);
 		URLConnection con = url.openConnection();
 		con.setConnectTimeout(CONNECTION_TIMEOUT);
 		con.setReadTimeout(READ_TIMEOUT);

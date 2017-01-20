@@ -3,11 +3,16 @@ package at.brandl.lws.notice.client;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.NumberLabel;
 import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
-import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 import at.brandl.lws.notice.client.utils.NameSelection;
@@ -19,16 +24,16 @@ import at.brandl.lws.notice.shared.service.InteractionServiceAsync;
 
 public class Interactions extends VerticalPanel {
 
-	private final Labels labels = (Labels) GWT.create(Labels.class);
+//	private final Labels labels = (Labels) GWT.create(Labels.class);
 	private final InteractionServiceAsync interactionService = (InteractionServiceAsync) GWT
 			.create(InteractionService.class);
 	private final NameSelection nameSelection;
 
-	private TextArea textArea;
+	private Grid interactions;
 
 	public Interactions(Authorization authorization) {
 		PopUp dialogBox = new PopUp();
-		textArea = new TextArea();
+		interactions = new Grid();
 		nameSelection = new NameSelection(dialogBox);
 		nameSelection.addSelectionHandler(new SelectionHandler<Suggestion>() {
 			@Override
@@ -37,7 +42,7 @@ public class Interactions extends VerticalPanel {
 			}
 		});
 		add(nameSelection);
-		add(textArea);
+		add(interactions);
 	}
 
 	private void fetch() {
@@ -46,12 +51,30 @@ public class Interactions extends VerticalPanel {
 			
 			@Override
 			public void onSuccess(List<GwtInteraction> result) {
-				textArea.setValue(result.toString());
+				int rows = result.size();
+				interactions.resize(rows, 2);
+				for(int i = 0; i < rows; i++) {
+					final GwtInteraction interaction = result.get(i);
+					Anchor link = new Anchor(interaction.getChildName());
+					interactions.setWidget(i, 0, link);
+					NumberLabel<Integer> count = new NumberLabel<>();
+					count.setValue(Integer.valueOf(interaction.getCount()));
+					interactions.setWidget(i, 1, count);
+					link.addClickHandler(new ClickHandler() {
+						
+						@Override
+						public void onClick(ClickEvent event) {
+							nameSelection.setSelected(interaction.getChildKey());
+							fetch();
+						}
+					});
+				}
 			}
 			
 			@Override
 			public void onFailure(Throwable caught) {
-				textArea.setValue(caught.getMessage());
+				interactions.resize(1, 1);
+				interactions.setWidget(0, 0, new Label(caught.getMessage()));
 				
 			}
 		});

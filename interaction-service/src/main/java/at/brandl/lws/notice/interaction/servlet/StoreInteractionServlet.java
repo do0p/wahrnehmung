@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import at.brandl.lws.notice.dao.DaoRegistry;
 import at.brandl.lws.notice.interaction.dao.InteractionDsDao;
 
 public class StoreInteractionServlet extends HttpServlet {
@@ -20,7 +21,7 @@ public class StoreInteractionServlet extends HttpServlet {
 
 	private static final String DATE_PARAM = "date";
 
-	private InteractionDsDao interactionDao = new InteractionDsDao();
+	private InteractionDsDao interactionDao = DaoRegistry.get(InteractionDsDao.class);
 
 	
 	@Override
