@@ -6,10 +6,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.logical.shared.AttachEvent;
+import com.google.gwt.event.logical.shared.AttachEvent.Handler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.SuggestBox;
 
+import at.brandl.lws.notice.client.Labels;
 import at.brandl.lws.notice.model.GwtChild;
 import at.brandl.lws.notice.shared.service.ChildService;
 import at.brandl.lws.notice.shared.service.ChildServiceAsync;
@@ -18,6 +21,7 @@ public class NameSelection extends SuggestBox {
 
 	private final PopUp dialogBox;
 
+	private final Labels labels = (Labels) GWT.create(Labels.class);
 	private final ChildServiceAsync childService = GWT
 			.create(ChildService.class);
 	private final Map<String, GwtChild> childMap = new HashMap<>();
@@ -31,6 +35,16 @@ public class NameSelection extends SuggestBox {
 		super(new MultiWordSuggestOracle());
 		this.dialogBox = dialogBox;
 		updateChildList();
+		Handler handler =
+		new Handler() {
+		    @Override
+		    public void onAttachOrDetach(AttachEvent event) {
+		        if (event.isAttached()) {
+		            getElement().setAttribute("placeHolder", labels.child());
+		        }
+		    }
+		};
+		addAttachHandler(handler);
 	}
 
 	public String getSelectedChildKey() {

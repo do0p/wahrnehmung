@@ -24,7 +24,7 @@ import at.brandl.lws.notice.shared.service.InteractionServiceAsync;
 
 public class Interactions extends VerticalPanel {
 
-//	private final Labels labels = (Labels) GWT.create(Labels.class);
+	private final Labels labels = (Labels) GWT.create(Labels.class);
 	private final InteractionServiceAsync interactionService = (InteractionServiceAsync) GWT
 			.create(InteractionService.class);
 	private final NameSelection nameSelection;
@@ -52,9 +52,11 @@ public class Interactions extends VerticalPanel {
 			@Override
 			public void onSuccess(List<GwtInteraction> result) {
 				int rows = result.size();
-				interactions.resize(rows, 2);
-				for(int i = 0; i < rows; i++) {
-					final GwtInteraction interaction = result.get(i);
+				interactions.resize(rows + 1, 2);
+				interactions.setWidget(0, 0, new Label(labels.with()));
+				interactions.setWidget(0, 1, new Label(labels.numberOfContacts()));
+				for(int i = 1; i <= rows; i++) {
+					final GwtInteraction interaction = result.get(i - 1);
 					Anchor link = new Anchor(interaction.getChildName());
 					interactions.setWidget(i, 0, link);
 					NumberLabel<Integer> count = new NumberLabel<>();
