@@ -45,9 +45,20 @@
 			<web-resource-name>/*</web-resource-name>
 			<url-pattern>/*</url-pattern>
 		</web-resource-collection>
-<!--  		<auth-constraint>
+		<user-data-constraint>
+			<transport-guarantee>CONFIDENTIAL</transport-guarantee>
+		</user-data-constraint>
+		
+	</security-constraint> 
+
+ 	<security-constraint>
+		<web-resource-collection>
+			<web-resource-name>/storeInteraction</web-resource-name>
+			<url-pattern>/storeInteraction</url-pattern>
+		</web-resource-collection>
+  		<auth-constraint>
             <role-name>admin</role-name>
-        </auth-constraint>  -->
+        </auth-constraint>  
 		<user-data-constraint>
 			<transport-guarantee>CONFIDENTIAL</transport-guarantee>
 		</user-data-constraint>

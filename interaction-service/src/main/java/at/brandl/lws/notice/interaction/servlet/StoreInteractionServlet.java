@@ -22,11 +22,18 @@ public class StoreInteractionServlet extends HttpServlet {
 	private static final String DATE_PARAM = "date";
 
 	private InteractionDsDao interactionDao = DaoRegistry.get(InteractionDsDao.class);
-
+//	private String appId = SystemProperty.applicationId.get();
 	
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
+//		String inboundAppId = req.getHeader("X-Appengine-Inbound-Appid");
+//		if (!appId.equals(inboundAppId)) {
+//			System.err.println(inboundAppId + " not allowed in " + appId);
+//			resp.sendError(403);
+//			return;
+//		}
+		
 		String[] childKeys = req.getParameterValues(KEY_PARAM);
 		if (childKeys == null) {
 			throw new IllegalArgumentException(KEY_PARAM + " is missing");

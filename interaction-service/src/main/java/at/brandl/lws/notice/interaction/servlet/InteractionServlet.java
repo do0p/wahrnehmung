@@ -39,27 +39,37 @@ public class InteractionServlet extends HttpServlet {
 		}
 
 		String childKey = req.getParameter(KEY_PARAM);
-		if (childKey == null) {
-			throw new IllegalArgumentException("childKey is missing");
-		}
-
 		Date fromDate = getDateValue(req, FROM_PARAM);
 		Date toDate = getDateValue(req, TO_PARAM);
 
-		Map<String, Integer> interactions = interactionDao.getInteractions(childKey, fromDate, toDate);
-
 		JsonGenerator generator = new JsonFactory().createGenerator(resp.getOutputStream());
-		writeBegin(generator);
-		for (Entry<String, Integer> interaction : interactions.entrySet()) {
-			writeEntry(generator, interaction);
+		generator.writeStartArray();
+
+		if (childKey == null) {
+
+			Map<String, Map<String, Integer>> allInteractions = interactionDao.getAllInteractions(fromDate, toDate);
+			for (Entry<String, Map<String, Integer>> interaction : allInteractions.entrySet()) {
+				generator.writeStartObject();
+				generator.writeFieldName(interaction.getKey());
+				generator.writeStartArray();
+				writeAllEntries(generator, interaction.getValue());
+				generator.writeEndArray();
+				generator.writeEndObject();
+			}
+
+		} else {
+			Map<String, Integer> interactions = interactionDao.getInteractions(childKey, fromDate, toDate);
+
+			writeAllEntries(generator, interactions);
 		}
-		writeEnd(generator);
+		generator.writeEndArray();
 		generator.close();
 	}
 
-	private void writeEnd(JsonGenerator generator) throws IOException {
-		generator.writeEndArray();
-		// generator.writeEndObject();
+	private void writeAllEntries(JsonGenerator generator, Map<String, Integer> interactions) throws IOException {
+		for (Entry<String, Integer> interaction : interactions.entrySet()) {
+			writeEntry(generator, interaction);
+		}
 	}
 
 	private void writeEntry(JsonGenerator generator, Entry<String, Integer> interaction) throws IOException {
@@ -67,12 +77,6 @@ public class InteractionServlet extends HttpServlet {
 		generator.writeFieldName(interaction.getKey());
 		generator.writeNumber(interaction.getValue());
 		generator.writeEndObject();
-	}
-
-	private void writeBegin(JsonGenerator generator) throws IOException {
-		// generator.writeStartObject();
-		// generator.writeFieldName("interactions");
-		generator.writeStartArray();
 	}
 
 	private Date getDateValue(HttpServletRequest req, String paramName) {

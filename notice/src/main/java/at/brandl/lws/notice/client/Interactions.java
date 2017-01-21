@@ -43,6 +43,7 @@ public class Interactions extends VerticalPanel {
 		});
 		add(nameSelection);
 		add(interactions);
+		add(new Anchor(labels.showNetwork(), "/vijs/vijs.html", "#"));
 	}
 
 	private void fetch() {
