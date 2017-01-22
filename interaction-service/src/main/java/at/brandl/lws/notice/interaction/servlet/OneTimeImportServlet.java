@@ -1,7 +1,6 @@
 package at.brandl.lws.notice.interaction.servlet;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -105,7 +104,7 @@ public class OneTimeImportServlet extends HttpServlet {
 	private void registerInteraction(String child1, String child2, Date date) {
 		Queue queue = QueueFactory.getQueue(INTERACTION_QUEUE_NAME);
 		queue.add(TaskOptions.Builder.withUrl(INTERACTION_SERVICE_URL).param("childKey", child1)
-				.param("childKey", child2).param("date", new SimpleDateFormat("yyyy-MM-dd").format(date)));
+				.param("childKey", child2).param("date", Long.toString(date.getTime())));
 	}
 
 }

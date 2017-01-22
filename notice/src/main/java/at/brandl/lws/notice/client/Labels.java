@@ -81,4 +81,6 @@ public interface Labels extends Messages {
 	String with();
 	String numberOfContacts();
 	String showNetwork();
+	String from();
+	String until();
 }

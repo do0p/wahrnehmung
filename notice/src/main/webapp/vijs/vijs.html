@@ -1,97 +1,109 @@
 <html>
 <head>
-    <script type="text/javascript" src="vis.min.js"></script>
-    <link href="vis.min.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="vis.min.js"></script>
+<link href="vis.min.css" rel="stylesheet" type="text/css" />
 
-    <style type="text/css">
-        #mynetwork {
-            width: 100%;
-            height: 100%;
-            border: 1px solid lightgray;
-        }
-    </style>
+<style type="text/css">
+#mynetwork {
+	width: 100%;
+	height: 95%;
+	border: 1px solid lightgray;
+}
+</style>
 </head>
 <body>
-<div id="mynetwork"></div>
+	<input type="range" id="mincount" min="1" max="30" value="15"
+		onChange="redraw();">
+	<div id="mynetwork"></div>
 
-<script type="text/javascript">
+	<script type="text/javascript">
+		var jsonResp;
 
+		function filterCount(edge) {
+			return edge.count >= document.getElementById('mincount').value;
+		}
 
+		function getData() {
 
-    function filterCount(edge) {
-		return edge.count >= 15;
-	}
-	 
-    
+			var nodes = [];
+			var edges = [];
 
-    // create a network
-    var container = document.getElementById('mynetwork');
+			if (jsonResp) {
+				nodes = jsonResp.nodes;
+				edges = jsonResp.edges.filter(filterCount);
+			}
 
-    
-    
-    var options = {
-        layout: {
-            improvedLayout:false
-        },
-        nodes: {
-            shape: 'dot',
-            font: {
-                size: 28,
-                face: 'verdana'
-            },
-        },
-        edges: {
-            width: 0.15,
-            smooth: {
-                type: 'continuous'
-            },
-        },
-        interaction: {
-            tooltipDelay: 120,
-            hover: true,
-            navigationButtons: true
-        },
-        physics: {
-            forceAtlas2Based: {
-                springLength: 50
-            },
-            minVelocity: 9,
-            solver: 'forceAtlas2Based',
-            timestep: 0.2,
-            adaptiveTimestep: true
-        }/*,
-        configure: {
-            filter: 'physics',
-            showButton: false
-            }*/
-    };
+			return {
+				nodes : new vis.DataSet(nodes),
+				edges : new vis.DataSet(edges)
+			};
+		}
 
-	
-	function reqListener() {  
-        var jsonResp = JSON.parse(this.responseText);  
-        
-		// provide the data in the vis format
-        var data = {
-            nodes: jsonResp.nodes,
-            edges: jsonResp.edges.filter(filterCount)
+		// create a network
+		var container = document.getElementById('mynetwork');
+
+		var options = {
+			layout : {
+				improvedLayout : false
+			},
+			nodes : {
+				shape : 'dot',
+				font : {
+					size : 28,
+					face : 'verdana'
+				},
+			},
+			edges : {
+				width : 0.15,
+				smooth : {
+					type : 'continuous'
+				},
+			},
+			interaction : {
+				tooltipDelay : 120,
+				hover : true,
+				navigationButtons : true
+			},
+			physics : {
+				barnesHut : {
+					gravitationalConstant : -10000,
+					springLength : 150,
+					springConstant : 0.05,
+					avoidOverlap : 0.3,
+					centralGravity : 2.5
+				},
+				minVelocity : 9,
+				solver : 'barnesHut',
+				timestep : 0.2,
+				adaptiveTimestep : true
+			}
+		/**,
+			    configure: {
+			        filter: 'physics',
+			        showButton: true
+			    }**/
 		};
-		
-        // initialize your network!
-        var network = new vis.Network(container, data, options);		
-    }
 
-    function reqError(err) {  
-      console.log('Fetch Error :-S', err);  
-    }
-	
- 
-	
-	var oReq = new XMLHttpRequest();  
-    oReq.onload = reqListener;  
-    oReq.onerror = reqError;  
-    oReq.open('get', 'https://wahrnehmung-test.appspot.com/vijs', true);  
-    oReq.send();
-	
-</script>
+		var network = new vis.Network(container, getData(), options);
+
+		function redraw() {
+			network.setData(getData());
+		}
+
+		function reqListener() {
+			jsonResp = JSON.parse(this.responseText);
+			redraw();
+		}
+
+		function reqError(err) {
+			console.log('Fetch Error :-S', err);
+		}
+
+		var oReq = new XMLHttpRequest();
+		oReq.onload = reqListener;
+		oReq.onerror = reqError;
+		oReq.open('get', 'https://wahrnehmung-test.appspot.com/vijs', true);
+		oReq.send();
+	</script>
 </body>
 </html>

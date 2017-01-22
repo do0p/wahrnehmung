@@ -1,8 +1,6 @@
 package at.brandl.lws.notice.interaction.servlet;
 
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import javax.servlet.ServletException;
@@ -22,18 +20,18 @@ public class StoreInteractionServlet extends HttpServlet {
 	private static final String DATE_PARAM = "date";
 
 	private InteractionDsDao interactionDao = DaoRegistry.get(InteractionDsDao.class);
-//	private String appId = SystemProperty.applicationId.get();
-	
+	// private String appId = SystemProperty.applicationId.get();
+
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
-//		String inboundAppId = req.getHeader("X-Appengine-Inbound-Appid");
-//		if (!appId.equals(inboundAppId)) {
-//			System.err.println(inboundAppId + " not allowed in " + appId);
-//			resp.sendError(403);
-//			return;
-//		}
-		
+		// String inboundAppId = req.getHeader("X-Appengine-Inbound-Appid");
+		// if (!appId.equals(inboundAppId)) {
+		// System.err.println(inboundAppId + " not allowed in " + appId);
+		// resp.sendError(403);
+		// return;
+		// }
+
 		String[] childKeys = req.getParameterValues(KEY_PARAM);
 		if (childKeys == null) {
 			throw new IllegalArgumentException(KEY_PARAM + " is missing");
@@ -43,21 +41,20 @@ public class StoreInteractionServlet extends HttpServlet {
 		}
 
 		Date date = getDateValue(req, DATE_PARAM);
-
-		interactionDao.incrementInteraction(childKeys[0], childKeys[1], date, 1);
+		interactionDao.incrementInteraction(childKeys[0], childKeys[1], DateUtils.getStartOfDay(date), 1);
 	}
-
 
 	private Date getDateValue(HttpServletRequest req, String paramName) {
 		String dateString = req.getParameter(paramName);
 		if (dateString == null) {
-				throw new IllegalArgumentException(paramName + " is missing.");
+			throw new IllegalArgumentException(paramName + " is missing.");
 		}
 		try {
-			return new SimpleDateFormat("yyyy-MM-dd").parse(dateString);
-		} catch (ParseException e) {
-			throw new IllegalArgumentException("cannot parse dates from " + dateString, e);
+			return new Date(Long.parseLong(dateString));
+		} catch (NumberFormatException e) {
+			throw new IllegalArgumentException("not a long value");
 		}
+
 	}
 
 }

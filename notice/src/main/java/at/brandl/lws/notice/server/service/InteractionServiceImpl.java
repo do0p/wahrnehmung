@@ -7,6 +7,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import com.fasterxml.jackson.core.JsonFactory;
@@ -29,9 +30,9 @@ public class InteractionServiceImpl extends RemoteServiceServlet implements Inte
 	private ChildDsDao childDao = DaoRegistry.get(ChildDsDao.class);
 
 	@Override
-	public List<GwtInteraction> getInteractions(String childKey) throws IOException {
+	public List<GwtInteraction> getInteractions(String childKey, Date fromDate, Date toDate) throws IOException {
 
-		URLConnection con = createUrlConnection(childKey);
+		URLConnection con = createUrlConnection(childKey, fromDate, toDate);
 		return parseResponse(con);
 	}
 
@@ -54,11 +55,12 @@ public class InteractionServiceImpl extends RemoteServiceServlet implements Inte
 		return interactions;
 	}
 
-	private URLConnection createUrlConnection(String childKey) throws MalformedURLException, IOException {
+	private URLConnection createUrlConnection(String childKey, Date fromDate, Date toDate) throws MalformedURLException, IOException {
 
 		// String host = "http://localhost:9090";
 		String host = "https://interaction-service-dot-" + Config.getInstance().getApplicationName() + ".appspot.com";
-		URL url = new URL(host + "/interactions?childKey=" + childKey);
+		String dateQuery = buildDateQuery(fromDate, toDate);
+		URL url = new URL(host + "/interactions?childKey=" + childKey + dateQuery);
 		// System.err.println("opening connection to " + url);
 		URLConnection con = url.openConnection();
 		con.setConnectTimeout(CONNECTION_TIMEOUT);
@@ -67,6 +69,19 @@ public class InteractionServiceImpl extends RemoteServiceServlet implements Inte
 			((HttpURLConnection) con).setInstanceFollowRedirects(false);
 		}
 		return con;
+	}
+
+	private String buildDateQuery(Date fromDate, Date toDate) {
+		StringBuilder dateQuery = new StringBuilder();
+		if(fromDate != null) {
+//			System.err.println("from: " + fromDate);
+			dateQuery.append("&from=" + fromDate.getTime());
+		}
+		if(toDate != null) {
+//			System.err.println("to: " + toDate);
+			dateQuery.append("&to=" + toDate.getTime());
+		}
+		return dateQuery.toString() ;
 	}
 
 	private String getChildName(String childKey) {

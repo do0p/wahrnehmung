@@ -41,7 +41,9 @@ public class InteractionServlet extends HttpServlet {
 		String childKey = req.getParameter(KEY_PARAM);
 		Date fromDate = getDateValue(req, FROM_PARAM);
 		Date toDate = getDateValue(req, TO_PARAM);
-
+		fromDate = DateUtils.getStartOfDay(fromDate);
+		toDate = DateUtils.getEndOfDay(toDate);
+		
 		JsonGenerator generator = new JsonFactory().createGenerator(resp.getOutputStream());
 		generator.writeStartArray();
 

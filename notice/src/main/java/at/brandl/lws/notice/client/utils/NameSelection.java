@@ -35,16 +35,14 @@ public class NameSelection extends SuggestBox {
 		super(new MultiWordSuggestOracle());
 		this.dialogBox = dialogBox;
 		updateChildList();
-		Handler handler =
-		new Handler() {
+		addAttachHandler(new Handler() {
 		    @Override
 		    public void onAttachOrDetach(AttachEvent event) {
 		        if (event.isAttached()) {
 		            getElement().setAttribute("placeHolder", labels.child());
 		        }
 		    }
-		};
-		addAttachHandler(handler);
+		});
 	}
 
 	public String getSelectedChildKey() {

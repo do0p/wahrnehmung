@@ -95,7 +95,7 @@ public class WahrnehmungsServiceImpl extends RemoteServiceServlet implements Wah
 	private void registerInteraction(String child1, String child2, Date date) {
 		Queue queue = QueueFactory.getQueue(INTERACTION_QUEUE_NAME);
 		queue.add(TaskOptions.Builder.withUrl(INTERACTION_SERVICE_URL).param("childKey", child1).param("childKey", child2).param("date",
-			new	SimpleDateFormat("yyyy-MM-dd").format(date)));
+			Long.toString(date.getTime())));
 	}
 
 	@Override
