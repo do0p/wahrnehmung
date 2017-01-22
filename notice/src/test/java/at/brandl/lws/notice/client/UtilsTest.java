@@ -4,11 +4,11 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
+
 import at.brandl.lws.notice.client.utils.Utils;
 import at.brandl.lws.notice.model.GwtQuestionnaire;
 import at.brandl.lws.notice.model.GwtQuestionnaireAnswers;
-
-import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 
 @Ignore
 public class UtilsTest {

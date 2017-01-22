@@ -10,8 +10,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import at.brandl.lws.notice.TestUtils;
+import at.brandl.lws.notice.dao.DaoRegistry;
 import at.brandl.lws.notice.model.GwtChild;
-import at.brandl.lws.notice.server.dao.DaoRegistry;
 import at.brandl.lws.notice.shared.util.Constants.Child.Cache;
 
 public class ChildDsDaoTest extends AbstractDsDaoTest {

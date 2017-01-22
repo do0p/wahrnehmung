@@ -2,11 +2,11 @@ package at.brandl.lws.notice.client.utils;
 
 import java.util.Date;
 
-import at.brandl.lws.notice.client.Labels;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.datepicker.client.CalendarUtil;
+
+import at.brandl.lws.notice.client.Labels;
 
 public class YearSelection extends ListBox {
 

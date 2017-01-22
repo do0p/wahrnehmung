@@ -20,15 +20,15 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.Text;
+
 import at.brandl.lws.notice.model.GwtBeobachtung;
 import at.brandl.lws.notice.model.GwtBeobachtung.DurationEnum;
 import at.brandl.lws.notice.model.GwtBeobachtung.SocialEnum;
 import at.brandl.lws.notice.service.dao.NoticeArchiveDsDao;
 import at.brandl.lws.notice.shared.util.Constants.Notice;
-
-import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.Text;
 
 public class RemoveDuplicateNotices extends HttpServlet {
 

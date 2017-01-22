@@ -1,11 +1,11 @@
 package at.brandl.lws.notice.client.utils;
 
+import com.google.gwt.user.client.ui.VerticalPanel;
+
 import at.brandl.lws.notice.model.GwtAnswer;
 import at.brandl.lws.notice.model.GwtQuestionGroup;
 import at.brandl.lws.notice.model.GwtQuestionnaire;
 import at.brandl.lws.notice.model.GwtQuestionnaireAnswers;
-
-import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class QuestionnairePanel extends VerticalPanel implements
 		QuestionnaireAnswerListener {

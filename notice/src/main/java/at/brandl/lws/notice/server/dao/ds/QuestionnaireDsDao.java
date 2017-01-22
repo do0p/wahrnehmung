@@ -11,12 +11,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import at.brandl.lws.notice.model.GwtAnswer;
-import at.brandl.lws.notice.model.GwtQuestionnaireAnswers;
-import at.brandl.lws.notice.shared.util.Constants.QuestionnaireAnswer;
-import at.brandl.lws.notice.shared.util.Constants.QuestionnaireAnswers;
-import at.brandl.lws.notice.shared.validator.GwtQuestionnaireAnswersValidator;
-
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.PreparedQuery;
@@ -25,6 +19,14 @@ import com.google.appengine.api.datastore.Transaction;
 import com.google.appengine.api.datastore.TransactionOptions;
 import com.google.appengine.api.memcache.MemcacheService;
 import com.google.appengine.api.users.User;
+
+import at.brandl.lws.notice.dao.AbstractDsDao;
+import at.brandl.lws.notice.dao.DsUtil;
+import at.brandl.lws.notice.model.GwtAnswer;
+import at.brandl.lws.notice.model.GwtQuestionnaireAnswers;
+import at.brandl.lws.notice.shared.util.Constants.QuestionnaireAnswer;
+import at.brandl.lws.notice.shared.util.Constants.QuestionnaireAnswers;
+import at.brandl.lws.notice.shared.validator.GwtQuestionnaireAnswersValidator;
 
 public class QuestionnaireDsDao extends AbstractDsDao {
 

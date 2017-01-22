@@ -2,9 +2,9 @@ package at.brandl.lws.notice.shared.service;
 
 import java.util.List;
 
-import at.brandl.lws.notice.model.GwtDocumentation;
-
 import com.google.gwt.user.client.rpc.AsyncCallback;
+
+import at.brandl.lws.notice.model.GwtDocumentation;
 
 public interface DocsServiceAsync {
 

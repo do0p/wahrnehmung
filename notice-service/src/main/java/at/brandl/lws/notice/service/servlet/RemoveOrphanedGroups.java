@@ -10,11 +10,11 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import at.brandl.lws.notice.service.dao.NoticeArchiveDsDao;
-import at.brandl.lws.notice.shared.util.Constants.NoticeGroup;
-
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
+
+import at.brandl.lws.notice.service.dao.NoticeArchiveDsDao;
+import at.brandl.lws.notice.shared.util.Constants.NoticeGroup;
 
 public class RemoveOrphanedGroups extends HttpServlet {
 

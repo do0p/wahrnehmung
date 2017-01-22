@@ -1,8 +1,8 @@
 package at.brandl.lws.notice.client.utils;
 
-import at.brandl.lws.notice.model.GwtMultipleChoiceOption;
-
 import com.google.gwt.user.client.ui.CheckBox;
+
+import at.brandl.lws.notice.model.GwtMultipleChoiceOption;
 
 public class MultipleChoiceCheckBox extends CheckBox {
 

@@ -5,21 +5,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import at.brandl.lws.notice.client.utils.BeobachtungsTable;
-import at.brandl.lws.notice.client.utils.NameSelection;
-import at.brandl.lws.notice.client.utils.Navigation;
-import at.brandl.lws.notice.client.utils.PopUp;
-import at.brandl.lws.notice.client.utils.Print;
-import at.brandl.lws.notice.client.utils.SectionSelection;
-import at.brandl.lws.notice.client.utils.SectionSelectionBox;
-import at.brandl.lws.notice.client.utils.Show;
-import at.brandl.lws.notice.client.utils.Utils;
-import at.brandl.lws.notice.client.utils.YearSelection;
-import at.brandl.lws.notice.client.utils.YearSelection.YearSelectionResult;
-import at.brandl.lws.notice.model.Authorization;
-import at.brandl.lws.notice.model.BeobachtungsFilter;
-import at.brandl.lws.notice.model.GwtBeobachtung;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -40,6 +25,21 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.CellPreviewEvent;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.SelectionChangeEvent;
+
+import at.brandl.lws.notice.client.utils.BeobachtungsTable;
+import at.brandl.lws.notice.client.utils.NameSelection;
+import at.brandl.lws.notice.client.utils.Navigation;
+import at.brandl.lws.notice.client.utils.PopUp;
+import at.brandl.lws.notice.client.utils.Print;
+import at.brandl.lws.notice.client.utils.SectionSelection;
+import at.brandl.lws.notice.client.utils.SectionSelectionBox;
+import at.brandl.lws.notice.client.utils.Show;
+import at.brandl.lws.notice.client.utils.Utils;
+import at.brandl.lws.notice.client.utils.YearSelection;
+import at.brandl.lws.notice.client.utils.YearSelection.YearSelectionResult;
+import at.brandl.lws.notice.model.Authorization;
+import at.brandl.lws.notice.model.BeobachtungsFilter;
+import at.brandl.lws.notice.model.GwtBeobachtung;
 
 public class Search extends VerticalPanel {
 	private static final int START_YEAR = 2012;

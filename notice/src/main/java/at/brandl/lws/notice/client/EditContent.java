@@ -6,22 +6,6 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import at.brandl.lws.notice.client.utils.DecisionBox;
-import at.brandl.lws.notice.client.utils.FileUploadForm;
-import at.brandl.lws.notice.client.utils.NameSelection;
-import at.brandl.lws.notice.client.utils.PopUp;
-import at.brandl.lws.notice.client.utils.RichTextToolbar;
-import at.brandl.lws.notice.client.utils.SectionSelection;
-import at.brandl.lws.notice.client.utils.SectionSelectionBox;
-import at.brandl.lws.notice.client.utils.Utils;
-import at.brandl.lws.notice.model.Authorization;
-import at.brandl.lws.notice.model.GwtBeobachtung;
-import at.brandl.lws.notice.model.GwtBeobachtung.DurationEnum;
-import at.brandl.lws.notice.model.GwtBeobachtung.SocialEnum;
-import at.brandl.lws.notice.shared.service.WahrnehmungsService;
-import at.brandl.lws.notice.shared.service.WahrnehmungsServiceAsync;
-import at.brandl.lws.notice.shared.validator.GwtBeobachtungValidator;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.BlurEvent;
 import com.google.gwt.event.dom.client.BlurHandler;
@@ -49,6 +33,22 @@ import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.datepicker.client.DateBox;
+
+import at.brandl.lws.notice.client.utils.DecisionBox;
+import at.brandl.lws.notice.client.utils.FileUploadForm;
+import at.brandl.lws.notice.client.utils.NameSelection;
+import at.brandl.lws.notice.client.utils.PopUp;
+import at.brandl.lws.notice.client.utils.RichTextToolbar;
+import at.brandl.lws.notice.client.utils.SectionSelection;
+import at.brandl.lws.notice.client.utils.SectionSelectionBox;
+import at.brandl.lws.notice.client.utils.Utils;
+import at.brandl.lws.notice.model.Authorization;
+import at.brandl.lws.notice.model.GwtBeobachtung;
+import at.brandl.lws.notice.model.GwtBeobachtung.DurationEnum;
+import at.brandl.lws.notice.model.GwtBeobachtung.SocialEnum;
+import at.brandl.lws.notice.shared.service.WahrnehmungsService;
+import at.brandl.lws.notice.shared.service.WahrnehmungsServiceAsync;
+import at.brandl.lws.notice.shared.validator.GwtBeobachtungValidator;
 
 public class EditContent extends HorizontalPanel {
 

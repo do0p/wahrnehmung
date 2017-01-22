@@ -4,10 +4,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import at.brandl.lws.notice.model.Authorization;
-import at.brandl.lws.notice.shared.service.AuthorizationService;
-import at.brandl.lws.notice.shared.service.AuthorizationServiceAsync;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -19,6 +15,10 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
+
+import at.brandl.lws.notice.model.Authorization;
+import at.brandl.lws.notice.shared.service.AuthorizationService;
+import at.brandl.lws.notice.shared.service.AuthorizationServiceAsync;
 
 public class AuthorizationAdmin extends AbstractAdminTab {
 

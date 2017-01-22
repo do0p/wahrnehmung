@@ -77,4 +77,10 @@ public interface Labels extends Messages {
 	String questionLabel();
 	String questionGroupLabel();
 	String groupActivity();
+	String interactions();
+	String with();
+	String numberOfContacts();
+	String showNetwork();
+	String from();
+	String until();
 }

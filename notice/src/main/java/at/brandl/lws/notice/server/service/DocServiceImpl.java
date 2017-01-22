@@ -24,24 +24,6 @@ import org.jsoup.nodes.Element;
 import org.jsoup.safety.Whitelist;
 import org.jsoup.select.NodeTraversor;
 
-import at.brandl.lws.notice.model.BackendServiceException;
-import at.brandl.lws.notice.model.BeobachtungsFilter;
-import at.brandl.lws.notice.model.DocumentationAlreadyExistsException;
-import at.brandl.lws.notice.model.GwtBeobachtung;
-import at.brandl.lws.notice.model.GwtChild;
-import at.brandl.lws.notice.model.GwtDocumentation;
-import at.brandl.lws.notice.model.GwtSection;
-import at.brandl.lws.notice.model.GwtSummary;
-import at.brandl.lws.notice.model.UserGrantRequiredException;
-import at.brandl.lws.notice.server.dao.DaoRegistry;
-import at.brandl.lws.notice.server.dao.ds.BeobachtungDsDao;
-import at.brandl.lws.notice.server.dao.ds.ChildDsDao;
-import at.brandl.lws.notice.server.dao.ds.SectionDsDao;
-import at.brandl.lws.notice.shared.Config;
-import at.brandl.lws.notice.shared.service.DocsService;
-import at.brandl.lws.notice.shared.service.StateParser;
-import at.brandl.lws.notice.shared.util.Constants;
-
 import com.google.api.client.auth.oauth2.AuthorizationCodeFlow;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
@@ -60,6 +42,24 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.google.gwt.view.client.Range;
+
+import at.brandl.lws.notice.dao.DaoRegistry;
+import at.brandl.lws.notice.model.BackendServiceException;
+import at.brandl.lws.notice.model.BeobachtungsFilter;
+import at.brandl.lws.notice.model.DocumentationAlreadyExistsException;
+import at.brandl.lws.notice.model.GwtBeobachtung;
+import at.brandl.lws.notice.model.GwtChild;
+import at.brandl.lws.notice.model.GwtDocumentation;
+import at.brandl.lws.notice.model.GwtSection;
+import at.brandl.lws.notice.model.GwtSummary;
+import at.brandl.lws.notice.model.UserGrantRequiredException;
+import at.brandl.lws.notice.server.dao.ds.BeobachtungDsDao;
+import at.brandl.lws.notice.server.dao.ds.ChildDsDao;
+import at.brandl.lws.notice.server.dao.ds.SectionDsDao;
+import at.brandl.lws.notice.shared.Config;
+import at.brandl.lws.notice.shared.service.DocsService;
+import at.brandl.lws.notice.shared.service.StateParser;
+import at.brandl.lws.notice.shared.util.Constants;
 
 public class DocServiceImpl extends RemoteServiceServlet implements DocsService {
 

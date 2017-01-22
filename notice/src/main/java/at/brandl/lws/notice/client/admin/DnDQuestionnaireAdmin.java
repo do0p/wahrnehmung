@@ -7,6 +7,15 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.user.client.ui.CellPanel;
+import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
+
 import at.brandl.lws.notice.client.utils.ChangeListener;
 import at.brandl.lws.notice.client.utils.ChangeableLabel;
 import at.brandl.lws.notice.client.utils.Data;
@@ -31,15 +40,6 @@ import at.brandl.lws.notice.model.GwtQuestionnaire;
 import at.brandl.lws.notice.shared.service.FormService;
 import at.brandl.lws.notice.shared.service.FormServiceAsync;
 import at.brandl.lws.notice.shared.validator.GwtQuestionnaireValidator;
-
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.user.client.ui.CellPanel;
-import com.google.gwt.user.client.ui.Grid;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
 
 public class DnDQuestionnaireAdmin extends AbstractAdminTab implements
 		ReadyListener, ChangeListener {

@@ -2,9 +2,6 @@ package at.brandl.lws.notice.client.utils;
 
 import java.util.Collection;
 
-import at.brandl.lws.notice.client.Labels;
-import at.brandl.lws.notice.model.GwtBeobachtung;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -14,6 +11,9 @@ import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.ScrollPanel;
+
+import at.brandl.lws.notice.client.Labels;
+import at.brandl.lws.notice.model.GwtBeobachtung;
 
 public class Show extends DialogBox {
 

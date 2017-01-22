@@ -5,13 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import at.brandl.lws.notice.client.utils.DecisionBox;
-import at.brandl.lws.notice.client.utils.Utils;
-import at.brandl.lws.notice.model.GwtChild;
-import at.brandl.lws.notice.shared.service.ChildService;
-import at.brandl.lws.notice.shared.service.ChildServiceAsync;
-import at.brandl.lws.notice.shared.validator.GwtChildValidator;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -28,6 +21,13 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.datepicker.client.DateBox;
+
+import at.brandl.lws.notice.client.utils.DecisionBox;
+import at.brandl.lws.notice.client.utils.Utils;
+import at.brandl.lws.notice.model.GwtChild;
+import at.brandl.lws.notice.shared.service.ChildService;
+import at.brandl.lws.notice.shared.service.ChildServiceAsync;
+import at.brandl.lws.notice.shared.validator.GwtChildValidator;
 
 public class ChildAdmin extends AbstractAdminTab {
 

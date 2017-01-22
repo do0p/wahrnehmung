@@ -2,15 +2,6 @@ package at.brandl.lws.notice.client.utils;
 
 import java.util.Iterator;
 
-import at.brandl.lws.notice.client.EditContent;
-import at.brandl.lws.notice.client.Labels;
-import at.brandl.lws.notice.model.Authorization;
-import at.brandl.lws.notice.model.BeobachtungsFilter;
-import at.brandl.lws.notice.model.BeobachtungsResult;
-import at.brandl.lws.notice.model.GwtBeobachtung;
-import at.brandl.lws.notice.shared.service.WahrnehmungsService;
-import at.brandl.lws.notice.shared.service.WahrnehmungsServiceAsync;
-
 import com.google.gwt.cell.client.ActionCell;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.ValueUpdater;
@@ -29,6 +20,15 @@ import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.MultiSelectionModel;
 import com.google.gwt.view.client.Range;
+
+import at.brandl.lws.notice.client.EditContent;
+import at.brandl.lws.notice.client.Labels;
+import at.brandl.lws.notice.model.Authorization;
+import at.brandl.lws.notice.model.BeobachtungsFilter;
+import at.brandl.lws.notice.model.BeobachtungsResult;
+import at.brandl.lws.notice.model.GwtBeobachtung;
+import at.brandl.lws.notice.shared.service.WahrnehmungsService;
+import at.brandl.lws.notice.shared.service.WahrnehmungsServiceAsync;
 
 public class BeobachtungsTable extends CellTable<GwtBeobachtung> {
 	private static final int PAGE_SIZE = 10;

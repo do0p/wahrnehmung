@@ -7,12 +7,12 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
+import com.google.gwt.user.server.rpc.RemoteServiceServlet;
+
+import at.brandl.lws.notice.dao.DaoRegistry;
 import at.brandl.lws.notice.model.GwtSection;
-import at.brandl.lws.notice.server.dao.DaoRegistry;
 import at.brandl.lws.notice.server.dao.ds.SectionDsDao;
 import at.brandl.lws.notice.shared.service.SectionService;
-
-import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 public class SectionServiceImpl extends RemoteServiceServlet implements
 		SectionService {

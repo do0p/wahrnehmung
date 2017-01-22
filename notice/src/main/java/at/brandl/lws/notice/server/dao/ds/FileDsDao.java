@@ -9,9 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import at.brandl.lws.notice.model.GwtFileInfo;
-import at.brandl.lws.notice.shared.Config;
-
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.FetchOptions;
@@ -26,6 +23,10 @@ import com.google.appengine.api.memcache.MemcacheService;
 import com.google.appengine.tools.cloudstorage.GcsFilename;
 import com.google.appengine.tools.cloudstorage.GcsService;
 import com.google.appengine.tools.cloudstorage.GcsServiceFactory;
+
+import at.brandl.lws.notice.dao.AbstractDsDao;
+import at.brandl.lws.notice.model.GwtFileInfo;
+import at.brandl.lws.notice.shared.Config;
 
 public class FileDsDao extends AbstractDsDao {
 

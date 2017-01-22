@@ -135,6 +135,20 @@ public class Constants {
 		public static final String TYPE = "type";
 		public static final String CREATE_DATE = "createDate";
 	}
+	
+	public static class Interaction {
+		
+		public static final String KIND = "InteractionDs";
+		public static final String DATE = "date";
+		public static final String PARTNER = "partner";
+		public static final String COUNT = "count";
+		
+		public static class Cache {
+
+			public static final String NAME = "interactionDao";
+		}
+
+	}
 
 	public static final String MULTIPLE_CHOICE = "multipleChoice";
 	public static final String DOCUMENTATION_FOLDER_NAME = "Berichte";

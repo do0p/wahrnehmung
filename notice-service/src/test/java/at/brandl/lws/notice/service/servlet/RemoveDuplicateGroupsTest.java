@@ -15,13 +15,13 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import at.brandl.lws.notice.shared.util.Constants.NoticeGroup;
-
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalMemcacheServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
+
+import at.brandl.lws.notice.shared.util.Constants.NoticeGroup;
 
 public class RemoveDuplicateGroupsTest {
 

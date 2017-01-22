@@ -5,6 +5,14 @@
 	version="3.0">
 
 	<servlet>
+		<servlet-name>vijsServlet</servlet-name>
+		<servlet-class>at.brandl.lws.notice.server.servlet.ViJsServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>vijsServlet</servlet-name>
+		<url-pattern>/vijs</url-pattern>
+	</servlet-mapping>
+	<servlet>
 		<servlet-name>fileUploadServlet</servlet-name>
 		<servlet-class>at.brandl.lws.notice.server.service.FileUploadService</servlet-class>
 	</servlet>
@@ -75,6 +83,14 @@
 	<servlet>
 		<servlet-name>docOAuthCallbackServlet</servlet-name>
 		<servlet-class>at.brandl.lws.notice.server.service.DocsOauthCallbackService</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>interactionsServlet</servlet-name>
+		<url-pattern>/wahrnehmung/interactions</url-pattern>
+	</servlet-mapping>
+	<servlet>
+		<servlet-name>interactionsServlet</servlet-name>
+		<servlet-class>at.brandl.lws.notice.server.service.InteractionServiceImpl</servlet-class>
 	</servlet>
 
 	<security-constraint>

@@ -15,8 +15,6 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
-import at.brandl.lws.notice.model.BackendServiceException;
-
 import com.google.api.client.extensions.appengine.datastore.AppEngineDataStoreFactory;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
@@ -29,6 +27,8 @@ import com.google.api.client.json.JsonGenerator;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.repackaged.org.apache.commons.codec.binary.Base64;
 import com.google.api.client.util.store.DataStoreFactory;
+
+import at.brandl.lws.notice.model.BackendServiceException;
 
 class Utils {
 

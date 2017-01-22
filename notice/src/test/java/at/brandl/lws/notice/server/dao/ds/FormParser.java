@@ -6,6 +6,8 @@ import java.io.StringReader;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
+import com.google.appengine.repackaged.com.google.common.base.StringUtil;
+
 import at.brandl.lws.notice.model.GwtAnswerTemplate;
 import at.brandl.lws.notice.model.GwtMultipleChoiceAnswerTemplate;
 import at.brandl.lws.notice.model.GwtMultipleChoiceOption;
@@ -13,8 +15,6 @@ import at.brandl.lws.notice.model.GwtQuestion;
 import at.brandl.lws.notice.model.GwtQuestionGroup;
 import at.brandl.lws.notice.model.GwtQuestionnaire;
 import at.brandl.lws.notice.shared.service.FormPrinter;
-
-import com.google.appengine.repackaged.com.google.common.base.StringUtil;
 
 public class FormParser extends FormPrinter {
 

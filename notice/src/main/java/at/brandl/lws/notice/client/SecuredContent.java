@@ -1,51 +1,45 @@
 package at.brandl.lws.notice.client;
 
-import at.brandl.lws.notice.model.Authorization;
-import at.brandl.lws.notice.shared.service.AuthorizationService;
-import at.brandl.lws.notice.shared.service.AuthorizationServiceAsync;
-
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
-public abstract class SecuredContent
-  implements EntryPoint
-{
-  private final AuthorizationServiceAsync authService = (AuthorizationServiceAsync)GWT.create(AuthorizationService.class);
-  private Authorization authorization;
+import at.brandl.lws.notice.model.Authorization;
+import at.brandl.lws.notice.shared.service.AuthorizationService;
+import at.brandl.lws.notice.shared.service.AuthorizationServiceAsync;
 
-  public final void onModuleLoad()
-  {
-    executeSecured(this);
-  }
+public abstract class SecuredContent implements EntryPoint {
 
-  public void executeSecured(final SecuredContent securedContent) {
-    this.authService.getAuthorizationForCurrentUser(
-      Window.Location.createUrlBuilder().buildString(), 
-      new AsyncCallback<Authorization>()
-    {
-      public void onFailure(Throwable caught)
-      {
-      }
+	private final AuthorizationServiceAsync authService = (AuthorizationServiceAsync) GWT
+			.create(AuthorizationService.class);
+	private Authorization authorization;
 
-      public void onSuccess(Authorization authorization)
-      {
-        SecuredContent.this.authorization = authorization;
-        if (authorization.isLoggedIn())
-          securedContent.onLogin(authorization);
-        else
-          securedContent.onLogOut(authorization);
-      }
-    });
-  }
+	public final void onModuleLoad() {
+		executeSecured(this);
+	}
 
-  protected abstract void onLogin(Authorization paramAuthorization);
+	public void executeSecured(final SecuredContent securedContent) {
+		this.authService.getAuthorizationForCurrentUser(Window.Location.createUrlBuilder().buildString(),
+				new AsyncCallback<Authorization>() {
+					public void onFailure(Throwable caught) {
+					}
 
-  protected abstract void onLogOut(Authorization paramAuthorization);
+					public void onSuccess(Authorization authorization) {
+						SecuredContent.this.authorization = authorization;
+						if (authorization.isLoggedIn())
+							securedContent.onLogin(authorization);
+						else
+							securedContent.onLogOut(authorization);
+					}
+				});
+	}
 
-  protected Authorization getAuthorization()
-  {
-    return this.authorization;
-  }
+	protected abstract void onLogin(Authorization paramAuthorization);
+
+	protected abstract void onLogOut(Authorization paramAuthorization);
+
+	protected Authorization getAuthorization() {
+		return this.authorization;
+	}
 }

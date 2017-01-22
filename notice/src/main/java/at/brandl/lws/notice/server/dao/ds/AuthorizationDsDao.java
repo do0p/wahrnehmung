@@ -5,14 +5,15 @@ import static com.google.appengine.api.datastore.FetchOptions.Builder.withDefaul
 import java.util.ArrayList;
 import java.util.Collection;
 
-import at.brandl.lws.notice.model.Authorization;
-
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.users.User;
+
+import at.brandl.lws.notice.dao.AbstractDsDao;
+import at.brandl.lws.notice.model.Authorization;
 
 public class AuthorizationDsDao extends AbstractDsDao {
 

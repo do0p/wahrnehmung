@@ -5,11 +5,19 @@
 	<parent>
 		<groupId>at.brandl.lws.notice</groupId>
 		<artifactId>parent</artifactId>
-		<version>21-1</version>
+		<version>22</version>
 		<relativePath>../</relativePath>
 	</parent>
 
 	<artifactId>notice-shared</artifactId>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.google.appengine</groupId>
+			<artifactId>appengine-api-1.0-sdk</artifactId>
+		</dependency>
+	</dependencies>
+
 	<build>
 		<plugins>
 

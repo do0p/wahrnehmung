@@ -8,14 +8,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import at.brandl.lws.notice.shared.util.Constants.ArchiveNotice;
-import at.brandl.lws.notice.shared.util.Constants.ArchiveNoticeGroup;
-import at.brandl.lws.notice.shared.util.Constants.Child;
-import at.brandl.lws.notice.shared.util.Constants.MigrationKeyMapping;
-import at.brandl.lws.notice.shared.util.Constants.MigrationKeyMapping.KeyMappingType;
-import at.brandl.lws.notice.shared.util.Constants.Notice;
-import at.brandl.lws.notice.shared.util.Constants.NoticeGroup;
-
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
@@ -28,8 +20,14 @@ import com.google.appengine.api.datastore.Query.Filter;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Transaction;
-import com.google.appengine.api.memcache.MemcacheService;
-import com.google.appengine.api.memcache.MemcacheServiceFactory;
+
+import at.brandl.lws.notice.shared.util.Constants.ArchiveNotice;
+import at.brandl.lws.notice.shared.util.Constants.ArchiveNoticeGroup;
+import at.brandl.lws.notice.shared.util.Constants.Child;
+import at.brandl.lws.notice.shared.util.Constants.MigrationKeyMapping;
+import at.brandl.lws.notice.shared.util.Constants.MigrationKeyMapping.KeyMappingType;
+import at.brandl.lws.notice.shared.util.Constants.Notice;
+import at.brandl.lws.notice.shared.util.Constants.NoticeGroup;
 
 public class NoticeArchiveDsDao {
 

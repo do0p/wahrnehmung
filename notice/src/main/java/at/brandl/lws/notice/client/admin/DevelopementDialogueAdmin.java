@@ -3,12 +3,6 @@ package at.brandl.lws.notice.client.admin;
 import java.util.Date;
 import java.util.List;
 
-import at.brandl.lws.notice.client.utils.NameSelection;
-import at.brandl.lws.notice.client.utils.Utils;
-import at.brandl.lws.notice.model.GwtChild;
-import at.brandl.lws.notice.shared.service.ChildService;
-import at.brandl.lws.notice.shared.service.ChildServiceAsync;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -23,6 +17,12 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.datepicker.client.DateBox;
+
+import at.brandl.lws.notice.client.utils.NameSelection;
+import at.brandl.lws.notice.client.utils.Utils;
+import at.brandl.lws.notice.model.GwtChild;
+import at.brandl.lws.notice.shared.service.ChildService;
+import at.brandl.lws.notice.shared.service.ChildServiceAsync;
 
 public class DevelopementDialogueAdmin extends AbstractAdminTab {
 

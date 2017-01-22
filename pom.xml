@@ -5,7 +5,7 @@
 
 	<groupId>at.brandl.lws.notice</groupId>
 	<artifactId>parent</artifactId>
-	<version>21-1</version>
+	<version>22</version>
 	<packaging>pom</packaging>
 
 	<name>Notice parent</name>
@@ -13,7 +13,7 @@
 	<properties>
 		<appengine.app.version>${project.version}</appengine.app.version>
 		<appengine.app.id>wahrnehmung-test</appengine.app.id>
-		<appengine.target.version>1.9.28</appengine.target.version>
+		<appengine.target.version>1.9.48</appengine.target.version>
 		<gwt.target.version>2.7.0</gwt.target.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
@@ -23,6 +23,7 @@
 		<module>notice</module>
 		<module>notice-service</module>
 		<module>notice-ear</module>
+		<module>interaction-service</module>
 	</modules>
 
 	<dependencyManagement>
@@ -90,6 +91,11 @@
 				<groupId>com.google.apis</groupId>
 				<artifactId>google-api-services-script</artifactId>
 				<version>v1-rev1-1.20.0</version>
+			</dependency>
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-core</artifactId>
+				<version>2.8.5</version>
 			</dependency>
 
 			<!-- Test Dependencies -->

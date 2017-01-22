@@ -10,8 +10,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import at.brandl.lws.notice.TestUtils;
+import at.brandl.lws.notice.dao.DaoRegistry;
 import at.brandl.lws.notice.model.GwtSection;
-import at.brandl.lws.notice.server.dao.DaoRegistry;
 
 public class SectionDsDaoTest extends AbstractDsDaoTest {
 

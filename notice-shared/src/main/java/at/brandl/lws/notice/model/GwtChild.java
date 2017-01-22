@@ -8,7 +8,7 @@ import java.util.List;
 
 public class GwtChild implements Serializable, Comparable<GwtChild> {
 
-	private static final long serialVersionUID = 5870082887319396186L;
+	private static final long serialVersionUID = 5870082887419396186L;
 	private String firstName;
 	private String lastName;
 	private Date birthDay;

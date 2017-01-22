@@ -1,10 +1,5 @@
 package at.brandl.lws.notice.client;
 
-import at.brandl.lws.notice.client.utils.Navigation;
-import at.brandl.lws.notice.client.utils.Utils;
-import at.brandl.lws.notice.model.Authorization;
-import at.brandl.lws.notice.shared.service.StateParser;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -13,6 +8,11 @@ import com.google.gwt.user.client.Window.Location;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
+
+import at.brandl.lws.notice.client.utils.Navigation;
+import at.brandl.lws.notice.client.utils.Utils;
+import at.brandl.lws.notice.model.Authorization;
+import at.brandl.lws.notice.shared.service.StateParser;
 
 public class Notice extends SecuredContent implements
 		ValueChangeHandler<String> {

@@ -2,10 +2,10 @@ package at.brandl.lws.notice.shared.service;
 
 import java.util.Collection;
 
-import at.brandl.lws.notice.model.Authorization;
-
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+
+import at.brandl.lws.notice.model.Authorization;
 
 @RemoteServiceRelativePath("auth")
 public abstract interface AuthorizationService extends RemoteService
