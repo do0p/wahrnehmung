@@ -22,14 +22,14 @@
 		<url-pattern>/interactions</url-pattern>
 	</servlet-mapping>
 	
-	<servlet>
+<!-- 	<servlet>
 		<servlet-name>importServlet</servlet-name>
 		<servlet-class>at.brandl.lws.notice.interaction.servlet.OneTimeImportServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>importServlet</servlet-name>
 		<url-pattern>/import</url-pattern>
-	</servlet-mapping>
+	</servlet-mapping> -->
 	
 	<servlet>
 		<servlet-name>storeInteractionsServlet</servlet-name>

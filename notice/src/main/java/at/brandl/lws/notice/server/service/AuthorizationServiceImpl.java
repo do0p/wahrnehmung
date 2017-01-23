@@ -16,44 +16,44 @@ public class AuthorizationServiceImpl extends RemoteServiceServlet implements
 		AuthorizationService {
 	private static final long serialVersionUID = 3902038151789960035L;
 	private final AuthorizationDsDao authorizationDao;
-	private UserService userService;
+	private final UserService userService;
 
 	public AuthorizationServiceImpl() {
-		this.authorizationDao = DaoRegistry.get(AuthorizationDsDao.class);
-		this.userService = UserServiceFactory.getUserService();
+		authorizationDao = DaoRegistry.get(AuthorizationDsDao.class);
+		userService = UserServiceFactory.getUserService();
 	}
 
 	public Collection<Authorization> queryAuthorizations() {
-		return this.authorizationDao.queryAuthorizations();
+		return authorizationDao.queryAuthorizations();
 	}
 
 	public void storeAuthorization(Authorization aut) {
 		assertCurrentUserIsAdmin();
-		this.authorizationDao.storeAuthorization(aut);
+		authorizationDao.storeAuthorization(aut);
 	}
 
 	public void deleteAuthorization(String email) {
 		assertCurrentUserIsAdmin();
-		this.authorizationDao.deleteAuthorization(email);
+		authorizationDao.deleteAuthorization(email);
 	}
 
 	public void assertCurrentUserIsAdmin() {
 		if (!currentUserIsAdmin())
 			throw new IllegalStateException("current user is no admin: "
-					+ this.userService.getCurrentUser());
+					+ userService.getCurrentUser());
 	}
 
 	public void assertCurrentUserIsSectionAdmin() {
 		if (!currentUserIsSectionAdmin())
 			throw new IllegalStateException(
 					"current user is no section-admin: "
-							+ this.userService.getCurrentUser());
+							+ userService.getCurrentUser());
 	}
 
 	public void assertCurrentUserIsTeacher() {
 		if (!currentUserIsTeacher())
 			throw new IllegalStateException("current user is no teacher: "
-					+ this.userService.getCurrentUser());
+					+ userService.getCurrentUser());
 	}
 
 	public boolean currentUserIsAdmin() {
@@ -78,11 +78,11 @@ public class AuthorizationServiceImpl extends RemoteServiceServlet implements
 		Authorization authorization = getAuthorizationForCurrentUserInternal();
 		if (authorization == null) {
 			authorization = new Authorization();
-			authorization.setLoginUrl(this.userService
+			authorization.setLoginUrl(userService
 					.createLoginURL(followUpUrl));
 			authorization.setLoggedIn(false);
 		} else {
-			authorization.setLogoutUrl(this.userService
+			authorization.setLogoutUrl(userService
 					.createLogoutURL(followUpUrl));
 			authorization.setLoggedIn(true);
 		}
@@ -93,11 +93,11 @@ public class AuthorizationServiceImpl extends RemoteServiceServlet implements
 		if (!userService.isUserLoggedIn()) {
 			return null;
 		}
-		User user = this.userService.getCurrentUser();
+		User user = userService.getCurrentUser();
 		if (userService.isUserAdmin()) {
 			return createSuperUserAuthorization(user);
 		}
-		return this.authorizationDao.getAuthorization(user);
+		return authorizationDao.getAuthorization(user);
 	}
 
 	private Authorization createSuperUserAuthorization(User user) {

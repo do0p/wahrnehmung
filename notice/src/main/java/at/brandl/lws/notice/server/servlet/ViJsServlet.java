@@ -30,7 +30,9 @@ import com.fasterxml.jackson.core.JsonToken;
 import at.brandl.lws.notice.dao.DaoRegistry;
 import at.brandl.lws.notice.model.GwtInteraction;
 import at.brandl.lws.notice.server.dao.ds.ChildDsDao;
+import at.brandl.lws.notice.server.service.AuthorizationServiceImpl;
 import at.brandl.lws.notice.shared.Config;
+import at.brandl.lws.notice.shared.service.AuthorizationService;
 
 public class ViJsServlet extends HttpServlet {
 
@@ -62,11 +64,17 @@ public class ViJsServlet extends HttpServlet {
 		}
 	}
 
+	private final AuthorizationServiceImpl authService = new AuthorizationServiceImpl();
 	private final ChildDsDao childDsDao = DaoRegistry.get(ChildDsDao.class);
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
+		if(!authService.currentUserIsTeacher()) {
+			resp.sendError(403);
+			return;
+		}
+		
 		// Date fromDate = getDateValue(req, FROM_PARAM);
 		// Date toDate = getDateValue(req, TO_PARAM);
 
@@ -174,8 +182,9 @@ public class ViJsServlet extends HttpServlet {
 	private URLConnection createUrlConnection() throws MalformedURLException, IOException {
 
 		// String host = "http://localhost:9090";
-		String host = "https://interaction-service-dot-" + Config.getInstance().getApplicationName() + ".appspot.com";
-		URL url = new URL(host + "/interactions");
+		String serviceUrl = Config.getInstance().getInteractionServiceUrl();
+//		String dateQuery = buildDateQuery(fromDate, toDate);
+		URL url = new URL(serviceUrl);// + "?childKey=" + childKey + dateQuery);
 		// System.err.println("opening connection to " + url);
 		URLConnection con = url.openConnection();
 		con.setConnectTimeout(CONNECTION_TIMEOUT);

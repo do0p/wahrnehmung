@@ -12,6 +12,7 @@
 		<servlet-name>vijsServlet</servlet-name>
 		<url-pattern>/vijs</url-pattern>
 	</servlet-mapping>
+	
 	<servlet>
 		<servlet-name>fileUploadServlet</servlet-name>
 		<servlet-class>at.brandl.lws.notice.server.service.FileUploadService</servlet-class>
@@ -20,6 +21,7 @@
 		<servlet-name>fileUploadServlet</servlet-name>
 		<url-pattern>/wahrnehmung/upload</url-pattern>
 	</servlet-mapping>
+	
 	<servlet>
 		<servlet-name>wahrnehmungServlet</servlet-name>
 		<servlet-class>at.brandl.lws.notice.server.service.WahrnehmungsServiceImpl</servlet-class>
@@ -28,6 +30,7 @@
 		<servlet-name>wahrnehmungServlet</servlet-name>
 		<url-pattern>/wahrnehmung/store</url-pattern>
 	</servlet-mapping>
+	
 	<servlet>
 		<servlet-name>childServlet</servlet-name>
 		<servlet-class>at.brandl.lws.notice.server.service.ChildServiceImpl</servlet-class>
@@ -36,6 +39,7 @@
 		<servlet-name>childServlet</servlet-name>
 		<url-pattern>/wahrnehmung/child</url-pattern>
 	</servlet-mapping>
+	
 	<servlet>
 		<servlet-name>sectionServlet</servlet-name>
 		<servlet-class>at.brandl.lws.notice.server.service.SectionServiceImpl</servlet-class>
@@ -44,6 +48,7 @@
 		<servlet-name>sectionServlet</servlet-name>
 		<url-pattern>/wahrnehmung/section</url-pattern>
 	</servlet-mapping>
+	
 	<servlet>
 		<servlet-name>formServlet</servlet-name>
 		<servlet-class>at.brandl.lws.notice.server.service.FormServiceImpl</servlet-class>
@@ -52,6 +57,7 @@
 		<servlet-name>formServlet</servlet-name>
 		<url-pattern>/wahrnehmung/form</url-pattern>
 	</servlet-mapping>
+	
 	<servlet>
 		<servlet-name>questionnaireServlet</servlet-name>
 		<servlet-class>at.brandl.lws.notice.server.service.QuestionnaireServiceImpl</servlet-class>
@@ -60,6 +66,7 @@
 		<servlet-name>questionnaireServlet</servlet-name>
 		<url-pattern>/wahrnehmung/questionnaire</url-pattern>
 	</servlet-mapping>
+	
 	<servlet>
 		<servlet-name>authServlet</servlet-name>
 		<servlet-class>at.brandl.lws.notice.server.service.AuthorizationServiceImpl</servlet-class>
@@ -68,43 +75,34 @@
 		<servlet-name>authServlet</servlet-name>
 		<url-pattern>/wahrnehmung/auth</url-pattern>
 	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>docServlet</servlet-name>
-		<url-pattern>/wahrnehmung/doc</url-pattern>
-	</servlet-mapping>
+	
 	<servlet>
 		<servlet-name>docServlet</servlet-name>
 		<servlet-class>at.brandl.lws.notice.server.service.DocServiceImpl</servlet-class>
 	</servlet>
 	<servlet-mapping>
-		<servlet-name>docOAuthCallbackServlet</servlet-name>
-		<url-pattern>/oauth2docscallback</url-pattern>
+		<servlet-name>docServlet</servlet-name>
+		<url-pattern>/wahrnehmung/doc</url-pattern>
 	</servlet-mapping>
+	
 	<servlet>
 		<servlet-name>docOAuthCallbackServlet</servlet-name>
 		<servlet-class>at.brandl.lws.notice.server.service.DocsOauthCallbackService</servlet-class>
 	</servlet>
 	<servlet-mapping>
-		<servlet-name>interactionsServlet</servlet-name>
-		<url-pattern>/wahrnehmung/interactions</url-pattern>
+		<servlet-name>docOAuthCallbackServlet</servlet-name>
+		<url-pattern>/oauth2docscallback</url-pattern>
 	</servlet-mapping>
+	
 	<servlet>
 		<servlet-name>interactionsServlet</servlet-name>
 		<servlet-class>at.brandl.lws.notice.server.service.InteractionServiceImpl</servlet-class>
 	</servlet>
+	<servlet-mapping>
+		<servlet-name>interactionsServlet</servlet-name>
+		<url-pattern>/wahrnehmung/interactions</url-pattern>
+	</servlet-mapping>
 
-	<security-constraint>
-		<web-resource-collection>
-			<web-resource-name>/*</web-resource-name>
-			<url-pattern>/*</url-pattern>
-		</web-resource-collection>
-		<user-data-constraint>
-			<transport-guarantee>CONFIDENTIAL</transport-guarantee>
-		</user-data-constraint>
-	</security-constraint>
-	<welcome-file-list>
-		<welcome-file>Wahrnehmung.html</welcome-file>
-	</welcome-file-list>
 	<servlet>
 		<servlet-name>SystemServiceServlet</servlet-name>
 		<servlet-class>com.google.api.server.spi.SystemServiceServlet</servlet-class>
@@ -117,5 +115,22 @@
 		<servlet-name>SystemServiceServlet</servlet-name>
 		<url-pattern>/_ah/spi/*</url-pattern>
 	</servlet-mapping>
+
+	<security-constraint>
+		<web-resource-collection>
+			<web-resource-name>/*</web-resource-name>
+			<url-pattern>/*</url-pattern>
+		</web-resource-collection>
+		<auth-constraint>
+			<role-name>*</role-name>
+		</auth-constraint>
+		<user-data-constraint>
+			<transport-guarantee>CONFIDENTIAL</transport-guarantee>
+		</user-data-constraint>
+	</security-constraint>
+
+	<welcome-file-list>
+		<welcome-file>Wahrnehmung.html</welcome-file>
+	</welcome-file-list>
 
 </web-app>

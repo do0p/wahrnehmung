@@ -43,6 +43,10 @@ public class Config extends Properties {
 		return getProperty("application.name");
 	}
 
+	public String getInteractionServiceUrl() {
+		return getProperty("interactionservice.url");
+	}
+	
 	public String getBucketName() {
 		return getApplicationName() + ".appspot.com";
 	}

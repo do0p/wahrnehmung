@@ -12,7 +12,6 @@
 
 	<properties>
 		<appengine.app.version>${project.version}</appengine.app.version>
-		<appengine.app.id>wahrnehmung-test</appengine.app.id>
 		<appengine.target.version>1.9.48</appengine.target.version>
 		<gwt.target.version>2.7.0</gwt.target.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -200,4 +199,28 @@
 			</plugins>
 		</pluginManagement>
 	</build>
+
+	<profiles>
+		<profile>
+			<id>dev</id>
+			<properties>
+				<appengine.app.id>dev</appengine.app.id>
+				<interactionservice.url>http://localhost:9090/interactions</interactionservice.url>
+			</properties>
+		</profile>
+		<profile>
+			<id>test</id>
+			<properties>
+				<appengine.app.id>wahrnehmung-test</appengine.app.id>
+				<interactionservice.url>https://interaction-service-dot-${appengine.app.id}.appspot.com/interactions</interactionservice.url>
+			</properties>
+		</profile>
+		<profile>
+			<id>prod</id>
+			<properties>
+				<appengine.app.id>lws-wahrnehmung</appengine.app.id>
+				<interactionservice.url>https://interaction-service-dot-${appengine.app.id}.appspot.com/interactions</interactionservice.url>
+			</properties>
+		</profile>
+	</profiles>
 </project>

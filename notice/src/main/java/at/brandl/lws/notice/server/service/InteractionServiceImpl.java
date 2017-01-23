@@ -58,9 +58,9 @@ public class InteractionServiceImpl extends RemoteServiceServlet implements Inte
 	private URLConnection createUrlConnection(String childKey, Date fromDate, Date toDate) throws MalformedURLException, IOException {
 
 		// String host = "http://localhost:9090";
-		String host = "https://interaction-service-dot-" + Config.getInstance().getApplicationName() + ".appspot.com";
+		String serviceUrl = Config.getInstance().getInteractionServiceUrl();
 		String dateQuery = buildDateQuery(fromDate, toDate);
-		URL url = new URL(host + "/interactions?childKey=" + childKey + dateQuery);
+		URL url = new URL(serviceUrl + "?childKey=" + childKey + dateQuery);
 		// System.err.println("opening connection to " + url);
 		URLConnection con = url.openConnection();
 		con.setConnectTimeout(CONNECTION_TIMEOUT);
