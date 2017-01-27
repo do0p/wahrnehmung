@@ -9,9 +9,11 @@ import java.util.logging.Logger;
 import com.google.appengine.api.blobstore.BlobstoreService;
 import com.google.appengine.api.blobstore.BlobstoreServiceFactory;
 import com.google.appengine.api.blobstore.UploadOptions;
+import com.google.appengine.api.modules.ModulesServiceFactory;
 import com.google.appengine.api.taskqueue.Queue;
 import com.google.appengine.api.taskqueue.QueueFactory;
 import com.google.appengine.api.taskqueue.TaskOptions;
+import com.google.appengine.api.taskqueue.TaskOptions.Method;
 import com.google.appengine.api.users.User;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
@@ -28,6 +30,7 @@ import at.brandl.lws.notice.server.dao.ds.BeobachtungDsDao;
 import at.brandl.lws.notice.server.dao.ds.FileDsDao;
 import at.brandl.lws.notice.shared.Config;
 import at.brandl.lws.notice.shared.service.WahrnehmungsService;
+import at.brandl.lws.notice.shared.util.Constants;
 import at.brandl.lws.notice.shared.validator.GwtBeobachtungValidator;
 
 /**
@@ -35,8 +38,7 @@ import at.brandl.lws.notice.shared.validator.GwtBeobachtungValidator;
  */
 public class WahrnehmungsServiceImpl extends RemoteServiceServlet implements WahrnehmungsService {
 
-	private static final String INTERACTION_SERVICE_URL = "/storeInteraction";
-	private static final String INTERACTION_QUEUE_NAME = "interaction";
+	private static final String INTERACTION_SERVICE_PATH = "/interactions";
 	private static final Logger LOGGER = Logger.getLogger(WahrnehmungsServiceImpl.class.getCanonicalName());
 	private static final String UPLOAD_URL = "/wahrnehmung/upload";
 	private static final long serialVersionUID = 6513086238987365801L;
@@ -92,9 +94,10 @@ public class WahrnehmungsServiceImpl extends RemoteServiceServlet implements Wah
 	}
 
 	private void registerInteraction(String child1, String child2, Date date) {
-		Queue queue = QueueFactory.getQueue(INTERACTION_QUEUE_NAME);
-		queue.add(TaskOptions.Builder.withUrl(INTERACTION_SERVICE_URL).param("childKey", child1).param("childKey", child2).param("date",
-			Long.toString(date.getTime())));
+		
+		Queue queue = QueueFactory.getQueue(Constants.INTERACTION_QUEUE_NAME);
+		queue.add(TaskOptions.Builder.withUrl(INTERACTION_SERVICE_PATH).method(Method.POST).param("childKey", child1).param("childKey", child2).param("date",
+			Long.toString(date.getTime())).header("Host", ModulesServiceFactory.getModulesService().getVersionHostname("interaction-service" ,null)));
 	}
 
 	@Override

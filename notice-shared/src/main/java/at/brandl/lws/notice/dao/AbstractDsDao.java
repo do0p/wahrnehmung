@@ -2,6 +2,7 @@ package at.brandl.lws.notice.dao;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
+import com.google.appengine.api.datastore.Entities;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.FetchOptions;
@@ -9,10 +10,14 @@ import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.Filter;
 import com.google.appengine.api.datastore.Query.FilterOperator;
+import com.google.appengine.api.datastore.Transaction;
 import com.google.appengine.api.memcache.MemcacheService;
 import com.google.appengine.api.memcache.MemcacheServiceFactory;
 
 public abstract class AbstractDsDao extends AbstractDao {
+
+	
+	
 
 	protected Filter createEqualsPredicate(String fieldName, Entity entity) {
 		return new Query.FilterPredicate(fieldName, FilterOperator.EQUAL,
@@ -28,6 +33,13 @@ public abstract class AbstractDsDao extends AbstractDao {
 		getCache(cacheName).put(key, entity);
 	}
 
+	
+	protected <T> void insertIntoCache(CacheKey cacheKey, T result, DatastoreService ds, Transaction tx,
+			String cacheName) {
+		getCache(cacheName).put(cacheKey,
+				new CacheEntity<T>(result, getEntityGroupVersion(ds, tx, cacheKey.getKey())));
+	}
+	
 	protected void deleteFromCache(Key key, String cacheName) {
 		getCache(cacheName).delete(key);
 	}
@@ -36,6 +48,29 @@ public abstract class AbstractDsDao extends AbstractDao {
 		return (Entity) getCache(cacheName).get(key);
 	}
 
+	protected <T> T getFromCache(CacheKey cacheKey, DatastoreService ds, String cacheName) {
+		@SuppressWarnings("unchecked")
+		CacheEntity<T> cacheEntity = (CacheEntity<T>) getCache(cacheName).get(cacheKey);
+
+		if (cacheEntity != null && cacheEntity.getVersion() == getEntityGroupVersion(ds, null, cacheKey.getKey())) {
+			return cacheEntity.getEntity();
+		}
+
+		return null;
+	}
+	
+
+	private static long getEntityGroupVersion(DatastoreService ds, Transaction tx, Key entityKey) {
+		try {
+			return Entities.getVersionProperty(ds.get(tx, Entities.createEntityGroupKey(entityKey)));
+		} catch (EntityNotFoundException e) {
+			// No entity group information, return a value strictly smaller than
+			// any
+			// possible version
+			return 0;
+		}
+	}
+	
 	protected DatastoreService getDatastoreService() {
 		return DatastoreServiceFactory.getDatastoreService();
 	}

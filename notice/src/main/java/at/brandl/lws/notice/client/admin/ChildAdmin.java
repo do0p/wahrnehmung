@@ -54,7 +54,9 @@ public class ChildAdmin extends AbstractAdminTab {
 		super(true);
 
 		beginYearBox = new ListBox();
+		beginYearBox.ensureDebugId("beginYear");
 		beginGradeBox = new ListBox();
+		beginGradeBox.ensureDebugId("beginGrade");
 		int year = new Date().getYear() + 1900;
 		for (int i = 0; i < MAX_YEARS_IN_SCHOOL; i++) {
 
@@ -73,6 +75,7 @@ public class ChildAdmin extends AbstractAdminTab {
 		decisionBox.setText(labels().childDelWarning());
 
 		fnBox = new TextBox();
+		fnBox.ensureDebugId("firstname");
 		fnBox.addValueChangeHandler(new ValueChangeHandler<String>() {
 			@Override
 			public void onValueChange(ValueChangeEvent<String> event) {
@@ -80,6 +83,7 @@ public class ChildAdmin extends AbstractAdminTab {
 			}
 		});
 		lnBox = new TextBox();
+		lnBox.ensureDebugId("lastname");
 		lnBox.addValueChangeHandler(new ValueChangeHandler<String>() {
 			@Override
 			public void onValueChange(ValueChangeEvent<String> event) {
@@ -87,6 +91,7 @@ public class ChildAdmin extends AbstractAdminTab {
 			}
 		});
 		bdBox = new DateBox();
+		bdBox.ensureDebugId("birthday");
 		bdBox.setFormat(Utils.DATEBOX_FORMAT);
 		bdBox.addValueChangeHandler(new ValueChangeHandler<Date>() {
 			@Override
@@ -117,6 +122,7 @@ public class ChildAdmin extends AbstractAdminTab {
 			}
 		});
 		archivedBox = new CheckBox();
+		archivedBox.ensureDebugId("archived");
 		archivedBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
 			@Override
 			public void onValueChange(ValueChangeEvent<Boolean> event) {
@@ -130,6 +136,7 @@ public class ChildAdmin extends AbstractAdminTab {
 		// data.add(fileUpload);
 
 		children = new ListBox();
+		children.ensureDebugId("childlist");
 		children.setVisibleItemCount(VISIBLE_CHILDREN);
 
 		rebuildChildList();

@@ -26,6 +26,7 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
+import com.google.appengine.api.utils.SystemProperty;
 
 import at.brandl.lws.notice.dao.DaoRegistry;
 import at.brandl.lws.notice.model.GwtInteraction;
@@ -184,11 +185,12 @@ public class ViJsServlet extends HttpServlet {
 		// String host = "http://localhost:9090";
 		String serviceUrl = Config.getInstance().getInteractionServiceUrl();
 //		String dateQuery = buildDateQuery(fromDate, toDate);
-		URL url = new URL(serviceUrl);// + "?childKey=" + childKey + dateQuery);
+		URL url = new URL(serviceUrl+ "/interactions");// + "?childKey=" + childKey + dateQuery);
 		// System.err.println("opening connection to " + url);
 		URLConnection con = url.openConnection();
 		con.setConnectTimeout(CONNECTION_TIMEOUT);
 		con.setReadTimeout(READ_TIMEOUT);
+		con.setRequestProperty("X-Appengine-Inbound-Appid", SystemProperty.applicationId.get());
 		if (con instanceof HttpURLConnection) {
 			((HttpURLConnection) con).setInstanceFollowRedirects(false);
 		}

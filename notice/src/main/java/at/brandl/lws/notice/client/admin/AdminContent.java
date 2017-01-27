@@ -1,7 +1,9 @@
 package at.brandl.lws.notice.client.admin;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.user.client.ui.TabBar.Tab;
 import com.google.gwt.user.client.ui.TabPanel;
+import com.google.gwt.user.client.ui.UIObject;
 
 import at.brandl.lws.notice.client.Labels;
 import at.brandl.lws.notice.client.utils.Utils;
@@ -32,6 +34,13 @@ public class AdminContent extends TabPanel {
 		}
 		if (authorization.isAdmin() || authorization.isEditSections() || authorization.isEditDialogueDates()) {
 			selectTab(0);
+		}
+		
+		for(int i = 0; i < getTabBar().getTabCount(); i++ ) {
+			Tab tab = getTabBar().getTab(i);
+			if(tab instanceof UIObject) {
+				((UIObject) tab).ensureDebugId(Integer.toString(i));
+			}
 		}
 	}
 }

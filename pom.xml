@@ -5,7 +5,7 @@
 
 	<groupId>at.brandl.lws.notice</groupId>
 	<artifactId>parent</artifactId>
-	<version>22</version>
+	<version>22-1</version>
 	<packaging>pom</packaging>
 
 	<name>Notice parent</name>
@@ -205,21 +205,21 @@
 			<id>dev</id>
 			<properties>
 				<appengine.app.id>dev</appengine.app.id>
-				<interactionservice.url>http://localhost:9090/interactions</interactionservice.url>
+				<gwt.debug>&lt;inherits name='com.google.gwt.user.Debug'/&gt;</gwt.debug>
 			</properties>
 		</profile>
 		<profile>
 			<id>test</id>
 			<properties>
 				<appengine.app.id>wahrnehmung-test</appengine.app.id>
-				<interactionservice.url>https://interaction-service-dot-${appengine.app.id}.appspot.com/interactions</interactionservice.url>
+				<gwt.debug>&lt;inherits name='com.google.gwt.user.Debug'/&gt;</gwt.debug>
 			</properties>
 		</profile>
 		<profile>
 			<id>prod</id>
 			<properties>
 				<appengine.app.id>lws-wahrnehmung</appengine.app.id>
-				<interactionservice.url>https://interaction-service-dot-${appengine.app.id}.appspot.com/interactions</interactionservice.url>
+				<gwt.debug></gwt.debug>
 			</properties>
 		</profile>
 	</profiles>

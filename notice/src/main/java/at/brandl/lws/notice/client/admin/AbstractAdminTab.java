@@ -153,8 +153,11 @@ abstract class AbstractAdminTab extends VerticalPanel {
 			setSpacing(Utils.SPACING);
 			this.showDeleteButton = showDeleteButton;
 			saveButton = new Button(labels.create());
+			saveButton.ensureDebugId("save");
 			deleteButton = new Button(labels.delete());
+			deleteButton.ensureDebugId("delete");
 			cancelButton = new Button(labels.cancel());
+			cancelButton.ensureDebugId("cancel");
 			saveButton.addClickHandler(new ClickHandler() {
 				@Override
 				public void onClick(ClickEvent event) {

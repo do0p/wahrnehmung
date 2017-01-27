@@ -99,10 +99,30 @@ public class InteractionDsDaoTest {
 		Map<String, Integer> interactions = interactionDao.getInteractions(childKey1, DATE1, DATE1);
 		assertInteraction(interactions, childKey2, COUNT1 * 2);
 	}
+	
+	@Test
+	public void deleteInteraction() {
+		interactionDao.incrementInteraction(childKey1, childKey2, DATE1, COUNT1);
+		interactionDao.incrementInteraction(childKey1, childKey3, DATE1, COUNT1);
+		
+		interactionDao.deleteAllInteractions(childKey2);
+		
+		Map<String, Integer> interactions = interactionDao.getInteractions(childKey2, null, null);
+		Assert.assertTrue(interactions.isEmpty());
 
-	private void assertInteraction(Map<String, Integer> interactions, String partnerKey, Integer count) {
+		 interactions = interactionDao.getInteractions(childKey1, null, null);
+		assertInteraction(interactions, childKey2, 0);
+		assertInteraction(interactions, childKey3, COUNT1);
+		
+	}
+
+	private void assertInteraction(Map<String, Integer> interactions, String partnerKey, Integer expectedCount) {
 
 		Assert.assertNotNull(interactions);
-		Assert.assertEquals(count, interactions.get(partnerKey));
+		Integer count = interactions.get(partnerKey);
+		if(count == null) {
+			count = 0;
+		}
+		Assert.assertEquals(expectedCount, count);
 	}
 }

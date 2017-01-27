@@ -14,6 +14,7 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
+import com.google.appengine.api.utils.SystemProperty;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 import at.brandl.lws.notice.dao.DaoRegistry;
@@ -28,10 +29,14 @@ public class InteractionServiceImpl extends RemoteServiceServlet implements Inte
 	private static final int CONNECTION_TIMEOUT = 5000;
 	private static final long serialVersionUID = -8046489780384721894L;
 	private ChildDsDao childDao = DaoRegistry.get(ChildDsDao.class);
+	private final AuthorizationServiceImpl authorizationService = new AuthorizationServiceImpl();
 
 	@Override
 	public List<GwtInteraction> getInteractions(String childKey, Date fromDate, Date toDate) throws IOException {
 
+		if(!(authorizationService.currentUserIsAdmin() || authorizationService.currentUserIsTeacher())) {
+			return Collections.emptyList();
+		}
 		URLConnection con = createUrlConnection(childKey, fromDate, toDate);
 		return parseResponse(con);
 	}
@@ -55,16 +60,19 @@ public class InteractionServiceImpl extends RemoteServiceServlet implements Inte
 		return interactions;
 	}
 
-	private URLConnection createUrlConnection(String childKey, Date fromDate, Date toDate) throws MalformedURLException, IOException {
+	private URLConnection createUrlConnection(String childKey, Date fromDate, Date toDate)
+			throws MalformedURLException, IOException {
 
 		// String host = "http://localhost:9090";
 		String serviceUrl = Config.getInstance().getInteractionServiceUrl();
 		String dateQuery = buildDateQuery(fromDate, toDate);
-		URL url = new URL(serviceUrl + "?childKey=" + childKey + dateQuery);
-		// System.err.println("opening connection to " + url);
+		URL url = new URL(serviceUrl + "/interactions?childKey=" + childKey + dateQuery);
+		System.err.println("opening connection to " + url);
 		URLConnection con = url.openConnection();
+
 		con.setConnectTimeout(CONNECTION_TIMEOUT);
 		con.setReadTimeout(READ_TIMEOUT);
+		con.setRequestProperty("X-Appengine-Inbound-Appid", SystemProperty.applicationId.get());
 		if (con instanceof HttpURLConnection) {
 			((HttpURLConnection) con).setInstanceFollowRedirects(false);
 		}
@@ -73,15 +81,15 @@ public class InteractionServiceImpl extends RemoteServiceServlet implements Inte
 
 	private String buildDateQuery(Date fromDate, Date toDate) {
 		StringBuilder dateQuery = new StringBuilder();
-		if(fromDate != null) {
-//			System.err.println("from: " + fromDate);
+		if (fromDate != null) {
+			// System.err.println("from: " + fromDate);
 			dateQuery.append("&from=" + fromDate.getTime());
 		}
-		if(toDate != null) {
-//			System.err.println("to: " + toDate);
+		if (toDate != null) {
+			// System.err.println("to: " + toDate);
 			dateQuery.append("&to=" + toDate.getTime());
 		}
-		return dateQuery.toString() ;
+		return dateQuery.toString();
 	}
 
 	private String getChildName(String childKey) {

@@ -1,6 +1,5 @@
 package at.brandl.lws.notice.interaction.dao;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -28,76 +27,13 @@ import com.google.appengine.api.datastore.TransactionOptions;
 import com.google.appengine.api.memcache.MemcacheService;
 
 import at.brandl.lws.notice.dao.AbstractDsDao;
+import at.brandl.lws.notice.dao.CacheEntity;
+import at.brandl.lws.notice.dao.CacheKey;
 import at.brandl.lws.notice.dao.DsUtil;
 import at.brandl.lws.notice.shared.util.Constants;
 import at.brandl.lws.notice.shared.util.Constants.Interaction;
 
 public class InteractionDsDao extends AbstractDsDao {
-
-	private static class CacheKey implements Serializable {
-
-		private static final long serialVersionUID = 1406539907465233216L;
-		private final Key key;
-		private final Date fromDate;
-		private final Date toDate;
-
-		private CacheKey(Key key, Date fromDate, Date toDate) {
-			this.key = key;
-			this.fromDate = fromDate;
-			this.toDate = toDate;
-		}
-
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + ((fromDate == null) ? 0 : fromDate.hashCode());
-			result = prime * result + ((key == null) ? 0 : key.hashCode());
-			result = prime * result + ((toDate == null) ? 0 : toDate.hashCode());
-			return result;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			CacheKey other = (CacheKey) obj;
-			if (fromDate == null) {
-				if (other.fromDate != null)
-					return false;
-			} else if (!fromDate.equals(other.fromDate))
-				return false;
-			if (key == null) {
-				if (other.key != null)
-					return false;
-			} else if (!key.equals(other.key))
-				return false;
-			if (toDate == null) {
-				if (other.toDate != null)
-					return false;
-			} else if (!toDate.equals(other.toDate))
-				return false;
-			return true;
-		}
-
-	}
-
-	private static class CacheEntity<T extends Serializable> implements Serializable {
-
-		private static final long serialVersionUID = 320234988413201922L;
-		private final long version;
-		private final T entity;
-
-		private CacheEntity(T entity, long version) {
-			this.entity = entity;
-			this.version = version;
-		}
-
-	}
 
 	public Map<String, Map<String, Integer>> getAllInteractions(Date from, Date to) {
 		Map<String, Map<String, Integer>> allInteractions = new HashMap<>();
@@ -140,40 +76,31 @@ public class InteractionDsDao extends AbstractDsDao {
 
 		MemcacheService cache = getCache(Interaction.KIND);
 		CacheKey cacheKey = new CacheKey(childKey, from, to);
-		CacheEntity<HashMap<String, Integer>> cacheEntity = (CacheEntity<HashMap<String, Integer>>) cache.get(cacheKey);
+		HashMap<String, Integer> result = getFromCache(cacheKey, ds, Interaction.KIND);
+		if (result == null) {
 
-		if (cacheEntity != null && cacheEntity.version == getEntityGroupVersion(ds, null, childKey)) {
-			return cacheEntity.entity;
+			Transaction tx = ds.beginTransaction();
+			Query query = new Query(Interaction.KIND).setAncestor(childKey);
+			Filter filter = createDateFilter(from, to);
+			if (filter != null) {
+				query.setFilter(filter);
+			}
+			PreparedQuery preparedQuery = ds.prepare(tx, query);
+
+			result = new HashMap<>();
+			for (Entity interaction : preparedQuery.asIterable()) {
+				addToResult(interaction, result);
+			}
+			insertIntoCache(cacheKey, result, ds, tx, Interaction.KIND);
+			tx.rollback();
 		}
-
-		Transaction tx = ds.beginTransaction();
-		Query query = new Query(Interaction.KIND).setAncestor(childKey);
-		Filter filter = createDateFilter(from, to);
-		if (filter != null) {
-			query.setFilter(filter);
-		}
-		PreparedQuery preparedQuery = ds.prepare(tx, query);
-
-		HashMap<String, Integer> result = new HashMap<>();
-		for (Entity interaction : preparedQuery.asIterable()) {
-			addToResult(interaction, result);
-		}
-		cache.put(cacheKey, new CacheEntity<HashMap<String, Integer>>(result, getEntityGroupVersion(ds, tx, childKey)));
-		tx.rollback();
-
 		return result;
 	}
 
-	private static long getEntityGroupVersion(DatastoreService ds, Transaction tx, Key entityKey) {
-		try {
-			return Entities.getVersionProperty(ds.get(tx, Entities.createEntityGroupKey(entityKey)));
-		} catch (EntityNotFoundException e) {
-			// No entity group information, return a value strictly smaller than
-			// any
-			// possible version
-			return 0;
-		}
-	}
+
+
+
+
 
 	private Filter createDateFilter(Date from, Date to) {
 
@@ -288,6 +215,42 @@ public class InteractionDsDao extends AbstractDsDao {
 		entity.setProperty(Interaction.COUNT, count);
 		entity.setProperty(Interaction.DATE, date);
 		return entity;
+	}
+
+	public void deleteAllInteractions(String keyString) {
+		DatastoreService ds = getDatastoreService();
+		Key childKey = DsUtil.toKey(keyString);
+		Map<String, Integer> interactions = doGetInteractions(childKey, null, null, ds);
+
+		for (String otherChild : interactions.keySet()) {
+			Key otherChildKey = DsUtil.toKey(otherChild);
+			Transaction transaction = ds.beginTransaction(TransactionOptions.Builder.withXG(true));
+			try {
+				List<Key> toDelete = new ArrayList<Key>();
+
+				for (Entity entity : ds.prepare(createQuery(otherChildKey, childKey)).asIterable()) {
+					toDelete.add(entity.getKey());
+				}
+
+				for (Entity entity : ds.prepare(createQuery(childKey, otherChildKey)).asIterable()) {
+					toDelete.add(entity.getKey());
+				}
+
+				ds.delete(toDelete);
+				transaction.commit();
+
+			} finally {
+				if (transaction.isActive()) {
+					transaction.rollback();
+				}
+			}
+		}
+	}
+
+	private Query createQuery(Key childKey, Key otherChildKey) {
+		return new Query(Constants.Interaction.KIND, childKey)
+				.setFilter(new FilterPredicate(Constants.Interaction.PARTNER, FilterOperator.EQUAL, otherChildKey))
+				.setKeysOnly();
 	}
 
 }

@@ -41,12 +41,13 @@ public class Navigation extends HorizontalPanel {
 		add(new Hyperlink(labels.notice(), NEW_ENTRY));
 		add(new Hyperlink(labels.questionnaire(), FORM_ENTRY));
 		add(new Hyperlink(labels.search(), LIST_ENTRY));
-		add(new Hyperlink(labels.interactions(), INTERACTIONS_ENTRY));
-		if ((authorization.isAdmin()) || (authorization.isSeeAll())) {
+		if (authorization.isAdmin() || authorization.isSeeAll()) {
+			add(new Hyperlink(labels.interactions(), INTERACTIONS_ENTRY));
+		}
+		if (authorization.isAdmin() || authorization.isSeeAll()) {
 			add(new Hyperlink(labels.documentation(), DOCUMENTATION_ENTRY));
 		}
-		if ((authorization.isAdmin()) || (authorization.isEditSections())
-				|| (authorization.isSeeAll())) {
+		if (authorization.isAdmin() || authorization.isEditSections() || authorization.isSeeAll()) {
 			add(new Hyperlink(labels.configuration(), ADMIN));
 		}
 	}
@@ -77,7 +78,7 @@ public class Navigation extends HorizontalPanel {
 	}
 
 	private Widget getInteractions() {
-		if(interactions == null) {
+		if (interactions == null) {
 			interactions = new Interactions(authorization);
 		}
 		return interactions;

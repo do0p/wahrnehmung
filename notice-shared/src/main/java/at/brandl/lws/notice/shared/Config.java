@@ -4,6 +4,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+import com.google.appengine.api.modules.ModulesServiceFactory;
+import com.google.appengine.api.utils.SystemProperty;
+import com.google.appengine.api.utils.SystemProperty.Environment;
+
 public class Config extends Properties {
 
 	private static final long serialVersionUID = 4642424314615927394L;
@@ -40,11 +44,12 @@ public class Config extends Properties {
 	}
 
 	public String getApplicationName() {
-		return getProperty("application.name");
+		return SystemProperty.applicationId.get();
 	}
 
 	public String getInteractionServiceUrl() {
-		return getProperty("interactionservice.url");
+		boolean localDev = SystemProperty.environment.value().equals(Environment.Value.Development);
+		return  (localDev ? "http://" : "https://") + ModulesServiceFactory.getModulesService().getVersionHostname("interaction-service" ,null);
 	}
 	
 	public String getBucketName() {

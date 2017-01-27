@@ -153,4 +153,5 @@ public class Constants {
 	public static final String MULTIPLE_CHOICE = "multipleChoice";
 	public static final String DOCUMENTATION_FOLDER_NAME = "Berichte";
 	public static final String NOTICE_ROOT_FOLDER_NAME = "Wahrnehmung Dokumente";
+	public static final String INTERACTION_QUEUE_NAME = "interaction";
 }

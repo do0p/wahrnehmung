@@ -31,14 +31,14 @@
 		<url-pattern>/import</url-pattern>
 	</servlet-mapping> -->
 	
-	<servlet>
+<!-- 	<servlet>
 		<servlet-name>storeInteractionsServlet</servlet-name>
 		<servlet-class>at.brandl.lws.notice.interaction.servlet.StoreInteractionServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>storeInteractionsServlet</servlet-name>
 		<url-pattern>/storeInteraction</url-pattern>
-	</servlet-mapping>
+	</servlet-mapping> -->
 	
  	<security-constraint>
 		<web-resource-collection>
@@ -51,7 +51,7 @@
 		
 	</security-constraint> 
 
- 	<security-constraint>
+ <!-- 	<security-constraint>
 		<web-resource-collection>
 			<web-resource-name>/storeInteraction</web-resource-name>
 			<url-pattern>/storeInteraction</url-pattern>
@@ -63,7 +63,7 @@
 			<transport-guarantee>CONFIDENTIAL</transport-guarantee>
 		</user-data-constraint>
 		
-	</security-constraint> 
+	</security-constraint>  -->
 
 	<servlet>
 		<servlet-name>SystemServiceServlet</servlet-name>
