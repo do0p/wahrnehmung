@@ -74,7 +74,6 @@ public class InteractionDsDao extends AbstractDsDao {
 
 	private Map<String, Integer> doGetInteractions(Key childKey, Date from, Date to, DatastoreService ds) {
 
-		MemcacheService cache = getCache(Interaction.KIND);
 		CacheKey cacheKey = new CacheKey(childKey, from, to);
 		HashMap<String, Integer> result = getFromCache(cacheKey, ds, Interaction.KIND);
 		if (result == null) {
@@ -88,7 +87,7 @@ public class InteractionDsDao extends AbstractDsDao {
 			PreparedQuery preparedQuery = ds.prepare(tx, query);
 
 			result = new HashMap<>();
-			for (Entity interaction : preparedQuery.asIterable()) {
+			for (Entity interaction : preparedQuery.asIterable(FetchOptions.Builder.withChunkSize(100))) {
 				addToResult(interaction, result);
 			}
 			insertIntoCache(cacheKey, result, ds, tx, Interaction.KIND);

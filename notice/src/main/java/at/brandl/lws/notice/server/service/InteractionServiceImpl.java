@@ -67,7 +67,7 @@ public class InteractionServiceImpl extends RemoteServiceServlet implements Inte
 		String serviceUrl = Config.getInstance().getInteractionServiceUrl();
 		String dateQuery = buildDateQuery(fromDate, toDate);
 		URL url = new URL(serviceUrl + "/interactions?childKey=" + childKey + dateQuery);
-		System.err.println("opening connection to " + url);
+//		System.err.println("opening connection to " + url);
 		URLConnection con = url.openConnection();
 
 		con.setConnectTimeout(CONNECTION_TIMEOUT);
