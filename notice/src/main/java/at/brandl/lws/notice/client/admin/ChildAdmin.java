@@ -79,7 +79,8 @@ public class ChildAdmin extends AbstractAdminTab {
 		fnBox.addValueChangeHandler(new ValueChangeHandler<String>() {
 			@Override
 			public void onValueChange(ValueChangeEvent<String> event) {
-				child.setFirstName(fnBox.getValue());
+				updateChild();
+				updateButtonPanel();
 			}
 		});
 		lnBox = new TextBox();
@@ -87,7 +88,8 @@ public class ChildAdmin extends AbstractAdminTab {
 		lnBox.addValueChangeHandler(new ValueChangeHandler<String>() {
 			@Override
 			public void onValueChange(ValueChangeEvent<String> event) {
-				child.setLastName(lnBox.getValue());
+				updateChild();
+				updateButtonPanel();
 			}
 		});
 		bdBox = new DateBox();
@@ -96,9 +98,11 @@ public class ChildAdmin extends AbstractAdminTab {
 		bdBox.addValueChangeHandler(new ValueChangeHandler<Date>() {
 			@Override
 			public void onValueChange(ValueChangeEvent<Date> event) {
-				child.setBirthDay(bdBox.getValue());
+				updateChild();
+				updateButtonPanel();
 			}
 		});
+	
 		beginYearBox.addChangeHandler(new ChangeHandler() {
 			@Override
 			public void onChange(ChangeEvent event) {
@@ -107,6 +111,8 @@ public class ChildAdmin extends AbstractAdminTab {
 					Long beginYear = Long.valueOf(beginYearBox
 							.getItemText(selectedIndex));
 					child.setBeginYear(beginYear);
+					updateChild();
+					updateButtonPanel();
 				}
 			}
 		});
@@ -118,6 +124,8 @@ public class ChildAdmin extends AbstractAdminTab {
 					Long beginGrade = Long.valueOf(beginGradeBox
 							.getItemText(selectedIndex));
 					child.setBeginGrade(beginGrade);
+					updateChild();
+					updateButtonPanel();
 				}
 			}
 		});
@@ -126,7 +134,8 @@ public class ChildAdmin extends AbstractAdminTab {
 		archivedBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
 			@Override
 			public void onValueChange(ValueChangeEvent<Boolean> event) {
-				child.setArchived(archivedBox.getValue());
+				updateChild();
+				updateButtonPanel();
 			}
 		});
 
@@ -143,17 +152,10 @@ public class ChildAdmin extends AbstractAdminTab {
 
 		layout();
 
-		addButtonUpdateChangeHandler(fnBox);
-		addButtonUpdateChangeHandler(lnBox);
-		addButtonUpdateChangeHandler(bdBox);
-		addButtonUpdateChangeHandler(beginYearBox);
-		addButtonUpdateChangeHandler(beginGradeBox);
-
 		children.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
 				select();
-				updateButtonPanel();
 			}
 		});
 
@@ -228,6 +230,13 @@ public class ChildAdmin extends AbstractAdminTab {
 		child.setBeginGrade(Long.valueOf(beginGradeBox.getSelectedValue()));
 	}
 
+	private void updateChild() {
+		child.setFirstName(fnBox.getValue());
+		child.setLastName(lnBox.getValue());
+		child.setArchived(archivedBox.getValue());
+		child.setBirthDay(bdBox.getValue());
+	}
+	
 	@Override
 	void save() {
 		if (!GwtChildValidator.valid(child)) {
@@ -278,6 +287,7 @@ public class ChildAdmin extends AbstractAdminTab {
 				
 				archivedBox.setValue(child.getArchived());
 				getButtonPanel().setSaveButtonLabel(labels().change());
+				updateButtonPanel();
 			}
 		});
 	}

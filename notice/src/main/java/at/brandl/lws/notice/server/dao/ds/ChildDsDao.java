@@ -9,6 +9,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Entity;
@@ -25,52 +27,49 @@ import at.brandl.lws.notice.shared.util.Constants.Child.Cache;
 
 public class ChildDsDao extends AbstractDsDao {
 
-	private boolean dirty = true;
+	private static final Lock lock = new ReentrantLock();
 
 	@SuppressWarnings("unchecked")
 	public List<GwtChild> getAllChildren() {
-		
-		List<GwtChild> allChildren;
-		
-		if(dirty)
-		{
-			allChildren = updateCacheFromDatastore();
-		} else {
-			allChildren = (List<GwtChild>) getCache(Cache.NAME).get(Cache.ALL_CHILDREN);
-			if(allChildren == null) {
-				allChildren = updateCacheFromDatastore();
+
+		System.out.println("in all Children");
+
+		List<GwtChild> allChildren = (List<GwtChild>) getCache(Cache.NAME).get(Cache.ALL_CHILDREN);
+		if (allChildren == null) {
+			try {
+				lock.lock();
+				allChildren = (List<GwtChild>) getCache(Cache.NAME).get(Cache.ALL_CHILDREN);
+				if (allChildren == null) {
+					allChildren = getAllChildrenFromDatastore();
+					getCache(Cache.NAME).put(Cache.ALL_CHILDREN, allChildren);
+				}
+			} finally {
+				lock.unlock();
 			}
 		}
-		
-		return allChildren;
-	}
-
-	private List<GwtChild> updateCacheFromDatastore() {
-		List<GwtChild> allChildren = getAllChildrenFromDatastore();
-		getCache(Cache.NAME).put(Cache.ALL_CHILDREN, allChildren);
-		dirty = false;
 		return allChildren;
 	}
 
 	private List<GwtChild> getAllChildrenFromDatastore() {
-		final Query query = new Query(Child.KIND).addSort(Child.LASTNAME)
-				.addSort(Child.FIRSTNAME).addSort(Child.BIRTHDAY);
+		final Query query = new Query(Child.KIND).addSort(Child.LASTNAME).addSort(Child.FIRSTNAME)
+				.addSort(Child.BIRTHDAY);
 		return mapToGwtChildren(execute(query, withDefaults()));
 	}
 
 	public void storeChild(GwtChild gwtChild) throws IllegalArgumentException {
+
+		System.out.println("in store child");
 		final DatastoreService datastoreService = getDatastoreService();
 
 		final Transaction transaction = datastoreService.beginTransaction();
 		try {
-
+			lock.lock();
 			final Entity child = toEntity(gwtChild);
 
 			if (!child.getKey().isComplete()) {
 				if (exists(child, datastoreService)) {
 					transaction.rollback();
-					throw new IllegalArgumentException(formatChildName(child)
-							+ " existiert bereits!");
+					throw new IllegalArgumentException(formatChildName(child) + " existiert bereits!");
 				}
 			}
 
@@ -78,18 +77,20 @@ public class ChildDsDao extends AbstractDsDao {
 			transaction.commit();
 			gwtChild.setKey(DsUtil.toString(child.getKey()));
 			insertIntoCache(child, Cache.NAME);
-			dirty = true;
-			
+			getCache(Cache.NAME).delete(Cache.ALL_CHILDREN);
+
 		} finally {
 			if (transaction.isActive()) {
 				transaction.rollback();
 			}
+			lock.unlock();
 		}
 	}
 
 	public void deleteChild(String childKey) {
+		System.out.println("in delete child");
 		deleteEntity(DsUtil.toKey(childKey), Cache.NAME);
-		dirty = true;
+		getCache(Cache.NAME).delete(Cache.ALL_CHILDREN);
 	}
 
 	public GwtChild getChild(String key) {
@@ -107,15 +108,11 @@ public class ChildDsDao extends AbstractDsDao {
 	}
 
 	private Filter createChildFilter(Entity child) {
-		final Filter firstnamePredicate = createEqualsPredicate(
-				Child.FIRSTNAME, child);
-		final Filter lastnamePredicate = createEqualsPredicate(Child.LASTNAME,
-				child);
-		final Filter birthdayPredicate = createEqualsPredicate(Child.BIRTHDAY,
-				child);
+		final Filter firstnamePredicate = createEqualsPredicate(Child.FIRSTNAME, child);
+		final Filter lastnamePredicate = createEqualsPredicate(Child.LASTNAME, child);
+		final Filter birthdayPredicate = createEqualsPredicate(Child.BIRTHDAY, child);
 		return new Query.CompositeFilter(CompositeFilterOperator.AND,
-				Arrays.asList(firstnamePredicate, lastnamePredicate,
-						birthdayPredicate));
+				Arrays.asList(firstnamePredicate, lastnamePredicate, birthdayPredicate));
 	}
 
 	private List<GwtChild> mapToGwtChildren(Iterable<Entity> resultList) {
@@ -154,28 +151,26 @@ public class ChildDsDao extends AbstractDsDao {
 		child.setProperty(Child.BEGIN_YEAR, gwtChild.getBeginYear());
 		child.setProperty(Child.BEGIN_GRADE, gwtChild.getBeginGrade());
 		child.setProperty(Child.ARCHIVED, gwtChild.getArchived());
-		List<Date> developementDialogueDates = gwtChild
-				.getDevelopementDialogueDates();
-		if (developementDialogueDates != null
-				&& !developementDialogueDates.isEmpty()) {
+		List<Date> developementDialogueDates = gwtChild.getDevelopementDialogueDates();
+		if (developementDialogueDates != null && !developementDialogueDates.isEmpty()) {
 			Collections.sort(developementDialogueDates);
 			child.setProperty(Child.DEVELOPEMENT_DIALOGUE_DATES, developementDialogueDates);
-			child.setProperty(Child.LAST_DEVELOPEMENT_DIALOGUE_DATE, developementDialogueDates.get(developementDialogueDates.size() - 1));
+			child.setProperty(Child.LAST_DEVELOPEMENT_DIALOGUE_DATE,
+					developementDialogueDates.get(developementDialogueDates.size() - 1));
 		}
 		return child;
 	}
 
 	public static String formatChildName(Entity child) {
-		return child.getProperty(Child.FIRSTNAME) + " "
-				+ child.getProperty(Child.LASTNAME);
+		return child.getProperty(Child.FIRSTNAME) + " " + child.getProperty(Child.LASTNAME);
 	}
 
 	public Collection<GwtChild> getAllChildrenOver12() {
 		Collection<GwtChild> result = new ArrayList<GwtChild>();
 		Date twelveYearsAgo = getDateTwelveYearsAgo();
-		for(GwtChild child : getAllChildren()) {
+		for (GwtChild child : getAllChildren()) {
 			Date birthDay = child.getBirthDay();
-			if(birthDay != null && !birthDay.after(twelveYearsAgo)) {
+			if (birthDay != null && !birthDay.after(twelveYearsAgo)) {
 				result.add(child);
 			}
 		}
@@ -196,9 +191,9 @@ public class ChildDsDao extends AbstractDsDao {
 	public Collection<GwtChild> getAllChildrenUnder12() {
 		Collection<GwtChild> result = new ArrayList<GwtChild>();
 		Date twelveYearsAgo = getDateTwelveYearsAgo();
-		for(GwtChild child : getAllChildren()) {
+		for (GwtChild child : getAllChildren()) {
 			Date birthDay = child.getBirthDay();
-			if(birthDay != null && birthDay.after(twelveYearsAgo)) {
+			if (birthDay != null && birthDay.after(twelveYearsAgo)) {
 				result.add(child);
 			}
 		}
