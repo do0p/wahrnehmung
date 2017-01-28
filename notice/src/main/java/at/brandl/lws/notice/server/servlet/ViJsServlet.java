@@ -33,7 +33,6 @@ import at.brandl.lws.notice.model.GwtInteraction;
 import at.brandl.lws.notice.server.dao.ds.ChildDsDao;
 import at.brandl.lws.notice.server.service.AuthorizationServiceImpl;
 import at.brandl.lws.notice.shared.Config;
-import at.brandl.lws.notice.shared.service.AuthorizationService;
 
 public class ViJsServlet extends HttpServlet {
 
@@ -71,11 +70,11 @@ public class ViJsServlet extends HttpServlet {
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
-		if(!authService.currentUserIsTeacher()) {
+		if (!authService.currentUserIsTeacher()) {
 			resp.sendError(403);
 			return;
 		}
-		
+
 		// Date fromDate = getDateValue(req, FROM_PARAM);
 		// Date toDate = getDateValue(req, TO_PARAM);
 
@@ -98,8 +97,12 @@ public class ViJsServlet extends HttpServlet {
 		Map<String, Node> nodes = new HashMap<>();
 		int i = 1;
 		for (String childKey : childKeys) {
-			nodes.put(childKey, new Node(i, childDsDao.getChildName(childKey)));
-			i++;
+			try {
+				nodes.put(childKey, new Node(i, childDsDao.getChildName(childKey)));
+				i++;
+			} catch (IllegalArgumentException e) {
+				System.err.println(e.getMessage());
+			}
 		}
 		return nodes;
 	}
@@ -142,12 +145,20 @@ public class ViJsServlet extends HttpServlet {
 		for (Entry<String, List<GwtInteraction>> entry : allInteractions.entrySet()) {
 			String child = entry.getKey();
 			done.add(child);
+			Node childNode = nodes.get(child);
+			if(childNode == null) {
+				continue;
+			}
 			for (GwtInteraction interaction : entry.getValue()) {
 				String childOther = interaction.getChildKey();
 				if (done.contains(childOther)) {
 					continue;
 				}
-				edges.add(new Edge(nodes.get(child).id, nodes.get(childOther).id, interaction.getCount()));
+				Node childOtherNode = nodes.get(childOther);
+				if(childOtherNode == null) {
+					continue;
+				}
+				edges.add(new Edge(childNode.id, childOtherNode.id, interaction.getCount()));
 			}
 		}
 
@@ -184,8 +195,10 @@ public class ViJsServlet extends HttpServlet {
 
 		// String host = "http://localhost:9090";
 		String serviceUrl = Config.getInstance().getInteractionServiceUrl();
-//		String dateQuery = buildDateQuery(fromDate, toDate);
-		URL url = new URL(serviceUrl+ "/interactions");// + "?childKey=" + childKey + dateQuery);
+		// String dateQuery = buildDateQuery(fromDate, toDate);
+		URL url = new URL(serviceUrl + "/interactions");// + "?childKey=" +
+														// childKey +
+														// dateQuery);
 		// System.err.println("opening connection to " + url);
 		URLConnection con = url.openConnection();
 		con.setConnectTimeout(CONNECTION_TIMEOUT);
