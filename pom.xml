@@ -23,6 +23,7 @@
 		<module>notice-service</module>
 		<module>notice-ear</module>
 		<module>interaction-service</module>
+		<module>integration-test</module>
 	</modules>
 
 	<dependencyManagement>
