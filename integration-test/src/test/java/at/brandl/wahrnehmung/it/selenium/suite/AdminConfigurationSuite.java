@@ -6,7 +6,7 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 import at.brandl.wahrnehmung.it.selenium.children.ChildAdminTest;
-import at.brandl.wahrnehmung.it.selenium.util.Navigation;
+import at.brandl.wahrnehmung.it.selenium.util.ToplevelNavigation;
 
 @RunWith(Suite.class)
 @SuiteClasses({ChildAdminTest.class})
@@ -14,7 +14,7 @@ public class AdminConfigurationSuite {
 
 	@BeforeClass
 	public static void setUpClass() {
-		Navigation.goTo("Konfiguration");
+		ToplevelNavigation.goTo("Konfiguration");
 	}
 	
 }
