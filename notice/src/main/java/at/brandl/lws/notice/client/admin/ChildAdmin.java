@@ -211,6 +211,7 @@ public class ChildAdmin extends AbstractAdminTab {
 		initChild();
 		
 		getButtonPanel().setSaveButtonLabel(labels().create());
+		updateButtonPanel();
 	}
 
 	private void resetForm() {

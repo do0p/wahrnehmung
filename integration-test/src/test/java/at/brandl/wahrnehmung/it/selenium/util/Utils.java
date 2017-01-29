@@ -1,0 +1,15 @@
+package at.brandl.wahrnehmung.it.selenium.util;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
+
+public class Utils {
+
+	public static WebElement getByDebugId(String id) {
+		return getById("gwt-debug-" + id);
+	}
+	
+	public static WebElement getById(String id) {
+		return WebDriverProvider.driver.findElement(By.id(id));
+	}
+}

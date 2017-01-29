@@ -1,10 +1,10 @@
 package at.brandl.wahrnehmung.it.selenium.children;
 
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
 
-import at.brandl.wahrnehmung.it.selenium.util.WebDriverProvider;
+import at.brandl.wahrnehmung.it.selenium.util.Configurations;
+import at.brandl.wahrnehmung.it.selenium.util.Utils;
 
 public class Children {
 
@@ -35,26 +35,58 @@ public class Children {
 	}
 
 	public static void createChild(Child child) {
-		WebElement element = WebDriverProvider.driver.findElement(By.id("gwt-debug-firstname"));
-		element.sendKeys(child.firstName);
-		element = WebDriverProvider.driver.findElement(By.id("gwt-debug-lastname"));
-		element.sendKeys(child.lastName);
-		element = WebDriverProvider.driver.findElement(By.id("gwt-debug-birthday"));
-		element.sendKeys(child.birthDay);
-		element = WebDriverProvider.driver.findElement(By.id("gwt-debug-beginYear"));
-		Select select = new Select(element);
-		select.selectByVisibleText(Integer.toString(child.beginYear));
-		element = WebDriverProvider.driver.findElement(By.id("gwt-debug-beginGrade"));
-		select = new Select(element);
-		select.selectByVisibleText(Integer.toString(child.beginGrade));
-		element = WebDriverProvider.driver.findElement(By.id("gwt-debug-save"));
-		element.click();
+		enterFirstname(child.firstName);
+		enterLastname(child.lastName);
+		enterBirthday(child.birthDay);
+		selectBeginYear(child.beginYear);
+		selectBeginGrade(child.beginGrade);
+		Configurations.save();
 	}
-	
+
+	public static void selectBeginGrade(Integer beginGrade) {
+		getBeginGradeSelect().selectByVisibleText(Integer.toString(beginGrade));
+	}
+
+	public static void selectBeginYear(Integer beginYear) {
+		getBeginYearSelect().selectByVisibleText(Integer.toString(beginYear));
+	}
+
+	public static void enterBirthday(String birthDay) {
+		getBirthdayField().sendKeys(birthDay);
+	}
+
+	public static void enterLastname(String lastName) {
+		getLastnameField().sendKeys(lastName);
+	}
+
+	public static void enterFirstname(String firstName) {
+		getFirstnameField().sendKeys(firstName);
+	}
+
+	public static Select getBeginGradeSelect() {
+		return new Select(Utils.getByDebugId("beginGrade"));
+	}
+
+	public static Select getBeginYearSelect() {
+		return new Select(Utils.getByDebugId("beginYear"));
+	}
+
+	public static WebElement getBirthdayField() {
+		return Utils.getByDebugId("birthday");
+	}
+
+	public static WebElement getLastnameField() {
+		return Utils.getByDebugId("lastname");
+	}
+
+	public static WebElement getFirstnameField() {
+		return Utils.getByDebugId("firstname");
+	}
+
 	public static Boolean childListContains(Child child) {
-		Select childList = new Select(WebDriverProvider.driver.findElement(By.id("gwt-debug-childlist")));
-		for(WebElement element : childList.getOptions()) {
-			if(element.getText().equals(child.fullName())) {
+		Select childList = getChildListSelect();
+		for (WebElement element : childList.getOptions()) {
+			if (element.getText().equals(child.fullName())) {
 				return true;
 			}
 		}
@@ -63,12 +95,16 @@ public class Children {
 
 	public static void deleteChild(Child child) {
 		selectInChildList(child);
-		WebDriverProvider.driver.findElement(By.id("gwt-debug-delete")).click();;
-		WebDriverProvider.driver.findElement(By.id("gwt-debug-ok")).click();
+		Configurations.delete();
+		Configurations.clickOk();
 	}
 
 	public static void selectInChildList(Child child) {
-		Select childList = new Select(WebDriverProvider.driver.findElement(By.id("gwt-debug-childlist")));
-		childList.selectByVisibleText(child.fullName());
+		getChildListSelect().selectByVisibleText(child.fullName());
 	}
+
+	public static Select getChildListSelect() {
+		return new Select(Utils.getByDebugId("childlist"));
+	}
+
 }
