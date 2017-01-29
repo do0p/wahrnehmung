@@ -34,20 +34,20 @@ public class ChildDsDao extends AbstractDsDao {
 
 		System.out.println("in all Children");
 
-		List<GwtChild> allChildren = (List<GwtChild>) getCache(Cache.NAME).get(Cache.ALL_CHILDREN);
-		if (allChildren == null) {
-			try {
-				lock.lock();
+		try {
+			lock.lock();
+			List<GwtChild> allChildren = (List<GwtChild>) getCache(Cache.NAME).get(Cache.ALL_CHILDREN);
+			if (allChildren == null) {
 				allChildren = (List<GwtChild>) getCache(Cache.NAME).get(Cache.ALL_CHILDREN);
 				if (allChildren == null) {
 					allChildren = getAllChildrenFromDatastore();
 					getCache(Cache.NAME).put(Cache.ALL_CHILDREN, allChildren);
 				}
-			} finally {
-				lock.unlock();
 			}
+			return allChildren;
+		} finally {
+			lock.unlock();
 		}
-		return allChildren;
 	}
 
 	private List<GwtChild> getAllChildrenFromDatastore() {
@@ -88,9 +88,14 @@ public class ChildDsDao extends AbstractDsDao {
 	}
 
 	public void deleteChild(String childKey) {
-		System.out.println("in delete child");
-		deleteEntity(DsUtil.toKey(childKey), Cache.NAME);
-		getCache(Cache.NAME).delete(Cache.ALL_CHILDREN);
+		try {
+			lock.lock();
+			System.out.println("in delete child");
+			deleteEntity(DsUtil.toKey(childKey), Cache.NAME);
+			getCache(Cache.NAME).delete(Cache.ALL_CHILDREN);
+		} finally {
+			lock.unlock();
+		}
 	}
 
 	public GwtChild getChild(String key) {

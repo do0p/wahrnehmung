@@ -24,6 +24,7 @@ public class EdgeSuiteIT {
 	@AfterClass
 	public static void tearDownClass() {
 		WebDriverProvider.driver.close();
+		WebDriverProvider.driver.quit();
 		WebDriverProvider.driver = null;
 	}
 }

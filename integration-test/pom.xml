@@ -11,7 +11,7 @@
 	<properties>
 		<earoutput>${project.build.directory}/earoutput</earoutput>
 		<chromedriver>C:/Program Files (x86)/selenium/chromedriver.exe</chromedriver>
-		<geckodriver>C:/Program Files/selenium/geckodriver.exe</geckodriver>
+		<geckodriver>C:/Program Files (x86)/selenium/geckodriver.exe</geckodriver>
 		<edgedriver>C:/Program Files/selenium/MicrosoftWebDriver.exe</edgedriver>
 	</properties>
 

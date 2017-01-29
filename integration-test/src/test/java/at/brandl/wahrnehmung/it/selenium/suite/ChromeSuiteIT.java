@@ -22,6 +22,7 @@ public class ChromeSuiteIT {
 	@AfterClass
 	public static void tearDownClass() {
 		WebDriverProvider.driver.close();
+		WebDriverProvider.driver.quit();
 		WebDriverProvider.driver = null;
 	}
 }
