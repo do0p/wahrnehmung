@@ -4,6 +4,6 @@ import org.openqa.selenium.WebDriver;
 
 public class WebDriverProvider {
 
-	public static WebDriver driver;
+	public static volatile WebDriver driver;
 	
 }

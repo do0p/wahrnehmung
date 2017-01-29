@@ -17,14 +17,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
-	<modules>
-		<module>notice-shared</module>
-		<module>notice</module>
-		<module>notice-service</module>
-		<module>notice-ear</module>
-		<module>interaction-service</module>
-		<module>integration-test</module>
-	</modules>
+
 
 	<dependencyManagement>
 		<dependencies>
@@ -208,6 +201,14 @@
 				<appengine.app.id>dev</appengine.app.id>
 				<gwt.debug>&lt;inherits name='com.google.gwt.user.Debug'/&gt;</gwt.debug>
 			</properties>
+			<modules>
+				<module>notice-shared</module>
+				<module>notice</module>
+				<module>notice-service</module>
+				<module>notice-ear</module>
+				<module>interaction-service</module>
+				<module>integration-test</module>
+			</modules>
 		</profile>
 		<profile>
 			<id>test</id>
@@ -215,6 +216,13 @@
 				<appengine.app.id>wahrnehmung-test</appengine.app.id>
 				<gwt.debug>&lt;inherits name='com.google.gwt.user.Debug'/&gt;</gwt.debug>
 			</properties>
+			<modules>
+				<module>notice-shared</module>
+				<module>notice</module>
+				<module>notice-service</module>
+				<module>notice-ear</module>
+				<module>interaction-service</module>
+			</modules>
 		</profile>
 		<profile>
 			<id>prod</id>
@@ -222,6 +230,13 @@
 				<appengine.app.id>lws-wahrnehmung</appengine.app.id>
 				<gwt.debug></gwt.debug>
 			</properties>
+			<modules>
+				<module>notice-shared</module>
+				<module>notice</module>
+				<module>notice-service</module>
+				<module>notice-ear</module>
+				<module>interaction-service</module>
+			</modules>
 		</profile>
 	</profiles>
 </project>

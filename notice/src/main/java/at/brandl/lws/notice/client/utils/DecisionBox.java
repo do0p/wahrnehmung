@@ -34,8 +34,10 @@ public class DecisionBox extends DialogBox {
 	{
 		super(false, true);
 		okButton = new Button(labels.ok());
+		okButton.ensureDebugId("ok");
 		okButton.addClickHandler(new HideClickHandler());
 		cancelButton = new Button(labels.cancel());
+		cancelButton.ensureDebugId("cancel");
 		cancelButton.addClickHandler(new HideClickHandler());
 		text = new HTML();
 		

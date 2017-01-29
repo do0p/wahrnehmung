@@ -12,8 +12,6 @@ import at.brandl.wahrnehmung.it.selenium.util.WebDriverProvider;
 
 public class ChildAdminTest {
 
-	public static final WebDriver driver = WebDriverProvider.driver;
-
 	@BeforeClass
 	public static void setUpClass() {
 		ConfigurationNavigation.navigateToChildAdmin();
@@ -24,12 +22,22 @@ public class ChildAdminTest {
 		final Child child = new Child("Franz", "Jonas", "2.10.03", 2009, 1);
 		Children.createChild(child);
 		assertChildListContains(child);
+		Children.deleteChild(child);
+		assertChildListContainsNot(child);
 	}
 
 	private void assertChildListContains(final Child child) {
-		(new WebDriverWait(driver, 10)).until(new ExpectedCondition<Boolean>() {
+		(new WebDriverWait(WebDriverProvider.driver, 10)).until(new ExpectedCondition<Boolean>() {
             public Boolean apply(WebDriver d) {
                 return Children.childListContains(child);
+            }
+        });
+	}
+	
+	private void assertChildListContainsNot(final Child child) {
+		(new WebDriverWait(WebDriverProvider.driver, 10)).until(new ExpectedCondition<Boolean>() {
+            public Boolean apply(WebDriver d) {
+                return !Children.childListContains(child);
             }
         });
 	}

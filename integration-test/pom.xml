@@ -11,6 +11,8 @@
 	<properties>
 		<earoutput>${project.build.directory}/earoutput</earoutput>
 		<chromedriver>C:/Program Files (x86)/selenium/chromedriver.exe</chromedriver>
+		<geckodriver>C:/Program Files/selenium/geckodriver.exe</geckodriver>
+		<edgedriver>C:/Program Files/selenium/MicrosoftWebDriver.exe</edgedriver>
 	</properties>
 
 	<dependencies>
@@ -95,6 +97,8 @@
 				<configuration>
 					<systemPropertyVariables>
 						<webdriver.chrome.driver>${chromedriver}</webdriver.chrome.driver>
+						<webdriver.gecko.driver>${geckodriver}</webdriver.gecko.driver>
+						<webdriver.edge.driver>${edgedriver}</webdriver.edge.driver>
 					</systemPropertyVariables>
 				</configuration>
 				<executions>
