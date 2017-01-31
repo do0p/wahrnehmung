@@ -8,15 +8,16 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.CompositeFilterOperator;
 import com.google.appengine.api.datastore.Query.Filter;
 import com.google.appengine.api.datastore.Transaction;
+import com.google.appengine.api.memcache.MemcacheService.IdentifiableValue;
 
 import at.brandl.lws.notice.dao.AbstractDsDao;
 import at.brandl.lws.notice.dao.DsUtil;
@@ -31,20 +32,15 @@ public class ChildDsDao extends AbstractDsDao {
 	@SuppressWarnings("unchecked")
 	public List<GwtChild> getAllChildren() {
 
-		System.out.println("in all Children");
-		System.out.println(getCache(Cache.NAME).contains(Cache.ALL_CHILDREN));
 		List<GwtChild> allChildren = (List<GwtChild>) getCache(Cache.NAME).get(Cache.ALL_CHILDREN);
 		if (allChildren == null) {
 			synchronized (LOCK) {
 
 				allChildren = (List<GwtChild>) getCache(Cache.NAME).get(Cache.ALL_CHILDREN);
-				System.out.println(getCache(Cache.NAME).contains(Cache.ALL_CHILDREN));
 
 				if (allChildren == null) {
 					allChildren = getAllChildrenFromDatastore();
-					System.out.println(allChildren.size());
 					getCache(Cache.NAME).put(Cache.ALL_CHILDREN, allChildren);
-					System.out.println(getCache(Cache.NAME).contains(Cache.ALL_CHILDREN));
 				}
 			}
 		}
@@ -59,7 +55,6 @@ public class ChildDsDao extends AbstractDsDao {
 
 	public void storeChild(GwtChild gwtChild) throws IllegalArgumentException {
 
-		System.out.println("in store child");
 		final DatastoreService datastoreService = getDatastoreService();
 
 		final Transaction transaction = datastoreService.beginTransaction();
@@ -77,9 +72,17 @@ public class ChildDsDao extends AbstractDsDao {
 			transaction.commit();
 			gwtChild.setKey(DsUtil.toString(child.getKey()));
 			insertIntoCache(child, Cache.NAME);
-			System.out.println("delete cache");
-			getCache(Cache.NAME).delete(Cache.ALL_CHILDREN);
-			System.out.println(getCache(Cache.NAME).contains(Cache.ALL_CHILDREN));
+			boolean success = false;
+			while (!success) {
+				IdentifiableValue value = getCache(Cache.NAME).getIdentifiable(Cache.ALL_CHILDREN);
+				if (value != null) {
+					List<GwtChild> allChildren = (List<GwtChild>) value.getValue();
+					allChildren.add(gwtChild);
+					success = getCache(Cache.NAME).putIfUntouched(Cache.ALL_CHILDREN, value, allChildren);
+				} else {
+					break;
+				}
+			}
 
 		} finally {
 			if (transaction.isActive()) {
@@ -89,11 +92,25 @@ public class ChildDsDao extends AbstractDsDao {
 	}
 
 	public void deleteChild(String childKey) {
-		System.out.println("in delete child");
 		deleteEntity(DsUtil.toKey(childKey), Cache.NAME);
-		System.out.println("delete cache");
-		getCache(Cache.NAME).delete(Cache.ALL_CHILDREN);
-		System.out.println(getCache(Cache.NAME).contains(Cache.ALL_CHILDREN));
+		boolean success = false;
+		while (!success) {
+			IdentifiableValue value = getCache(Cache.NAME).getIdentifiable(Cache.ALL_CHILDREN);
+			if (value != null) {
+				List<GwtChild> allChildren = (List<GwtChild>) value.getValue();
+				Iterator<GwtChild> iterator = allChildren.iterator();
+				while(iterator.hasNext()) {
+					GwtChild child = iterator.next();
+					if(child.getKey().equals(childKey)) {
+						iterator.remove();
+						break;
+					}
+				}
+				success = getCache(Cache.NAME).putIfUntouched(Cache.ALL_CHILDREN, value, allChildren);
+			} else {
+				break;
+			}
+		}
 	}
 
 	public GwtChild getChild(String key) {
