@@ -20,6 +20,10 @@ public class Configurations {
 		return Utils.getByDebugId("cancel");
 	}
 
+	public static WebElement getCloseButton() {
+		return Utils.getById("closeButton");
+	}
+
 	public static WebElement getOkButton() {
 		return Utils.getByDebugId("ok");
 	}
@@ -38,6 +42,10 @@ public class Configurations {
 
 	public static void cancel() {
 		getCancelButton().click();
+	}
+
+	public static void clickClose() {
+		getCloseButton().click();
 	}
 
 }

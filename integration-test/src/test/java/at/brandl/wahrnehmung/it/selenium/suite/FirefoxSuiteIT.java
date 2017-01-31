@@ -6,10 +6,10 @@ import org.junit.Ignore;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
-import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.firefox.FirefoxProfile;
 
+import at.brandl.wahrnehmung.it.selenium.util.TestContext;
 import at.brandl.wahrnehmung.it.selenium.util.WebDriverProvider;
+import at.brandl.wahrnehmung.it.selenium.util.WebDriverProvider.DriverType;
 
 @Ignore("does not trigger focus and change events in when browserwindow is not active")
 @RunWith(Suite.class)
@@ -18,17 +18,13 @@ public class FirefoxSuiteIT {
 
 	@BeforeClass
 	public static void setUpClass() {
-		FirefoxProfile profile = new FirefoxProfile();
-		profile.setPreference("focusmanager.testmode",true);
-		profile.setEnableNativeEvents(true);
-		WebDriverProvider.driver = new FirefoxDriver(profile);
-		WebDriverProvider.driver.get("http://localhost:8080");
+		WebDriverProvider driverProvider = TestContext.getInstance().getDriverProvider();
+		driverProvider.setType(DriverType.FIREFOX);
+		driverProvider.setManagedBySuite(true);
 	}
 
 	@AfterClass
 	public static void tearDownClass() {
-		WebDriverProvider.driver.close();
-		WebDriverProvider.driver.quit();
-		WebDriverProvider.driver = null;
+		TestContext.getInstance().getDriverProvider().close();
 	}
 }

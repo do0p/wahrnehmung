@@ -33,6 +33,7 @@ abstract class AbstractAdminTab extends VerticalPanel {
 	AbstractAdminTab(boolean showDeleteButton) {
 		labels = GWT.create(Labels.class);
 		dialogBox = new PopUp();
+		dialogBox.ensureDebugId("dialog");
 		buttonPanel = new ButtonPanel(showDeleteButton);
 	}
 

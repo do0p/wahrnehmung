@@ -9,11 +9,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.CompositeFilterOperator;
 import com.google.appengine.api.datastore.Query.Filter;
@@ -27,27 +26,29 @@ import at.brandl.lws.notice.shared.util.Constants.Child.Cache;
 
 public class ChildDsDao extends AbstractDsDao {
 
-	private static final Lock lock = new ReentrantLock();
+	private static final Object LOCK = new Object();
 
 	@SuppressWarnings("unchecked")
 	public List<GwtChild> getAllChildren() {
 
 		System.out.println("in all Children");
+		System.out.println(getCache(Cache.NAME).contains(Cache.ALL_CHILDREN));
+		List<GwtChild> allChildren = (List<GwtChild>) getCache(Cache.NAME).get(Cache.ALL_CHILDREN);
+		if (allChildren == null) {
+			synchronized (LOCK) {
 
-		try {
-			lock.lock();
-			List<GwtChild> allChildren = (List<GwtChild>) getCache(Cache.NAME).get(Cache.ALL_CHILDREN);
-			if (allChildren == null) {
 				allChildren = (List<GwtChild>) getCache(Cache.NAME).get(Cache.ALL_CHILDREN);
+				System.out.println(getCache(Cache.NAME).contains(Cache.ALL_CHILDREN));
+
 				if (allChildren == null) {
 					allChildren = getAllChildrenFromDatastore();
+					System.out.println(allChildren.size());
 					getCache(Cache.NAME).put(Cache.ALL_CHILDREN, allChildren);
+					System.out.println(getCache(Cache.NAME).contains(Cache.ALL_CHILDREN));
 				}
 			}
-			return allChildren;
-		} finally {
-			lock.unlock();
 		}
+		return allChildren;
 	}
 
 	private List<GwtChild> getAllChildrenFromDatastore() {
@@ -63,7 +64,6 @@ public class ChildDsDao extends AbstractDsDao {
 
 		final Transaction transaction = datastoreService.beginTransaction();
 		try {
-			lock.lock();
 			final Entity child = toEntity(gwtChild);
 
 			if (!child.getKey().isComplete()) {
@@ -77,25 +77,23 @@ public class ChildDsDao extends AbstractDsDao {
 			transaction.commit();
 			gwtChild.setKey(DsUtil.toString(child.getKey()));
 			insertIntoCache(child, Cache.NAME);
+			System.out.println("delete cache");
 			getCache(Cache.NAME).delete(Cache.ALL_CHILDREN);
+			System.out.println(getCache(Cache.NAME).contains(Cache.ALL_CHILDREN));
 
 		} finally {
 			if (transaction.isActive()) {
 				transaction.rollback();
 			}
-			lock.unlock();
 		}
 	}
 
 	public void deleteChild(String childKey) {
-		try {
-			lock.lock();
-			System.out.println("in delete child");
-			deleteEntity(DsUtil.toKey(childKey), Cache.NAME);
-			getCache(Cache.NAME).delete(Cache.ALL_CHILDREN);
-		} finally {
-			lock.unlock();
-		}
+		System.out.println("in delete child");
+		deleteEntity(DsUtil.toKey(childKey), Cache.NAME);
+		System.out.println("delete cache");
+		getCache(Cache.NAME).delete(Cache.ALL_CHILDREN);
+		System.out.println(getCache(Cache.NAME).contains(Cache.ALL_CHILDREN));
 	}
 
 	public GwtChild getChild(String key) {

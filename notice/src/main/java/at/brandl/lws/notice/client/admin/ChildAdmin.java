@@ -72,6 +72,7 @@ public class ChildAdmin extends AbstractAdminTab {
 		initChild();
 
 		decisionBox = new DecisionBox();
+		decisionBox.ensureDebugId("decision");
 		decisionBox.setText(labels().childDelWarning());
 
 		fnBox = new TextBox();

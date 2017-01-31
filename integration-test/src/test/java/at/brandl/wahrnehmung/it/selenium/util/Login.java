@@ -10,41 +10,43 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class Login {
 
-	public static void login(String email, boolean admin) {
+	static void login(String email, boolean admin) {
 
-		
-		List<WebElement> elements = WebDriverProvider.driver.findElements(By.linkText("abmelden"));
-		if(!elements.isEmpty()) {
+		final WebDriver driver = TestContext.getInstance().getDriver();
+
+		List<WebElement> elements = driver.findElements(By.linkText("abmelden"));
+		if (!elements.isEmpty()) {
 			elements.get(0).click();
 		}
-		
-		// wait until javascript is loaded	
-		(new WebDriverWait(WebDriverProvider.driver, 10)).until(new ExpectedCondition<Boolean>() {
-            public Boolean apply(WebDriver d) {
-                return !WebDriverProvider.driver.findElements(By.id("email")).isEmpty();
-            }
-        });
-		
-		WebElement element = WebDriverProvider.driver.findElement(By.id("email"));
+
+		// wait until javascript is loaded
+		(new WebDriverWait(driver, 10)).until(new ExpectedCondition<Boolean>() {
+			public Boolean apply(WebDriver d) {
+				return !driver.findElements(By.id("email")).isEmpty();
+			}
+		});
+
+		WebElement element = driver.findElement(By.id("email"));
+		element.clear();
 		element.sendKeys(email);
 
 		if (admin) {
-			element = WebDriverProvider.driver.findElement(By.id("isAdmin"));
+			element = driver.findElement(By.id("isAdmin"));
 			element.click();
 		}
 
 		element.submit();
-		
-		// wait until javascript is loaded	
-		(new WebDriverWait(WebDriverProvider.driver, 10)).until(new ExpectedCondition<Boolean>() {
-            public Boolean apply(WebDriver d) {
-                return !WebDriverProvider.driver.findElements(By.linkText("Konfiguration")).isEmpty();
-            }
-        });
+
+		// wait until javascript is loaded
+		(new WebDriverWait(driver, 10)).until(new ExpectedCondition<Boolean>() {
+			public Boolean apply(WebDriver d) {
+				return !driver.findElements(By.linkText("Konfiguration")).isEmpty();
+			}
+		});
 	}
 
-	public static void logout() {
-		WebDriverProvider.driver.findElement(By.linkText("abmelden"));
+	static void logout() {
+		TestContext.getInstance().getDriver().findElement(By.linkText("abmelden"));
 	}
 
 }

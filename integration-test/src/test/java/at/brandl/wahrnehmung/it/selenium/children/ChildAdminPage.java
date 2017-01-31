@@ -4,9 +4,12 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
 
 import at.brandl.wahrnehmung.it.selenium.util.Configurations;
+import at.brandl.wahrnehmung.it.selenium.util.Navigation;
+import at.brandl.wahrnehmung.it.selenium.util.Page;
+import at.brandl.wahrnehmung.it.selenium.util.TestContext;
 import at.brandl.wahrnehmung.it.selenium.util.Utils;
 
-public class Children {
+public class ChildAdminPage implements Page {
 
 	public static class Child {
 
@@ -34,7 +37,7 @@ public class Children {
 		}
 	}
 
-	public static void createChild(Child child) {
+	public void createChild(Child child) {
 		enterFirstname(child.firstName);
 		enterLastname(child.lastName);
 		enterBirthday(child.birthDay);
@@ -43,47 +46,47 @@ public class Children {
 		Configurations.save();
 	}
 
-	public static void selectBeginGrade(Integer beginGrade) {
+	public void selectBeginGrade(Integer beginGrade) {
 		getBeginGradeSelect().selectByVisibleText(Integer.toString(beginGrade));
 	}
 
-	public static void selectBeginYear(Integer beginYear) {
+	public void selectBeginYear(Integer beginYear) {
 		getBeginYearSelect().selectByVisibleText(Integer.toString(beginYear));
 	}
 
-	public static void enterBirthday(String birthDay) {
+	public void enterBirthday(String birthDay) {
 		getBirthdayField().sendKeys(birthDay);
 	}
 
-	public static void enterLastname(String lastName) {
+	public void enterLastname(String lastName) {
 		getLastnameField().sendKeys(lastName);
 	}
 
-	public static void enterFirstname(String firstName) {
+	public void enterFirstname(String firstName) {
 		getFirstnameField().sendKeys(firstName);
 	}
 
-	public static Select getBeginGradeSelect() {
+	public Select getBeginGradeSelect() {
 		return new Select(Utils.getByDebugId("beginGrade"));
 	}
 
-	public static Select getBeginYearSelect() {
+	public Select getBeginYearSelect() {
 		return new Select(Utils.getByDebugId("beginYear"));
 	}
 
-	public static WebElement getBirthdayField() {
+	public WebElement getBirthdayField() {
 		return Utils.getByDebugId("birthday");
 	}
 
-	public static WebElement getLastnameField() {
+	public WebElement getLastnameField() {
 		return Utils.getByDebugId("lastname");
 	}
 
-	public static WebElement getFirstnameField() {
+	public WebElement getFirstnameField() {
 		return Utils.getByDebugId("firstname");
 	}
 
-	public static Boolean childListContains(Child child) {
+	public Boolean childListContains(Child child) {
 		Select childList = getChildListSelect();
 		for (WebElement element : childList.getOptions()) {
 			if (element.getText().equals(child.fullName())) {
@@ -93,18 +96,26 @@ public class Children {
 		return false;
 	}
 
-	public static void deleteChild(Child child) {
+	public void deleteChild(Child child) {
 		selectInChildList(child);
 		Configurations.delete();
 		Configurations.clickOk();
 	}
 
-	public static void selectInChildList(Child child) {
+	public void selectInChildList(Child child) {
 		getChildListSelect().selectByVisibleText(child.fullName());
 	}
 
-	public static Select getChildListSelect() {
+	public Select getChildListSelect() {
 		return new Select(Utils.getByDebugId("childlist"));
+	}
+
+	@Override
+	public void goTo() {
+		Navigation navigation = TestContext.getInstance().getNavigation();
+		navigation.login(true);
+		navigation.goTo("Konfiguration");
+		Configurations.navigateToChildAdmin();
 	}
 
 }

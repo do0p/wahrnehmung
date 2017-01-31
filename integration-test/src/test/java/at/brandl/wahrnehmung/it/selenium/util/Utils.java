@@ -10,6 +10,6 @@ public class Utils {
 	}
 	
 	public static WebElement getById(String id) {
-		return WebDriverProvider.driver.findElement(By.id(id));
+		return TestContext.getInstance().getDriver().findElement(By.id(id));
 	}
 }
