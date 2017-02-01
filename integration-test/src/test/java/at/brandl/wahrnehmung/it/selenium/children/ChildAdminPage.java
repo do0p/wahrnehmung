@@ -1,5 +1,6 @@
 package at.brandl.wahrnehmung.it.selenium.children;
 
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
 
@@ -37,13 +38,22 @@ public class ChildAdminPage implements Page {
 		}
 	}
 
-	public void createChild(Child child) {
+	public void sendChild(Child child) {
 		enterFirstname(child.firstName);
 		enterLastname(child.lastName);
-		enterBirthday(child.birthDay);
+		enterBirthday(child.birthDay + Keys.TAB);
 		selectBeginYear(child.beginYear);
 		selectBeginGrade(child.beginGrade);
-		Configurations.save();
+		checkArchived(child.archived);
+		Configurations.clickSave();
+	}
+
+	public void checkArchived(boolean archived) {
+		WebElement archivedField = getArchivedField();
+		boolean selected = archivedField.isSelected();
+		if (selected != archived) {
+			archivedField.sendKeys(Keys.SPACE);
+		}
 	}
 
 	public void selectBeginGrade(Integer beginGrade) {
@@ -55,15 +65,19 @@ public class ChildAdminPage implements Page {
 	}
 
 	public void enterBirthday(String birthDay) {
-		getBirthdayField().sendKeys(birthDay);
+		Utils.clearAndSendKeys(getBirthdayField(), birthDay);
 	}
 
 	public void enterLastname(String lastName) {
-		getLastnameField().sendKeys(lastName);
+		Utils.clearAndSendKeys(getLastnameField(), lastName);
 	}
 
 	public void enterFirstname(String firstName) {
-		getFirstnameField().sendKeys(firstName);
+		Utils.clearAndSendKeys(getFirstnameField(), firstName);
+	}
+
+	public WebElement getArchivedField() {
+		return Utils.getByDebugId("archived-input");
 	}
 
 	public Select getBeginGradeSelect() {
@@ -97,13 +111,14 @@ public class ChildAdminPage implements Page {
 	}
 
 	public void deleteChild(Child child) {
-		selectInChildList(child);
-		Configurations.delete();
+		
+		Configurations.clickDelete();
 		Configurations.clickOk();
 	}
 
 	public void selectInChildList(Child child) {
-		getChildListSelect().selectByVisibleText(child.fullName());
+		Select childListSelect = getChildListSelect();
+		childListSelect.selectByVisibleText(child.fullName());
 	}
 
 	public Select getChildListSelect() {

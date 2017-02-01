@@ -59,6 +59,7 @@ public class ChildDsDao extends AbstractDsDao {
 
 		final Transaction transaction = datastoreService.beginTransaction();
 		try {
+			String keyForUpdate = gwtChild.getKey();
 			final Entity child = toEntity(gwtChild);
 
 			if (!child.getKey().isComplete()) {
@@ -75,13 +76,32 @@ public class ChildDsDao extends AbstractDsDao {
 			boolean success = false;
 			while (!success) {
 				IdentifiableValue value = getCache(Cache.NAME).getIdentifiable(Cache.ALL_CHILDREN);
-				if (value != null) {
-					List<GwtChild> allChildren = (List<GwtChild>) value.getValue();
-					allChildren.add(gwtChild);
-					success = getCache(Cache.NAME).putIfUntouched(Cache.ALL_CHILDREN, value, allChildren);
-				} else {
+				if (value == null) {
 					break;
 				}
+
+				@SuppressWarnings("unchecked")
+				List<GwtChild> allChildren = (List<GwtChild>) value.getValue();
+				if (keyForUpdate != null) {
+					int index = -1;
+					for (int i = 0; i < allChildren.size(); i++) {
+						GwtChild cachedChild = allChildren.get(i);
+						if (keyForUpdate.equals(cachedChild.getKey())) {
+							index = i;
+							break;
+						}
+					}
+					if (index >= 0) {
+						allChildren.remove(index);
+						allChildren.add(index, gwtChild);
+					} else {
+						keyForUpdate = null;
+					}
+				}
+				if (keyForUpdate == null) {
+					allChildren.add(gwtChild);
+				}
+				success = getCache(Cache.NAME).putIfUntouched(Cache.ALL_CHILDREN, value, allChildren);
 			}
 
 		} finally {
@@ -96,20 +116,21 @@ public class ChildDsDao extends AbstractDsDao {
 		boolean success = false;
 		while (!success) {
 			IdentifiableValue value = getCache(Cache.NAME).getIdentifiable(Cache.ALL_CHILDREN);
-			if (value != null) {
-				List<GwtChild> allChildren = (List<GwtChild>) value.getValue();
-				Iterator<GwtChild> iterator = allChildren.iterator();
-				while(iterator.hasNext()) {
-					GwtChild child = iterator.next();
-					if(child.getKey().equals(childKey)) {
-						iterator.remove();
-						break;
-					}
-				}
-				success = getCache(Cache.NAME).putIfUntouched(Cache.ALL_CHILDREN, value, allChildren);
-			} else {
+			if (value == null) {
 				break;
 			}
+		
+			@SuppressWarnings("unchecked")
+			List<GwtChild> allChildren = (List<GwtChild>) value.getValue();
+			Iterator<GwtChild> iterator = allChildren.iterator();
+			while (iterator.hasNext()) {
+				GwtChild child = iterator.next();
+				if (child.getKey().equals(childKey)) {
+					iterator.remove();
+					break;
+				}
+			}
+			success = getCache(Cache.NAME).putIfUntouched(Cache.ALL_CHILDREN, value, allChildren);
 		}
 	}
 

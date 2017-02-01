@@ -12,4 +12,9 @@ public class Utils {
 	public static WebElement getById(String id) {
 		return TestContext.getInstance().getDriver().findElement(By.id(id));
 	}
+
+	public static void clearAndSendKeys(WebElement element, String text) {
+		element.clear();
+		element.sendKeys(text);
+	}
 }

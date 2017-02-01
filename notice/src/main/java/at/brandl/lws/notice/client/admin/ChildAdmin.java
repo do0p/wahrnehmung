@@ -223,6 +223,10 @@ public class ChildAdmin extends AbstractAdminTab {
 		beginYearBox.setSelectedIndex(0);
 		beginGradeBox.setSelectedIndex(0);
 		archivedBox.setValue(false);
+		int selectedIndex = children.getSelectedIndex();
+		if(selectedIndex >= 0) {
+			children.setItemSelected(selectedIndex, false);
+		}
 	}
 
 	private void initChild() {

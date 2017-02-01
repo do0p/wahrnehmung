@@ -28,11 +28,11 @@ public class Configurations {
 		return Utils.getByDebugId("ok");
 	}
 
-	public static void save() {
+	public static void clickSave() {
 		getSaveButton().click();
 	}
 
-	public static void delete() {
+	public static void clickDelete() {
 		getDeleteButton().click();
 	}
 
@@ -40,7 +40,7 @@ public class Configurations {
 		getOkButton().click();
 	}
 
-	public static void cancel() {
+	public static void clickCancel() {
 		getCancelButton().click();
 	}
 
