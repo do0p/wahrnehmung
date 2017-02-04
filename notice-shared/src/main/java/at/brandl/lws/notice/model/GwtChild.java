@@ -86,21 +86,26 @@ public class GwtChild implements Serializable, Comparable<GwtChild> {
 	}
 
 	public Date getLastDevelopementDialogueDate() {
-		return developementDialogueDates == null
-				|| developementDialogueDates.isEmpty() ? null
-				: developementDialogueDates.get(developementDialogueDates
-						.size() - 1);
+		return developementDialogueDates == null || developementDialogueDates.isEmpty() ? null
+				: developementDialogueDates.get(developementDialogueDates.size() - 1);
 	}
 
 	public int compareTo(GwtChild other) {
-		int result = lastName.compareTo(other.lastName);
+		int result = archivedValue(archived) - archivedValue(other.archived);
 		if (result == 0) {
-			result = firstName.compareTo(other.firstName);
+			result = lastName.compareTo(other.lastName);
 			if (result == 0) {
-				result = birthDay.compareTo(other.birthDay);
+				result = firstName.compareTo(other.firstName);
+				if (result == 0) {
+					result = other.birthDay.compareTo(birthDay);
+				}
 			}
 		}
 		return result;
+	}
+
+	private int archivedValue(Boolean archived) {
+		return archived != null && archived.booleanValue() ? 1 : 0;
 	}
 
 	public Long getBeginYear() {

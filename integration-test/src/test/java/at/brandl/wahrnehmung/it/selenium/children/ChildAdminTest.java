@@ -40,7 +40,7 @@ public class ChildAdminTest {
 
 		assertChildListContainsNot(child);
 		page.sendChild(child);
-		
+
 		assertChildListContains(child);
 		page.selectInChildList(child);
 		assertChild(child);
@@ -54,12 +54,8 @@ public class ChildAdminTest {
 
 		assertChildListContainsNot(child);
 		page.sendChild(child);
-		
 		assertChildListContains(child);
-		page.selectInChildList(child);
-		assertChild(child);
-		
-		Configurations.clickCancel();
+
 		page.sendChild(child);
 		assertDialogBoxShows();
 		Configurations.clickClose();
@@ -75,15 +71,13 @@ public class ChildAdminTest {
 
 		assertChildListContainsNot(child);
 		page.sendChild(child);
-		
 		assertChildListContains(child);
-		page.selectInChildList(child);
-		assertChild(child);
 
+		page.selectInChildList(child);
 		Child updatedChild = new Child("Franzi", "Jones", "3.1.03", 2011, 2);
 		updatedChild.archived = true;
 		page.sendChild(updatedChild);
-		
+
 		assertChildListContainsNot(child);
 		assertChildListContains(updatedChild);
 		page.selectInChildList(updatedChild);
@@ -163,6 +157,62 @@ public class ChildAdminTest {
 		Assert.assertFalse(saveButton.isEnabled());
 		Assert.assertFalse(deleteButton.isEnabled());
 		Assert.assertFalse(cancelButton.isEnabled());
+	}
+
+	@Test
+	public void orderInChildList() {
+
+		assertChildListContainsNot(child);
+		page.sendChild(child);
+		assertChildListContains(child);
+
+		Child secondChild = new Child("Franz", "Arno", "3.1.03", 2011, 2);
+		page.sendChild(secondChild);
+		assertChildListContains(secondChild);
+
+		Child thirdChild = new Child("Arno", "Jonas", "3.1.03", 2011, 2);
+		page.sendChild(thirdChild);
+		assertChildListContains(thirdChild);
+
+		Child fourthChild = new Child("Franz", "Jonas", "3.1.04", 2011, 2);
+		page.sendChild(fourthChild);
+		assertChildListContains(fourthChild);
+
+		Child fifthChild =  new Child("Arno", "Arno", "3.1.04", 2011, 2);
+		fifthChild.archived = true;
+		page.sendChild(fifthChild);
+		assertChildListContains(fifthChild);
+		
+		int posOfChild = page.getPosInChildlist(child);
+		int posOfSecondChild = page.getPosInChildlist(secondChild);
+		int posOfThirdChild = page.getPosInChildlist(thirdChild);
+		int posOfFourthChild = page.getPosInChildlist(fourthChild);
+		int posOfFifthChild = page.getPosInChildlist(fifthChild);
+
+		Assert.assertTrue("alphabetic order lastname", posOfChild > posOfSecondChild);
+		Assert.assertTrue("alphabetic order firstname", posOfChild > posOfThirdChild);
+		Assert.assertTrue("order by birthday", posOfChild > posOfFourthChild);
+		Assert.assertTrue("order by archived", posOfChild < posOfFifthChild);
+		
+		page.selectInChildList(child);
+		page.deleteChild(child);
+		assertChildListContainsNot(child);
+		
+		page.selectInChildList(secondChild);
+		page.deleteChild(secondChild);
+		assertChildListContainsNot(secondChild);
+		
+		page.selectInChildList(thirdChild);
+		page.deleteChild(thirdChild);
+		assertChildListContainsNot(thirdChild);
+		
+		page.selectInChildList(fourthChild);
+		page.deleteChild(fourthChild);
+		assertChildListContainsNot(fourthChild);
+		
+		page.selectInChildList(fifthChild);
+		page.deleteChild(fifthChild);
+		assertChildListContainsNot(fifthChild);
 	}
 
 	@After

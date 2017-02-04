@@ -1,5 +1,7 @@
 package at.brandl.wahrnehmung.it.selenium.children;
 
+import java.util.List;
+
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
@@ -101,13 +103,21 @@ public class ChildAdminPage implements Page {
 	}
 
 	public Boolean childListContains(Child child) {
+		return getPosInChildlist(child) >= 0;
+	}
+
+	public int getPosInChildlist(Child child) {
 		Select childList = getChildListSelect();
-		for (WebElement element : childList.getOptions()) {
+		List<WebElement> options = childList.getOptions();
+		int index = -1;
+		for (int i = 0; i < options.size(); i++) {
+			WebElement element = options.get(i);
 			if (element.getText().equals(child.fullName())) {
-				return true;
+				index = i;
+				break;
 			}
 		}
-		return false;
+		return index;
 	}
 
 	public void deleteChild(Child child) {

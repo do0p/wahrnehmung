@@ -40,6 +40,7 @@ public class ChildDsDao extends AbstractDsDao {
 
 				if (allChildren == null) {
 					allChildren = getAllChildrenFromDatastore();
+					Collections.sort(allChildren);
 					getCache(Cache.NAME).put(Cache.ALL_CHILDREN, allChildren);
 				}
 			}
@@ -48,8 +49,7 @@ public class ChildDsDao extends AbstractDsDao {
 	}
 
 	private List<GwtChild> getAllChildrenFromDatastore() {
-		final Query query = new Query(Child.KIND).addSort(Child.LASTNAME).addSort(Child.FIRSTNAME)
-				.addSort(Child.BIRTHDAY);
+		final Query query = new Query(Child.KIND);
 		return mapToGwtChildren(execute(query, withDefaults()));
 	}
 
@@ -101,6 +101,7 @@ public class ChildDsDao extends AbstractDsDao {
 				if (keyForUpdate == null) {
 					allChildren.add(gwtChild);
 				}
+				Collections.sort(allChildren);
 				success = getCache(Cache.NAME).putIfUntouched(Cache.ALL_CHILDREN, value, allChildren);
 			}
 
