@@ -116,6 +116,8 @@ public class ViJsServlet extends HttpServlet {
 			generator.writeNumber(node.id);
 			generator.writeFieldName("label");
 			generator.writeString(node.label);
+			generator.writeFieldName("title");
+			generator.writeString(node.label);
 			generator.writeEndObject();
 		}
 		generator.writeEndArray();
@@ -130,8 +132,12 @@ public class ViJsServlet extends HttpServlet {
 			generator.writeNumber(edge.from);
 			generator.writeFieldName("to");
 			generator.writeNumber(edge.to);
-			generator.writeFieldName("count");
+			generator.writeFieldName("value");
 			generator.writeNumber(edge.count);
+			generator.writeFieldName("label");
+			generator.writeString(Integer.toString(edge.count));
+			generator.writeFieldName("title");
+			generator.writeString(Integer.toString(edge.count));
 			generator.writeEndObject();
 		}
 		generator.writeEndArray();

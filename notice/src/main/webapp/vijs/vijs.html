@@ -20,7 +20,7 @@
 		var jsonResp;
 
 		function filterCount(edge) {
-			return edge.count >= document.getElementById('mincount').value;
+			return edge.value >= document.getElementById('mincount').value;
 		}
 
 		function getData() {
@@ -43,46 +43,56 @@
 		var container = document.getElementById('mynetwork');
 
 		var options = {
-			layout : {
-				improvedLayout : false
-			},
-			nodes : {
-				shape : 'dot',
-				font : {
-					size : 28,
-					face : 'verdana'
+			"nodes" : {
+				"color" : {
+					"highlight" : {
+						"border" : "rgba(113,233,40,1)",
+						"background" : "rgba(196,255,190,1)"
+					},
+					"hover" : {
+						"border" : "rgba(113,233,40,1)",
+						"background" : "rgba(196,255,190,1)"
+					}
 				},
-			},
-			edges : {
-				width : 0.15,
-				smooth : {
-					type : 'continuous'
+				"font" : {
+					"size" : 28,
+					"face" : "verdana"
 				},
+				"shape" : "dot"
 			},
-			interaction : {
-				tooltipDelay : 120,
-				hover : true,
-				navigationButtons : true
-			},
-			physics : {
-				barnesHut : {
-					gravitationalConstant : -10000,
-					springLength : 150,
-					springConstant : 0.05,
-					avoidOverlap : 0.3,
-					centralGravity : 2.5
+			"edges" : {
+				"arrowStrikethrough" : false,
+				"hoverWidth" : 5,
+				"scaling" : {
+					"max" : 5
 				},
-				minVelocity : 9,
-				solver : 'barnesHut',
-				timestep : 0.2,
-				adaptiveTimestep : true
+				"selectionWidth" : 5,
+				"smooth" : false,
+				"width" : 0.15
+			},
+			"interaction" : {
+				"hover" : true,
+				"multiselect" : true,
+				"navigationButtons" : true,
+				"tooltipDelay" : 120
+			},
+			"physics" : {
+				"barnesHut" : {
+					"gravitationalConstant" : -20000,
+					"centralGravity" : 2.5,
+					"springLength" : 150,
+					"springConstant" : 0.005,
+					"avoidOverlap" : 0.5
+				},
+				"minVelocity" : 9,
+				"timestep" : 0.2
 			}
-		/**,
-			    configure: {
-			        filter: 'physics',
-			        showButton: true
-			    }**/
 		};
+
+		var configureActive = window.location.href.split('?')[1] == "configure"
+		if (configureActive) {
+			options.configure = {};
+		}
 
 		var network = new vis.Network(container, getData(), options);
 
