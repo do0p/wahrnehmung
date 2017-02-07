@@ -94,15 +94,15 @@ public class ChildAdminTest {
 		assertChildListContains(child);
 
 		page.selectInChildList(child);
-		Configurations.clickDelete();
+		page.clickDelete();
 		assertDecisionBoxShows();
-		Configurations.clickCancel();
+		page.clickCancel();
 
 		Thread.sleep(500);
 
 		assertChildListContains(child);
 		page.selectInChildList(child);
-		Configurations.clickDelete();
+		page.clickDelete();
 		assertDecisionBoxShows();
 		Configurations.clickOk();
 	}
@@ -110,9 +110,9 @@ public class ChildAdminTest {
 	@Test
 	public void buttonState() {
 
-		WebElement saveButton = Configurations.getSaveButton();
-		WebElement deleteButton = Configurations.getDeleteButton();
-		WebElement cancelButton = Configurations.getCancelButton();
+		WebElement saveButton = page.getSaveButton();
+		WebElement deleteButton = page.getDeleteButton();
+		WebElement cancelButton = page.getCancelButton();
 
 		// initially all is disabled
 		Assert.assertFalse(saveButton.isEnabled());
@@ -138,7 +138,7 @@ public class ChildAdminTest {
 		Assert.assertTrue(cancelButton.isEnabled());
 
 		// save empties the form
-		Configurations.clickSave();
+		page.clickSave();
 		assertChildListContains(child);
 		Assert.assertFalse(saveButton.isEnabled());
 		Assert.assertFalse(deleteButton.isEnabled());
@@ -150,7 +150,7 @@ public class ChildAdminTest {
 		Assert.assertTrue(deleteButton.isEnabled());
 		Assert.assertTrue(cancelButton.isEnabled());
 
-		Configurations.clickDelete();
+		page.clickDelete();
 		Configurations.clickOk();
 		assertChildListContainsNot(child);
 

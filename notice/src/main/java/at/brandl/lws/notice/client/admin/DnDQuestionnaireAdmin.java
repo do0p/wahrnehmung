@@ -388,4 +388,9 @@ public class DnDQuestionnaireAdmin extends AbstractAdminTab implements
 
 		return "DnDQuestionnaireAdmin" + instanceNo;
 	}
+
+	@Override
+	protected String getPageName() {
+		return "QuestionnaireAdmin";
+	}
 }

@@ -180,4 +180,9 @@ public class DevelopementDialogueAdmin extends AbstractAdminTab {
 		return dates.getSelectedIndex() >= 0;
 	}
 
+	@Override
+	protected String getPageName() {
+		return "DevDatesAdmin";
+	}
+
 }

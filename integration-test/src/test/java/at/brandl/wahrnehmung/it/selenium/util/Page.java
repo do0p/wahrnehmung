@@ -4,4 +4,5 @@ public interface Page {
 
 	void goTo();
 
+	String getPageName();
 }

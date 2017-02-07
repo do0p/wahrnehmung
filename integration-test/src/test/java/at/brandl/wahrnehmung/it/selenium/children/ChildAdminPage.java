@@ -1,7 +1,5 @@
 package at.brandl.wahrnehmung.it.selenium.children;
 
-import java.util.List;
-
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
@@ -13,6 +11,8 @@ import at.brandl.wahrnehmung.it.selenium.util.TestContext;
 import at.brandl.wahrnehmung.it.selenium.util.Utils;
 
 public class ChildAdminPage implements Page {
+
+	private static final String PAGE_NAME = "ChildAdmin";
 
 	public static class Child {
 
@@ -47,15 +47,11 @@ public class ChildAdminPage implements Page {
 		selectBeginYear(child.beginYear);
 		selectBeginGrade(child.beginGrade);
 		checkArchived(child.archived);
-		Configurations.clickSave();
+		clickSave();
 	}
 
 	public void checkArchived(boolean archived) {
-		WebElement archivedField = getArchivedField();
-		boolean selected = archivedField.isSelected();
-		if (selected != archived) {
-			archivedField.sendKeys(Keys.SPACE);
-		}
+		Utils.selectCheckBox(getArchivedField(), archived);
 	}
 
 	public void selectBeginGrade(Integer beginGrade) {
@@ -78,6 +74,18 @@ public class ChildAdminPage implements Page {
 		Utils.clearAndSendKeys(getFirstnameField(), firstName);
 	}
 
+	public void clickSave() {
+		getSaveButton().click();
+	}
+	
+	public void clickDelete() {
+		getDeleteButton().click();
+	}
+	
+	public void clickCancel() {
+		getCancelButton().click();
+	}
+	
 	public WebElement getArchivedField() {
 		return Utils.getByDebugId("archived-input");
 	}
@@ -101,38 +109,40 @@ public class ChildAdminPage implements Page {
 	public WebElement getFirstnameField() {
 		return Utils.getByDebugId("firstname");
 	}
+	
+	
+	public WebElement getSaveButton() {
+		return Utils.getByDebugId("save" + getPageName());
+	}
 
+	public WebElement getDeleteButton() {
+		return Utils.getByDebugId("delete" + getPageName());
+	}
+	
+	public WebElement getCancelButton() {
+		return Utils.getByDebugId("cancel" + getPageName());
+	}
+	
 	public Boolean childListContains(Child child) {
 		return getPosInChildlist(child) >= 0;
 	}
 
 	public int getPosInChildlist(Child child) {
-		Select childList = getChildListSelect();
-		List<WebElement> options = childList.getOptions();
-		int index = -1;
-		for (int i = 0; i < options.size(); i++) {
-			WebElement element = options.get(i);
-			if (element.getText().equals(child.fullName())) {
-				index = i;
-				break;
-			}
-		}
-		return index;
-	}
-
-	public void deleteChild(Child child) {
-		
-		Configurations.clickDelete();
-		Configurations.clickOk();
+		return Utils.getPosInSelect(getChildListSelect(), child.fullName());
 	}
 
 	public void selectInChildList(Child child) {
-		Select childListSelect = getChildListSelect();
-		childListSelect.selectByVisibleText(child.fullName());
+		getChildListSelect().selectByVisibleText(child.fullName());
 	}
 
 	public Select getChildListSelect() {
 		return new Select(Utils.getByDebugId("childlist"));
+	}
+
+	public void deleteChild(Child child) {
+
+		clickDelete();
+		Configurations.clickOk();
 	}
 
 	@Override
@@ -140,7 +150,12 @@ public class ChildAdminPage implements Page {
 		Navigation navigation = TestContext.getInstance().getNavigation();
 		navigation.login(true);
 		navigation.goTo("Konfiguration");
-		Configurations.navigateToChildAdmin();
+		Configurations.navigateTo(this);
 	}
 
+	@Override
+	public String getPageName() {
+		return PAGE_NAME;
+	}
+	
 }

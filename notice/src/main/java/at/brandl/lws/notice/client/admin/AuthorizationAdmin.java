@@ -22,6 +22,7 @@ import at.brandl.lws.notice.shared.service.AuthorizationServiceAsync;
 
 public class AuthorizationAdmin extends AbstractAdminTab {
 
+	public static final String PAGE_NAME = "UserAdmin";
 	private static final int VISIBLE_USERS = 20;
 	private final AuthorizationServiceAsync authorizationService = (AuthorizationServiceAsync) GWT
 			.create(AuthorizationService.class);
@@ -37,13 +38,18 @@ public class AuthorizationAdmin extends AbstractAdminTab {
 	public AuthorizationAdmin() {
 		super(true);
 		
-		this.userBox = new TextBox();
-		this.adminCheckBox = new CheckBox(labels().admin());
-		this.seeAllCheckBox = new CheckBox(labels().teacher());
-		this.editSectionCheckBox = new CheckBox(labels().sectionAdmin());
-
-		this.users = new ListBox();
-		this.users.setVisibleItemCount(VISIBLE_USERS);
+		userBox = new TextBox();
+		userBox.ensureDebugId("user");
+		adminCheckBox = new CheckBox(labels().admin());
+		adminCheckBox.ensureDebugId("admin");
+		seeAllCheckBox = new CheckBox(labels().teacher());
+		seeAllCheckBox.ensureDebugId("seeAll");
+		editSectionCheckBox = new CheckBox(labels().sectionAdmin());
+		editSectionCheckBox.ensureDebugId("editSections");
+		
+		users = new ListBox();
+		users.ensureDebugId("userList");
+		users.setVisibleItemCount(VISIBLE_USERS);
 		rebuildUsersList();
 
 		layout();
@@ -188,6 +194,12 @@ public class AuthorizationAdmin extends AbstractAdminTab {
 	@Override
 	boolean enableSave() {
 		return at.brandl.lws.notice.shared.Utils.isNotEmpty(userBox.getValue());
+	}
+
+
+	@Override
+	protected String getPageName() {
+		return PAGE_NAME;
 	}
 
 }

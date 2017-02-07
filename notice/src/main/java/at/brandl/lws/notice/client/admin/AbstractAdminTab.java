@@ -88,17 +88,17 @@ abstract class AbstractAdminTab extends VerticalPanel {
 			}
 		});
 	}
-	
+
 	<T> void addButtonUpdateKeyPressHandler(ValueBoxBase<T> valueBox) {
 		valueBox.addKeyPressHandler(new KeyPressHandler() {
-			
+
 			@Override
 			public void onKeyPress(KeyPressEvent event) {
 				updateButtonPanel();
 			}
 		});
 	}
-	
+
 	void addButtonUpdateChangeHandler(CheckBox checkBox) {
 		checkBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
 			@Override
@@ -154,11 +154,11 @@ abstract class AbstractAdminTab extends VerticalPanel {
 			setSpacing(Utils.SPACING);
 			this.showDeleteButton = showDeleteButton;
 			saveButton = new Button(labels.create());
-			saveButton.ensureDebugId("save");
+			saveButton.ensureDebugId("save" + getPageName());
 			deleteButton = new Button(labels.delete());
-			deleteButton.ensureDebugId("delete");
+			deleteButton.ensureDebugId("delete" + getPageName());
 			cancelButton = new Button(labels.cancel());
-			cancelButton.ensureDebugId("cancel");
+			cancelButton.ensureDebugId("cancel" + getPageName());
 			saveButton.addClickHandler(new ClickHandler() {
 				@Override
 				public void onClick(ClickEvent event) {
@@ -191,6 +191,7 @@ abstract class AbstractAdminTab extends VerticalPanel {
 			add(cancelButton);
 		}
 
+
 		void updateButtonStates() {
 			saveButton.setEnabled(enableSave());
 			cancelButton.setEnabled(enableCancel());
@@ -208,4 +209,6 @@ abstract class AbstractAdminTab extends VerticalPanel {
 		}
 	}
 
+
+	protected abstract String getPageName();
 }

@@ -543,4 +543,9 @@ public class SectionAdmin extends AbstractAdminTab {
 			reset();
 		}
 	}
+
+	@Override
+	protected String getPageName() {
+		return "SectionAdmin";
+	}
 }

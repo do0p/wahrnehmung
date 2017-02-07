@@ -1,5 +1,8 @@
 package at.brandl.lws.notice.client.admin;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.TabBar.Tab;
 import com.google.gwt.user.client.ui.TabPanel;
@@ -15,31 +18,42 @@ public class AdminContent extends TabPanel {
 
 	public AdminContent(Authorization authorization) {
 		setSize(Utils.HUNDRED_PERCENT, Utils.APP_WIDTH + Utils.PIXEL);
-
+		Map<Integer, String> debugIds = new HashMap<Integer, String>();
+		int i = 0;
 		if (authorization.isAdmin()) {
-			add(new ChildAdmin(), labels.children());
+			ChildAdmin page = new ChildAdmin();
+			add(page, labels.children());
+			debugIds.put(i++, page.getPageName());
 		}
 		if (authorization.isEditSections()) {
-			add(new SectionAdmin(), labels.sections());
+			SectionAdmin page = new SectionAdmin();
+			add(page, labels.sections());
+			debugIds.put(i++, page.getPageName());
 		}
 		if (authorization.isAdmin()) {
-			add(new AuthorizationAdmin(), labels.user());
+			AuthorizationAdmin page = new AuthorizationAdmin();
+			add(page, labels.user());
+			debugIds.put(i++, page.getPageName());
 		}
 		if (authorization.isEditDialogueDates()) {
-			add(new DevelopementDialogueAdmin(),
+			DevelopementDialogueAdmin page = new DevelopementDialogueAdmin();
+			add(page,
 					labels.developementDialogueDates());
+			debugIds.put(i++, page.getPageName());
 		}
 		if (authorization.isAdmin()) {
-			add(new DnDQuestionnaireAdmin(), labels.forms());
+			DnDQuestionnaireAdmin page = new DnDQuestionnaireAdmin();
+			add(page, labels.forms());
+			debugIds.put(i++, page.getPageName());
 		}
 		if (authorization.isAdmin() || authorization.isEditSections() || authorization.isEditDialogueDates()) {
 			selectTab(0);
 		}
 		
-		for(int i = 0; i < getTabBar().getTabCount(); i++ ) {
-			Tab tab = getTabBar().getTab(i);
+		for(int j = 0; j < getTabBar().getTabCount(); j++ ) {
+			Tab tab = getTabBar().getTab(j);
 			if(tab instanceof UIObject) {
-				((UIObject) tab).ensureDebugId(Integer.toString(i));
+				((UIObject) tab).ensureDebugId(debugIds.get(j));
 			}
 		}
 	}

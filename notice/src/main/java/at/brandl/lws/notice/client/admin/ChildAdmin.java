@@ -31,6 +31,7 @@ import at.brandl.lws.notice.shared.validator.GwtChildValidator;
 
 public class ChildAdmin extends AbstractAdminTab {
 
+	public static final String PAGE_NAME = "ChildAdmin";
 	private static final int VISIBLE_CHILDREN = 20;
 	private static final int MAX_YEARS_IN_SCHOOL = 15;
 
@@ -339,6 +340,11 @@ public class ChildAdmin extends AbstractAdminTab {
 	@Override
 	boolean enableSave() {
 		return GwtChildValidator.valid(child);
+	}
+
+	@Override
+	protected String getPageName() {
+		return PAGE_NAME;
 	}
 
 }
