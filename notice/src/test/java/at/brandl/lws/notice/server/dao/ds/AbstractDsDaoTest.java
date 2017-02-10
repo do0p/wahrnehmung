@@ -58,6 +58,10 @@ public abstract class AbstractDsDaoTest {
 		}
 	}
 
+	protected void clearCache() {
+		cache.clearAll();
+	}
+	
 	protected void removeFromCache(String key) {
 		cache.delete(toKey(key));
 	}

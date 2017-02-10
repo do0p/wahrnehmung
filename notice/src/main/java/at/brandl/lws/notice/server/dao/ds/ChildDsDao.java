@@ -22,6 +22,7 @@ import com.google.appengine.api.memcache.MemcacheService.IdentifiableValue;
 import com.google.common.base.Predicate;
 
 import at.brandl.lws.notice.dao.AbstractDsDao;
+import at.brandl.lws.notice.dao.CacheUtil;
 import at.brandl.lws.notice.dao.DsUtil;
 import at.brandl.lws.notice.model.GwtChild;
 import at.brandl.lws.notice.shared.util.Constants.Child;
@@ -69,7 +70,7 @@ public class ChildDsDao extends AbstractDsDao {
 			transaction.commit();
 			gwtChild.setKey(DsUtil.toString(child.getKey()));
 			insertIntoCache(child, Cache.NAME);
-			DsUtil.updateCachedResult(Cache.ALL_CHILDREN, gwtChild, new Predicate<GwtChild>() {
+			CacheUtil.updateCachedResult(Cache.ALL_CHILDREN, gwtChild, new Predicate<GwtChild>() {
 				@Override
 				public boolean apply(GwtChild gwtChild) {
 					return keyForUpdate != null && keyForUpdate.equals(gwtChild.getKey());

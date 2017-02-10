@@ -1,18 +1,14 @@
 package at.brandl.lws.notice.server.dao.ds;
 
+import static at.brandl.lws.notice.server.dao.ds.converter.GwtAuthorizationConverter.getEntityConverter;
+import static at.brandl.lws.notice.server.dao.ds.converter.GwtAuthorizationConverter.getStringToKeyConverter;
 import static at.brandl.lws.notice.server.dao.ds.converter.GwtAuthorizationConverter.toEntity;
-import static at.brandl.lws.notice.server.dao.ds.converter.GwtAuthorizationConverter.toGwtAuthorization;
 import static at.brandl.lws.notice.shared.util.Constants.Authorization.KIND;
-import static com.google.appengine.api.datastore.FetchOptions.Builder.withDefaults;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
@@ -20,10 +16,10 @@ import com.google.appengine.api.datastore.Transaction;
 import com.google.appengine.api.datastore.TransactionOptions;
 import com.google.appengine.api.memcache.MemcacheService;
 import com.google.appengine.api.users.User;
-import com.google.common.base.Supplier;
+import com.google.common.base.Function;
 
 import at.brandl.lws.notice.dao.AbstractDsDao;
-import at.brandl.lws.notice.dao.DsUtil;
+import at.brandl.lws.notice.dao.CacheUtil;
 import at.brandl.lws.notice.model.GwtAuthorization;
 import at.brandl.lws.notice.shared.Utils;
 import at.brandl.lws.notice.shared.util.Constants.Authorization;
@@ -32,39 +28,10 @@ import at.brandl.lws.notice.shared.util.Constants.Authorization.Selector;
 
 public class AuthorizationDsDao extends AbstractDsDao {
 
-	public static class GwtAuthorizationSupplier implements Supplier<GwtAuthorization> {
-
-		private final Key key;
-
-		public GwtAuthorizationSupplier(String userId) {
-			key = KeyFactory.createKey(KIND, userId);
-		}
-
-		@Override
-		public GwtAuthorization get() {
-			try {
-				Entity entity = DatastoreServiceFactory.getDatastoreService().get(key);
-				return toGwtAuthorization(entity);
-			} catch (EntityNotFoundException e) {
-				return null;
-			}
-		}
-	};
-
-	public static class GwtAuthorizationListSupplier implements Supplier<List<GwtAuthorization>> {
-
-		@Override
-		public List<GwtAuthorization> get() {
-			List<GwtAuthorization> result = new ArrayList<GwtAuthorization>();
-			Iterable<Entity> entities = DatastoreServiceFactory.getDatastoreService().prepare(new Query(KIND))
-					.asIterable(withDefaults());
-			for (Entity entity : entities) {
-				result.add(toGwtAuthorization(entity));
-			}
-			Collections.sort(result);
-			return result;
-		}
-	};
+	private static final Function<String, Key> STRING_TO_KEY_CONVERTER = getStringToKeyConverter();
+	private static final Function<Entity, GwtAuthorization> ENTITY_CONVERTER = getEntityConverter();
+	private static final EntityListSupplier<GwtAuthorization> USERLIST_SUPPLIER = new EntityListSupplier<GwtAuthorization>(
+			new Query(KIND), ENTITY_CONVERTER);
 
 	public GwtAuthorization getAuthorization(User user) {
 
@@ -72,36 +39,37 @@ public class AuthorizationDsDao extends AbstractDsDao {
 			return null;
 		}
 
-		String userId = user.getEmail().toLowerCase();
-		return getCached(userId, new GwtAuthorizationSupplier(userId));
+		String userId = createUserId(user.getEmail());
+		return getCachedUser(userId);
 	}
 
 	public List<GwtAuthorization> queryAuthorizations() {
 
-		return getCached(Cache.ALL_USERS, new GwtAuthorizationListSupplier());
+		return getCachedUserList();
 	}
 
-	public void storeAuthorization(GwtAuthorization aut) {
+	public void storeAuthorization(GwtAuthorization authorization) {
 
-		final String userId = createUserId(aut.getEmail());
+		String userId = createUserId(authorization.getEmail());
 		DatastoreService datastoreService = getDatastoreService();
 		Transaction transaction = datastoreService.beginTransaction(TransactionOptions.Builder.withXG(true));
 
 		try {
-			if (Utils.isNotEmpty(aut.getUserId()) && !aut.getUserId().equals(userId)) {
-				Key key = KeyFactory.createKey(KIND, aut.getUserId());
-				getDatastoreService().delete(key);
-				removeFromCache(aut.getUserId());
+			assertCacheIsLoaded();
+
+			if (Utils.isNotEmpty(authorization.getUserId()) && !authorization.getUserId().equals(userId)) {
+				getDatastoreService().delete(STRING_TO_KEY_CONVERTER.apply(authorization.getUserId()));
+				CacheUtil.removeFromCachedResult(Cache.ALL_USERS, new Selector(authorization.getUserId()), getCache());
 			}
 
-			aut.setUserId(userId);
-			Entity authorization = toEntity(aut);
-			aut.setKey(KeyFactory.keyToString(authorization.getKey()));
-			getDatastoreService().put(authorization);
+			authorization.setUserId(userId);
+			Entity entity = toEntity(authorization);
+			getDatastoreService().put(entity);
 			transaction.commit();
-			GwtAuthorization gwtAuthorization = toGwtAuthorization(authorization);
-			addToCache(gwtAuthorization.getUserId(), gwtAuthorization);
-			DsUtil.updateCachedResult(Cache.ALL_USERS, gwtAuthorization, new Selector(userId), getCache());
+
+			authorization.setKey(KeyFactory.keyToString(entity.getKey()));
+
+			CacheUtil.updateCachedResult(Cache.ALL_USERS, authorization, new Selector(userId), getCache());
 
 		} finally {
 			if (transaction.isActive()) {
@@ -111,44 +79,29 @@ public class AuthorizationDsDao extends AbstractDsDao {
 		}
 	}
 
+	private void assertCacheIsLoaded() {
+		queryAuthorizations();
+	}
+
 	public void deleteAuthorization(String email) {
 		String userId = createUserId(email);
 		Key key = KeyFactory.createKey(KIND, userId);
 		getDatastoreService().delete(key);
-		removeFromCache(userId);
+		CacheUtil.removeFromCachedResult(Cache.ALL_USERS, new Selector(userId), getCache());
 	}
 
 	private String createUserId(String email) {
 		return email.toLowerCase();
 	}
 
-	private <T> T getCached(String key, Supplier<T> supplier) {
-		Object lock = Authorization.class;
-		T object = getFromCache(key);
-		if (object == null) {
-			synchronized (lock) {
-				object = getFromCache(key);
-				if (object == null) {
-					object = supplier.get();
-					addToCache(key, object);
-				}
-			}
-		}
-		return object;
+	private List<GwtAuthorization> getCachedUserList() {
+		return CacheUtil.getCached(Cache.ALL_USERS, USERLIST_SUPPLIER, Authorization.class, getCache());
 	}
 
-	private void removeFromCache(String userId) {
-		getCache().delete(userId);
-		DsUtil.removeFromCachedResult(Cache.ALL_USERS, new Selector(userId), getCache());
-	}
-
-	private void addToCache(String key, Object object) {
-		getCache().put(key, object);
-	}
-
-	@SuppressWarnings("unchecked")
-	private <T> T getFromCache(String key) {
-		return (T) getCache().get(key);
+	private GwtAuthorization getCachedUser(String userId) {
+		return CacheUtil.getFromCachedList(new Selector(userId),
+				new EntitySupplier<GwtAuthorization>(STRING_TO_KEY_CONVERTER.apply(userId), ENTITY_CONVERTER),
+				Cache.ALL_USERS, USERLIST_SUPPLIER, Authorization.class, getCache());
 	}
 
 	private MemcacheService getCache() {

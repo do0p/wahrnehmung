@@ -11,6 +11,7 @@ import static at.brandl.lws.notice.shared.util.Constants.Authorization.USER_ID;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
+import com.google.common.base.Function;
 
 import at.brandl.lws.notice.model.GwtAuthorization;
 
@@ -29,8 +30,8 @@ public class GwtAuthorizationConverter {
 	}
 
 	public static Entity toEntity(GwtAuthorization aut) {
-		final Key key = KeyFactory.createKey(KIND, aut.getUserId());
-		final Entity authorization = new Entity(key);
+		Key key = getStringToKeyConverter().apply(aut.getUserId());
+		Entity authorization = new Entity(key);
 		authorization.setProperty(USER_ID, aut.getUserId());
 		authorization.setProperty(EMAIL, aut.getEmail());
 		authorization.setProperty(ADMIN, aut.isAdmin());
@@ -39,5 +40,23 @@ public class GwtAuthorizationConverter {
 		authorization.setProperty(SEE_ALL, aut.isSeeAll());
 		return authorization;
 	}
+	
+	public static Function<Entity, GwtAuthorization> getEntityConverter() {
+		return new Function<Entity, GwtAuthorization>() {
+			@Override
+			public GwtAuthorization apply(Entity entity) {
+				return toGwtAuthorization(entity);
+			}
+		};
+	}
 
+	public static Function<String, Key> getStringToKeyConverter() {
+		return new Function<String, Key>() {
+			@Override
+			public Key apply(String keyString) {
+				return KeyFactory.createKey(KIND, keyString);
+			}
+		};
+	}
+	
 }
