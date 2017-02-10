@@ -1,5 +1,9 @@
 package at.brandl.lws.notice.shared.util;
 
+import com.google.common.base.Predicate;
+
+import at.brandl.lws.notice.model.GwtAuthorization;
+
 public class Constants {
 
 	
@@ -17,6 +21,20 @@ public class Constants {
 
 			public static final String NAME = "authDao";
 			public static final String ALL_USERS = "allUsers";
+		}
+
+		public static class Selector implements Predicate<GwtAuthorization> {
+		
+			private final String userId;
+		
+			public Selector(String userId) {
+				this.userId = userId;
+			}
+		
+			@Override
+			public boolean apply(GwtAuthorization user) {
+				return userId.equals(user.getUserId());
+			}
 		}
 	}
 	
