@@ -20,18 +20,16 @@ public class ChildDsDaoTest extends AbstractDsDaoTest {
 	private static final String CHILD_LASTN = "Yößläer";
 	private static final Date CHILD_BIRTHDAY = new Date();
 	private static final long YEAR = 365 * 24 * 60 * 60 * 1000;
-	private static final Date DIALOGUE_DATE1 = new Date(
-			System.currentTimeMillis() - YEAR);
-	private static final Date DIALOGUE_DATE2 = new Date(
-			System.currentTimeMillis() - 2 * YEAR);
+	private static final Date DIALOGUE_DATE1 = new Date(System.currentTimeMillis() - YEAR);
+	private static final Date DIALOGUE_DATE2 = new Date(System.currentTimeMillis() - 2 * YEAR);
 	private GwtChild child;
 
 	private ChildDsDao childDao;
 
 	@Before
 	public void setUp() {
-		child = TestUtils.createGwtChild(null, CHILD_FIRSTN, CHILD_LASTN,
-				CHILD_BIRTHDAY, DIALOGUE_DATE1, DIALOGUE_DATE2);
+		child = TestUtils.createGwtChild(null, CHILD_FIRSTN, CHILD_LASTN, CHILD_BIRTHDAY, DIALOGUE_DATE1,
+				DIALOGUE_DATE2);
 		childDao = DaoRegistry.get(ChildDsDao.class);
 	}
 
@@ -39,29 +37,25 @@ public class ChildDsDaoTest extends AbstractDsDaoTest {
 	public void crud() {
 		// create
 		childDao.storeChild(child);
-		final String key = child.getKey();
+		String key = child.getKey();
 		Assert.assertNotNull(key);
-		assertServicesContains(key);
 
 		// read
 		GwtChild storedChild = childDao.getChild(child.getKey());
 		Assert.assertNotNull(storedChild);
-		assertChild(storedChild, CHILD_FIRSTN, CHILD_LASTN, CHILD_BIRTHDAY,
-				DIALOGUE_DATE1, DIALOGUE_DATE2);
+		assertChild(storedChild, CHILD_FIRSTN, CHILD_LASTN, CHILD_BIRTHDAY, DIALOGUE_DATE1, DIALOGUE_DATE2);
 
 		// read all
-		final List<GwtChild> allChildren = childDao.getAllChildren();
+		List<GwtChild> allChildren = childDao.getAllChildren();
 		Assert.assertEquals(1, allChildren.size());
 
 		// update
-		final String updatedFirstName = "XYZ";
+		String updatedFirstName = "XYZ";
 		child.setFirstName(updatedFirstName);
 		childDao.storeChild(child);
 		storedChild = childDao.getChild(child.getKey());
 		Assert.assertNotNull(storedChild);
-		assertChild(storedChild, updatedFirstName, CHILD_LASTN, CHILD_BIRTHDAY,
-				DIALOGUE_DATE1, DIALOGUE_DATE2);
-		assertServicesContains(key);
+		assertChild(storedChild, updatedFirstName, CHILD_LASTN, CHILD_BIRTHDAY, DIALOGUE_DATE1, DIALOGUE_DATE2);
 
 		// store duplicate
 		child.setKey(null);
@@ -71,54 +65,38 @@ public class ChildDsDaoTest extends AbstractDsDaoTest {
 		} catch (IllegalArgumentException e) {
 			// success
 		}
-		assertServicesContains(key);
 		child.setKey(key);
 
 		// delete
 		childDao.deleteChild(child.getKey());
-
-		assertServicesContainsNot(key);
+		Assert.assertNull(childDao.getChild(child.getKey()));
 
 	}
 
 	@Test
 	public void worksWithCache() {
 		childDao.storeChild(child);
-		final String key = child.getKey();
-
-		assertServicesContains(key);
+		String key = child.getKey();
 
 		removeFromDatastore(key);
 
-		final GwtChild storedChild = childDao.getChild(key);
-		assertCacheContains(key);
+		GwtChild storedChild = childDao.getChild(key);
 		Assert.assertNotNull(storedChild);
-		assertChild(storedChild, CHILD_FIRSTN, CHILD_LASTN, CHILD_BIRTHDAY,
-				DIALOGUE_DATE1, DIALOGUE_DATE2);
+		assertChild(storedChild, CHILD_FIRSTN, CHILD_LASTN, CHILD_BIRTHDAY, DIALOGUE_DATE1, DIALOGUE_DATE2);
 
-		removeFromCache(key);
-
-		assertServicesContainsNot(key);
 	}
 
 	@Test
 	public void worksWithoutCache() {
 		childDao.storeChild(child);
-		final String key = child.getKey();
-		assertServicesContains(key);
+		String key = child.getKey();
 
-		removeFromCache(key);
+		clearCache();
 
-		final GwtChild storedChild = childDao.getChild(key);
-		assertServicesContains(key);
+		GwtChild storedChild = childDao.getChild(key);
 		Assert.assertNotNull(storedChild);
-		assertChild(storedChild, CHILD_FIRSTN, CHILD_LASTN, CHILD_BIRTHDAY,
-				DIALOGUE_DATE1, DIALOGUE_DATE2);
+		assertChild(storedChild, CHILD_FIRSTN, CHILD_LASTN, CHILD_BIRTHDAY, DIALOGUE_DATE1, DIALOGUE_DATE2);
 
-		removeFromCache(key);
-
-		childDao.deleteChild(child.getKey());
-		assertServicesContainsNot(key);
 	}
 
 	@Override
@@ -126,16 +104,15 @@ public class ChildDsDaoTest extends AbstractDsDaoTest {
 		return Cache.NAME;
 	}
 
-	private void assertChild(GwtChild child, String expectedFn,
-			String expectedLn, Date expectedBd, Date... dialogueDates) {
+	private void assertChild(GwtChild child, String expectedFn, String expectedLn, Date expectedBd,
+			Date... dialogueDates) {
 		Assert.assertEquals(expectedFn, child.getFirstName());
 		Assert.assertEquals(expectedLn, child.getLastName());
 		Assert.assertEquals(expectedBd, child.getBirthDay());
 		List<Date> dialogueDateList = Arrays.asList(dialogueDates);
 		Collections.sort(dialogueDateList);
 		for (int i = 0; i < dialogueDateList.size(); i++) {
-			Assert.assertEquals(dialogueDateList.get(i), child
-					.getDevelopementDialogueDates().get(i));
+			Assert.assertEquals(dialogueDateList.get(i), child.getDevelopementDialogueDates().get(i));
 		}
 	}
 

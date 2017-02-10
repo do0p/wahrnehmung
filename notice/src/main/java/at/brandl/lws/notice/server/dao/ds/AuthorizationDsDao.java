@@ -21,10 +21,10 @@ import com.google.common.base.Function;
 import at.brandl.lws.notice.dao.AbstractDsDao;
 import at.brandl.lws.notice.dao.CacheUtil;
 import at.brandl.lws.notice.model.GwtAuthorization;
+import at.brandl.lws.notice.server.dao.ds.converter.GwtAuthorizationConverter.Selector;
 import at.brandl.lws.notice.shared.Utils;
 import at.brandl.lws.notice.shared.util.Constants.Authorization;
 import at.brandl.lws.notice.shared.util.Constants.Authorization.Cache;
-import at.brandl.lws.notice.shared.util.Constants.Authorization.Selector;
 
 public class AuthorizationDsDao extends AbstractDsDao {
 
@@ -50,13 +50,13 @@ public class AuthorizationDsDao extends AbstractDsDao {
 
 	public void storeAuthorization(GwtAuthorization authorization) {
 
-		String userId = createUserId(authorization.getEmail());
 		DatastoreService datastoreService = getDatastoreService();
 		Transaction transaction = datastoreService.beginTransaction(TransactionOptions.Builder.withXG(true));
 
 		try {
 			assertCacheIsLoaded();
 
+			String userId = createUserId(authorization.getEmail());
 			if (Utils.isNotEmpty(authorization.getUserId()) && !authorization.getUserId().equals(userId)) {
 				getDatastoreService().delete(STRING_TO_KEY_CONVERTER.apply(authorization.getUserId()));
 				CacheUtil.removeFromCachedResult(Cache.ALL_USERS, new Selector(authorization.getUserId()), getCache());
@@ -64,7 +64,7 @@ public class AuthorizationDsDao extends AbstractDsDao {
 
 			authorization.setUserId(userId);
 			Entity entity = toEntity(authorization);
-			getDatastoreService().put(entity);
+			datastoreService.put(entity);
 			transaction.commit();
 
 			authorization.setKey(KeyFactory.keyToString(entity.getKey()));
@@ -79,15 +79,26 @@ public class AuthorizationDsDao extends AbstractDsDao {
 		}
 	}
 
-	private void assertCacheIsLoaded() {
-		queryAuthorizations();
+	public void deleteAuthorization(String email) {
+
+		String userId = createUserId(email);
+		DatastoreService datastoreService = getDatastoreService();
+		Transaction transaction = datastoreService.beginTransaction();
+
+		try {
+			datastoreService.delete(KeyFactory.createKey(KIND, userId));
+			transaction.commit();
+			assertCacheIsLoaded();
+			CacheUtil.removeFromCachedResult(Cache.ALL_USERS, new Selector(userId), getCache());
+		} finally {
+			if (transaction.isActive()) {
+				transaction.rollback();
+			}
+		}
 	}
 
-	public void deleteAuthorization(String email) {
-		String userId = createUserId(email);
-		Key key = KeyFactory.createKey(KIND, userId);
-		getDatastoreService().delete(key);
-		CacheUtil.removeFromCachedResult(Cache.ALL_USERS, new Selector(userId), getCache());
+	private void assertCacheIsLoaded() {
+		getCachedUserList();
 	}
 
 	private String createUserId(String email) {

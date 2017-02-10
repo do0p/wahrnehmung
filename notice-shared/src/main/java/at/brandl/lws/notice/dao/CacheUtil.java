@@ -13,15 +13,15 @@ public class CacheUtil {
 
 	public static <T extends Comparable<T>> void updateCachedResult(String cacheKey, T object, Predicate<T> selector,
 			MemcacheService cache) {
-	
+
 		boolean success = false;
 		while (!success) {
-	
+
 			IdentifiableValue value = cache.getIdentifiable(cacheKey);
 			if (value == null) {
 				break;
 			}
-	
+
 			@SuppressWarnings("unchecked")
 			List<T> allObjects = (List<T>) value.getValue();
 			Iterator<T> iterator = allObjects.iterator();
@@ -32,24 +32,24 @@ public class CacheUtil {
 					break;
 				}
 			}
-	
+
 			if (object != null) {
 				allObjects.add(object);
 				Collections.sort(allObjects);
 			}
-	
+
 			success = cache.putIfUntouched(cacheKey, value, allObjects);
 		}
 	}
 
-	public static <T extends Comparable<T>> void removeFromCachedResult(String cacheKey, Predicate<T> equals, MemcacheService cache) {
-	
+	public static <T extends Comparable<T>> void removeFromCachedResult(String cacheKey, Predicate<T> equals,
+			MemcacheService cache) {
+
 		updateCachedResult(cacheKey, null, equals, cache);
 	}
 
 	@SuppressWarnings("unchecked")
-	public
-	static <T> T getCached(String key, Supplier<T> supplier, Object lock, MemcacheService cache) {
+	public static <T> T getCached(String key, Supplier<T> supplier, Object lock, MemcacheService cache) {
 		T object = (T) cache.get(key);
 		if (object == null) {
 			synchronized (lock) {
@@ -67,16 +67,21 @@ public class CacheUtil {
 
 	public static <T extends Comparable<T>> T getFromCachedList(Predicate<T> selector, Supplier<T> entitySupplier,
 			String listCacheKey, Supplier<List<T>> entityListSupplier, Object lock, MemcacheService cache) {
-		
+
 		List<T> objects = getCached(listCacheKey, entityListSupplier, lock, cache);
 		for (T object : objects) {
 			if (selector.apply(object)) {
 				return object;
 			}
 		}
-	
-		T object = entitySupplier.get();
-		updateCachedResult(listCacheKey, object, selector, cache);
+
+		T object = null;
+		if (entitySupplier != null) {
+			object = entitySupplier.get();
+			if (object != null) {
+				updateCachedResult(listCacheKey, object, selector, cache);
+			}
+		}
 		return object;
 	}
 

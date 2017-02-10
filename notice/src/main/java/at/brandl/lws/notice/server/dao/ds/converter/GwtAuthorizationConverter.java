@@ -12,6 +12,7 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.common.base.Function;
+import com.google.common.base.Predicate;
 
 import at.brandl.lws.notice.model.GwtAuthorization;
 
@@ -57,6 +58,20 @@ public class GwtAuthorizationConverter {
 				return KeyFactory.createKey(KIND, keyString);
 			}
 		};
+	}
+	
+	public static class Selector implements Predicate<GwtAuthorization> {
+		
+		private final String userId;
+	
+		public Selector(String userId) {
+			this.userId = userId;
+		}
+	
+		@Override
+		public boolean apply(GwtAuthorization user) {
+			return userId.equals(user.getUserId());
+		}
 	}
 	
 }

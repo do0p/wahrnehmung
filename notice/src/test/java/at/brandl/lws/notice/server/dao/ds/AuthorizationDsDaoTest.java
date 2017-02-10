@@ -5,7 +5,6 @@ import static at.brandl.lws.notice.TestUtils.createUser;
 
 import java.util.Collection;
 
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,7 +35,7 @@ public class AuthorizationDsDaoTest extends AbstractDsDaoTest {
 		authorizationDao.storeAuthorization(authorizationUser);
 		String userId = authorizationUser.getUserId();
 		Assert.assertNotNull(userId);
-		
+
 		// read
 		GwtAuthorization storedAuth = authorizationDao.getAuthorization(user);
 		Assert.assertNotNull(storedAuth);
@@ -54,7 +53,7 @@ public class AuthorizationDsDaoTest extends AbstractDsDaoTest {
 
 		storedAuth = authorizationDao.getAuthorization(user);
 		Assert.assertNull(storedAuth);
-		
+
 		storedAuth = authorizationDao.getAuthorization(createUser(updatedEmail));
 		Assert.assertNotNull(storedAuth);
 		assertAuthorization(updatedEmail, false, true, true, storedAuth);
@@ -65,7 +64,6 @@ public class AuthorizationDsDaoTest extends AbstractDsDaoTest {
 		storedAuth = authorizationDao.getAuthorization(createUser(updatedEmail));
 		Assert.assertNull(storedAuth);
 	}
-
 
 	@Test
 	public void worksWithCache() {
@@ -84,17 +82,12 @@ public class AuthorizationDsDaoTest extends AbstractDsDaoTest {
 		authorizationDao.storeAuthorization(authorizationUser);
 
 		clearCache();
-		
+
 		GwtAuthorization storedAuth = authorizationDao.getAuthorization(user);
 		Assert.assertNotNull(storedAuth);
 		assertAuthorization(USER_EMAIL, false, true, false, storedAuth);
 	}
 
-	@After
-	public void tearDown() {
-		clearCache();
-	}
-	
 	@Override
 	protected String getMemCacheServiceName() {
 		return Constants.Authorization.Cache.NAME;
@@ -109,5 +102,4 @@ public class AuthorizationDsDaoTest extends AbstractDsDaoTest {
 		Assert.assertEquals(seeAll, auth.isSeeAll());
 	}
 
-	
 }
