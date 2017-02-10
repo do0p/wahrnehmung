@@ -67,15 +67,15 @@ public class UserAdminPage implements Page {
 	}
 
 	public WebElement getAdminField() {
-		return Utils.getByDebugId("admin");
+		return Utils.getByDebugId("admin-input");
 	}
 
 	public WebElement getSeeAllField() {
-		return Utils.getByDebugId("seeAll");
+		return Utils.getByDebugId("seeAll-input");
 	}
 
 	public WebElement getEditSectionField() {
-		return Utils.getByDebugId("editSections");
+		return Utils.getByDebugId("editSections-input");
 	}
 
 	public Select getUserListSelect() {

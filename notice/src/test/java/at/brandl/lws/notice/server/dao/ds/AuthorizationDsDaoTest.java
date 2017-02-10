@@ -11,13 +11,14 @@ import org.junit.Test;
 import com.google.appengine.api.users.User;
 
 import at.brandl.lws.notice.dao.DaoRegistry;
-import at.brandl.lws.notice.model.Authorization;
+import at.brandl.lws.notice.model.GwtAuthorization;
+import at.brandl.lws.notice.shared.util.Constants;
 
 public class AuthorizationDsDaoTest extends AbstractDsDaoTest {
 
 	private static final String USER_EMAIL = "User@lws.at";
 	private AuthorizationDsDao authorizationDao;
-	private Authorization authorizationUser;
+	private GwtAuthorization authorizationUser;
 	private User user;
 
 	@Before
@@ -31,38 +32,50 @@ public class AuthorizationDsDaoTest extends AbstractDsDaoTest {
 	public void crud() {
 		// create
 		authorizationDao.storeAuthorization(authorizationUser);
-		final String key = authorizationUser.getKey();
+		String key = authorizationUser.getKey();
+		String userId = authorizationUser.getUserId();
 		Assert.assertNotNull(key);
-		assertServicesContains(key);
+		assertDatastoreContains(key);
+		assertCacheContainsStringKey(userId);
 
 		// read
-
-		Authorization storedAuth = authorizationDao.getAuthorization(user);
+		GwtAuthorization storedAuth = authorizationDao.getAuthorization(user);
 		Assert.assertNotNull(storedAuth);
 		assertAuthorization(USER_EMAIL, false, true, false, storedAuth);
 
 		// read all
-		final Collection<Authorization> allAuthorizations = authorizationDao
+		final Collection<GwtAuthorization> allAuthorizations = authorizationDao
 				.queryAuthorizations();
 		Assert.assertEquals(1, allAuthorizations.size());
 
 		// update
 		authorizationUser.setSeeAll(true);
+		String updatedEmail = "Updated@gmail.com";
+		authorizationUser.setEmail(updatedEmail);
 		authorizationDao.storeAuthorization(authorizationUser);
+		
 		storedAuth = authorizationDao.getAuthorization(user);
+		Assert.assertNull(storedAuth);
+		assertCacheContainsNotStringKey(userId);
+		assertDatastoreContainsNot(key);
+		
+		storedAuth = authorizationDao.getAuthorization(createUser(updatedEmail));
 		Assert.assertNotNull(storedAuth);
-		assertAuthorization(USER_EMAIL, false, true, true, storedAuth);
-		assertServicesContains(key);
-
+		key = storedAuth.getKey();
+		userId = storedAuth.getUserId();
+		assertDatastoreContains(key);
+		assertCacheContainsStringKey(userId);
+		assertAuthorization(updatedEmail, false, true, true, storedAuth);
+		
 		// delete
-		authorizationDao.deleteAuthorization(USER_EMAIL);
+		authorizationDao.deleteAuthorization(updatedEmail);
 
-		assertServicesContainsNot(key);
-
+		assertCacheContainsNotStringKey(userId);
+		assertDatastoreContainsNot(key);
 	}
 
 	private void assertAuthorization(String email, boolean admin,
-			boolean editSections, boolean seeAll, Authorization auth) {
+			boolean editSections, boolean seeAll, GwtAuthorization auth) {
 		Assert.assertEquals(email, auth.getEmail());
 		Assert.assertEquals(email.toLowerCase(), auth.getUserId());
 		Assert.assertEquals(admin, auth.isAdmin());
@@ -73,45 +86,52 @@ public class AuthorizationDsDaoTest extends AbstractDsDaoTest {
 	@Test
 	public void worksWithCache() {
 		authorizationDao.storeAuthorization(authorizationUser);
-		final String key = authorizationUser.getKey();
+		String key = authorizationUser.getKey();
+		String userId = authorizationUser.getUserId();
 
-		assertServicesContains(key);
+		assertDatastoreContains(key);
+		assertCacheContainsStringKey(userId);
 
 		removeFromDatastore(key);
 
-		Authorization storedAuth = authorizationDao.getAuthorization(user);
+		GwtAuthorization storedAuth = authorizationDao.getAuthorization(user);
 		Assert.assertNotNull(storedAuth);
 		assertAuthorization(USER_EMAIL, false, true, false, storedAuth);
-		assertCacheContains(key);
+		assertCacheContainsStringKey(userId);
 
-		removeFromCache(key);
+		removeFromCacheStringKey(userId);
 
-		assertServicesContainsNot(key);
+		assertCacheContainsNotStringKey(userId);
+		assertDatastoreContainsNot(key);
 	}
 
 	@Test
 	public void worksWithoutCache() {
 		authorizationDao.storeAuthorization(authorizationUser);
-		final String key = authorizationUser.getKey();
+		String key = authorizationUser.getKey();
+		String userId = authorizationUser.getUserId();
 
-		assertServicesContains(key);
+		
+		assertDatastoreContains(key);
+		assertCacheContainsStringKey(userId);
 
-		removeFromCache(key);
+		removeFromCacheStringKey(userId);
 
-		Authorization storedAuth = authorizationDao.getAuthorization(user);
+		GwtAuthorization storedAuth = authorizationDao.getAuthorization(user);
 		Assert.assertNotNull(storedAuth);
 		assertAuthorization(USER_EMAIL, false, true, false, storedAuth);
-		assertServicesContains(key);
 
-		removeFromCache(key);
+		assertDatastoreContains(key);
+		assertCacheContainsStringKey(userId);
 
 		authorizationDao.deleteAuthorization(USER_EMAIL);
-		assertServicesContainsNot(key);
+		assertCacheContainsNotStringKey(userId);
+		assertDatastoreContainsNot(key);
 	}
 
 	@Override
 	protected String getMemCacheServiceName() {
-		return AuthorizationDsDao.AUTH_DAO_MEMCACHE;
+		return Constants.Authorization.Cache.NAME;
 	}
 
 }

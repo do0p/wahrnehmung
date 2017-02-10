@@ -2,6 +2,24 @@ package at.brandl.lws.notice.shared.util;
 
 public class Constants {
 
+	
+	public static class Authorization {
+
+		public static final String KIND = "AuthorizationDs";
+		public static final String USER_ID = "userId";
+		public static final String EMAIL = "email";
+		public static final String ADMIN = "admin";
+		public static final String SEE_ALL = "seeAll";
+		public static final String EDIT_SECTIONS = "editSections";
+		public static final String EDIT_DIALOGUE_DATES = "editDialogueDates";
+
+		public static class Cache {
+
+			public static final String NAME = "authDao";
+			public static final String ALL_USERS = "allUsers";
+		}
+	}
+	
 	public static class Notice {
 
 		public static final String KIND = "BeobachtungDs";

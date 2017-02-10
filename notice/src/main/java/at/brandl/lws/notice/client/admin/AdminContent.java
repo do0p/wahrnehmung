@@ -10,13 +10,13 @@ import com.google.gwt.user.client.ui.UIObject;
 
 import at.brandl.lws.notice.client.Labels;
 import at.brandl.lws.notice.client.utils.Utils;
-import at.brandl.lws.notice.model.Authorization;
+import at.brandl.lws.notice.model.GwtAuthorization;
 
 public class AdminContent extends TabPanel {
 
 	private final Labels labels = (Labels) GWT.create(Labels.class);
 
-	public AdminContent(Authorization authorization) {
+	public AdminContent(GwtAuthorization authorization) {
 		setSize(Utils.HUNDRED_PERCENT, Utils.APP_WIDTH + Utils.PIXEL);
 		Map<Integer, String> debugIds = new HashMap<Integer, String>();
 		int i = 0;

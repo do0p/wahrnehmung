@@ -42,7 +42,6 @@ import at.brandl.lws.notice.client.utils.RichTextToolbar;
 import at.brandl.lws.notice.client.utils.SectionSelection;
 import at.brandl.lws.notice.client.utils.SectionSelectionBox;
 import at.brandl.lws.notice.client.utils.Utils;
-import at.brandl.lws.notice.model.Authorization;
 import at.brandl.lws.notice.model.GwtBeobachtung;
 import at.brandl.lws.notice.model.GwtBeobachtung.DurationEnum;
 import at.brandl.lws.notice.model.GwtBeobachtung.SocialEnum;
@@ -79,7 +78,7 @@ public class EditContent extends HorizontalPanel {
 	private RichTextToolbar toolbar;
 	private GwtBeobachtung beobachtung;
 
-	public EditContent(Authorization authorization) {
+	public EditContent() {
 
 		beobachtung = new GwtBeobachtung();
 

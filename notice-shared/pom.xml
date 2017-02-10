@@ -16,16 +16,20 @@
 			<groupId>com.google.appengine</groupId>
 			<artifactId>appengine-api-1.0-sdk</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava-gwt</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>
-	
+
 		<resources>
 			<resource>
 				<directory>${basedir}/src/main/resources</directory>
 			</resource>
 		</resources>
-	
+
 		<plugins>
 
 			<plugin>

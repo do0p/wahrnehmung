@@ -16,12 +16,8 @@ import com.google.appengine.api.memcache.MemcacheServiceFactory;
 
 public abstract class AbstractDsDao extends AbstractDao {
 
-	
-	
-
 	protected Filter createEqualsPredicate(String fieldName, Entity entity) {
-		return new Query.FilterPredicate(fieldName, FilterOperator.EQUAL,
-				entity.getProperty(fieldName));
+		return new Query.FilterPredicate(fieldName, FilterOperator.EQUAL, entity.getProperty(fieldName));
 	}
 
 	protected Filter createEqualsPredicate(String fieldName, Object value) {
@@ -33,13 +29,11 @@ public abstract class AbstractDsDao extends AbstractDao {
 		getCache(cacheName).put(key, entity);
 	}
 
-	
 	protected <T> void insertIntoCache(CacheKey cacheKey, T result, DatastoreService ds, Transaction tx,
 			String cacheName) {
-		getCache(cacheName).put(cacheKey,
-				new CacheEntity<T>(result, getEntityGroupVersion(ds, tx, cacheKey.getKey())));
+		getCache(cacheName).put(cacheKey, new CacheEntity<T>(result, getEntityGroupVersion(ds, tx, cacheKey.getKey())));
 	}
-	
+
 	protected void deleteFromCache(Key key, String cacheName) {
 		getCache(cacheName).delete(key);
 	}
@@ -58,7 +52,6 @@ public abstract class AbstractDsDao extends AbstractDao {
 
 		return null;
 	}
-	
 
 	private static long getEntityGroupVersion(DatastoreService ds, Transaction tx, Key entityKey) {
 		try {
@@ -70,7 +63,7 @@ public abstract class AbstractDsDao extends AbstractDao {
 			return 0;
 		}
 	}
-	
+
 	protected DatastoreService getDatastoreService() {
 		return DatastoreServiceFactory.getDatastoreService();
 	}
@@ -94,8 +87,7 @@ public abstract class AbstractDsDao extends AbstractDao {
 
 	protected MemcacheService getCache(String cacheName) {
 		// System.err.println("getting data from cache");
-		return MemcacheServiceFactory
-				.getMemcacheService(cacheName);
+		return MemcacheServiceFactory.getMemcacheService(cacheName);
 	}
 
 	protected void deleteEntity(Key key, String cacheName) {
@@ -120,10 +112,8 @@ public abstract class AbstractDsDao extends AbstractDao {
 		return count(query, fetchOptions, getDatastoreService());
 	}
 
-	protected int count(Query query, FetchOptions fetchOptions,
-			DatastoreService datastoreService) {
+	protected int count(Query query, FetchOptions fetchOptions, DatastoreService datastoreService) {
 		return datastoreService.prepare(query).countEntities(fetchOptions);
 	}
-
 
 }

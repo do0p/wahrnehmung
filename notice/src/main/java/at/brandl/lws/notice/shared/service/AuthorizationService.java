@@ -5,19 +5,19 @@ import java.util.Collection;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
-import at.brandl.lws.notice.model.Authorization;
+import at.brandl.lws.notice.model.GwtAuthorization;
 
 @RemoteServiceRelativePath("auth")
 public abstract interface AuthorizationService extends RemoteService
 {
-  Collection<Authorization> queryAuthorizations();
+  Collection<GwtAuthorization> queryAuthorizations();
 
-  void storeAuthorization(Authorization paramAuthorization);
+  void storeAuthorization(GwtAuthorization paramAuthorization);
 
   void deleteAuthorization(String paramString);
 
   boolean currentUserIsAdmin();
 
-  Authorization getAuthorizationForCurrentUser(String paramString);
+  GwtAuthorization getAuthorizationForCurrentUser(String paramString);
 
 }

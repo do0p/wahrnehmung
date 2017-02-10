@@ -8,7 +8,7 @@ import com.google.appengine.api.users.UserServiceFactory;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 import at.brandl.lws.notice.dao.DaoRegistry;
-import at.brandl.lws.notice.model.Authorization;
+import at.brandl.lws.notice.model.GwtAuthorization;
 import at.brandl.lws.notice.server.dao.ds.AuthorizationDsDao;
 import at.brandl.lws.notice.shared.service.AuthorizationService;
 
@@ -23,11 +23,11 @@ public class AuthorizationServiceImpl extends RemoteServiceServlet implements
 		userService = UserServiceFactory.getUserService();
 	}
 
-	public Collection<Authorization> queryAuthorizations() {
+	public Collection<GwtAuthorization> queryAuthorizations() {
 		return authorizationDao.queryAuthorizations();
 	}
 
-	public void storeAuthorization(Authorization aut) {
+	public void storeAuthorization(GwtAuthorization aut) {
 		assertCurrentUserIsAdmin();
 		authorizationDao.storeAuthorization(aut);
 	}
@@ -58,26 +58,26 @@ public class AuthorizationServiceImpl extends RemoteServiceServlet implements
 
 	public boolean currentUserIsAdmin() {
 
-		Authorization authorization = getAuthorizationForCurrentUserInternal();
+		GwtAuthorization authorization = getAuthorizationForCurrentUserInternal();
 		return (authorization != null) && (authorization.isAdmin());
 	}
 
 	public boolean currentUserIsSectionAdmin() {
-		Authorization authorization = getAuthorizationForCurrentUserInternal();
+		GwtAuthorization authorization = getAuthorizationForCurrentUserInternal();
 		return (authorization != null)
 				&& ((authorization.isAdmin()) || (authorization
 						.isEditSections()));
 	}
 
 	public boolean currentUserIsTeacher() {
-		Authorization authorization = getAuthorizationForCurrentUserInternal();
+		GwtAuthorization authorization = getAuthorizationForCurrentUserInternal();
 		return (authorization != null) && (authorization.isSeeAll());
 	}
 
-	public Authorization getAuthorizationForCurrentUser(String followUpUrl) {
-		Authorization authorization = getAuthorizationForCurrentUserInternal();
+	public GwtAuthorization getAuthorizationForCurrentUser(String followUpUrl) {
+		GwtAuthorization authorization = getAuthorizationForCurrentUserInternal();
 		if (authorization == null) {
-			authorization = new Authorization();
+			authorization = new GwtAuthorization();
 			authorization.setLoginUrl(userService
 					.createLoginURL(followUpUrl));
 			authorization.setLoggedIn(false);
@@ -89,7 +89,7 @@ public class AuthorizationServiceImpl extends RemoteServiceServlet implements
 		return authorization;
 	}
 
-	private Authorization getAuthorizationForCurrentUserInternal() {
+	private GwtAuthorization getAuthorizationForCurrentUserInternal() {
 		if (!userService.isUserLoggedIn()) {
 			return null;
 		}
@@ -100,8 +100,8 @@ public class AuthorizationServiceImpl extends RemoteServiceServlet implements
 		return authorizationDao.getAuthorization(user);
 	}
 
-	private Authorization createSuperUserAuthorization(User user) {
-		Authorization authorization = new Authorization();
+	private GwtAuthorization createSuperUserAuthorization(User user) {
+		GwtAuthorization authorization = new GwtAuthorization();
 		authorization.setAdmin(true);
 		authorization.setEditDialogueDates(true);
 		authorization.setEditSections(true);
@@ -112,7 +112,7 @@ public class AuthorizationServiceImpl extends RemoteServiceServlet implements
 		return authorization;
 	}
 
-	public Authorization getAuthorization(User currentUser) {
+	public GwtAuthorization getAuthorization(User currentUser) {
 
 		return getAuthorizationForCurrentUserInternal();
 	}

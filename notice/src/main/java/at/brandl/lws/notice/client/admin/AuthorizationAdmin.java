@@ -7,6 +7,8 @@ import java.util.Map;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -16,7 +18,7 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
-import at.brandl.lws.notice.model.Authorization;
+import at.brandl.lws.notice.model.GwtAuthorization;
 import at.brandl.lws.notice.shared.service.AuthorizationService;
 import at.brandl.lws.notice.shared.service.AuthorizationServiceAsync;
 
@@ -33,11 +35,12 @@ public class AuthorizationAdmin extends AbstractAdminTab {
 	private final CheckBox editSectionCheckBox;
 
 	private final ListBox users;
-	private final Map<String, Authorization> authorizations = new HashMap<String, Authorization>();
+	private final Map<String, GwtAuthorization> authorizations = new HashMap<String, GwtAuthorization>();
+	private GwtAuthorization aut;
 
 	public AuthorizationAdmin() {
 		super(true);
-		
+
 		userBox = new TextBox();
 		userBox.ensureDebugId("user");
 		adminCheckBox = new CheckBox(labels().admin());
@@ -46,7 +49,8 @@ public class AuthorizationAdmin extends AbstractAdminTab {
 		seeAllCheckBox.ensureDebugId("seeAll");
 		editSectionCheckBox = new CheckBox(labels().sectionAdmin());
 		editSectionCheckBox.ensureDebugId("editSections");
-		
+		aut = new GwtAuthorization();
+
 		users = new ListBox();
 		users.ensureDebugId("userList");
 		users.setVisibleItemCount(VISIBLE_USERS);
@@ -54,12 +58,40 @@ public class AuthorizationAdmin extends AbstractAdminTab {
 
 		layout();
 
-		addButtonUpdateChangeHandler(userBox);
-		addButtonUpdateChangeHandler(adminCheckBox);
-		addButtonUpdateChangeHandler(seeAllCheckBox);
-		addButtonUpdateChangeHandler(editSectionCheckBox);
-		
-	
+		userBox.addValueChangeHandler(new ValueChangeHandler<String>() {
+			@Override
+			public void onValueChange(ValueChangeEvent<String> event) {
+				aut.setEmail(userBox.getText());
+				updateButtonPanel();
+			}
+		});
+
+		adminCheckBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+			@Override
+			public void onValueChange(ValueChangeEvent<Boolean> event) {
+				aut.setAdmin(convertToBoolean(adminCheckBox.getValue()));
+				updateButtonPanel();
+			}
+		});
+
+		seeAllCheckBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+			@Override
+			public void onValueChange(ValueChangeEvent<Boolean> event) {
+				boolean seeAll = convertToBoolean(seeAllCheckBox.getValue());
+				aut.setSeeAll(seeAll);
+				aut.setEditDialogueDates(seeAll);
+				updateButtonPanel();
+			}
+		});
+
+		editSectionCheckBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+			@Override
+			public void onValueChange(ValueChangeEvent<Boolean> event) {
+				aut.setEditSections(convertToBoolean(editSectionCheckBox.getValue()));
+				updateButtonPanel();
+			}
+		});
+
 		users.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
@@ -67,10 +99,14 @@ public class AuthorizationAdmin extends AbstractAdminTab {
 				updateButtonPanel();
 			}
 		});
-		
+
 		updateButtonPanel();
+
 	}
 
+	private boolean convertToBoolean(Boolean value) {
+		return value == null ? false : value;
+	}
 
 	private void layout() {
 		Panel rights = new VerticalPanel();
@@ -98,70 +134,50 @@ public class AuthorizationAdmin extends AbstractAdminTab {
 	private void rebuildUsersList() {
 		this.users.clear();
 		this.authorizations.clear();
-		this.authorizationService
-				.queryAuthorizations(new ErrorReportingCallback<Collection<Authorization>>() {
-					@Override
-					public void onSuccess(Collection<Authorization> result) {
-						for (Authorization authorization : result) {
-							users.addItem(authorization.getEmail(),
-									authorization.getUserId());
-							authorizations.put(authorization.getUserId(),
-									authorization);
-						}
-					}
-				});
+		this.authorizationService.queryAuthorizations(new ErrorReportingCallback<Collection<GwtAuthorization>>() {
+			@Override
+			public void onSuccess(Collection<GwtAuthorization> result) {
+				for (GwtAuthorization authorization : result) {
+					users.addItem(authorization.getEmail(), authorization.getUserId());
+					authorizations.put(authorization.getUserId(), authorization);
+				}
+			}
+		});
 	}
 
 	@Override
 	void reset() {
-		this.userBox.setText("");
-		this.adminCheckBox.setValue(Boolean.valueOf(false));
-		this.seeAllCheckBox.setValue(Boolean.valueOf(false));
-		this.editSectionCheckBox.setValue(Boolean.valueOf(false));
-
+		aut = new GwtAuthorization();
+		updateForm(aut);
+		updateButtonPanel();
+		if (users.getSelectedIndex() >= 0) {
+			users.setItemSelected(users.getSelectedIndex(), false);
+		}
 		getButtonPanel().setSaveButtonLabel(labels().create());
 	}
 
 	@Override
 	void save() {
-		Authorization aut = new Authorization();
 
-		String email = userBox.getValue();
-		if (at.brandl.lws.notice.shared.Utils.isEmpty(email)) {
-			return;
-		}
-		aut.setEmail(email);
-		aut.setAdmin(adminCheckBox.getValue().booleanValue());
-		boolean isTeacher = seeAllCheckBox.getValue().booleanValue();
-		aut.setSeeAll(isTeacher);
-		aut.setEditSections(editSectionCheckBox.getValue());
-		aut.setEditDialogueDates(isTeacher);
-
-		authorizationService.storeAuthorization(aut,
-				new ErrorReportingCallback<Void>() {
-					@Override
-					public void onSuccess(Void result) {
-						rebuildUsersList();
-						reset();
-					}
-				});
+		authorizationService.storeAuthorization(aut, new ErrorReportingCallback<Void>() {
+			@Override
+			public void onSuccess(Void result) {
+				reset();
+				rebuildUsersList();
+			}
+		});
 	}
 
 	@Override
 	void delete() {
-		String email = userBox.getValue();
-		if (at.brandl.lws.notice.shared.Utils.isEmpty(email)) {
-			return;
-		}
 
-		authorizationService.deleteAuthorization(email,
-				new ErrorReportingCallback<Void>() {
-					@Override
-					public void onSuccess(Void result) {
-						rebuildUsersList();
-						reset();
-					}
-				});
+		authorizationService.deleteAuthorization(aut.getEmail(), new ErrorReportingCallback<Void>() {
+			@Override
+			public void onSuccess(Void result) {
+				reset();
+				rebuildUsersList();
+			}
+		});
 	}
 
 	private void select() {
@@ -169,33 +185,34 @@ public class AuthorizationAdmin extends AbstractAdminTab {
 		if (selectedIndex < 0) {
 			return;
 		}
-		Authorization authorization = (Authorization) authorizations.get(users
-				.getValue(selectedIndex));
-		userBox.setText(users.getItemText(selectedIndex));
-		adminCheckBox.setValue(Boolean.valueOf(authorization.isAdmin()));
-		seeAllCheckBox.setValue(Boolean.valueOf(authorization.isSeeAll()));
-		editSectionCheckBox.setValue(Boolean.valueOf(authorization
-				.isEditSections()));
+		aut = (GwtAuthorization) authorizations.get(users.getValue(selectedIndex));
+		updateForm(aut);
 
 		getButtonPanel().setSaveButtonLabel(labels().change());
 	}
 
+	private void updateForm(GwtAuthorization authorization) {
+		userBox.setText(authorization.getEmail());
+		adminCheckBox.setValue(Boolean.valueOf(authorization.isAdmin()));
+		seeAllCheckBox.setValue(Boolean.valueOf(authorization.isSeeAll()));
+		editSectionCheckBox.setValue(Boolean.valueOf(authorization.isEditSections()));
+	}
+
 	@Override
 	boolean enableDelete() {
-		return users.getSelectedIndex() != -1;
+		return at.brandl.lws.notice.shared.Utils.isNotEmpty(aut.getEmail()) && users.getSelectedIndex() != -1;
 	}
 
 	@Override
 	boolean enableCancel() {
-		return at.brandl.lws.notice.shared.Utils.isNotEmpty(userBox.getValue()) || adminCheckBox.getValue()
-				|| seeAllCheckBox.getValue() || editSectionCheckBox.getValue();
+		return at.brandl.lws.notice.shared.Utils.isNotEmpty(aut.getEmail()) || aut.isAdmin() || aut.isSeeAll()
+				|| aut.isEditSections();
 	}
 
 	@Override
 	boolean enableSave() {
-		return at.brandl.lws.notice.shared.Utils.isNotEmpty(userBox.getValue());
+		return at.brandl.lws.notice.shared.Utils.isNotEmpty(aut.getEmail());
 	}
-
 
 	@Override
 	protected String getPageName() {

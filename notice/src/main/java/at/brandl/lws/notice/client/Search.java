@@ -37,7 +37,7 @@ import at.brandl.lws.notice.client.utils.Show;
 import at.brandl.lws.notice.client.utils.Utils;
 import at.brandl.lws.notice.client.utils.YearSelection;
 import at.brandl.lws.notice.client.utils.YearSelection.YearSelectionResult;
-import at.brandl.lws.notice.model.Authorization;
+import at.brandl.lws.notice.model.GwtAuthorization;
 import at.brandl.lws.notice.model.BeobachtungsFilter;
 import at.brandl.lws.notice.model.GwtBeobachtung;
 
@@ -58,7 +58,7 @@ public class Search extends VerticalPanel {
 	private final MultiSelectionModel<GwtBeobachtung> selectionModel;
 	private final Show beobachtungen;
 
-	public Search(Authorization authorization, Navigation navigation) {
+	public Search(GwtAuthorization authorization, Navigation navigation) {
 		PopUp dialogBox = new PopUp();
 		final RichTextArea textArea = new RichTextArea();
 		this.filter = new BeobachtungsFilter();
@@ -120,7 +120,7 @@ public class Search extends VerticalPanel {
 		});
 
 		this.selectionModel = createSelectionModel(textArea);
-		this.table = new BeobachtungsTable(authorization, this.selectionModel,
+		this.table = new BeobachtungsTable(this.selectionModel,
 				this.filter, dialogBox, navigation.getEditContent());
 		this.table
 				.addCellPreviewHandler(new CellPreviewEvent.Handler<GwtBeobachtung>() {

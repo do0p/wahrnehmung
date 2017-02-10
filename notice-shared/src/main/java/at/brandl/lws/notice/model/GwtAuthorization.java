@@ -2,7 +2,7 @@ package at.brandl.lws.notice.model;
 
 import java.io.Serializable;
 
-public class Authorization implements Serializable {
+public class GwtAuthorization implements Serializable, Comparable<GwtAuthorization> {
 
 	private static final long serialVersionUID = -5057466504583370610L;
 
@@ -86,10 +86,10 @@ public class Authorization implements Serializable {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (!(obj instanceof Authorization)) {
+		if (!(obj instanceof GwtAuthorization)) {
 			return false;
 		}
-		final Authorization other = (Authorization) obj;
+		final GwtAuthorization other = (GwtAuthorization) obj;
 		return userId.equals(other.userId);
 	}
 
@@ -128,6 +128,18 @@ public class Authorization implements Serializable {
 
 	public void setSuperUser(boolean superUser) {
 		this.superUser = superUser;
+	}
+
+	@Override
+	public int compareTo(GwtAuthorization o) {
+		
+		if(email == null) {
+			return o.email == null ? 0 : 1;
+		}
+		if(o.email == null) {
+			return -1;
+		}
+		return email.compareTo(o.email);
 	}
 
 }

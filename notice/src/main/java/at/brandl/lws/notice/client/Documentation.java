@@ -23,7 +23,6 @@ import at.brandl.lws.notice.client.utils.NameSelection;
 import at.brandl.lws.notice.client.utils.Navigation;
 import at.brandl.lws.notice.client.utils.PopUp;
 import at.brandl.lws.notice.client.utils.Utils;
-import at.brandl.lws.notice.model.Authorization;
 import at.brandl.lws.notice.model.DocumentationAlreadyExistsException;
 import at.brandl.lws.notice.model.GwtDocumentation;
 import at.brandl.lws.notice.model.UserGrantRequiredException;
@@ -44,7 +43,7 @@ public class Documentation extends VerticalPanel {
 	private Grid documentationGrid;
 	private DecisionBox decisionBox;
 
-	public Documentation(Authorization authorization, Navigation navigation) {
+	public Documentation(Navigation navigation) {
 		dialogBox = new PopUp();
 		nameSelection = new NameSelection(dialogBox);
 		documentationGrid = new Grid(0, 3);

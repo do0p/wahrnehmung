@@ -24,7 +24,6 @@ import com.google.gwt.user.datepicker.client.DateBox;
 import at.brandl.lws.notice.client.utils.NameSelection;
 import at.brandl.lws.notice.client.utils.PopUp;
 import at.brandl.lws.notice.client.utils.Utils;
-import at.brandl.lws.notice.model.Authorization;
 import at.brandl.lws.notice.model.GwtInteraction;
 import at.brandl.lws.notice.shared.service.InteractionService;
 import at.brandl.lws.notice.shared.service.InteractionServiceAsync;
@@ -40,7 +39,7 @@ public class Interactions extends VerticalPanel {
 	private DateBox fromDate;
 	private DateBox toDate;
 
-	public Interactions(Authorization authorization) {
+	public Interactions() {
 		PopUp dialogBox = new PopUp();
 		interactions = new Grid();
 		nameSelection = new NameSelection(dialogBox);

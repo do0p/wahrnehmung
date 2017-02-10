@@ -23,7 +23,6 @@ import com.google.gwt.view.client.Range;
 
 import at.brandl.lws.notice.client.EditContent;
 import at.brandl.lws.notice.client.Labels;
-import at.brandl.lws.notice.model.Authorization;
 import at.brandl.lws.notice.model.BeobachtungsFilter;
 import at.brandl.lws.notice.model.BeobachtungsResult;
 import at.brandl.lws.notice.model.GwtBeobachtung;
@@ -43,8 +42,7 @@ public class BeobachtungsTable extends CellTable<GwtBeobachtung> {
 	private boolean allSelected;
 	private final PopUp dialogBox;
 
-	public BeobachtungsTable(final Authorization authorization,
-			final MultiSelectionModel<GwtBeobachtung> selectionModel,
+	public BeobachtungsTable(final MultiSelectionModel<GwtBeobachtung> selectionModel,
 			final BeobachtungsFilter filter, final PopUp dialogBox,
 			final EditContent editContent) {
 		this.filter = filter;

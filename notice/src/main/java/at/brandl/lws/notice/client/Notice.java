@@ -11,7 +11,7 @@ import com.google.gwt.user.client.ui.Widget;
 
 import at.brandl.lws.notice.client.utils.Navigation;
 import at.brandl.lws.notice.client.utils.Utils;
-import at.brandl.lws.notice.model.Authorization;
+import at.brandl.lws.notice.model.GwtAuthorization;
 import at.brandl.lws.notice.shared.service.StateParser;
 
 public class Notice extends SecuredContent implements
@@ -20,7 +20,7 @@ public class Notice extends SecuredContent implements
 	private final Labels labels = (Labels) GWT.create(Labels.class);
 	private Navigation navigation;
 
-	protected void onLogin(Authorization authorization) {
+	protected void onLogin(GwtAuthorization authorization) {
 		this.navigation = new Navigation(authorization);
 		RootPanel.get(Utils.NAVIGATION_ELEMENT).add(this.navigation);
 		History.addValueChangeHandler(this);
@@ -43,7 +43,7 @@ public class Notice extends SecuredContent implements
 				new Anchor(labels.logout(), authorization.getLogoutUrl()));
 	}
 
-	protected void onLogOut(Authorization authorization) {
+	protected void onLogOut(GwtAuthorization authorization) {
 		RootPanel rootPanel = RootPanel.get(Utils.MAIN_ELEMENT);
 		rootPanel.clear();
 		rootPanel.add(new LoginFailedContent(authorization.getLoginUrl()));

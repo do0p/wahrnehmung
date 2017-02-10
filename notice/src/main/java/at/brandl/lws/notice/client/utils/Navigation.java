@@ -12,7 +12,7 @@ import at.brandl.lws.notice.client.Labels;
 import at.brandl.lws.notice.client.Questionnaire;
 import at.brandl.lws.notice.client.Search;
 import at.brandl.lws.notice.client.admin.AdminContent;
-import at.brandl.lws.notice.model.Authorization;
+import at.brandl.lws.notice.model.GwtAuthorization;
 
 public class Navigation extends HorizontalPanel {
 
@@ -25,7 +25,7 @@ public class Navigation extends HorizontalPanel {
 	private static final String INTERACTIONS_ENTRY = "interactions";
 	public static final String DOCUMENTATION_ENTRY = "documentation";
 
-	private final Authorization authorization;
+	private final GwtAuthorization authorization;
 
 	private AdminContent adminContent;
 	private Search search;
@@ -35,7 +35,7 @@ public class Navigation extends HorizontalPanel {
 
 	private Interactions interactions;
 
-	public Navigation(Authorization authorization) {
+	public Navigation(GwtAuthorization authorization) {
 		this.authorization = authorization;
 		setSpacing(10);
 		add(new Hyperlink(labels.notice(), NEW_ENTRY));
@@ -79,14 +79,14 @@ public class Navigation extends HorizontalPanel {
 
 	private Widget getInteractions() {
 		if (interactions == null) {
-			interactions = new Interactions(authorization);
+			interactions = new Interactions();
 		}
 		return interactions;
 	}
 
 	private Documentation getDocumentation() {
 		if (documentation == null) {
-			documentation = new Documentation(authorization, this);
+			documentation = new Documentation(this);
 		}
 		return documentation;
 	}
@@ -107,14 +107,14 @@ public class Navigation extends HorizontalPanel {
 
 	public EditContent getEditContent() {
 		if (editContent == null) {
-			editContent = new EditContent(this.authorization);
+			editContent = new EditContent();
 		}
 		return editContent;
 	}
 
 	public Questionnaire getFormContent() {
 		if (questionnaire == null) {
-			questionnaire = new Questionnaire(this.authorization);
+			questionnaire = new Questionnaire();
 		}
 		return questionnaire;
 	}

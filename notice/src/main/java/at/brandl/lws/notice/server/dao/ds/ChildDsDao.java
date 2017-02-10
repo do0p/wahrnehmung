@@ -17,7 +17,9 @@ import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.CompositeFilterOperator;
 import com.google.appengine.api.datastore.Query.Filter;
 import com.google.appengine.api.datastore.Transaction;
+import com.google.appengine.api.memcache.MemcacheService;
 import com.google.appengine.api.memcache.MemcacheService.IdentifiableValue;
+import com.google.common.base.Predicate;
 
 import at.brandl.lws.notice.dao.AbstractDsDao;
 import at.brandl.lws.notice.dao.DsUtil;
@@ -29,28 +31,22 @@ public class ChildDsDao extends AbstractDsDao {
 
 	private static final Object LOCK = new Object();
 
-	@SuppressWarnings("unchecked")
 	public List<GwtChild> getAllChildren() {
 
-		List<GwtChild> allChildren = (List<GwtChild>) getCache(Cache.NAME).get(Cache.ALL_CHILDREN);
+		List<GwtChild> allChildren = getChildrenListFromCache();
 		if (allChildren == null) {
 			synchronized (LOCK) {
 
-				allChildren = (List<GwtChild>) getCache(Cache.NAME).get(Cache.ALL_CHILDREN);
+				allChildren = getChildrenListFromCache();
 
 				if (allChildren == null) {
 					allChildren = getAllChildrenFromDatastore();
 					Collections.sort(allChildren);
-					getCache(Cache.NAME).put(Cache.ALL_CHILDREN, allChildren);
+					addChildrenListToCache(allChildren);
 				}
 			}
 		}
 		return allChildren;
-	}
-
-	private List<GwtChild> getAllChildrenFromDatastore() {
-		final Query query = new Query(Child.KIND);
-		return mapToGwtChildren(execute(query, withDefaults()));
 	}
 
 	public void storeChild(GwtChild gwtChild) throws IllegalArgumentException {
@@ -59,7 +55,7 @@ public class ChildDsDao extends AbstractDsDao {
 
 		final Transaction transaction = datastoreService.beginTransaction();
 		try {
-			String keyForUpdate = gwtChild.getKey();
+			final String keyForUpdate = gwtChild.getKey();
 			final Entity child = toEntity(gwtChild);
 
 			if (!child.getKey().isComplete()) {
@@ -73,37 +69,12 @@ public class ChildDsDao extends AbstractDsDao {
 			transaction.commit();
 			gwtChild.setKey(DsUtil.toString(child.getKey()));
 			insertIntoCache(child, Cache.NAME);
-			boolean success = false;
-			while (!success) {
-				IdentifiableValue value = getCache(Cache.NAME).getIdentifiable(Cache.ALL_CHILDREN);
-				if (value == null) {
-					break;
+			DsUtil.updateCachedResult(Cache.ALL_CHILDREN, gwtChild, new Predicate<GwtChild>() {
+				@Override
+				public boolean apply(GwtChild gwtChild) {
+					return keyForUpdate != null && keyForUpdate.equals(gwtChild.getKey());
 				}
-
-				@SuppressWarnings("unchecked")
-				List<GwtChild> allChildren = (List<GwtChild>) value.getValue();
-				if (keyForUpdate != null) {
-					int index = -1;
-					for (int i = 0; i < allChildren.size(); i++) {
-						GwtChild cachedChild = allChildren.get(i);
-						if (keyForUpdate.equals(cachedChild.getKey())) {
-							index = i;
-							break;
-						}
-					}
-					if (index >= 0) {
-						allChildren.remove(index);
-						allChildren.add(index, gwtChild);
-					} else {
-						keyForUpdate = null;
-					}
-				}
-				if (keyForUpdate == null) {
-					allChildren.add(gwtChild);
-				}
-				Collections.sort(allChildren);
-				success = getCache(Cache.NAME).putIfUntouched(Cache.ALL_CHILDREN, value, allChildren);
-			}
+			}, getCache());
 
 		} finally {
 			if (transaction.isActive()) {
@@ -116,11 +87,11 @@ public class ChildDsDao extends AbstractDsDao {
 		deleteEntity(DsUtil.toKey(childKey), Cache.NAME);
 		boolean success = false;
 		while (!success) {
-			IdentifiableValue value = getCache(Cache.NAME).getIdentifiable(Cache.ALL_CHILDREN);
+			IdentifiableValue value = getCache().getIdentifiable(Cache.ALL_CHILDREN);
 			if (value == null) {
 				break;
 			}
-		
+
 			@SuppressWarnings("unchecked")
 			List<GwtChild> allChildren = (List<GwtChild>) value.getValue();
 			Iterator<GwtChild> iterator = allChildren.iterator();
@@ -131,7 +102,7 @@ public class ChildDsDao extends AbstractDsDao {
 					break;
 				}
 			}
-			success = getCache(Cache.NAME).putIfUntouched(Cache.ALL_CHILDREN, value, allChildren);
+			success = getCache().putIfUntouched(Cache.ALL_CHILDREN, value, allChildren);
 		}
 	}
 
@@ -240,6 +211,24 @@ public class ChildDsDao extends AbstractDsDao {
 			}
 		}
 		return result;
+	}
+
+	private void addChildrenListToCache(List<GwtChild> allChildren) {
+		getCache().put(Cache.ALL_CHILDREN, allChildren);
+	}
+
+	@SuppressWarnings("unchecked")
+	private List<GwtChild> getChildrenListFromCache() {
+		return (List<GwtChild>) getCache().get(Cache.ALL_CHILDREN);
+	}
+
+	private MemcacheService getCache() {
+		return getCache(Cache.NAME);
+	}
+
+	private List<GwtChild> getAllChildrenFromDatastore() {
+		final Query query = new Query(Child.KIND);
+		return mapToGwtChildren(execute(query, withDefaults()));
 	}
 
 }

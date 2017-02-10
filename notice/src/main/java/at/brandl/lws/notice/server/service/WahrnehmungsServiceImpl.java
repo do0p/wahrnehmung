@@ -21,7 +21,7 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import com.google.gwt.view.client.Range;
 
 import at.brandl.lws.notice.dao.DaoRegistry;
-import at.brandl.lws.notice.model.Authorization;
+import at.brandl.lws.notice.model.GwtAuthorization;
 import at.brandl.lws.notice.model.BeobachtungsFilter;
 import at.brandl.lws.notice.model.BeobachtungsResult;
 import at.brandl.lws.notice.model.GwtBeobachtung;
@@ -148,7 +148,7 @@ public class WahrnehmungsServiceImpl extends RemoteServiceServlet implements Wah
 
 	private User getUserForQuery() {
 		final User currentUser = userService.getCurrentUser();
-		final Authorization authorization = authorizationService.getAuthorization(currentUser);
+		final GwtAuthorization authorization = authorizationService.getAuthorization(currentUser);
 		final User user = authorization.isSeeAll() ? null : currentUser;
 		return user;
 	}

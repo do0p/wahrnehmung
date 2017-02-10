@@ -32,7 +32,6 @@ import at.brandl.lws.notice.client.utils.Print;
 import at.brandl.lws.notice.client.utils.QuestionnairePanel;
 import at.brandl.lws.notice.client.utils.ReadyListener;
 import at.brandl.lws.notice.client.utils.Utils;
-import at.brandl.lws.notice.model.Authorization;
 import at.brandl.lws.notice.model.GwtAnswer;
 import at.brandl.lws.notice.model.GwtQuestionnaire;
 import at.brandl.lws.notice.model.GwtQuestionnaireAnswers;
@@ -66,7 +65,7 @@ public class Questionnaire extends VerticalPanel implements ChangeListener,
 	private boolean changes;
 	private boolean formSelectionReady;
 
-	public Questionnaire(Authorization authorization) {
+	public Questionnaire() {
 
 		dialogBox = new PopUp();
 		decisionBox = new DecisionBox();

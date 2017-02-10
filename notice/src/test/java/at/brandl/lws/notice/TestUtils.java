@@ -12,7 +12,7 @@ import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Text;
 import com.google.appengine.api.users.User;
 
-import at.brandl.lws.notice.model.Authorization;
+import at.brandl.lws.notice.model.GwtAuthorization;
 import at.brandl.lws.notice.model.BeobachtungsFilter;
 import at.brandl.lws.notice.model.GwtBeobachtung;
 import at.brandl.lws.notice.model.GwtBeobachtung.DurationEnum;
@@ -151,9 +151,9 @@ public class TestUtils {
 		return KeyFactory.stringToKey(key);
 	}
 
-	public static Authorization createAuthorization(String email,
+	public static GwtAuthorization createAuthorization(String email,
 			boolean admin, Boolean editSections, boolean seeAll) {
-		final Authorization authorization = new Authorization();
+		final GwtAuthorization authorization = new GwtAuthorization();
 		authorization.setEmail(email);
 		authorization.setAdmin(admin);
 		authorization.setEditSections(editSections);
