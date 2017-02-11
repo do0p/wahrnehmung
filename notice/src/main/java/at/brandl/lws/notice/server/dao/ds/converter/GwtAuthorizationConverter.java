@@ -70,7 +70,7 @@ public class GwtAuthorizationConverter {
 	
 		@Override
 		public boolean apply(GwtAuthorization user) {
-			return userId.equals(user.getUserId());
+			return userId != null && user != null && userId.equals(user.getUserId());
 		}
 	}
 	

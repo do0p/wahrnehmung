@@ -3,9 +3,7 @@ package at.brandl.lws.notice.server.dao.ds;
 import static at.brandl.lws.notice.server.dao.ds.converter.GwtChildConverter.getEntityConverter;
 import static at.brandl.lws.notice.shared.util.Constants.Child.KIND;
 
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -21,6 +19,7 @@ import at.brandl.lws.notice.dao.CacheUtil;
 import at.brandl.lws.notice.dao.DsUtil;
 import at.brandl.lws.notice.model.GwtChild;
 import at.brandl.lws.notice.server.dao.ds.converter.GwtChildConverter;
+import at.brandl.lws.notice.server.dao.ds.converter.GwtChildConverter.BirthdaySelector;
 import at.brandl.lws.notice.server.dao.ds.converter.GwtChildConverter.ChildSelector;
 import at.brandl.lws.notice.server.dao.ds.converter.GwtChildConverter.KeySelector;
 import at.brandl.lws.notice.shared.util.Constants.Child;
@@ -44,14 +43,13 @@ public class ChildDsDao extends AbstractDsDao {
 
 	public void storeChild(GwtChild gwtChild) throws IllegalArgumentException {
 
+		assertCacheIsLoaded();
 		DatastoreService datastoreService = getDatastoreService();
 		Transaction transaction = datastoreService.beginTransaction();
 
 		try {
-			assertCacheIsLoaded();
 
 			String keyForUpdate = gwtChild.getKey();
-
 			if (keyForUpdate == null && exists(gwtChild)) {
 				transaction.rollback();
 				throw new IllegalArgumentException(formatChildName(gwtChild) + " existiert bereits!");
@@ -73,13 +71,13 @@ public class ChildDsDao extends AbstractDsDao {
 
 	public void deleteChild(String childKey) {
 
+		assertCacheIsLoaded();
 		DatastoreService datastoreService = getDatastoreService();
 		Transaction transaction = datastoreService.beginTransaction();
 
 		try {
 			datastoreService.delete(DsUtil.toKey(childKey));
 			transaction.commit();
-			assertCacheIsLoaded();
 			CacheUtil.removeFromCachedResult(Cache.ALL_CHILDREN, new KeySelector(childKey), getCache());
 		} finally {
 			if (transaction.isActive()) {
@@ -92,43 +90,26 @@ public class ChildDsDao extends AbstractDsDao {
 		return formatChildName(getCachedChild(childKey));
 	}
 
-	public static String formatChildName(GwtChild child) {
-		return child.getFirstName() + " " + child.getLastName();
+	public List<GwtChild> getAllChildrenOver12() {
+		return DsUtil.filterList(new BirthdaySelector(getDateTwelveYearsAgo(), false), getAllChildren());
 	}
 
-	public Collection<GwtChild> getAllChildrenOver12() {
-		Collection<GwtChild> result = new ArrayList<GwtChild>();
-		Date twelveYearsAgo = getDateTwelveYearsAgo();
-		for (GwtChild child : getAllChildren()) {
-			Date birthDay = child.getBirthDay();
-			if (birthDay != null && !birthDay.after(twelveYearsAgo)) {
-				result.add(child);
-			}
-		}
-		return result;
+	public List<GwtChild> getAllChildrenUnder12() {
+		return DsUtil.filterList(new BirthdaySelector(getDateTwelveYearsAgo(), true), getAllChildren());
 	}
 
-	public Collection<GwtChild> getAllChildrenUnder12() {
-		Collection<GwtChild> result = new ArrayList<GwtChild>();
-		Date twelveYearsAgo = getDateTwelveYearsAgo();
-		for (GwtChild child : getAllChildren()) {
-			Date birthDay = child.getBirthDay();
-			if (birthDay != null && birthDay.after(twelveYearsAgo)) {
-				result.add(child);
-			}
-		}
-		return result;
+	private String formatChildName(GwtChild child) {
+		return String.format("%s %s", child.getFirstName(), child.getLastName());
 	}
-
+	
 	private Date getDateTwelveYearsAgo() {
 		Calendar calendar = Calendar.getInstance();
-		calendar.clear(Calendar.HOUR);
-		calendar.clear(Calendar.MINUTE);
-		calendar.clear(Calendar.SECOND);
-		calendar.clear(Calendar.MILLISECOND);
+		calendar.set(Calendar.HOUR, 23);
+		calendar.set(Calendar.MINUTE, 59);
+		calendar.set(Calendar.SECOND, 59);
+		calendar.set(Calendar.MILLISECOND, 999);
 		calendar.roll(Calendar.YEAR, -12);
-		Date twelveYearsAgo = calendar.getTime();
-		return twelveYearsAgo;
+		return calendar.getTime();
 	}
 
 	private MemcacheService getCache() {

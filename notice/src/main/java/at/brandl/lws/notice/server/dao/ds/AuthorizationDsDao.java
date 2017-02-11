@@ -50,11 +50,11 @@ public class AuthorizationDsDao extends AbstractDsDao {
 
 	public void storeAuthorization(GwtAuthorization authorization) {
 
+		assertCacheIsLoaded();
 		DatastoreService datastoreService = getDatastoreService();
 		Transaction transaction = datastoreService.beginTransaction(TransactionOptions.Builder.withXG(true));
 
 		try {
-			assertCacheIsLoaded();
 
 			String userId = createUserId(authorization.getEmail());
 			if (Utils.isNotEmpty(authorization.getUserId()) && !authorization.getUserId().equals(userId)) {
@@ -82,27 +82,19 @@ public class AuthorizationDsDao extends AbstractDsDao {
 	public void deleteAuthorization(String email) {
 
 		String userId = createUserId(email);
+		assertCacheIsLoaded();
 		DatastoreService datastoreService = getDatastoreService();
 		Transaction transaction = datastoreService.beginTransaction();
 
 		try {
 			datastoreService.delete(KeyFactory.createKey(KIND, userId));
 			transaction.commit();
-			assertCacheIsLoaded();
 			CacheUtil.removeFromCachedResult(Cache.ALL_USERS, new Selector(userId), getCache());
 		} finally {
 			if (transaction.isActive()) {
 				transaction.rollback();
 			}
 		}
-	}
-
-	private void assertCacheIsLoaded() {
-		getCachedUserList();
-	}
-
-	private String createUserId(String email) {
-		return email.toLowerCase();
 	}
 
 	private List<GwtAuthorization> getCachedUserList() {
@@ -117,6 +109,14 @@ public class AuthorizationDsDao extends AbstractDsDao {
 
 	private MemcacheService getCache() {
 		return getCache(Cache.NAME);
+	}
+
+	private void assertCacheIsLoaded() {
+		getCachedUserList();
+	}
+
+	private String createUserId(String email) {
+		return email.toLowerCase();
 	}
 
 }

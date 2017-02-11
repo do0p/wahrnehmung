@@ -183,7 +183,26 @@ public class UserAdminTest {
 
 	@Test
 	public void orderInUserList() {
+		String dora = "dora@gmail.com";
+		page.enterUser(dora + Keys.TAB);
+		page.clickSave();
+		assertUserListContains(dora);
+		
+		String alfred = "alfred@zoo.com";
+		page.enterUser(alfred + Keys.TAB);
+		page.clickSave();
+		assertUserListContains(alfred);
 
+		int posDora = page.getPosInUserList(dora);
+		int posAlfred = page.getPosInUserList(alfred);
+		Assert.assertTrue(posDora > posAlfred);
+		
+		page.selectInUserList(dora);
+		page.clickDelete();
+		
+		page.selectInUserList(alfred);
+		page.clickDelete();
+		
 	}
 
 	private void assertUser(String user, boolean admin, boolean seeAll, boolean sectionAdmin) {

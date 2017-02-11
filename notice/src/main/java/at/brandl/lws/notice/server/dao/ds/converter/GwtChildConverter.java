@@ -10,6 +10,7 @@ import com.google.common.base.Predicate;
 
 import at.brandl.lws.notice.dao.DsUtil;
 import at.brandl.lws.notice.model.GwtChild;
+import at.brandl.lws.notice.model.ObjectUtils;
 import at.brandl.lws.notice.shared.util.Constants.Child;
 
 public class GwtChildConverter {
@@ -70,7 +71,7 @@ public class GwtChildConverter {
 
 		@Override
 		public boolean apply(GwtChild child) {
-			return child.getKey().equals(key);
+			return key != null && child != null && key.equals(child.getKey());
 		}
 	}
 
@@ -83,10 +84,31 @@ public class GwtChildConverter {
 
 		@Override
 		public boolean apply(GwtChild child) {
-			return this.child.getFirstName().equals(child.getFirstName())
-					&& this.child.getLastName().equals(child.getLastName())
-					&& this.child.getBirthDay().equals(child.getBirthDay());
+			return this.child != null && child != null
+					&& ObjectUtils.equals(this.child.getFirstName(), child.getFirstName())
+					&& ObjectUtils.equals(this.child.getLastName(), child.getLastName())
+					&& ObjectUtils.equals(this.child.getBirthDay(), child.getBirthDay());
 		}
+	}
+	
+	public static class BirthdaySelector implements Predicate<GwtChild> {
+
+		private final Date date;
+		private final boolean after;
+		
+		public BirthdaySelector(Date birthDay, boolean after) {
+			date = birthDay;
+			this.after = after;
+		}
+		
+		@Override
+		public boolean apply(GwtChild child) {
+			if(date == null || child == null || child.getBirthDay() == null) {
+				return false;
+			}
+			return after ? child.getBirthDay().after(date) : !child.getBirthDay().after(date);
+		}
+		
 	}
 
 }

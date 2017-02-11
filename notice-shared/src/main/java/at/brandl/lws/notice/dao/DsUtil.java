@@ -1,8 +1,13 @@
 package at.brandl.lws.notice.dao;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
+import com.google.common.base.Predicate;
 
 public class DsUtil {
 
@@ -39,5 +44,15 @@ public class DsUtil {
 
 	private static boolean isInIntRange(Long longValue) {
 		return longValue.longValue() == longValue.intValue();
+	}
+
+	public static <T> List<T> filterList(Predicate<T> selector, Collection<T> objects) {
+		List<T> result = new ArrayList<T>();
+		for (T object : objects) {
+			if (selector.apply(object)) {
+				result.add(object);
+			}
+		}
+		return result;
 	}
 }
