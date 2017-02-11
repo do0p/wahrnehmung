@@ -5,7 +5,7 @@
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/java"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/resources"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/test/resources"/>
-        <dependent-module archiveName="notice-shared-22-3.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/notice-shared/notice-shared">
+        <dependent-module archiveName="notice-shared-22-4.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/notice-shared/notice-shared">
             <dependency-type>uses</dependency-type>
         </dependent-module>
         <property name="context-root" value="notice"/>
