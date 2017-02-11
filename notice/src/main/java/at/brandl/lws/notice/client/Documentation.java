@@ -66,6 +66,7 @@ public class Documentation extends VerticalPanel {
 	 * For example period = 2016 / 2017, the school year is 2016.
 	 * @return the school year
 	 */
+	@SuppressWarnings("deprecation")
 	private int calcSchoolYear() {
 		Date date = new Date();
 		int year = date.getYear() + 1900;

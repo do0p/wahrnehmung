@@ -55,10 +55,11 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.UIObject;
 
+@SuppressWarnings("deprecation")
 public class Print {
 
     /**
-     * If true, use a Timer instead of DeferredCommand to print the internal fram
+     * If true, use a Timer instead of DeferredCommand to print the internal frame
      */
     public static boolean USE_TIMER     = true;
 
@@ -76,7 +77,7 @@ public class Print {
         it("", obj);
     }
 
-    public static void it(Element element) {
+	public static void it( Element element) {
         it("", element);
     }
 
@@ -88,11 +89,12 @@ public class Print {
         it(docType, style, obj.getElement());
     }
 
-    public static void it(String style, Element element) {
+    public static void it(String style,  Element element) {
         it("", style, element);
     }
 
-    public static void it(String docType, String style, Element element) {
+    
+	public static void it(String docType, String style, Element element) {
         updateFieldsDOM(element);
         it(docType, style, DOM.toString(element));
     }
@@ -110,7 +112,8 @@ public class Print {
            "</html>");
     }
 
-    public static void it(String html) {
+    
+	public static void it(String html) {
         try {
             buildFrame(html);
 
@@ -155,7 +158,7 @@ public class Print {
     }-*/;
 
     // Great contribution from mgrushinskiy to print form element
-    public static void updateFieldsDOM(Element dom) {
+    public static void updateFieldsDOM( Element dom) {
         NodeList<com.google.gwt.dom.client.Element> textareas   = dom.getElementsByTagName("textarea");
         NodeList<com.google.gwt.dom.client.Element> inputs      = dom.getElementsByTagName("input");
         NodeList<com.google.gwt.dom.client.Element> options     = dom.getElementsByTagName("option");

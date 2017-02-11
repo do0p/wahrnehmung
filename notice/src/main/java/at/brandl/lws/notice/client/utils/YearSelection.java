@@ -36,6 +36,7 @@ public class YearSelection extends ListBox {
 
 	private final Labels labels = (Labels) GWT.create(Labels.class);
 
+	@SuppressWarnings("deprecation")
 	public YearSelection(int startYear) {
 		addItem(labels.developementDialogueDate(), DIALOGUE);
 		final Date now = new Date();
@@ -70,6 +71,7 @@ public class YearSelection extends ListBox {
 		return result;
 	}
 
+	@SuppressWarnings("deprecation")
 	private Date createDate(int year) {
 		final Date date = new Date();
 		date.setYear(year - 1900);

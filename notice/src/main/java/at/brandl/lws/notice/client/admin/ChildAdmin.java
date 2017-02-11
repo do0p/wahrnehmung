@@ -58,6 +58,7 @@ public class ChildAdmin extends AbstractAdminTab {
 		beginYearBox.ensureDebugId("beginYear");
 		beginGradeBox = new ListBox();
 		beginGradeBox.ensureDebugId("beginGrade");
+		@SuppressWarnings("deprecation")
 		int year = new Date().getYear() + 1900;
 		for (int i = 0; i < MAX_YEARS_IN_SCHOOL; i++) {
 
