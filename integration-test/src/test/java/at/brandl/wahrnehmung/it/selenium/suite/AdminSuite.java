@@ -6,7 +6,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
-import at.brandl.wahrnehmung.it.selenium.util.Login;
+import at.brandl.wahrnehmung.it.selenium.util.Constants;
 import at.brandl.wahrnehmung.it.selenium.util.TestContext;
 
 @RunWith(Suite.class)
@@ -16,7 +16,7 @@ public class AdminSuite {
 	
 	@BeforeClass
 	public static void setUpClass() {
-		TestContext.getInstance().login(true);
+		TestContext.getInstance().login(Constants.ADMIN_USER);
 	}
 
 	@AfterClass

@@ -14,7 +14,7 @@ public class TestContext {
 		}
 		return testContext;
 	}
-	
+
 	private final WebDriverProvider driverProvider = new WebDriverProvider();
 	private final Navigation navigation = new Navigation();
 
@@ -38,12 +38,14 @@ public class TestContext {
 		navigation.goTo(page);
 	}
 
-
-
-	public void login(boolean admin) {
-		navigation.login(admin);
+	public void login() {
+		navigation.login();
 	}
 
+	public void login(User user) {
+		navigation.login(user);
+	}
+	
 	public void logout() {
 		navigation.logout();
 	}

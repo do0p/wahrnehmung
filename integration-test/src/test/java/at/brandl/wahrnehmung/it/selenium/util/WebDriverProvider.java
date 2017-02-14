@@ -19,8 +19,7 @@ public class WebDriverProvider {
 	public WebDriver get() {
 		if (driver == null) {
 			driver = createDriver();
-	//		driver.get("https://wahrnehmung-test.appspot.com");
-			driver.get("http://localhost:8080");
+			driver.get(Constants.BASE_URL);
 		}
 		return driver;
 	}

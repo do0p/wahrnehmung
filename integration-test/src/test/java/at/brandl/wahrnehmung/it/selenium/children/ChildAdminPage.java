@@ -5,6 +5,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
 
 import at.brandl.wahrnehmung.it.selenium.util.Configurations;
+import at.brandl.wahrnehmung.it.selenium.util.Constants;
 import at.brandl.wahrnehmung.it.selenium.util.Navigation;
 import at.brandl.wahrnehmung.it.selenium.util.Page;
 import at.brandl.wahrnehmung.it.selenium.util.TestContext;
@@ -148,7 +149,7 @@ public class ChildAdminPage implements Page {
 	@Override
 	public void goTo() {
 		Navigation navigation = TestContext.getInstance().getNavigation();
-		navigation.login(true);
+		navigation.login(Constants.ADMIN_USER);
 		navigation.goTo("Konfiguration");
 		Configurations.navigateTo(this);
 	}

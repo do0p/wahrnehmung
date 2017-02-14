@@ -46,7 +46,8 @@ public class Login {
 	}
 
 	static void logout() {
-		TestContext.getInstance().getDriver().findElement(By.linkText("abmelden"));
+		TestContext.getInstance().getDriver().findElement(By.linkText("abmelden")).click();
+		TestContext.getInstance().getDriver().get(Constants.BASE_URL);
 	}
 
 }
