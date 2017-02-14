@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
 import at.brandl.wahrnehmung.it.selenium.user.UserAdminPage;
@@ -75,15 +76,15 @@ public class Navigation {
 		WebElement element = TestContext.getInstance().getDriver().findElement(By.linkText(linkText));
 		element.click();
 	}
-	
+
 
 	private void createUser(User user) {
 		login();
-		goTo("Konfiguration");
+		goTo(Constants.CONFIG_LINK);
 		UserAdminPage page = new UserAdminPage();
 		Configurations.navigateTo(page);
 		if(!page.userListContains(user.getEmail())) {
-			page.enterUser(user.getEmail());
+			page.enterUser(user.getEmail() + Keys.TAB);
 			page.checkAdmin(user.isAdmin());
 			page.checkSeeAll(user.isTeacher());
 			page.checkEditSection(user.isSectionAdmin());

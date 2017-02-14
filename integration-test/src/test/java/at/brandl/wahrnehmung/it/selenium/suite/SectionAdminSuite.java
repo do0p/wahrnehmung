@@ -6,18 +6,18 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
-import at.brandl.wahrnehmung.it.selenium.user.AdminRightsTest;
+import at.brandl.wahrnehmung.it.selenium.user.SectionAdminRightsTest;
 import at.brandl.wahrnehmung.it.selenium.util.Constants;
 import at.brandl.wahrnehmung.it.selenium.util.TestContext;
 
 @RunWith(Suite.class)
-@SuiteClasses({AdminRightsTest.class, AdminConfigurationSuite.class})
-public class AdminSuite {
+@SuiteClasses({SectionAdminRightsTest.class})
+public class SectionAdminSuite {
 	
 	
 	@BeforeClass
 	public static void setUpClass() {
-		TestContext.getInstance().login(Constants.ADMIN_USER);
+		TestContext.getInstance().login(Constants.SECTION_ADMIN);
 	}
 
 	@AfterClass

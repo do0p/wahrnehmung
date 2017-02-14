@@ -40,7 +40,7 @@ public class Login {
 		// wait until javascript is loaded
 		(new WebDriverWait(driver, 10)).until(new ExpectedCondition<Boolean>() {
 			public Boolean apply(WebDriver d) {
-				return !driver.findElements(By.linkText("Konfiguration")).isEmpty();
+				return !driver.findElements(By.linkText(Constants.NOTICE_LINK)).isEmpty();
 			}
 		});
 	}

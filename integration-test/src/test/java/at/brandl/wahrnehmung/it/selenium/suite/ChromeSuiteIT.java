@@ -11,7 +11,7 @@ import at.brandl.wahrnehmung.it.selenium.util.WebDriverProvider;
 import at.brandl.wahrnehmung.it.selenium.util.WebDriverProvider.DriverType;
 
 @RunWith(Suite.class)
-@SuiteClasses({ AdminSuite.class })
+@SuiteClasses({ AdminSuite.class, SectionAdminSuite.class, TeacherSuite.class, UserSuite.class })
 public class ChromeSuiteIT {
 
 	@BeforeClass

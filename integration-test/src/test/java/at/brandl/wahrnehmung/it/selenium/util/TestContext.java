@@ -1,6 +1,7 @@
 package at.brandl.wahrnehmung.it.selenium.util;
 
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 
 public class TestContext {
 
@@ -48,5 +49,14 @@ public class TestContext {
 	
 	public void logout() {
 		navigation.logout();
+	}
+	
+	public WebElement getLink(String linkText) {
+		return Utils.getLink(linkText);
+	}
+
+	public WebElement getLinkByDebugId(String debugId) {
+		return Utils.getLinkByDebugId(debugId);
+		
 	}
 }

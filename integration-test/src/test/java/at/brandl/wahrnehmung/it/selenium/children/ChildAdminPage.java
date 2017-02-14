@@ -13,7 +13,7 @@ import at.brandl.wahrnehmung.it.selenium.util.Utils;
 
 public class ChildAdminPage implements Page {
 
-	private static final String PAGE_NAME = "ChildAdmin";
+	public static final String PAGE_NAME = "ChildAdmin";
 
 	public static class Child {
 
@@ -150,7 +150,7 @@ public class ChildAdminPage implements Page {
 	public void goTo() {
 		Navigation navigation = TestContext.getInstance().getNavigation();
 		navigation.login(Constants.ADMIN_USER);
-		navigation.goTo("Konfiguration");
+		navigation.goTo(Constants.CONFIG_LINK);
 		Configurations.navigateTo(this);
 	}
 

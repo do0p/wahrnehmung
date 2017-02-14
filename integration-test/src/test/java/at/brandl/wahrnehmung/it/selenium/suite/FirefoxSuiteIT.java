@@ -13,7 +13,7 @@ import at.brandl.wahrnehmung.it.selenium.util.WebDriverProvider.DriverType;
 
 @Ignore("does not trigger focus and change events in when browserwindow is not active")
 @RunWith(Suite.class)
-@SuiteClasses({AdminSuite.class})
+@SuiteClasses({AdminSuite.class, SectionAdminSuite.class, TeacherSuite.class, UserSuite.class})
 public class FirefoxSuiteIT {
 
 	@BeforeClass

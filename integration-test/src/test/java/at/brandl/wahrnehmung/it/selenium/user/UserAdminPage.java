@@ -12,13 +12,13 @@ import at.brandl.wahrnehmung.it.selenium.util.Utils;
 
 public class UserAdminPage implements Page {
 
-	private static final String PAGE_NAME = "UserAdmin";
+	public static final String PAGE_NAME = "UserAdmin";
 
 	@Override
 	public void goTo() {
 		Navigation navigation = TestContext.getInstance().getNavigation();
 		navigation.login(Constants.ADMIN_USER);
-		navigation.goTo("Konfiguration");
+		navigation.goTo(Constants.CONFIG_LINK);
 		Configurations.navigateTo(this);
 	}
 

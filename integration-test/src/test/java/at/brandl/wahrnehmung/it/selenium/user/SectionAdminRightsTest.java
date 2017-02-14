@@ -12,14 +12,13 @@ import at.brandl.wahrnehmung.it.selenium.section.SectionAdminPage;
 import at.brandl.wahrnehmung.it.selenium.util.Constants;
 import at.brandl.wahrnehmung.it.selenium.util.TestContext;
 
-public class AdminRightsTest {
-
+public class SectionAdminRightsTest {
 	private static TestContext testContext;
 
 	@Before
 	public void setUp() {
 		testContext = TestContext.getInstance();
-		testContext.login(Constants.ADMIN_USER);
+		testContext.login(Constants.SECTION_ADMIN);
 	}
 	
 	@Test
@@ -32,11 +31,11 @@ public class AdminRightsTest {
 		Assert.assertNotNull(testContext.getLink(Constants.CONFIG_LINK));
 	
 		testContext.getNavigation().goTo(Constants.CONFIG_LINK);
-		Assert.assertNotNull(testContext.getLinkByDebugId(ChildAdminPage.PAGE_NAME));
-		Assert.assertNull(testContext.getLinkByDebugId(SectionAdminPage.PAGE_NAME));
-		Assert.assertNotNull(testContext.getLinkByDebugId(UserAdminPage.PAGE_NAME));
+		Assert.assertNull(testContext.getLinkByDebugId(ChildAdminPage.PAGE_NAME));
+		Assert.assertNotNull(testContext.getLinkByDebugId(SectionAdminPage.PAGE_NAME));
+		Assert.assertNull(testContext.getLinkByDebugId(UserAdminPage.PAGE_NAME));
 		Assert.assertNull(testContext.getLinkByDebugId(DialogueAdminPage.PAGE_NAME));
-		Assert.assertNotNull(testContext.getLinkByDebugId(FormsAdminPage.PAGE_NAME));
+		Assert.assertNull(testContext.getLinkByDebugId(FormsAdminPage.PAGE_NAME));
 	}
 
 	@AfterClass

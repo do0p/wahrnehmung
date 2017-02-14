@@ -13,7 +13,7 @@ import at.brandl.wahrnehmung.it.selenium.util.WebDriverProvider.DriverType;
 
 @Ignore("EdgeDriver is broken, see https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/5238133/")
 @RunWith(Suite.class)
-@SuiteClasses({AdminSuite.class})
+@SuiteClasses({AdminSuite.class, SectionAdminSuite.class, TeacherSuite.class, UserSuite.class})
 public class EdgeSuiteIT {
 
 	@BeforeClass

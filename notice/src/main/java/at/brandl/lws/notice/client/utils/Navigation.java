@@ -39,12 +39,14 @@ public class Navigation extends HorizontalPanel {
 		this.authorization = authorization;
 		setSpacing(10);
 		add(new Hyperlink(labels.notice(), NEW_ENTRY));
-		add(new Hyperlink(labels.questionnaire(), FORM_ENTRY));
+		if (authorization.isSeeAll()) {
+			add(new Hyperlink(labels.questionnaire(), FORM_ENTRY));
+		}
 		add(new Hyperlink(labels.search(), LIST_ENTRY));
-		if (authorization.isAdmin() || authorization.isSeeAll()) {
+		if (authorization.isSeeAll()) {
 			add(new Hyperlink(labels.interactions(), INTERACTIONS_ENTRY));
 		}
-		if (authorization.isAdmin() || authorization.isSeeAll()) {
+		if (authorization.isSeeAll()) {
 			add(new Hyperlink(labels.documentation(), DOCUMENTATION_ENTRY));
 		}
 		if (authorization.isAdmin() || authorization.isEditSections() || authorization.isSeeAll()) {
