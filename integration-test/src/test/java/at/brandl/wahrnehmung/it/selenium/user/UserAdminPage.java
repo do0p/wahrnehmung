@@ -8,6 +8,7 @@ import at.brandl.wahrnehmung.it.selenium.util.Constants;
 import at.brandl.wahrnehmung.it.selenium.util.Navigation;
 import at.brandl.wahrnehmung.it.selenium.util.Page;
 import at.brandl.wahrnehmung.it.selenium.util.TestContext;
+import at.brandl.wahrnehmung.it.selenium.util.User;
 import at.brandl.wahrnehmung.it.selenium.util.Utils;
 
 public class UserAdminPage implements Page {
@@ -16,8 +17,9 @@ public class UserAdminPage implements Page {
 
 	@Override
 	public void goTo() {
-		Navigation navigation = TestContext.getInstance().getNavigation();
-		navigation.login(Constants.ADMIN_USER);
+		TestContext context = TestContext.getInstance();
+		context.login(this);
+		Navigation navigation = context.getNavigation();
 		navigation.goTo(Constants.CONFIG_LINK);
 		Configurations.navigateTo(this);
 	}
@@ -99,5 +101,15 @@ public class UserAdminPage implements Page {
 	@Override
 	public String getPageName() {
 		return PAGE_NAME;
+	}
+
+	@Override
+	public boolean isAllowed(User user) {
+		return user.isAdmin();
+	}
+
+	@Override
+	public User getDefaultUser() {
+		return Constants.ADMIN_USER;
 	}
 }

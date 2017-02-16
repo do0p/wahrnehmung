@@ -39,16 +39,19 @@ public class TestContext {
 		navigation.goTo(page);
 	}
 
-	public void login() {
-		navigation.login();
+	public void login(Page page) {
+		User loggedInUser = getLoggedInUser();
+		if (loggedInUser == null || !page.isAllowed(loggedInUser)) {
+			login(page.getDefaultUser());
+		}
 	}
-
+	
 	public void login(User user) {
 		navigation.login(user);
 	}
-	
-	public void logout() {
-		navigation.logout();
+
+	public User getLoggedInUser() {
+		return navigation.getLoggedInUser();
 	}
 	
 	public WebElement getLink(String linkText) {

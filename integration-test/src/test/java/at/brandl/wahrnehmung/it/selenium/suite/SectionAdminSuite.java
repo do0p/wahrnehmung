@@ -1,6 +1,5 @@
 package at.brandl.wahrnehmung.it.selenium.suite;
 
-import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
@@ -20,9 +19,4 @@ public class SectionAdminSuite {
 		TestContext.getInstance().login(Constants.SECTION_ADMIN);
 	}
 
-	@AfterClass
-	public static void tearDownClass() {
-		TestContext.getInstance().logout();
-	}
-	
 }

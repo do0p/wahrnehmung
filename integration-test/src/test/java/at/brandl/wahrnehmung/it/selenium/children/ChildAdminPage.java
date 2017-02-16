@@ -6,9 +6,9 @@ import org.openqa.selenium.support.ui.Select;
 
 import at.brandl.wahrnehmung.it.selenium.util.Configurations;
 import at.brandl.wahrnehmung.it.selenium.util.Constants;
-import at.brandl.wahrnehmung.it.selenium.util.Navigation;
 import at.brandl.wahrnehmung.it.selenium.util.Page;
 import at.brandl.wahrnehmung.it.selenium.util.TestContext;
+import at.brandl.wahrnehmung.it.selenium.util.User;
 import at.brandl.wahrnehmung.it.selenium.util.Utils;
 
 public class ChildAdminPage implements Page {
@@ -78,15 +78,15 @@ public class ChildAdminPage implements Page {
 	public void clickSave() {
 		getSaveButton().click();
 	}
-	
+
 	public void clickDelete() {
 		getDeleteButton().click();
 	}
-	
+
 	public void clickCancel() {
 		getCancelButton().click();
 	}
-	
+
 	public WebElement getArchivedField() {
 		return Utils.getByDebugId("archived-input");
 	}
@@ -110,8 +110,7 @@ public class ChildAdminPage implements Page {
 	public WebElement getFirstnameField() {
 		return Utils.getByDebugId("firstname");
 	}
-	
-	
+
 	public WebElement getSaveButton() {
 		return Utils.getByDebugId("save" + getPageName());
 	}
@@ -119,11 +118,11 @@ public class ChildAdminPage implements Page {
 	public WebElement getDeleteButton() {
 		return Utils.getByDebugId("delete" + getPageName());
 	}
-	
+
 	public WebElement getCancelButton() {
 		return Utils.getByDebugId("cancel" + getPageName());
 	}
-	
+
 	public Boolean childListContains(Child child) {
 		return getPosInChildlist(child) >= 0;
 	}
@@ -148,9 +147,9 @@ public class ChildAdminPage implements Page {
 
 	@Override
 	public void goTo() {
-		Navigation navigation = TestContext.getInstance().getNavigation();
-		navigation.login(Constants.ADMIN_USER);
-		navigation.goTo(Constants.CONFIG_LINK);
+		TestContext context = TestContext.getInstance();
+		context.login(this);
+		context.getNavigation().goTo(Constants.CONFIG_LINK);
 		Configurations.navigateTo(this);
 	}
 
@@ -158,5 +157,14 @@ public class ChildAdminPage implements Page {
 	public String getPageName() {
 		return PAGE_NAME;
 	}
+
+	@Override
+	public boolean isAllowed(User user) {
+		return user.isAdmin();
+	}
 	
+	public User getDefaultUser() {
+		return Constants.ADMIN_USER;
+	}
+
 }
