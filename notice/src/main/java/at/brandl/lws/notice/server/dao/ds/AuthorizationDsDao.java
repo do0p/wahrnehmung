@@ -102,7 +102,7 @@ public class AuthorizationDsDao extends AbstractDsDao {
 	}
 
 	private GwtAuthorization getCachedUser(String userId) {
-		return CacheUtil.getFromCachedList(new Selector(userId),
+		return CacheUtil.getFirstFromCachedList(new Selector(userId),
 				new EntitySupplier<GwtAuthorization>(STRING_TO_KEY_CONVERTER.apply(userId), ENTITY_CONVERTER),
 				Cache.ALL_USERS, USERLIST_SUPPLIER, Authorization.class, getCache());
 	}

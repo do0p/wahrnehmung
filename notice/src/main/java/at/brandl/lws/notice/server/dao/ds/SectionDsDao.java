@@ -1,64 +1,72 @@
 package at.brandl.lws.notice.server.dao.ds;
 
-import static com.google.appengine.api.datastore.FetchOptions.Builder.withDefaults;
+import static at.brandl.lws.notice.server.dao.ds.converter.GwtSectionConverter.getEntityConverter;
+import static at.brandl.lws.notice.shared.util.Constants.Section.KIND;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.Key;
-import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
-import com.google.appengine.api.datastore.Query.Filter;
 import com.google.appengine.api.datastore.Transaction;
+import com.google.appengine.api.memcache.MemcacheService;
+import com.google.common.base.Function;
 
 import at.brandl.lws.notice.dao.AbstractDsDao;
+import at.brandl.lws.notice.dao.CacheUtil;
 import at.brandl.lws.notice.dao.DaoRegistry;
 import at.brandl.lws.notice.dao.DsUtil;
 import at.brandl.lws.notice.model.GwtSection;
-import at.brandl.lws.notice.model.ObjectUtils;
+import at.brandl.lws.notice.server.dao.ds.converter.GwtSectionConverter;
+import at.brandl.lws.notice.server.dao.ds.converter.GwtSectionConverter.KeySelector;
+import at.brandl.lws.notice.server.dao.ds.converter.GwtSectionConverter.SectionSelector;
+import at.brandl.lws.notice.shared.util.Constants.Section;
+import at.brandl.lws.notice.shared.util.Constants.Section.Cache;
 
 public class SectionDsDao extends AbstractDsDao {
 
 	public static final String SEPARATOR = " / ";
-	public static final String SECTION_KIND = "SectionDs";
-	public static final String SECTION_NAME_FIELD = "sectionName";
-	public static final String SECTION_ARCHIVE_FIELD = "archived";
-	public static final String SECTION_POS_FIELD = "pos";
-	public static final String SECTION_MEMCACHE = "section";
-	
+	private static final Function<Entity, GwtSection> ENTITY_CONVERTER = getEntityConverter();
+	private static final EntityListSupplier<GwtSection> SECTIONLIST_SUPPLIER = new EntityListSupplier<GwtSection>(
+			new Query(KIND), ENTITY_CONVERTER);
+
 	private Map<String, List<String>> sectionChildCache;
 	private volatile boolean sectionChildCacheUpdateNeeded = true;
 
-	public GwtSection getSection(String sectionKey) {
-		final Entity section = getCachedEntity(DsUtil.toKey(sectionKey), SECTION_MEMCACHE);
-		return toGwt(section);
+	public List<GwtSection> getAllSections() {
+
+		return CacheUtil.getCached(Cache.ALL_SECTIONS, SECTIONLIST_SUPPLIER, Section.class, getCache());
 	}
-	
+
+	public GwtSection getSection(String sectionKey) {
+
+		return CacheUtil.getFirstFromCachedList(new KeySelector(sectionKey),
+				new EntitySupplier<GwtSection>(DsUtil.toKey(sectionKey), ENTITY_CONVERTER), Cache.ALL_SECTIONS,
+				SECTIONLIST_SUPPLIER, Section.class, getCache());
+	}
+
 	public String getSectionName(String sectionKey) {
 
-		return getSectionName(DsUtil.toKey(sectionKey));
+		return getSectionName(getSection(sectionKey));
 	}
 
-	private String getSectionName(Key key) {
+	private String getSectionName(GwtSection section) {
 		String name = "";
-		if(key.getParent() != null) {
-			name = getSectionName(key.getParent()) + SEPARATOR; 
+		if (section.getParentKey() != null) {
+			name = getSectionName(getSection(section.getParentKey())) + SEPARATOR;
 		}
-		return name + getCachedEntity(key, SECTION_MEMCACHE).getProperty(SECTION_NAME_FIELD);
+		return name + section.getSectionName();
 	}
 
-	public List<GwtSection> getAllSections() {
-		final Query query = new Query(SECTION_KIND);
-		final Iterable<Entity> result = execute(query, withDefaults());
-		return mapToGwtSections(result);
+	private MemcacheService getCache() {
+		return getCache(Cache.NAME);
 	}
 
 	public Set<String> getAllChildKeys(String key) {
@@ -67,181 +75,133 @@ public class SectionDsDao extends AbstractDsDao {
 		if (children == null) {
 			return new HashSet<String>();
 		}
-		for(String sectionKey : children)
-		System.out.print(KeyFactory.stringToKey(sectionKey) + " ");
-		System.out.println();
 		return new HashSet<String>(children);
 	}
 
 	public void storeSection(GwtSection gwtSection) {
 
-		if(gwtSection.getSectionName().contains(SEPARATOR)) {
+		if (gwtSection.getSectionName().contains(SEPARATOR)) {
 			throw new IllegalArgumentException("section name may not contain '" + SEPARATOR + "'");
 		}
-		
-		final DatastoreService datastoreService = getDatastoreService();
 
-		final Transaction transaction = datastoreService.beginTransaction();
+		assertCacheIsLoaded();
+		DatastoreService datastoreService = getDatastoreService();
+		Transaction transaction = datastoreService.beginTransaction();
+
 		try {
 
-			final Entity section = toEntity(gwtSection);
+			String keyForUpdate = gwtSection.getKey();
+			if (keyForUpdate == null && exists(gwtSection, datastoreService)) {
+				transaction.rollback();
+				throw new IllegalArgumentException(gwtSection.getSectionName() + " existiert bereits!");
 
-			if (!section.getKey().isComplete()) {
-				if (exists(section, datastoreService)) {
-					transaction.rollback();
-					throw new IllegalArgumentException(
-							section.getProperty(SECTION_NAME_FIELD)
-									+ " existiert bereits!");
-				}
-			} 
+			}
 
+			Entity section = GwtSectionConverter.toEntity(gwtSection);
 			datastoreService.put(section);
 			transaction.commit();
 			sectionChildCacheUpdateNeeded = true;
 			gwtSection.setKey(DsUtil.toString(section.getKey()));
-			insertIntoCache(section, SECTION_MEMCACHE);
+			CacheUtil.updateCachedResult(Cache.ALL_SECTIONS, gwtSection, new KeySelector(keyForUpdate), getCache());
 
 		} finally {
 			if (transaction.isActive()) {
 				transaction.rollback();
 			}
 		}
+
 	}
 
 	public void deleteSections(Collection<String> sectionKeys) {
+
 		if (sectionKeys == null || sectionKeys.isEmpty()) {
 			return;
 		}
 
-		final DatastoreService datastoreService = getDatastoreService();
+		assertCacheIsLoaded();
+		DatastoreService datastoreService = getDatastoreService();
+		Transaction transaction = datastoreService.beginTransaction();
 
-		final Transaction transaction = datastoreService.beginTransaction();
 		try {
 			if (getBeobachtungDao().beobachtungenExist(sectionKeys, datastoreService)) {
-				throw new IllegalStateException(
-						"Es noch Wahrnehmungen in den Bereichen.");
+				throw new IllegalStateException("Es noch Wahrnehmungen in den Bereichen.");
 			}
-			for(String key : sectionKeys)
-			{
-				deleteEntity(DsUtil.toKey(key), datastoreService, SECTION_MEMCACHE);
+
+			for (String sectionKey : sectionKeys) {
+				datastoreService.delete(DsUtil.toKey(sectionKey));
 			}
 			transaction.commit();
 			sectionChildCacheUpdateNeeded = true;
+			for (String sectionKey : sectionKeys) {
+				CacheUtil.removeFromCachedResult(Cache.ALL_SECTIONS, new KeySelector(sectionKey), getCache());
+			}
 		} finally {
 			if (transaction.isActive()) {
 				transaction.rollback();
 			}
 		}
+
+	}
+
+	private void assertCacheIsLoaded() {
+		getAllSections();
 	}
 
 	private void updateChildKeys() {
 		if (sectionChildCacheUpdateNeeded) {
 			synchronized (this) {
 				if (sectionChildCacheUpdateNeeded) {
-					final Map<String, List<String>> tmpChildMap = new HashMap<String, List<String>>();
-
-					addChildKeys(null, tmpChildMap);
-					sectionChildCache = tmpChildMap;
+					sectionChildCache = createChildMap();
 					sectionChildCacheUpdateNeeded = false;
 				}
 			}
 		}
 	}
 
-	private List<String> addChildKeys(Key parentKey,
-			Map<String, List<String>> result) {
-		final List<String> childKeys = new ArrayList<String>();
-		result.put(parentKey == null ? null : DsUtil.toString(parentKey), childKeys);
-		for (Entity section : getAllSectionKeysInternal(parentKey)) {
-			childKeys.add(DsUtil.toString(section.getKey()));
-			childKeys.addAll(addChildKeys(section.getKey(), result));
-		}
-		return childKeys;
-	}
 
-	private Iterable<Entity> getAllSectionKeysInternal(Key parentKey) {
-		final Query query = new Query(SECTION_KIND, parentKey).setKeysOnly();
-		return removeKey(execute(query, withDefaults()), parentKey);
-	}
-
-	private Iterable<Entity> removeKey(Iterable<Entity> entities, Key parentKey) {
-		final Collection<Entity> result = new LinkedList<Entity>();
-		for(Entity entity : entities)
-		{
-			if(!entity.getKey().equals(parentKey))
-			{
-				result.add(entity);
-			}
-		}
-		return result;
-	}
-
-	private List<GwtSection> mapToGwtSections(Iterable<Entity> entities) {
-		final List<GwtSection> result = new ArrayList<GwtSection>();
-		for (Entity section : entities) {
-			result.add(toGwt(section));
-		}
-
-		return result;
-	}
-
-	private boolean exists(Entity section, DatastoreService datastoreService) {
-		final Filter filter = createEqualsPredicate(SECTION_NAME_FIELD, section);
-		Key parent = section.getParent();
-		final Query query = new Query(SECTION_KIND).setFilter(filter);
-		if(parent != null) {
-			query.setAncestor(parent);
-		}
-		for(Entity storedSection : execute(query, withDefaults(), datastoreService)){
-			if(ObjectUtils.equals(parent, storedSection.getParent())) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	private Entity toEntity(GwtSection gwtSection) {
-		final String key = gwtSection.getKey();
-		final Entity entity;
-		if (key == null) {
-			final String parentKey = gwtSection.getParentKey();
-			if (parentKey == null) {
-				entity = new Entity(SECTION_KIND);
-			} else {
-				entity = new Entity(SECTION_KIND, DsUtil.toKey(parentKey));
-			}
-		} else {
-			entity = new Entity(DsUtil.toKey(key));
-		}
-		entity.setProperty(SECTION_POS_FIELD, gwtSection.getPos());
-		entity.setProperty(SECTION_NAME_FIELD, gwtSection.getSectionName());
-		entity.setProperty(SECTION_ARCHIVE_FIELD, gwtSection.getArchived());
-		return entity;
-	}
-
-	private GwtSection toGwt(Entity entity) {
-		final GwtSection section = new GwtSection();
-		section.setKey(DsUtil.toString(entity.getKey()));
-		section.setSectionName((String) entity.getProperty(SECTION_NAME_FIELD));
-		Long pos = (Long) entity.getProperty(SECTION_POS_FIELD);
-		if(pos == null) {
-			pos = 0l;
-		}
-		section.setPos(pos);
-		Boolean archived = (Boolean) entity.getProperty(SECTION_ARCHIVE_FIELD);
-		if(archived == null) {
-			archived = Boolean.FALSE;
-		}
-		section.setArchived(archived);
-		final Key parentKey = entity.getParent();
-		if (parentKey != null) {
-			section.setParentKey(DsUtil.toString(parentKey));
-		}
-		return section;
+	private boolean exists(GwtSection gwtSection, DatastoreService datastoreService) {
+		return CacheUtil.getFirstFromCachedList(new SectionSelector(gwtSection), null, Cache.ALL_SECTIONS,
+				SECTIONLIST_SUPPLIER, Section.class, getCache()) != null;
 	}
 
 	private BeobachtungDsDao getBeobachtungDao() {
 		return DaoRegistry.get(BeobachtungDsDao.class);
+	}
+
+	private Map<String, List<String>> createChildMap() {
+		Map<String, List<GwtSection>> relations = new HashMap<>();
+		Map<String, GwtSection> sections = new HashMap<>();
+		List<GwtSection> allSections = getAllSections();
+		for (GwtSection section : allSections) {
+			sections.put(section.getKey(), section);
+			List<GwtSection> siblings = relations.get(section.getParentKey());
+			if (siblings == null) {
+				siblings = new ArrayList<>();
+				relations.put(section.getParentKey(), siblings);
+			}
+			siblings.add(section);
+		}
+
+		Map<String, List<String>> deepRelations = new HashMap<>();
+		for (Entry<String, List<GwtSection>> entry : relations.entrySet()) {
+			List<String> tree = deepRelations.get(entry.getKey());
+			if (tree == null) {
+				tree = new ArrayList<>();
+				deepRelations.put(entry.getKey(), tree);
+			}
+			addAll(relations, tree, entry.getValue());
+		}
+		return deepRelations;
+	}
+
+	private void addAll(Map<String, List<GwtSection>> relations, List<String> tree, List<GwtSection> sections) {
+		if (sections == null || sections.isEmpty()) {
+			return;
+		}
+		for (GwtSection section : sections) {
+			tree.add(section.getKey());
+			addAll(relations, tree, relations.get(section.getKey()));
+		}
 	}
 
 }

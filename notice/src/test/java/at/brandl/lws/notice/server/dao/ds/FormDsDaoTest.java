@@ -26,6 +26,7 @@ import at.brandl.lws.notice.model.GwtQuestionGroup;
 import at.brandl.lws.notice.model.GwtQuestionnaire;
 import at.brandl.lws.notice.model.GwtQuestionnaireAnswers;
 import at.brandl.lws.notice.shared.util.Constants.Questionnaire.Cache;
+import at.brandl.lws.notice.shared.util.Constants.Section;
 
 public class FormDsDaoTest extends AbstractDsDaoTest {
 
@@ -39,8 +40,8 @@ public class FormDsDaoTest extends AbstractDsDaoTest {
 
 	@Before
 	public void setUp() {
-		sectionKey1 = KeyFactory.createKey(SectionDsDao.SECTION_KIND, 1);
-		sectionKey2 = KeyFactory.createKey(SectionDsDao.SECTION_KIND, 2);
+		sectionKey1 = KeyFactory.createKey(Section.KIND, 1);
+		sectionKey2 = KeyFactory.createKey(Section.KIND, 2);
 		form = createQuestionnaire();
 		formDao = DaoRegistry.get(FormDsDao.class);
 	}

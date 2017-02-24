@@ -12,6 +12,7 @@ import org.junit.Test;
 import at.brandl.lws.notice.TestUtils;
 import at.brandl.lws.notice.dao.DaoRegistry;
 import at.brandl.lws.notice.model.GwtSection;
+import at.brandl.lws.notice.shared.util.Constants.Section;
 
 public class SectionDsDaoTest extends AbstractDsDaoTest {
 
@@ -58,7 +59,6 @@ public class SectionDsDaoTest extends AbstractDsDaoTest {
 		sectionDao.storeSection(childSection);
 		final String childKey = childSection.getKey();
 		Assert.assertNotNull(childKey);
-		assertServicesContains(childKey);
 
 		// child section
 		GwtSection grandChildSection = TestUtils.createSection(null,
@@ -66,7 +66,6 @@ public class SectionDsDaoTest extends AbstractDsDaoTest {
 		sectionDao.storeSection(grandChildSection);
 		final String grandChildKey = grandChildSection.getKey();
 		Assert.assertNotNull(grandChildKey);
-		assertServicesContains(grandChildKey);
 
 		// store duplicate
 		GwtSection childSection2 = TestUtils.createSection(null, SECTION_NAME,
@@ -85,7 +84,6 @@ public class SectionDsDaoTest extends AbstractDsDaoTest {
 		sectionDao.storeSection(section);
 		final String key = section.getKey();
 		Assert.assertNotNull(key);
-		assertServicesContains(key);
 
 		// read
 		String sectionName = sectionDao.getSectionName(key);
@@ -111,7 +109,6 @@ public class SectionDsDaoTest extends AbstractDsDaoTest {
 		Assert.assertEquals(updatedSectionName, updatedSection.getSectionName());
 		Assert.assertEquals(Boolean.TRUE, updatedSection.getArchived());
 
-		assertServicesContains(key);
 
 		// store duplicate
 		section.setKey(null);
@@ -121,13 +118,13 @@ public class SectionDsDaoTest extends AbstractDsDaoTest {
 		} catch (IllegalArgumentException e) {
 			// success
 		}
-		assertServicesContains(key);
+		Assert.assertNotNull(sectionDao.getSection(key));
 		section.setKey(key);
 
 		// delete
 		sectionDao.deleteSections(Arrays.asList(key));
 
-		assertServicesContainsNot(key);
+		Assert.assertNull(sectionDao.getSection(key));
 
 	}
 
@@ -136,17 +133,12 @@ public class SectionDsDaoTest extends AbstractDsDaoTest {
 		sectionDao.storeSection(section);
 		final String key = section.getKey();
 
-		assertServicesContains(key);
-
 		removeFromDatastore(key);
 
-		final String sectionName = sectionDao.getSectionName(key);
-		Assert.assertEquals(SECTION_NAME, sectionName);
-		assertCacheContains(key);
+		Assert.assertNotNull(sectionDao.getSection(key));
+		clearCache();
 
-		removeFromCache(key);
-
-		assertServicesContainsNot(key);
+		Assert.assertNull(sectionDao.getSection(key));
 	}
 
 	@Test
@@ -154,18 +146,13 @@ public class SectionDsDaoTest extends AbstractDsDaoTest {
 		sectionDao.storeSection(section);
 		final String key = section.getKey();
 
-		assertServicesContains(key);
+		clearCache();
 
-		removeFromCache(key);
-
-		final String sectionName = sectionDao.getSectionName(key);
-		Assert.assertEquals(SECTION_NAME, sectionName);
-		assertServicesContains(key);
-
-		removeFromCache(key);
+		Assert.assertNotNull(sectionDao.getSection(key));
+		clearCache();
 
 		sectionDao.deleteSections(Arrays.asList(key));
-		assertServicesContainsNot(key);
+		Assert.assertNull(sectionDao.getSection(key));
 	}
 
 	@Test
@@ -206,9 +193,6 @@ public class SectionDsDaoTest extends AbstractDsDaoTest {
 		Assert.assertTrue(childKeys.isEmpty());
 
 		sectionDao.deleteSections(Arrays.asList(child1Key, child2Key));
-		assertServicesContains(key);
-		assertServicesContainsNot(child1Key);
-		assertServicesContainsNot(child2Key);
 
 		childKeys = sectionDao.getAllChildKeys(key);
 		Assert.assertTrue(childKeys.isEmpty());
@@ -216,7 +200,7 @@ public class SectionDsDaoTest extends AbstractDsDaoTest {
 
 	@Override
 	protected String getMemCacheServiceName() {
-		return SectionDsDao.SECTION_MEMCACHE;
+		return Section.Cache.NAME;
 	}
 
 }

@@ -9,6 +9,7 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -39,8 +40,8 @@ public class ViJsServlet extends HttpServlet {
 	private static final long serialVersionUID = -310249949623718456L;
 	private static final int READ_TIMEOUT = 60000;
 	private static final int CONNECTION_TIMEOUT = 5000;
-	// private static final String FROM_PARAM = "from";
-	// private static final String TO_PARAM = "to";
+	private static final String FROM_PARAM = "from";
+	private static final String TO_PARAM = "to";
 
 	private static final class Node {
 		private final int id;
@@ -75,8 +76,8 @@ public class ViJsServlet extends HttpServlet {
 			return;
 		}
 
-		// Date fromDate = getDateValue(req, FROM_PARAM);
-		// Date toDate = getDateValue(req, TO_PARAM);
+		 Date fromDate = getDateValue(req, FROM_PARAM);
+		 Date toDate = getDateValue(req, TO_PARAM);
 
 		Map<String, List<GwtInteraction>> allInteractions = parseResponse(createUrlConnection().getInputStream());
 
@@ -216,15 +217,15 @@ public class ViJsServlet extends HttpServlet {
 		return con;
 	}
 
-	// private Date getDateValue(HttpServletRequest req, String paramName) {
-	// String longValue = req.getParameter(paramName);
-	// if (longValue != null) {
-	// try {
-	// return new Date(Long.parseLong(longValue));
-	// } catch (NumberFormatException e) {
-	// throw new IllegalArgumentException("not a long value");
-	// }
-	// }
-	// return null;
-	// }
+	private Date getDateValue(HttpServletRequest req, String paramName) {
+		String longValue = req.getParameter(paramName);
+		if (longValue != null) {
+			try {
+				return new Date(Long.parseLong(longValue));
+			} catch (NumberFormatException e) {
+				throw new IllegalArgumentException("not a long value");
+			}
+		}
+		return null;
+	}
 }

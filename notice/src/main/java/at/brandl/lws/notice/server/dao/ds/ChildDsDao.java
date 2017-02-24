@@ -117,7 +117,7 @@ public class ChildDsDao extends AbstractDsDao {
 	}
 
 	private GwtChild getCachedChild(String key) {
-		return CacheUtil.getFromCachedList(new KeySelector(key),
+		return CacheUtil.getFirstFromCachedList(new KeySelector(key),
 				new EntitySupplier<GwtChild>(DsUtil.toKey(key), ENTITY_CONVERTER), Cache.ALL_CHILDREN,
 				CHILDRENLIST_SUPPLIER, Child.class, getCache());
 	}
@@ -132,7 +132,7 @@ public class ChildDsDao extends AbstractDsDao {
 
 	private boolean exists(GwtChild child) {
 
-		return CacheUtil.getFromCachedList(new ChildSelector(child), null, Cache.ALL_CHILDREN, CHILDRENLIST_SUPPLIER,
+		return CacheUtil.getFirstFromCachedList(new ChildSelector(child), null, Cache.ALL_CHILDREN, CHILDRENLIST_SUPPLIER,
 				Child.class, getCache()) != null;
 	}
 

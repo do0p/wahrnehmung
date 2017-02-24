@@ -1,7 +1,9 @@
 package at.brandl.wahrnehmung.it.selenium.dialogues;
 
+import at.brandl.wahrnehmung.it.selenium.util.Configurations;
 import at.brandl.wahrnehmung.it.selenium.util.Constants;
 import at.brandl.wahrnehmung.it.selenium.util.Page;
+import at.brandl.wahrnehmung.it.selenium.util.TestContext;
 import at.brandl.wahrnehmung.it.selenium.util.User;
 
 public class DialogueAdminPage implements Page {
@@ -10,8 +12,10 @@ public class DialogueAdminPage implements Page {
 
 	@Override
 	public void goTo() {
-		// TODO Auto-generated method stub
-
+		TestContext context = TestContext.getInstance();
+		context.login(this);
+		context.getNavigation().goTo(Constants.CONFIG_LINK);
+		Configurations.navigateTo(this);
 	}
 
 	@Override

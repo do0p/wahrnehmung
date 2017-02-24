@@ -2,7 +2,6 @@ package at.brandl.lws.notice.shared.util;
 
 public class Constants {
 
-	
 	public static class Authorization {
 
 		public static final String KIND = "AuthorizationDs";
@@ -19,9 +18,8 @@ public class Constants {
 			public static final String ALL_USERS = "allUsers";
 		}
 
-
 	}
-	
+
 	public static class Notice {
 
 		public static final String KIND = "BeobachtungDs";
@@ -50,8 +48,6 @@ public class Constants {
 
 	public static class Child {
 
-	
-
 		public static final String KIND = "ChildDs";
 		public static final String FIRSTNAME = "firstname";
 		public static final String LASTNAME = "lastname";
@@ -66,6 +62,20 @@ public class Constants {
 
 			public static final String NAME = "childDao";
 			public static final String ALL_CHILDREN = "allChildren";
+		}
+	}
+
+	public static class Section {
+
+		public static final String KIND = "SectionDs";
+		public static final String NAME = "sectionName";
+		public static final String ARCHIVED = "archived";
+		public static final String POS = "pos";
+
+		public static class Cache {
+
+			public static final String NAME = "sectionDao";
+			public static final String ALL_SECTIONS = "allSections";
 		}
 	}
 
@@ -157,14 +167,14 @@ public class Constants {
 		public static final String TYPE = "type";
 		public static final String CREATE_DATE = "createDate";
 	}
-	
+
 	public static class Interaction {
-		
+
 		public static final String KIND = "InteractionDs";
 		public static final String DATE = "date";
 		public static final String PARTNER = "partner";
 		public static final String COUNT = "count";
-		
+
 		public static class Cache {
 
 			public static final String NAME = "interactionDao";

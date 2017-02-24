@@ -12,8 +12,8 @@ import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Text;
 import com.google.appengine.api.users.User;
 
-import at.brandl.lws.notice.model.GwtAuthorization;
 import at.brandl.lws.notice.model.BeobachtungsFilter;
+import at.brandl.lws.notice.model.GwtAuthorization;
 import at.brandl.lws.notice.model.GwtBeobachtung;
 import at.brandl.lws.notice.model.GwtBeobachtung.DurationEnum;
 import at.brandl.lws.notice.model.GwtBeobachtung.SocialEnum;
@@ -24,6 +24,7 @@ import at.brandl.lws.notice.server.dao.ds.SectionDsDao;
 import at.brandl.lws.notice.shared.util.Constants;
 import at.brandl.lws.notice.shared.util.Constants.Child;
 import at.brandl.lws.notice.shared.util.Constants.Notice;
+import at.brandl.lws.notice.shared.util.Constants.Section;
 
 public class TestUtils {
 
@@ -115,11 +116,11 @@ public class TestUtils {
 
 		final Entity entity;
 		if (parentKey == null) {
-			entity = new Entity(SectionDsDao.SECTION_KIND);
+			entity = new Entity(Section.KIND);
 		} else {
-			entity = new Entity(SectionDsDao.SECTION_KIND, toKey(parentKey));
+			entity = new Entity(Section.KIND, toKey(parentKey));
 		}
-		entity.setProperty(SectionDsDao.SECTION_NAME_FIELD, sectionName);
+		entity.setProperty(Section.NAME, sectionName);
 		return entity;
 	}
 

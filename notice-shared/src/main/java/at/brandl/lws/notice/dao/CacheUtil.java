@@ -1,5 +1,6 @@
 package at.brandl.lws.notice.dao;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -29,7 +30,6 @@ public class CacheUtil {
 				T cachedObject = iterator.next();
 				if (selector.apply(cachedObject)) {
 					iterator.remove();
-					break;
 				}
 			}
 
@@ -65,7 +65,7 @@ public class CacheUtil {
 		return object;
 	}
 
-	public static <T extends Comparable<T>> T getFromCachedList(Predicate<T> selector, Supplier<T> entitySupplier,
+	public static <T extends Comparable<T>> T getFirstFromCachedList(Predicate<T> selector, Supplier<T> entitySupplier,
 			String listCacheKey, Supplier<List<T>> entityListSupplier, Object lock, MemcacheService cache) {
 
 		List<T> objects = getCached(listCacheKey, entityListSupplier, lock, cache);
@@ -85,4 +85,16 @@ public class CacheUtil {
 		return object;
 	}
 
+	public static <T extends Comparable<T>> List<T> getAllFromCachedList(Predicate<T> selector, 
+			String listCacheKey, Supplier<List<T>> entityListSupplier, Object lock, MemcacheService cache) {
+
+		List<T> result = new ArrayList<T>();
+		List<T> objects = getCached(listCacheKey, entityListSupplier, lock, cache);
+		for (T object : objects) {
+			if (selector.apply(object)) {
+				result.add(object);
+			}
+		}
+		return result;
+	}
 }

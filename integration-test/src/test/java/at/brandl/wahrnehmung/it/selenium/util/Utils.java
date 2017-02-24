@@ -1,5 +1,6 @@
 package at.brandl.wahrnehmung.it.selenium.util;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.openqa.selenium.By;
@@ -70,5 +71,31 @@ public class Utils {
 			return null;
 		}
 		return elements.get(0);
+	}
+
+	public static WebElement getByClass(String className) {
+		return TestContext.getInstance().getDriver().findElement(By.className(className));
+	}
+	
+	public static WebElement getByCss(String css) {
+		return TestContext.getInstance().getDriver().findElement(By.cssSelector(css));
+	}
+	
+	public static List<WebElement> findByCss(String css) {
+		return TestContext.getInstance().getDriver().findElements(By.cssSelector(css));
+	}
+
+	public static WebElement getParent(WebElement element) {
+		return element.findElement(By.xpath(".."));
+	}
+
+	public static List<WebElement> filterByText(List<WebElement> labels, String text) {
+		List<WebElement> filtered = new ArrayList<>();
+		for (WebElement label : labels) {
+			if (label.getText().equals(text)) {
+				filtered.add(label);
+			}
+		}
+		return filtered;
 	}
 }
