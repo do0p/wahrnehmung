@@ -1,15 +1,19 @@
 package at.brandl.lws.notice.model;
 
 import java.io.Serializable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-public class GwtSection implements Serializable, Comparable<GwtSection>{
+import com.google.common.base.Objects;
+
+public class GwtSection implements Serializable, Comparable<GwtSection> {
 
 	private static final long serialVersionUID = 4741899568904397965L;
 	private String sectionName;
 	private String key;
 	private String parentKey;
 	private Boolean archived;
-	private long pos;
+	private long pos = -1;
 
 	public String getKey() {
 		return key;
@@ -53,14 +57,29 @@ public class GwtSection implements Serializable, Comparable<GwtSection>{
 
 	@Override
 	public int compareTo(GwtSection o) {
-		long diff = pos - o.getPos();
-		if(diff < 0) {
-			return -1;
-		} 
-		if (diff > 0)  {
-			return 1;
+		long diff = sortArchived(this) - sortArchived(o);
+		// System.out.println("archvied: " + diff);
+		if (diff != 0) {
+			return (int) diff;
 		}
-		return 0;	
+		if (pos >= 0 && o.getPos() >= 0) {
+			diff = pos - o.getPos();
+			// System.out.println("pos: " + diff);
+			if (diff != 0) {
+				return (int) diff;
+			}
+		}
+		return sectionName.compareTo(o.sectionName);
+	}
+
+	private int sortArchived(GwtSection gwtSection) {
+		return (gwtSection.archived == null || !gwtSection.archived) ? -1 : 1;
+	}
+
+	@Override
+	public String toString() {
+		return Objects.toStringHelper(this).add("sectionName", sectionName).add("key", key).add("parentKey", parentKey)
+				.add("pos", pos).add("archived", archived).toString();
 	}
 
 }

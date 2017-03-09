@@ -42,31 +42,24 @@ public class SectionDsDao extends AbstractDsDao {
 
 	public List<GwtSection> getAllSections() {
 
-		return CacheUtil.getCached(Cache.ALL_SECTIONS, SECTIONLIST_SUPPLIER, Section.class, getCache());
+		List<GwtSection> sections = CacheUtil.getCached(Cache.ALL_SECTIONS, SECTIONLIST_SUPPLIER, Section.class,
+				getCache());
+		// System.out.println("all " + sections);
+		return sections;
 	}
 
 	public GwtSection getSection(String sectionKey) {
 
-		return CacheUtil.getFirstFromCachedList(new KeySelector(sectionKey),
+		GwtSection section = CacheUtil.getFirstFromCachedList(new KeySelector(sectionKey),
 				new EntitySupplier<GwtSection>(DsUtil.toKey(sectionKey), ENTITY_CONVERTER), Cache.ALL_SECTIONS,
 				SECTIONLIST_SUPPLIER, Section.class, getCache());
+		// System.out.println("key " + sectionKey + ": " + section);
+		return section;
 	}
 
 	public String getSectionName(String sectionKey) {
 
 		return getSectionName(getSection(sectionKey));
-	}
-
-	private String getSectionName(GwtSection section) {
-		String name = "";
-		if (section.getParentKey() != null) {
-			name = getSectionName(getSection(section.getParentKey())) + SEPARATOR;
-		}
-		return name + section.getSectionName();
-	}
-
-	private MemcacheService getCache() {
-		return getCache(Cache.NAME);
 	}
 
 	public Set<String> getAllChildKeys(String key) {
@@ -79,6 +72,8 @@ public class SectionDsDao extends AbstractDsDao {
 	}
 
 	public void storeSection(GwtSection gwtSection) {
+
+		// System.out.println("store " + gwtSection);
 
 		if (gwtSection.getSectionName().contains(SEPARATOR)) {
 			throw new IllegalArgumentException("section name may not contain '" + SEPARATOR + "'");
@@ -114,6 +109,8 @@ public class SectionDsDao extends AbstractDsDao {
 
 	public void deleteSections(Collection<String> sectionKeys) {
 
+		// System.out.println("delete " + sectionKeys);
+
 		if (sectionKeys == null || sectionKeys.isEmpty()) {
 			return;
 		}
@@ -143,6 +140,18 @@ public class SectionDsDao extends AbstractDsDao {
 
 	}
 
+	private String getSectionName(GwtSection section) {
+		String name = "";
+		if (section.getParentKey() != null) {
+			name = getSectionName(getSection(section.getParentKey())) + SEPARATOR;
+		}
+		return name + section.getSectionName();
+	}
+
+	private MemcacheService getCache() {
+		return getCache(Cache.NAME);
+	}
+
 	private void assertCacheIsLoaded() {
 		getAllSections();
 	}
@@ -157,7 +166,6 @@ public class SectionDsDao extends AbstractDsDao {
 			}
 		}
 	}
-
 
 	private boolean exists(GwtSection gwtSection, DatastoreService datastoreService) {
 		return CacheUtil.getFirstFromCachedList(new SectionSelector(gwtSection), null, Cache.ALL_SECTIONS,

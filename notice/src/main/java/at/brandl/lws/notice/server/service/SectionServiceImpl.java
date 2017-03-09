@@ -1,11 +1,7 @@
 package at.brandl.lws.notice.server.service;
 
-import java.text.Collator;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Locale;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
@@ -30,10 +26,7 @@ public class SectionServiceImpl extends RemoteServiceServlet implements
 	@Override
 	public List<GwtSection> querySections() {
 
-		List<GwtSection> allSections = sectionDao.getAllSections();
-		sort(allSections);
-		return allSections;
-
+		return sectionDao.getAllSections();
 	}
 
 	@Override
@@ -52,21 +45,5 @@ public class SectionServiceImpl extends RemoteServiceServlet implements
 				.getAllChildKeys(section.getKey());
 		allSectionKeysToDelete.add(section.getKey());
 		sectionDao.deleteSections(allSectionKeysToDelete);
-	}
-
-	private void sort(List<GwtSection> allSections) {
-		Collections.sort(allSections, new Comparator<GwtSection>() {
-
-			@Override
-			public int compare(GwtSection o1, GwtSection o2) {
-
-				long sort = o1.getPos() - o2.getPos();
-				if(sort != 0) {
-					return sort > 0 ? 1 : -1;
-				}
-				return Collator.getInstance(Locale.GERMAN).compare(
-						o1.getSectionName(), o2.getSectionName());
-			}
-		});
 	}
 }
