@@ -44,7 +44,7 @@ public class SectionDsDao extends AbstractDsDao {
 
 		List<GwtSection> sections = CacheUtil.getCached(Cache.ALL_SECTIONS, SECTIONLIST_SUPPLIER, Section.class,
 				getCache());
-		// System.out.println("all " + sections);
+		System.out.println("all " + sections);
 		return sections;
 	}
 
@@ -109,7 +109,7 @@ public class SectionDsDao extends AbstractDsDao {
 
 	public void deleteSections(Collection<String> sectionKeys) {
 
-		// System.out.println("delete " + sectionKeys);
+		System.out.println("delete keys " + sectionKeys);
 
 		if (sectionKeys == null || sectionKeys.isEmpty()) {
 			return;
@@ -125,11 +125,13 @@ public class SectionDsDao extends AbstractDsDao {
 			}
 
 			for (String sectionKey : sectionKeys) {
+				System.out.println("delete key " + sectionKey);
 				datastoreService.delete(DsUtil.toKey(sectionKey));
 			}
 			transaction.commit();
 			sectionChildCacheUpdateNeeded = true;
 			for (String sectionKey : sectionKeys) {
+				System.out.println("remove from cache " + sectionKey);
 				CacheUtil.removeFromCachedResult(Cache.ALL_SECTIONS, new KeySelector(sectionKey), getCache());
 			}
 		} finally {

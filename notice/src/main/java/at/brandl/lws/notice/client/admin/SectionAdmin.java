@@ -2,6 +2,7 @@ package at.brandl.lws.notice.client.admin;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -104,7 +105,7 @@ public class SectionAdmin extends AbstractAdminTab {
 		@Override
 		public String toString() {
 
-			return super.toString() + ": section=" + section;
+			return super.toString() + ": section=" + section + ": delete=" + delete;
 		}
 	}
 
@@ -197,17 +198,27 @@ public class SectionAdmin extends AbstractAdminTab {
 
 	private void deleteSections() {
 
+		LOGGER.info("in delete");
 		Set<SaveItem> items = saveItems.keySet();
-		for (SaveItem saveItem : items) {
-
+		LOGGER.info("saveitems " + items);
+		List<GwtSection> sectionsToDelete = new ArrayList<>();
+		Iterator<SaveItem> saveItems = items.iterator();
+		while(saveItems.hasNext()) {
+			SaveItem saveItem = saveItems.next();
+			LOGGER.info("saveitem " + saveItem);
 			if (saveItem.section == null) {
 				continue;
 			}
 
 			if (saveItem.delete) {
-				sectionService.deleteSection(saveItem.section, new AsyncVoidCallBack());
-				saveItems.remove(saveItem);
+				LOGGER.info("deleting " + saveItem.section);
+				saveItems.remove();
+				sectionsToDelete.add(saveItem.section);
 			}
+		}
+		if (!sectionsToDelete.isEmpty()) {
+			LOGGER.info("deleting " + sectionsToDelete);
+			sectionService.deleteSection(sectionsToDelete, new AsyncVoidCallBack());
 		}
 
 	}
@@ -281,8 +292,8 @@ public class SectionAdmin extends AbstractAdminTab {
 		}
 
 		private void createDelItem(GwtSection section) {
-
-			final SaveItem saveItem = new SaveItem(section, true);
+			LOGGER.info("creating saveitem for section " + section);
+			SaveItem saveItem = new SaveItem(section, true);
 			saveItems.put(saveItem, saveItem);
 		}
 
@@ -396,7 +407,7 @@ public class SectionAdmin extends AbstractAdminTab {
 		private InlineLabel createSectionLabel(GwtSection section) {
 			final InlineLabel sectionName = new InlineLabel(section.getSectionName());
 			if (section.getArchived()) {
-				sectionName.setStylePrimaryName(Utils.ARCHIVED_STYLE);
+				sectionName.addStyleName(Utils.ARCHIVED_STYLE);
 			}
 			return sectionName;
 		}
@@ -505,15 +516,15 @@ public class SectionAdmin extends AbstractAdminTab {
 			updateButtonPanel();
 		}
 
-		private void handleArchive(final GwtSection section, final InlineLabel sectionName, final Anchor sectionArchive,
-				final TreeItem sectionItem) {
+		private void handleArchive(GwtSection section, InlineLabel sectionName, Anchor sectionArchive,
+				TreeItem sectionItem) {
 			if (section.getArchived()) {
 				sectionName.removeStyleName(Utils.ARCHIVED_STYLE);
 				section.setArchived(Boolean.FALSE);
 				section.setPos(-1);
 				sectionArchive.setText(labels().archive());
 			} else {
-				sectionName.setStylePrimaryName(Utils.ARCHIVED_STYLE);
+				sectionName.addStyleName(Utils.ARCHIVED_STYLE);
 				section.setArchived(Boolean.TRUE);
 				sectionArchive.setText(labels().unarchive());
 				sectionItem.removeItems();

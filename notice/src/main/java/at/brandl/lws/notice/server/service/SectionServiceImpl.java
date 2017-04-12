@@ -10,8 +10,7 @@ import at.brandl.lws.notice.model.GwtSection;
 import at.brandl.lws.notice.server.dao.ds.SectionDsDao;
 import at.brandl.lws.notice.shared.service.SectionService;
 
-public class SectionServiceImpl extends RemoteServiceServlet implements
-		SectionService {
+public class SectionServiceImpl extends RemoteServiceServlet implements SectionService {
 
 	private static final long serialVersionUID = -4141659112765911287L;
 	private final SectionDsDao sectionDao;
@@ -30,8 +29,7 @@ public class SectionServiceImpl extends RemoteServiceServlet implements
 	}
 
 	@Override
-	public void storeSection(List<GwtSection> sections)
-			throws IllegalArgumentException {
+	public void storeSection(List<GwtSection> sections) throws IllegalArgumentException {
 		authorizationService.assertCurrentUserIsSectionAdmin();
 		for (GwtSection section : sections) {
 			sectionDao.storeSection(section);
@@ -39,11 +37,12 @@ public class SectionServiceImpl extends RemoteServiceServlet implements
 	}
 
 	@Override
-	public void deleteSection(GwtSection section) throws IllegalStateException {
+	public void deleteSection(List<GwtSection> sections) throws IllegalStateException {
 		authorizationService.assertCurrentUserIsSectionAdmin();
-		final Collection<String> allSectionKeysToDelete = sectionDao
-				.getAllChildKeys(section.getKey());
-		allSectionKeysToDelete.add(section.getKey());
-		sectionDao.deleteSections(allSectionKeysToDelete);
+		for (GwtSection section : sections) {
+			final Collection<String> allSectionKeysToDelete = sectionDao.getAllChildKeys(section.getKey());
+			allSectionKeysToDelete.add(section.getKey());
+			sectionDao.deleteSections(allSectionKeysToDelete);
+		}
 	}
 }

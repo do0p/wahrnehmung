@@ -1,5 +1,6 @@
 package at.brandl.wahrnehmung.it.selenium.section;
 
+import static org.junit.Assert.*;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
@@ -34,6 +35,8 @@ public class SectionAdminTest {
 		page.clickSave();
 
 		assertSectionExists(section);
+		assertSectionLinksExist(section, "archivieren", "ändern", "entfernen");
+		assertSectionLinksNotExist(section, "aktivieren");
 
 		// update section
 		String updatedSection = section + " updated";
@@ -43,6 +46,8 @@ public class SectionAdminTest {
 		page.clickSave();
 		assertSectionExists(updatedSection);
 		assertSectionNotExists(section);
+		assertSectionLinksExist(updatedSection, "archivieren", "ändern", "entfernen");
+		assertSectionLinksNotExist(updatedSection, "aktivieren");
 
 		// delete section
 		page.deleteSection(updatedSection);
@@ -93,27 +98,61 @@ public class SectionAdminTest {
 		int firstId = page.getIntTreeId(firstSection);
 		int secondId = page.getIntTreeId(secondSection);
 		Assert.assertTrue(firstId > secondId);
-		
-		// move second section down 
+
+		// move second section down
 		page.moveDown(secondSection);
 		page.clickSave();
 		assertSectionExists(firstSection);
 		assertSectionExists(secondSection);
-		
+
 		firstId = page.getIntTreeId(firstSection);
 		secondId = page.getIntTreeId(secondSection);
 		Assert.assertTrue(firstId < secondId);
-		
+
 		// delete sections
 		deleteSection(firstSection);
 		deleteSection(secondSection);
 	}
 
+	@Test
+	public void archiveSection() {
 
+		// enter section
+		page.enterSection(section);
+		page.clickSave();
+
+		assertSectionExists(section);
+		assertSectionLinksExist(section, "archivieren", "ändern", "entfernen");
+		assertSectionLinksNotExist(section, "aktivieren");
+
+		// archive section
+		page.archiveSection(section);
+		page.clickSave();
+
+		assertSectionExists(section);
+		assertSectionLinksExist(section, "aktivieren", "entfernen");
+		assertSectionLinksNotExist(section, "archivieren", "ändern");
+
+		// delete section
+		deleteSection(section);
+
+	}
 
 	@AfterClass
 	public static void tearDownClass() {
 		testContext.returnDriver();
+	}
+
+	private void assertSectionLinksExist(String section, String... linkTexts) {
+		for (String linkText : linkTexts) {
+			assertTrue(page.sectionLinkExists(section, linkText));
+		}
+	}
+
+	private void assertSectionLinksNotExist(String section, String... linkTexts) {
+		for (String linkText : linkTexts) {
+			assertFalse(page.sectionLinkExists(section, linkText));
+		}
 	}
 
 	private void deleteSection(String section) {
@@ -123,7 +162,7 @@ public class SectionAdminTest {
 		page.clickSave();
 		assertSectionNotExists(section);
 	}
-	
+
 	private void assertSectionNotExists(final String section) {
 		(new WebDriverWait(testContext.getDriver(), 10)).until(new ExpectedCondition<Boolean>() {
 			public Boolean apply(WebDriver d) {

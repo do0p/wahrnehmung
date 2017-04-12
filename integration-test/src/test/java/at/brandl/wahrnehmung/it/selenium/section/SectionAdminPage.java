@@ -27,24 +27,35 @@ public class SectionAdminPage implements Page {
 	public void enterSection(String section) {
 		Utils.clearAndSendKeys(getSectionField(), section);
 	}
-	
+
 	public void changeSection(String section, String changedSection) {
 		String elementId = clickSectionLink(section, "ändern");
-		
+
 		Utils.clearAndSendKeys(getSectionField(elementId), changedSection);
 	}
 
+	public void archiveSection(String section) {
+		clickSectionLink(section, "archivieren");
+	}
 
 	public void deleteSection(String section) {
 		clickSectionLink(section, "entfernen");
 	}
-	
+
 	public void moveDown(String section) {
 		clickSectionLink(section, "↓");
 	}
 
 	public void moveUp(String section) {
 		clickSectionLink(section, "↑");
+	}
+
+	public boolean sectionLinkExists(String section, String linkText) {
+		String elementId = getTreeId(section);
+		if (elementId == null) {
+			throw new IllegalArgumentException("no such section " + section);
+		}
+		return !Utils.filterByText(Utils.findByCss("#" + elementId + " .gwt-Anchor"), linkText).isEmpty();
 	}
 	
 	private String clickSectionLink(String section, String linkText) {
@@ -59,8 +70,8 @@ public class SectionAdminPage implements Page {
 	
 	private WebElement getSectionLink(String elementId, String linkText) {
 
-		List<WebElement> sectionLinks = Utils.filterByText(Utils.findByCss("#"+elementId + " .gwt-Anchor"), linkText);
-		if(sectionLinks.size() != 1) {
+		List<WebElement> sectionLinks = Utils.filterByText(Utils.findByCss("#" + elementId + " .gwt-Anchor"), linkText);
+		if (sectionLinks.size() != 1) {
 			throw new IllegalStateException("no deletelink found for " + elementId);
 		}
 		return sectionLinks.get(0);
@@ -68,7 +79,7 @@ public class SectionAdminPage implements Page {
 
 	public String getTreeId(String section) {
 		List<WebElement> labels = Utils.filterByText(Utils.findByCss(".gwt-TreeItem .gwt-InlineLabel"), section);
-		
+
 		for (WebElement label : labels) {
 
 			WebElement parent = Utils.getParent(label);
@@ -99,7 +110,7 @@ public class SectionAdminPage implements Page {
 	public WebElement getSectionField(String elementId) {
 		return Utils.getByCss("#" + elementId + " > .gwt-TextBox");
 	}
-	
+
 	public WebElement getSaveButton() {
 		return Utils.getByDebugId("save" + getPageName());
 	}
@@ -126,9 +137,5 @@ public class SectionAdminPage implements Page {
 	public int getIntTreeId(String section) {
 		return Integer.parseInt(getTreeId(section).substring(ID_PREFIX.length()));
 	}
-
-
-
-
 
 }
