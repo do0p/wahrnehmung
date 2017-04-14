@@ -2,7 +2,6 @@ package at.brandl.lws.notice.client.admin;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -199,28 +198,24 @@ public class SectionAdmin extends AbstractAdminTab {
 	private void deleteSections() {
 
 		LOGGER.info("in delete");
-		Set<SaveItem> items = saveItems.keySet();
-		LOGGER.info("saveitems " + items);
 		List<GwtSection> sectionsToDelete = new ArrayList<>();
-		Iterator<SaveItem> saveItems = items.iterator();
-		while(saveItems.hasNext()) {
-			SaveItem saveItem = saveItems.next();
+		List<SaveItem> allItems = new ArrayList<>(saveItems.values());
+		LOGGER.info("saveitems " + allItems);
+		for (SaveItem saveItem : allItems) {
 			LOGGER.info("saveitem " + saveItem);
-			if (saveItem.section == null) {
+			if (saveItem.section == null || !saveItem.delete) {
 				continue;
 			}
 
-			if (saveItem.delete) {
-				LOGGER.info("deleting " + saveItem.section);
-				saveItems.remove();
-				sectionsToDelete.add(saveItem.section);
-			}
+			LOGGER.info("deleting " + saveItem.section);
+			saveItems.remove(saveItem);
+			sectionsToDelete.add(saveItem.section);
 		}
+		
 		if (!sectionsToDelete.isEmpty()) {
 			LOGGER.info("deleting " + sectionsToDelete);
 			sectionService.deleteSection(sectionsToDelete, new AsyncVoidCallBack());
 		}
-
 	}
 
 	private class TreeBuilder extends ErrorReportingCallback<List<GwtSection>> {
@@ -231,6 +226,7 @@ public class SectionAdmin extends AbstractAdminTab {
 		@Override
 		public void onSuccess(List<GwtSection> sections) {
 
+			tree.clear();
 			addChildSections(tree, null, groupSections(sections));
 			updateButtonPanel();
 		}

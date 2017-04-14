@@ -58,6 +58,37 @@ public class SectionAdminTest {
 	}
 
 	@Test
+	public void crudChildSection() {
+		assertSectionNotExists(section);
+
+		page.enterSection(section);
+		page.clickSave();
+
+		assertSectionExists(section);
+
+		page.clickPlusMinusSign(section);
+//		page.click
+		
+		// update section
+		String updatedSection = section + " updated";
+		assertSectionNotExists(updatedSection);
+
+		page.changeSection(section, updatedSection);
+		page.clickSave();
+		assertSectionExists(updatedSection);
+		assertSectionNotExists(section);
+		assertSectionLinksExist(updatedSection, "archivieren", "ändern", "entfernen");
+		assertSectionLinksNotExist(updatedSection, "aktivieren");
+
+		// delete section
+		page.deleteSection(updatedSection);
+		Configurations.clickOk();
+		page.clickSave();
+
+		assertSectionNotExists(updatedSection);
+	}
+	
+	@Test
 	public void duplicateName() {
 
 		assertSectionNotExists(section);
@@ -134,6 +165,72 @@ public class SectionAdminTest {
 		assertSectionLinksNotExist(section, "archivieren", "ändern");
 
 		// delete section
+		deleteSection(section);
+	}
+
+	@Test
+	public void archivedSectionMoveToBottom() {
+
+		String archivedSection1 = "archivedSection1";
+		String archivedSection2 = "archivedSection2";
+
+		// enter section
+		page.enterSection(archivedSection1);
+		page.clickSave();
+		assertSectionExists(archivedSection1);
+		page.enterSection(archivedSection2);
+		page.clickSave();
+		assertSectionExists(archivedSection2);
+		page.enterSection(section);
+		page.clickSave();
+		assertSectionExists(section);
+
+		// initially sorting is alphabetically
+		int archivedId1 = page.getIntTreeId(archivedSection1);
+		int archivedId2 = page.getIntTreeId(archivedSection2);
+		int sectionId = page.getIntTreeId(section);
+		Assert.assertTrue(archivedId1 < archivedId2);
+		Assert.assertTrue(archivedId2 < sectionId);
+
+		// archiving moves archived section down
+		page.archiveSection(archivedSection1);
+		page.clickSave();
+
+		assertSectionExists(archivedSection1);
+
+		archivedId1 = page.getIntTreeId(archivedSection1);
+		archivedId2 = page.getIntTreeId(archivedSection2);
+		sectionId = page.getIntTreeId(section);
+		Assert.assertTrue(archivedId1 > sectionId);
+		Assert.assertTrue(sectionId > archivedId2);
+
+		// archiving moves archived section down
+		page.archiveSection(archivedSection2);
+		page.clickSave();
+
+		assertSectionExists(archivedSection2);
+
+		archivedId1 = page.getIntTreeId(archivedSection1);
+		archivedId2 = page.getIntTreeId(archivedSection2);
+		sectionId = page.getIntTreeId(section);
+		Assert.assertTrue(archivedId2 > archivedId1);
+		Assert.assertTrue(archivedId1 > sectionId);
+
+		// unarchiving moves archived section up again
+		page.activateSection(archivedSection2);
+		page.clickSave();
+
+		assertSectionExists(archivedSection2);
+
+		archivedId1 = page.getIntTreeId(archivedSection1);
+		archivedId2 = page.getIntTreeId(archivedSection2);
+		sectionId = page.getIntTreeId(section);
+		Assert.assertTrue(archivedId1 > sectionId);
+		Assert.assertTrue(sectionId > archivedId2);
+
+		// delete sections
+		deleteSection(archivedSection1);
+		deleteSection(archivedSection2);
 		deleteSection(section);
 
 	}

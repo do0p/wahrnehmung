@@ -3,6 +3,7 @@ package at.brandl.wahrnehmung.it.selenium.section;
 import java.util.List;
 
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.By.ByXPath;
 
 import at.brandl.wahrnehmung.it.selenium.util.Configurations;
 import at.brandl.wahrnehmung.it.selenium.util.Constants;
@@ -38,6 +39,10 @@ public class SectionAdminPage implements Page {
 		clickSectionLink(section, "archivieren");
 	}
 
+	public void activateSection(String section) {
+		clickSectionLink(section, "aktivieren");
+	}
+	
 	public void deleteSection(String section) {
 		clickSectionLink(section, "entfernen");
 	}
@@ -48,6 +53,15 @@ public class SectionAdminPage implements Page {
 
 	public void moveUp(String section) {
 		clickSectionLink(section, "↑");
+	}
+
+	public void clickPlusMinusSign(String section) {
+		String elementId = getTreeId(section);
+		if (elementId == null) {
+			throw new IllegalArgumentException("no such section " + section);
+		}
+		WebElement element = Utils.getByCss("#" + elementId);
+		element.findElement(ByXPath.xpath("../../td/img")).click();
 	}
 
 	public boolean sectionLinkExists(String section, String linkText) {
@@ -91,7 +105,6 @@ public class SectionAdminPage implements Page {
 				parent = Utils.getParent(parent);
 			}
 		}
-
 		return null;
 	}
 
