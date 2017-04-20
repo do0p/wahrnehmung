@@ -33,7 +33,6 @@ public class SectionAdminTest {
 
 		page.enterSection(section);
 		page.clickSave();
-
 		assertSectionExists(section);
 		assertSectionLinksExist(section, "archivieren", "ändern", "entfernen");
 		assertSectionLinksNotExist(section, "aktivieren");
@@ -59,45 +58,50 @@ public class SectionAdminTest {
 
 	@Test
 	public void crudChildSection() {
+		String childSection = section + "Child";
 		assertSectionNotExists(section);
 
-		page.enterSection(section);
+		enterSection(section);
+
+		page.clickPlusMinusSign(section);
+		page.clickCreate(section);
+		page.enterChildSection(section, childSection);
+
 		page.clickSave();
 
 		assertSectionExists(section);
-
 		page.clickPlusMinusSign(section);
-//		page.click
+
+		assertSectionExists(childSection);
+		assertSectionLinksExist(childSection, "archivieren", "ändern", "entfernen");
+		assertSectionLinksNotExist(childSection, "aktivieren");
 		
 		// update section
-		String updatedSection = section + " updated";
+		String updatedSection = childSection + " Updated";
 		assertSectionNotExists(updatedSection);
 
-		page.changeSection(section, updatedSection);
+		page.changeSection(childSection, updatedSection);
 		page.clickSave();
+
+		assertSectionExists(section);
+		page.clickPlusMinusSign(section);
+
 		assertSectionExists(updatedSection);
-		assertSectionNotExists(section);
+		assertSectionNotExists(childSection);
 		assertSectionLinksExist(updatedSection, "archivieren", "ändern", "entfernen");
 		assertSectionLinksNotExist(updatedSection, "aktivieren");
 
 		// delete section
-		page.deleteSection(updatedSection);
-		Configurations.clickOk();
-		page.clickSave();
-
-		assertSectionNotExists(updatedSection);
+		deleteSection(updatedSection);
+		deleteSection(section);
 	}
-	
+
 	@Test
 	public void duplicateName() {
 
 		assertSectionNotExists(section);
 
-		// enter section
-		page.enterSection(section);
-		page.clickSave();
-
-		assertSectionExists(section);
+		enterSection(section);
 
 		// enter same section again
 		page.enterSection(section);
@@ -118,12 +122,8 @@ public class SectionAdminTest {
 		String secondSection = "bb";
 
 		// enter sections
-		page.enterSection(firstSection);
-		page.clickSave();
-		assertSectionExists(firstSection);
-		page.enterSection(secondSection);
-		page.clickSave();
-		assertSectionExists(secondSection);
+		enterSection(firstSection);
+		enterSection(secondSection);
 
 		// initially sorting is alphabetically
 		int firstId = page.getIntTreeId(firstSection);
@@ -148,11 +148,7 @@ public class SectionAdminTest {
 	@Test
 	public void archiveSection() {
 
-		// enter section
-		page.enterSection(section);
-		page.clickSave();
-
-		assertSectionExists(section);
+		enterSection(section);
 		assertSectionLinksExist(section, "archivieren", "ändern", "entfernen");
 		assertSectionLinksNotExist(section, "aktivieren");
 
@@ -167,6 +163,53 @@ public class SectionAdminTest {
 		// delete section
 		deleteSection(section);
 	}
+	
+	@Test
+	public void archiveChildSection() {
+
+		String childSection = section + "Child";
+		
+		// enter section
+		enterSection(section);
+		
+		enterChildSection(section, childSection);
+		assertSectionLinksExist(childSection, "archivieren", "ändern", "entfernen");
+		assertSectionLinksNotExist(childSection, "aktivieren");
+
+		// archive section
+		page.archiveSection(childSection);
+		page.clickSave();
+
+		assertSectionExists(section);
+		page.clickPlusMinusSign(section);
+
+		assertSectionExists(childSection);
+		assertSectionLinksExist(childSection, "aktivieren", "entfernen");
+		assertSectionLinksNotExist(childSection, "archivieren", "ändern");
+
+		// delete section
+		deleteSection(section);
+	}
+
+	private void enterSection(String section) {
+		page.enterSection(section);
+		page.clickSave();
+		assertSectionExists(section);
+	}
+
+	private void enterChildSection(String section, String childSection) {
+		page.clickPlusMinusSign(section);
+		page.clickCreate(section);
+		page.enterChildSection(section, childSection);
+
+		page.clickSave();
+
+		assertSectionExists(section);
+		page.clickPlusMinusSign(section);
+
+		assertSectionExists(childSection);
+		page.clickPlusMinusSign(section);
+	}
 
 	@Test
 	public void archivedSectionMoveToBottom() {
@@ -175,15 +218,9 @@ public class SectionAdminTest {
 		String archivedSection2 = "archivedSection2";
 
 		// enter section
-		page.enterSection(archivedSection1);
-		page.clickSave();
-		assertSectionExists(archivedSection1);
-		page.enterSection(archivedSection2);
-		page.clickSave();
-		assertSectionExists(archivedSection2);
-		page.enterSection(section);
-		page.clickSave();
-		assertSectionExists(section);
+		enterSection(archivedSection1);
+		enterSection(archivedSection2);
+		enterSection(section);
 
 		// initially sorting is alphabetically
 		int archivedId1 = page.getIntTreeId(archivedSection1);
@@ -235,6 +272,82 @@ public class SectionAdminTest {
 
 	}
 
+	@Test
+	public void archivedChildSectionMoveToBottom() {
+
+		String secondSection = "zSection";
+		String childSection = "childSection";
+		String archivedChildSection1 = "archivedChildSection1";
+		String archivedChildSection2 = "archivedChildSection2";
+
+		enterSection(section);
+		enterSection(secondSection);
+		
+		enterChildSection(section, archivedChildSection1);
+		enterChildSection(section, archivedChildSection2);
+		enterChildSection(section, childSection);
+		
+		page.clickPlusMinusSign(section);
+
+		// initially sorting is alphabetically
+//		int sectionId = page.getIntTreeId(section);
+//		int secondSectionId = page.getIntTreeId(secondSection);
+//		int archivedId1 = page.getIntTreeId(archivedChildSection1);
+//		int archivedId2 = page.getIntTreeId(archivedChildSection2);
+//		int childSectionId = page.getIntTreeId(childSection);
+//		Assert.assertTrue(sectionId < archivedId1);
+//		Assert.assertTrue(archivedId1 < archivedId2);
+//		Assert.assertTrue(archivedId2 < childSectionId);
+//		Assert.assertTrue(childSectionId < secondSectionId);
+
+		// archiving moves archived section down
+		page.archiveSection(archivedChildSection1);
+		page.clickSave();
+
+		assertSectionExists(section);
+		page.clickPlusMinusSign(section);
+		assertSectionExists(archivedChildSection1);
+
+		int archivedId1 = page.getIntTreeId(archivedChildSection1);
+		int archivedId2 = page.getIntTreeId(archivedChildSection2);
+		int childSectionId = page.getIntTreeId(childSection);
+		Assert.assertTrue(archivedId1 > childSectionId);
+		Assert.assertTrue(archivedId1 > archivedId2);
+
+		// archiving moves archived section down
+		page.archiveSection(archivedChildSection2);
+		page.clickSave();
+
+		assertSectionExists(section);
+		page.clickPlusMinusSign(section);
+		assertSectionExists(archivedChildSection2);
+
+		archivedId1 = page.getIntTreeId(archivedChildSection1);
+		archivedId2 = page.getIntTreeId(archivedChildSection2);
+		childSectionId = page.getIntTreeId(childSection);
+		Assert.assertTrue(archivedId2 > childSectionId);
+		Assert.assertTrue(archivedId1 > childSectionId);
+
+		// unarchiving moves archived section up again
+		page.activateSection(archivedChildSection2);
+		page.clickSave();
+
+		assertSectionExists(section);
+		page.clickPlusMinusSign(section);
+		assertSectionExists(archivedChildSection2);
+
+		archivedId1 = page.getIntTreeId(archivedChildSection1);
+		archivedId2 = page.getIntTreeId(archivedChildSection2);
+		childSectionId = page.getIntTreeId(childSection);
+		Assert.assertTrue(archivedId1 > childSectionId);
+		Assert.assertTrue(childSectionId > archivedId2);
+
+		// delete sections
+		deleteSection(section);
+		deleteSection(secondSection);
+
+	}
+	
 	@AfterClass
 	public static void tearDownClass() {
 		testContext.returnDriver();

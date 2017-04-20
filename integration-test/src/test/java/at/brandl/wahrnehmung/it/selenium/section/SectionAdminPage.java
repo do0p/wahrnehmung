@@ -29,6 +29,10 @@ public class SectionAdminPage implements Page {
 		Utils.clearAndSendKeys(getSectionField(), section);
 	}
 
+	public void enterChildSection(String section, String childSection) {
+		Utils.clearAndSendKeys(getChildSectionField(section), childSection);
+	}
+
 	public void changeSection(String section, String changedSection) {
 		String elementId = clickSectionLink(section, "ändern");
 
@@ -42,7 +46,7 @@ public class SectionAdminPage implements Page {
 	public void activateSection(String section) {
 		clickSectionLink(section, "aktivieren");
 	}
-	
+
 	public void deleteSection(String section) {
 		clickSectionLink(section, "entfernen");
 	}
@@ -56,12 +60,18 @@ public class SectionAdminPage implements Page {
 	}
 
 	public void clickPlusMinusSign(String section) {
-		String elementId = getTreeId(section);
-		if (elementId == null) {
-			throw new IllegalArgumentException("no such section " + section);
-		}
-		WebElement element = Utils.getByCss("#" + elementId);
-		element.findElement(ByXPath.xpath("../../td/img")).click();
+		WebElement element = getRootElement(section);
+		element.findElement(ByXPath.xpath("table/tbody/tr/td/img")).click();
+	}
+
+	public WebElement getChildSectionField(String section) {
+		WebElement element = getRootElement(section);
+		return element.findElement(ByXPath.xpath("div/div/div/input"));
+	}
+
+	public void clickCreate(String section) {
+		WebElement element = getRootElement(section);
+		element.findElement(ByXPath.xpath("div/div/div/a")).click();
 	}
 
 	public boolean sectionLinkExists(String section, String linkText) {
@@ -71,7 +81,7 @@ public class SectionAdminPage implements Page {
 		}
 		return !Utils.filterByText(Utils.findByCss("#" + elementId + " .gwt-Anchor"), linkText).isEmpty();
 	}
-	
+
 	private String clickSectionLink(String section, String linkText) {
 		String elementId = getTreeId(section);
 		if (elementId == null) {
@@ -81,7 +91,7 @@ public class SectionAdminPage implements Page {
 		link.click();
 		return elementId;
 	}
-	
+
 	private WebElement getSectionLink(String elementId, String linkText) {
 
 		List<WebElement> sectionLinks = Utils.filterByText(Utils.findByCss("#" + elementId + " .gwt-Anchor"), linkText);
@@ -148,7 +158,20 @@ public class SectionAdminPage implements Page {
 	}
 
 	public int getIntTreeId(String section) {
-		return Integer.parseInt(getTreeId(section).substring(ID_PREFIX.length()));
+		String elementId = getTreeId(section);
+		if (elementId == null) {
+			throw new IllegalArgumentException("no such section " + section);
+		}
+		return Integer.parseInt(elementId.substring(ID_PREFIX.length()));
+	}
+
+	private WebElement getRootElement(String section) {
+		String elementId = getTreeId(section);
+		if (elementId == null) {
+			throw new IllegalArgumentException("no such section " + section);
+		}
+		WebElement element = Utils.getByCss("#" + elementId);
+		return element.findElement(ByXPath.xpath("../../../../.."));
 	}
 
 }
