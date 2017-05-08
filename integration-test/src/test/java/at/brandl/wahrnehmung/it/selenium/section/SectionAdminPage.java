@@ -174,4 +174,12 @@ public class SectionAdminPage implements Page {
 		return element.findElement(ByXPath.xpath("../../../../.."));
 	}
 
+	public String findFirstSection() {
+		List<WebElement> sections = Utils.findByCss("div.gwt-TreeItem span.gwt-InlineLabel");
+		if (sections.isEmpty()) {
+			return null;
+		}
+		return sections.get(0).getText();
+	}
+
 }
