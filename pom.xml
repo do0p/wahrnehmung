@@ -5,14 +5,14 @@
 
 	<groupId>at.brandl.lws.notice</groupId>
 	<artifactId>parent</artifactId>
-	<version>22-4</version>
+	<version>22-5</version>
 	<packaging>pom</packaging>
 
 	<name>Notice parent</name>
 
 	<properties>
 		<appengine.app.version>${project.version}</appengine.app.version>
-		<appengine.target.version>1.9.48</appengine.target.version>
+		<appengine.target.version>1.9.52</appengine.target.version>
 		<gwt.target.version>2.7.0</gwt.target.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
