@@ -129,6 +129,16 @@
 		</user-data-constraint>
 	</security-constraint>
 
+	<security-constraint>
+		<web-resource-collection>
+			<web-resource-name>admin</web-resource-name>
+			<url-pattern>/_ah/spi/*</url-pattern>
+		</web-resource-collection>
+		<user-data-constraint>
+			<transport-guarantee>CONFIDENTIAL</transport-guarantee>
+		</user-data-constraint>
+	</security-constraint>
+
 	<welcome-file-list>
 		<welcome-file>Wahrnehmung.html</welcome-file>
 	</welcome-file-list>
