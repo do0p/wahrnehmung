@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -356,6 +357,7 @@ public class BeobachtungDsDao extends AbstractDsDao {
 
 				Date lastDevelopementDialogueDate = child
 						.getLastDevelopementDialogueDate();
+				lastDevelopementDialogueDate = limitPastDate(lastDevelopementDialogueDate);
 
 				Date[] timeRange = filter.getTimeRange();
 				if (timeRange != null && timeRange.length == 2) {
@@ -386,6 +388,28 @@ public class BeobachtungDsDao extends AbstractDsDao {
 				}
 
 				return true;
+			}
+
+			private Date limitPastDate(Date date) {
+				Date earliestDate = mayOfLastSchoolYear();
+				if(date == null || date.before(earliestDate)) {
+					return earliestDate;
+				}
+				return date;
+			}
+
+			private Date mayOfLastSchoolYear() {
+				Calendar calendar = new GregorianCalendar();
+				int actualMonth = calendar.get(Calendar.MONTH);
+				int actualYear = calendar.get(Calendar.YEAR);
+				if(actualMonth < 8) {
+					calendar.set(Calendar.YEAR, actualYear -1);
+				}
+				calendar.set(Calendar.MONTH, 4);
+				calendar.set(Calendar.DAY_OF_MONTH, 1);
+				calendar.set(Calendar.HOUR, 0);
+				calendar.set(Calendar.MINUTE, 0);
+				return calendar.getTime();
 			}
 
 			private Date last(Date date1, Date date2) {

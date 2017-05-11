@@ -321,6 +321,34 @@ public class BeobachtungDsDaoTest extends AbstractDsDaoTest {
 	
 	}
 	
+	/** 
+	 * When filtering for last development dialogue date, there should
+	 * be no entries returned before may last schoolyear
+	 */
+	@Test
+	public void sinceLastDevelopementDialogueButNotBeforeMayOfLastSchoolYear() {
+		
+		// add entry before may last school year
+		GwtBeobachtung beobachtungBeforeMay = createBeobachtung(child1Key, section1Key, user1,
+				new Date(NOW - 24l * HOUR * 365 * 2), "beobachtungBeforeMay");
+		beobachtungBeforeMay.setArchived(true);
+		insertIntoDatastore(createBeobachtungEntity(beobachtungBeforeMay, user1));
+		
+		// assert its actually there
+		BeobachtungsFilter filter = createFilter(child1Key, null);
+		filter.setArchived(true);
+		assertEquals(beobachtungsDao.getBeobachtungen(
+				filter, range), beobachtung5, beobachtungBeforeMay);
+		
+		// when filtering for last development dialogue date the entry schould not be
+		// included in the result.
+		filter = createFilter(child1Key, null);
+		filter.setSinceLastDevelopmementDialogue(true);
+		assertEquals(beobachtungsDao.getBeobachtungen(
+				filter, range), beobachtung3, beobachtung2, beobachtung1, beobachtung5);
+	
+	}
+	
 	@Override
 	protected String getMemCacheServiceName() {
 		return BeobachtungDsDao.getCacheName(false);
