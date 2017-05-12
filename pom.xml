@@ -12,7 +12,7 @@
 
 	<properties>
 		<appengine.app.version>${project.version}</appengine.app.version>
-		<appengine.target.version>1.9.52</appengine.target.version>
+		<appengine.target.version>1.9.53</appengine.target.version>
 		<gwt.target.version>2.7.0</gwt.target.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
