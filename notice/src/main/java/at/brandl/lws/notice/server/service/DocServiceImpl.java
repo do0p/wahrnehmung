@@ -522,7 +522,8 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 			credential = flow.loadCredential(userId);
 			if (credential != null) {
 
-				if (credential.getExpiresInSeconds() < 60
+				Long expiresInSeconds = credential.getExpiresInSeconds();
+				if ((expiresInSeconds == null || expiresInSeconds < 60)
 						&& !credential.refreshToken()) {
 					credential = null;
 					flow.getCredentialDataStore().delete(userId);
