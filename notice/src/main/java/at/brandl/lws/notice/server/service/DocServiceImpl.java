@@ -26,6 +26,7 @@ import org.jsoup.select.NodeTraversor;
 
 import com.google.api.client.auth.oauth2.AuthorizationCodeFlow;
 import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.client.auth.oauth2.TokenResponseException;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.ByteArrayContent;
 import com.google.api.services.drive.model.File;
@@ -97,16 +98,14 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 	}
 
 	@Override
-	public List<GwtDocumentation> getDocumentations(String childKey)
-			throws BackendServiceException {
+	public List<GwtDocumentation> getDocumentations(String childKey) throws BackendServiceException {
 
 		authorizationService.assertCurrentUserIsTeacher();
 
 		GwtChild child = getChild(childKey);
 		ParentReference folder = getOrCreateDocumentationFolder(child);
 
-		FileList files = driveService.getFiles(null, DOCUMENT_TYPE,
-				folder.getId());
+		FileList files = driveService.getFiles(null, DOCUMENT_TYPE, folder.getId());
 		List<GwtDocumentation> documentations = new ArrayList<GwtDocumentation>();
 		for (File file : files.getItems()) {
 			GwtDocumentation documentation = map(file, childKey, -1);
@@ -118,15 +117,13 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 
 	@Override
 	public GwtDocumentation createDocumentation(String childKey, int year)
-			throws DocumentationAlreadyExistsException,
-			UserGrantRequiredException, BackendServiceException {
+			throws DocumentationAlreadyExistsException, UserGrantRequiredException, BackendServiceException {
 
 		authorizationService.assertCurrentUserIsTeacher();
 
 		// this must be the first call, because it might trigger an
 		// authorization roundtrip
-		Credential userCredential = getUserCredentials(childKey, year,
-				getUserId());
+		Credential userCredential = getUserCredentials(childKey, year, getUserId());
 
 		GwtChild child = getChild(childKey);
 
@@ -170,15 +167,13 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 		Number beginYear = child.getBeginYear();
 		Number beginGrade = child.getBeginGrade();
 		if (beginYear != null && beginGrade != null) {
-			return Integer.toString(year - beginYear.intValue()
-					+ beginGrade.intValue());
+			return Integer.toString(year - beginYear.intValue() + beginGrade.intValue());
 		}
 		return "";
 	}
 
 	@Override
-	public void deleteDocumentation(String fileId)
-			throws BackendServiceException {
+	public void deleteDocumentation(String fileId) throws BackendServiceException {
 
 		driveService.deleteFile(fileId);
 	}
@@ -195,24 +190,20 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 		return documentation;
 	}
 
-	private ParentReference getOrCreateDocumentationFolder(GwtChild child)
-			throws BackendServiceException {
+	private ParentReference getOrCreateDocumentationFolder(GwtChild child) throws BackendServiceException {
 
-		ParentReference docRootFolder = driveService.getOrCreateFolder(
-				Constants.NOTICE_ROOT_FOLDER_NAME, null);
+		ParentReference docRootFolder = driveService.getOrCreateFolder(Constants.NOTICE_ROOT_FOLDER_NAME, null);
 
 		String fullChildName = getFullChildName(child);
-		ParentReference childFolder = driveService.getOrCreateFolder(
-				fullChildName, docRootFolder);
+		ParentReference childFolder = driveService.getOrCreateFolder(fullChildName, docRootFolder);
 
-		return driveService.getOrCreateFolder(
-				Constants.DOCUMENTATION_FOLDER_NAME, childFolder);
+		return driveService.getOrCreateFolder(Constants.DOCUMENTATION_FOLDER_NAME, childFolder);
 	}
 
 	private String getFullChildName(GwtChild child) {
 
-		return String.format("%1$s %2$s (%3$td.%3$tm.%3$ty)",
-				child.getFirstName(), child.getLastName(), child.getBirthDay());
+		return String.format("%1$s %2$s (%3$td.%3$tm.%3$ty)", child.getFirstName(), child.getLastName(),
+				child.getBirthDay());
 	}
 
 	private Map<String, Object> createMap() {
@@ -225,9 +216,7 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 		Multimap<String, GwtSection> childSections = ArrayListMultimap.create();
 		for (GwtSection section : getAllSections()) {
 			if (section.getSectionName().contains(SectionDsDao.SEPARATOR)) {
-				throw new IllegalArgumentException(
-						"section name may not contain '"
-								+ SectionDsDao.SEPARATOR + "'");
+				throw new IllegalArgumentException("section name may not contain '" + SectionDsDao.SEPARATOR + "'");
 			}
 
 			String parentKey = section.getParentKey();
@@ -238,15 +227,13 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 	}
 
 	private List<GwtSection> getAllSections() {
-		List<GwtSection> allSections = new ArrayList<>(
-				sectionDao.getAllSections());
+		List<GwtSection> allSections = new ArrayList<>(sectionDao.getAllSections());
 		Collections.sort(allSections);
 
 		return allSections;
 	}
 
-	private Map<String, Object> createMap(String parentKey,
-			Multimap<String, GwtSection> childSections) {
+	private Map<String, Object> createMap(String parentKey, Multimap<String, GwtSection> childSections) {
 
 		Collection<GwtSection> sections = childSections.get(parentKey);
 		if (sections == null || sections.isEmpty()) {
@@ -257,7 +244,7 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 		ArrayList<Object> sectionOrder = new ArrayList<>();
 		parentMap.put(ORDER_NAME, sectionOrder);
 		for (GwtSection section : sections) {
-			if(isArchived(section)) {
+			if (isArchived(section)) {
 				continue;
 			}
 			LinkedHashMap<String, Object> childMap = new LinkedHashMap<>();
@@ -284,13 +271,11 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 			if (parts.length == 1) {
 				addText(sections, TEXT_NAME, notice);
 			} else {
-				Map<String, Object> subsections = getOrCreate(sections,
-						parts[1]);
+				Map<String, Object> subsections = getOrCreate(sections, parts[1]);
 				if (parts.length == 2) {
 					addText(subsections, TEXT_NAME, notice);
 				} else {
-					Map<String, Object> subsectionsText = getOrCreate(
-							subsections, parts[2]);
+					Map<String, Object> subsectionsText = getOrCreate(subsections, parts[2]);
 					addText(subsectionsText, TEXT_NAME, notice);
 				}
 			}
@@ -303,24 +288,19 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 		return new SimpleDateFormat("d.M.yy").format(date);
 	}
 
-	private Map<String, Object> getOrCreate(Map<String, Object> sections,
-			String sectionName) {
+	private Map<String, Object> getOrCreate(Map<String, Object> sections, String sectionName) {
 
 		@SuppressWarnings("unchecked")
-		Map<String, Object> subsections = (Map<String, Object>) sections
-				.get(sectionName);
+		Map<String, Object> subsections = (Map<String, Object>) sections.get(sectionName);
 		if (subsections == null) {
-			System.err.println("no section found for section name "
-					+ sectionName);
+			System.err.println("no section found for section name " + sectionName);
 			System.err.println("sectionnames: " + sections.keySet());
-			throw new IllegalArgumentException(
-					"no section found for section name " + sectionName);
+			throw new IllegalArgumentException("no section found for section name " + sectionName);
 		}
 		return subsections;
 	}
 
-	private void addText(Map<String, Object> sections, String sectionName,
-			GwtBeobachtung notice) {
+	private void addText(Map<String, Object> sections, String sectionName, GwtBeobachtung notice) {
 
 		@SuppressWarnings("unchecked")
 		List<String> texts = (List<String>) sections.get(sectionName);
@@ -371,13 +351,11 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 
 	private String createTitle(GwtChild child, int year) {
 
-		return String.format("Bericht %s SJ %s-%s", getFullChildName(child),
-				year, year + 1);
+		return String.format("Bericht %s SJ %s-%s", getFullChildName(child), year, year + 1);
 	}
 
-	private void updateDocument(String scriptName, File file,
-			Credential userCredential, Map<String, String> replacements,
-			Map<String, Object> notices) throws BackendServiceException {
+	private void updateDocument(String scriptName, File file, Credential userCredential,
+			Map<String, String> replacements, Map<String, Object> notices) throws BackendServiceException {
 
 		ExecutionRequest request = new ExecutionRequest();
 
@@ -390,12 +368,10 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 
 		request.setParameters(parameters);
 		try {
-			getScript(userCredential).scripts()
-					.run(SCRIPT_PROJECT_KEY, request).execute();
+			getScript(userCredential).scripts().run(SCRIPT_PROJECT_KEY, request).execute();
 		} catch (IOException e) {
 			e.printStackTrace(System.err);
-			throw new BackendServiceException("Got exception updating file "
-					+ file.getDefaultOpenWithLink() + " with "
+			throw new BackendServiceException("Got exception updating file " + file.getDefaultOpenWithLink() + " with "
 					+ Utils.createJsonString(parameters), e);
 		}
 	}
@@ -412,8 +388,7 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 
 		String title = createTitle(child, year);
 		assertFileNotExists(title, parent);
-		File file = driveService.uploadFile(title, template.getType(), parent,
-				template);
+		File file = driveService.uploadFile(title, template.getType(), parent, template);
 		driveService.updatePermissions(file, WRITER_ROLE, true);
 		return file;
 	}
@@ -421,14 +396,12 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 	private void assertFileNotExists(String title, ParentReference parent)
 			throws DocumentationAlreadyExistsException, BackendServiceException {
 
-		FileList files = driveService.getFiles(title, DOCUMENT_TYPE,
-				parent.getId());
+		FileList files = driveService.getFiles(title, DOCUMENT_TYPE, parent.getId());
 
 		int numFiles = files.getItems().size();
 		if (numFiles > 0) {
 			File file = files.getItems().iterator().next();
-			throw new DocumentationAlreadyExistsException(
-					file.getDefaultOpenWithLink());
+			throw new DocumentationAlreadyExistsException(file.getDefaultOpenWithLink());
 		}
 	}
 
@@ -448,9 +421,7 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 			return object.getContentType();
 		} catch (IOException e) {
 			e.printStackTrace(System.err);
-			throw new BackendServiceException(
-					"Got exception retrieving content type of " + TEMPLATE_FILE,
-					e);
+			throw new BackendServiceException("Got exception retrieving content type of " + TEMPLATE_FILE, e);
 		}
 	}
 
@@ -463,8 +434,7 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 			return out.toByteArray();
 		} catch (IOException e) {
 			e.printStackTrace(System.err);
-			throw new BackendServiceException(
-					"Got exception retrieving content from " + TEMPLATE_FILE, e);
+			throw new BackendServiceException("Got exception retrieving content from " + TEMPLATE_FILE, e);
 		}
 	}
 
@@ -490,11 +460,9 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 
 		if (null == storageService) {
 
-			GoogleCredential credential = Utils
-					.createApplicationCredentials(StorageScopes.all());
-			storageService = new Storage.Builder(Utils.HTTP_TRANSPORT,
-					Utils.JSON_FACTORY, credential).setApplicationName(
-					APPLICATION_NAME).build();
+			GoogleCredential credential = Utils.createApplicationCredentials(StorageScopes.all());
+			storageService = new Storage.Builder(Utils.HTTP_TRANSPORT, Utils.JSON_FACTORY, credential)
+					.setApplicationName(APPLICATION_NAME).build();
 		}
 		return storageService;
 	}
@@ -508,13 +476,12 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 	 */
 	private Script getScript(Credential credential) {
 
-		return new Script.Builder(Utils.HTTP_TRANSPORT, Utils.JSON_FACTORY,
-				credential).setApplicationName(APPLICATION_NAME).build();
+		return new Script.Builder(Utils.HTTP_TRANSPORT, Utils.JSON_FACTORY, credential)
+				.setApplicationName(APPLICATION_NAME).build();
 	}
 
-	private Credential getUserCredentials(String childKey, int year,
-			String userId) throws UserGrantRequiredException,
-			BackendServiceException {
+	private Credential getUserCredentials(String childKey, int year, String userId)
+			throws UserGrantRequiredException, BackendServiceException {
 
 		AuthorizationCodeFlow flow = Utils.newFlow();
 		Credential credential = null;
@@ -523,34 +490,39 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 			if (credential != null) {
 
 				Long expiresInSeconds = credential.getExpiresInSeconds();
-				if ((expiresInSeconds == null || expiresInSeconds < 60)
-						&& !credential.refreshToken()) {
-					credential = null;
-					flow.getCredentialDataStore().delete(userId);
+				if (expiresInSeconds == null || expiresInSeconds < 60) {
+					boolean refreshSuccess = false;
+					try {
+						refreshSuccess = credential.refreshToken();
+					} catch (TokenResponseException e) {
+						System.err.println("Error refreshing token for user " + userId + ". Message: " + e.getMessage());
+					}
+					if (!refreshSuccess) {
+						credential = null;
+						flow.getCredentialDataStore().delete(userId);
+					}
 				}
 			}
 		} catch (IOException e) {
+			System.err.println("Error getting token for user " + userId + ". Message: " + e.getMessage());
 			e.printStackTrace(System.err);
 			throw new BackendServiceException(
-					"could not get credentials for user " + userId, e);
+					"Could not get credentials for user " + userId + ". Cause: " + e.getMessage(), e);
 		}
 
 		if (credential == null) {
-			throw new UserGrantRequiredException(buildAuthorizationUrl(flow,
-					childKey, year));
+			throw new UserGrantRequiredException(buildAuthorizationUrl(flow, childKey, year));
 		}
 
 		return credential;
 	}
 
-	private String buildAuthorizationUrl(AuthorizationCodeFlow flow,
-			String childKey, int year) {
+	private String buildAuthorizationUrl(AuthorizationCodeFlow flow, String childKey, int year) {
 
 		HttpServletRequest request = getThreadLocalRequest();
 		String redirectUri = Utils.getRedirectUri(request);
 		String state = new StateParser(childKey, year).getState();
-		return flow.newAuthorizationUrl().setRedirectUri(redirectUri)
-				.setState(state).build();
+		return flow.newAuthorizationUrl().setRedirectUri(redirectUri).setState(state).build();
 	}
 
 	private static String getUserId() {
