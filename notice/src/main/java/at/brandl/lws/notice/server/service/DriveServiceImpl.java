@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.ByteArrayContent;
@@ -116,10 +117,11 @@ public class DriveServiceImpl {
 			ParentReference parent) throws BackendServiceException {
 
 		String parentId = parent == null ? ROOT_PARENT : parent.getId();
-		FileList files = getFiles(folderName, FOLDER_TYPE, parentId);
+		FileList fileList = getFiles(folderName, FOLDER_TYPE, parentId);
 
 		File file;
-		int numFiles = files.getItems().size();
+		List<File> files = fileList.getItems().stream().filter(f -> f.getTitle().equals(folderName)).collect(Collectors.toList());
+		int numFiles = files.size();
 		if (numFiles == 0) {
 			file = uploadFile(folderName, FOLDER_TYPE, parent, null);
 			updatePermissions(file, READER_ROLE, true);
@@ -135,12 +137,12 @@ public class DriveServiceImpl {
 			}
 
 		} else if (numFiles == 1) {
-			file = files.getItems().get(0);
+			file = files.get(0);
 
 		} else {
 
 			// delete duplicate empty folders
-			for (File duplicate : files.getItems()) {
+			for (File duplicate : files) {
 				if(deleteEmptyFolder(duplicate) && (--numFiles == 1)) {
 						break;
 				}
@@ -149,7 +151,7 @@ public class DriveServiceImpl {
 			if (numFiles > 1) {
 				String folderlist;
 				try {
-					folderlist = files.toPrettyString();
+					folderlist = fileList.toPrettyString();
 				} catch (IOException e) {
 					folderlist = "";
 				}
