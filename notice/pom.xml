@@ -8,7 +8,7 @@
 		<groupId>at.brandl.lws.notice</groupId>
 		<artifactId>parent</artifactId>
 		<relativePath>../</relativePath>
-		<version>22-7</version>
+		<version>22-8</version>
 	</parent>
 
 	<artifactId>notice</artifactId>
@@ -21,8 +21,8 @@
 			<artifactId>appengine-api-1.0-sdk</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.google.appengine</groupId>
-			<artifactId>appengine-endpoints</artifactId>
+			<groupId>com.google.endpoints</groupId>
+			<artifactId>endpoints-framework</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.google.appengine.tools</groupId>
@@ -121,6 +121,16 @@
 		</resources>
 
 		<plugins>
+		
+			<plugin>
+    			<groupId>com.google.cloud.tools</groupId>
+    			<artifactId>endpoints-framework-maven-plugin</artifactId>
+    			<version>1.0.2</version>
+    			<configuration>
+        			<!-- plugin configuration -->
+        			<hostname>${appengine.app.id}.appspot.com</hostname>
+    			</configuration>
+			</plugin>
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

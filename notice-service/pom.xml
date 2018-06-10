@@ -7,7 +7,7 @@
 		<groupId>at.brandl.lws.notice</groupId>
 		<artifactId>parent</artifactId>
 		<relativePath>../</relativePath>
-		<version>22-7</version>
+		<version>22-8</version>
 	</parent>
 
 	<artifactId>notice-service</artifactId>
@@ -27,8 +27,8 @@
 			<artifactId>appengine-api-1.0-sdk</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.google.appengine</groupId>
-			<artifactId>appengine-endpoints</artifactId>
+			<groupId>com.google.endpoints</groupId>
+			<artifactId>endpoints-framework</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.google.appengine.tools</groupId>
