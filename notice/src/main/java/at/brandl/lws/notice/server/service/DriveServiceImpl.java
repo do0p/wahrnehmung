@@ -8,7 +8,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.ByteArrayContent;
@@ -120,7 +119,13 @@ public class DriveServiceImpl {
 		FileList fileList = getFiles(folderName, FOLDER_TYPE, parentId);
 
 		File file;
-		List<File> files = fileList.getItems().stream().filter(f -> f.getTitle().equals(folderName)).collect(Collectors.toList());
+		List<File> files = new ArrayList<File>();
+//		List<File> files = fileList.getItems().stream().filter(f -> f.getTitle().equals(folderName)).collect(Collectors.toList());
+		for(File f : fileList.getItems()) {
+			if(f.getTitle().equals(folderName)) {
+				files.add(f);
+			}
+		}
 		int numFiles = files.size();
 		if (numFiles == 0) {
 			file = uploadFile(folderName, FOLDER_TYPE, parent, null);

@@ -419,7 +419,11 @@ public class BeobachtungDsDao extends AbstractDsDao {
 
 				setUpdated(childKey);
 				result = getAllBeobachtungen(childKey, sectionKey, aggregateSections, oldestEntry, archived);
-				cache.put(key, result);
+				try {
+					cache.put(key, result);
+				} catch (MemcacheServiceException e) {
+					System.out.println("could not put notices into memcache: " + e.getMessage());
+				}
 
 			}
 		}
