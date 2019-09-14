@@ -5,7 +5,7 @@
 
 	<groupId>at.brandl.lws.notice</groupId>
 	<artifactId>parent</artifactId>
-	<version>22-9</version>
+	<version>22-10</version>
 	<packaging>pom</packaging>
 
 	<name>Notice parent</name>
@@ -125,8 +125,8 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.2</version>
 				<configuration>
-					<source>1.7</source>
-					<target>1.7</target>
+					<source>1.8</source>
+					<target>1.8</target>
 				</configuration>
 			</plugin>
 
@@ -198,7 +198,6 @@
 		<profile>
 			<id>dev</id>
 			<properties>
-				<appengine.app.id>dev</appengine.app.id>
 				<gwt.debug>&lt;inherits name='com.google.gwt.user.Debug'/&gt;</gwt.debug>
 			</properties>
 			<modules>
@@ -213,7 +212,6 @@
 		<profile>
 			<id>test</id>
 			<properties>
-				<appengine.app.id>wahrnehmung-test</appengine.app.id>
 				<gwt.debug>&lt;inherits name='com.google.gwt.user.Debug'/&gt;</gwt.debug>
 			</properties>
 			<modules>
@@ -227,7 +225,6 @@
 		<profile>
 			<id>prod</id>
 			<properties>
-				<appengine.app.id>lws-wahrnehmung</appengine.app.id>
 				<gwt.debug></gwt.debug>
 			</properties>
 			<modules>
