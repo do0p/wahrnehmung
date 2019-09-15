@@ -17,8 +17,6 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
-
-
 	<dependencyManagement>
 		<dependencies>
 			<!-- Compile/runtime dependencies -->
@@ -111,7 +109,6 @@
 				<scope>test</scope>
 			</dependency>
 		</dependencies>
-
 	</dependencyManagement>
 
 	<build>

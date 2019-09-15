@@ -14,8 +14,6 @@
 
 	<name>appengine-modules-ear</name>
 
-
-
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
