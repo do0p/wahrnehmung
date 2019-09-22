@@ -7,7 +7,7 @@
 		<groupId>at.brandl.lws.notice</groupId>
 		<artifactId>parent</artifactId>
 		<relativePath>../</relativePath>
-		<version>22-10</version>
+		<version>22-11</version>
 	</parent>
 
 	<artifactId>notice-service</artifactId>
