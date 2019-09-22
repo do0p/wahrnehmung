@@ -167,7 +167,8 @@ public class DocServiceImpl extends RemoteServiceServlet implements DocsService 
 		Number beginYear = child.getBeginYear();
 		Number beginGrade = child.getBeginGrade();
 		if (beginYear != null && beginGrade != null) {
-			return Integer.toString(year - beginYear.intValue() + beginGrade.intValue());
+			int actualGrade = year - beginYear.intValue() + beginGrade.intValue();
+			return Integer.toString(actualGrade > 9 ? 9 : actualGrade);
 		}
 		return "";
 	}
