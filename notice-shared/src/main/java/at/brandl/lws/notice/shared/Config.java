@@ -11,6 +11,7 @@ import com.google.appengine.api.utils.SystemProperty.Environment;
 public class Config extends Properties {
 
 	private static final long serialVersionUID = 4642424314615927394L;
+	private static final String DOT = "-dot-";
 
 	private static class ConfigProvider {
 
@@ -49,10 +50,19 @@ public class Config extends Properties {
 
 	public String getInteractionServiceUrl() {
 		boolean localDev = SystemProperty.environment.value().equals(Environment.Value.Development);
-		return  (localDev ? "http://" : "https://") + ModulesServiceFactory.getModulesService().getVersionHostname("interaction-service" ,null);
+		String interactionServiceId = "interaction-service";
+		if(localDev) {
+			return "http://" + ModulesServiceFactory.getModulesService().getVersionHostname(interactionServiceId ,null);
+		} else {
+			return "https://" + interactionServiceId + DOT + getApplicationHostname();
+		}
 	}
 	
 	public String getBucketName() {
+		return getApplicationHostname();
+	}
+
+	private String getApplicationHostname() {
 		return getApplicationName() + ".appspot.com";
 	}
 }
