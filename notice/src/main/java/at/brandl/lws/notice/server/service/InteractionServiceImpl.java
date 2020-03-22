@@ -35,7 +35,7 @@ public class InteractionServiceImpl extends RemoteServiceServlet implements Inte
 	@Override
 	public List<GwtInteraction> getInteractions(String childKey, Date fromDate, Date toDate) throws IOException {
 
-		if(!(authorizationService.currentUserIsAdmin() || authorizationService.currentUserIsTeacher())) {
+		if (!(authorizationService.currentUserIsAdmin() || authorizationService.currentUserIsTeacher())) {
 			return Collections.emptyList();
 		}
 		URLConnection con = createUrlConnection(childKey, fromDate, toDate);
@@ -45,20 +45,26 @@ public class InteractionServiceImpl extends RemoteServiceServlet implements Inte
 	private List<GwtInteraction> parseResponse(URLConnection con) throws IOException, JsonParseException {
 		List<GwtInteraction> interactions = new ArrayList<>();
 		InputStream inputStream = con.getInputStream();
-		JsonParser parser = new JsonFactory().createParser(inputStream);
-		parser.nextToken();
-		while (JsonToken.START_OBJECT.equals(parser.nextToken())) {
-			GwtInteraction interaction = new GwtInteraction();
-			parser.nextToken(); // childKey as fieldname
-			String childKey = parser.getText();
-			interaction.setChildKey(childKey);
-			interaction.setChildName(getChildName(childKey));
-			parser.nextToken(); // count as value
-			interaction.setCount(parser.getIntValue());
-			parser.nextToken(); // end object
-			interactions.add(interaction);
+		try {
+			if (inputStream.available() > 0) {
+				JsonParser parser = new JsonFactory().createParser(inputStream);
+				parser.nextToken();
+				while (JsonToken.START_OBJECT.equals(parser.nextToken())) {
+					GwtInteraction interaction = new GwtInteraction();
+					parser.nextToken(); // childKey as fieldname
+					String childKey = parser.getText();
+					interaction.setChildKey(childKey);
+					interaction.setChildName(getChildName(childKey));
+					parser.nextToken(); // count as value
+					interaction.setCount(parser.getIntValue());
+					parser.nextToken(); // end object
+					interactions.add(interaction);
+				}
+				Collections.sort(interactions);
+			}
+		} finally {
+			inputStream.close();
 		}
-		Collections.sort(interactions);
 		return interactions;
 	}
 
