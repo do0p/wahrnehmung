@@ -1,6 +1,7 @@
 package at.brandl.lws.notice.server.service;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -43,7 +44,8 @@ public class InteractionServiceImpl extends RemoteServiceServlet implements Inte
 
 	private List<GwtInteraction> parseResponse(URLConnection con) throws IOException, JsonParseException {
 		List<GwtInteraction> interactions = new ArrayList<>();
-		JsonParser parser = new JsonFactory().createParser(con.getInputStream());
+		InputStream inputStream = con.getInputStream();
+		JsonParser parser = new JsonFactory().createParser(inputStream);
 		parser.nextToken();
 		while (JsonToken.START_OBJECT.equals(parser.nextToken())) {
 			GwtInteraction interaction = new GwtInteraction();
