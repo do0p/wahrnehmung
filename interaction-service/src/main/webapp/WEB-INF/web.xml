@@ -70,7 +70,7 @@
   	<security-constraint>
 		<web-resource-collection>
 			<web-resource-name>/storeInteraction</web-resource-name>
-			<url-pattern>/interaction</url-pattern>
+			<url-pattern>/interactions</url-pattern>
 		</web-resource-collection>
   		<auth-constraint>
             <role-name>admin</role-name>
