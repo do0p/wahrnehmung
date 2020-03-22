@@ -67,10 +67,10 @@
 		</user-data-constraint>
 	</security-constraint>
 
- <!-- 	<security-constraint>
+  	<security-constraint>
 		<web-resource-collection>
 			<web-resource-name>/storeInteraction</web-resource-name>
-			<url-pattern>/storeInteraction</url-pattern>
+			<url-pattern>/interaction</url-pattern>
 		</web-resource-collection>
   		<auth-constraint>
             <role-name>admin</role-name>
@@ -79,7 +79,7 @@
 			<transport-guarantee>CONFIDENTIAL</transport-guarantee>
 		</user-data-constraint>
 		
-	</security-constraint>  -->
+	</security-constraint>  
 
 	<servlet>
 		<servlet-name>SystemServiceServlet</servlet-name>

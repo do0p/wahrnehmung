@@ -9,7 +9,7 @@ import org.openqa.selenium.firefox.FirefoxProfile;
 public class WebDriverProvider {
 
 	public static enum DriverType {
-		CHROME, FIREFOX, IE
+		CHROME, IE
 	}
 
 	private DriverType type = DriverType.CHROME;
@@ -61,11 +61,6 @@ public class WebDriverProvider {
 		switch (type) {
 		case CHROME:
 			return new ChromeDriver();
-		case FIREFOX:
-			FirefoxProfile profile = new FirefoxProfile();
-			profile.setPreference("focusmanager.testmode", true);
-			profile.setEnableNativeEvents(true);
-			return new FirefoxDriver(profile);
 		case IE:
 			return new EdgeDriver();
 		}
