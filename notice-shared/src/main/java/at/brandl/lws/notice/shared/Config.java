@@ -51,11 +51,11 @@ public class Config extends Properties {
 	public String getInteractionServiceUrl() {
 		boolean localDev = SystemProperty.environment.value().equals(Environment.Value.Development);
 		String interactionServiceId = "interaction-service";
-		if(localDev) {
+	//	if(localDev) {
 			return "http://" + ModulesServiceFactory.getModulesService().getVersionHostname(interactionServiceId ,null);
-		} else {
-			return "https://" + interactionServiceId + DOT + getApplicationHostname();
-		}
+//		} else {
+//			return "https://" + interactionServiceId + DOT + getApplicationHostname();
+//		}
 	}
 	
 	public String getBucketName() {

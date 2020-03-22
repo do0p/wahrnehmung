@@ -212,7 +212,7 @@ public class ViJsServlet extends HttpServlet {
 		con.setReadTimeout(READ_TIMEOUT);
 		con.setRequestProperty("X-Appengine-Inbound-Appid", SystemProperty.applicationId.get());
 		if (con instanceof HttpURLConnection) {
-			((HttpURLConnection) con).setInstanceFollowRedirects(false);
+			((HttpURLConnection) con).setInstanceFollowRedirects(true);
 		}
 		return con;
 	}
