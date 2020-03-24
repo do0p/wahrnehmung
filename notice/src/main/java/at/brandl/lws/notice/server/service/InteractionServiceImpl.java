@@ -82,7 +82,7 @@ public class InteractionServiceImpl extends RemoteServiceServlet implements Inte
 		con.setReadTimeout(READ_TIMEOUT);
 		con.setRequestProperty("X-Appengine-Inbound-Appid", SystemProperty.applicationId.get());
 		if (con instanceof HttpURLConnection) {
-			((HttpURLConnection) con).setInstanceFollowRedirects(true);
+			((HttpURLConnection) con).setInstanceFollowRedirects(false);
 		}
 		return con;
 	}

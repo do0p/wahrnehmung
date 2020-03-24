@@ -5,6 +5,8 @@
 	<threadsafe>true</threadsafe>
 	<runtime>java8</runtime>
 	
+	<url-stream-handler>urlfetch</url-stream-handler>
+	
 	<!-- Configure serving/caching of GWT files -->
 	<static-files>
 		<include path="**" />

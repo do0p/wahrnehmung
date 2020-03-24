@@ -4,15 +4,6 @@
 	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
 	version="3.0">
 	
-<!-- 	<filter>
-		<filter-name>corsFilter</filter-name>
-		<filter-class>at.brandl.lws.notice.interaction.filter.CORSFilter</filter-class>
-	</filter>
-	<filter-mapping>
-		<filter-name>corsFilter</filter-name>
-		<url-pattern>/*</url-pattern>
-	</filter-mapping> -->
-	
 	<servlet>
 		<servlet-name>interactionsServlet</servlet-name>
 		<servlet-class>at.brandl.lws.notice.interaction.servlet.InteractionServlet</servlet-class>
@@ -21,33 +12,22 @@
 		<servlet-name>interactionsServlet</servlet-name>
 		<url-pattern>/interactions</url-pattern>
 	</servlet-mapping>
+
 	
-<!-- 	<servlet>
-		<servlet-name>importServlet</servlet-name>
-		<servlet-class>at.brandl.lws.notice.interaction.servlet.OneTimeImportServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>importServlet</servlet-name>
-		<url-pattern>/import</url-pattern>
-	</servlet-mapping> -->
-	
-<!-- 	<servlet>
+ 	<servlet>
 		<servlet-name>storeInteractionsServlet</servlet-name>
 		<servlet-class>at.brandl.lws.notice.interaction.servlet.StoreInteractionServlet</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>storeInteractionsServlet</servlet-name>
 		<url-pattern>/storeInteraction</url-pattern>
-	</servlet-mapping> -->
+	</servlet-mapping> 
 	
  	<security-constraint>
 		<web-resource-collection>
 			<web-resource-name>/*</web-resource-name>
 			<url-pattern>/*</url-pattern>
 		</web-resource-collection>
-		<auth-constraint>
-			<role-name>*</role-name>
-		</auth-constraint>
 		<user-data-constraint>
 			<transport-guarantee>CONFIDENTIAL</transport-guarantee>
 		</user-data-constraint>
@@ -70,7 +50,7 @@
   	<security-constraint>
 		<web-resource-collection>
 			<web-resource-name>/storeInteraction</web-resource-name>
-			<url-pattern>/interactions</url-pattern>
+			<url-pattern>/storeInteraction</url-pattern>
 		</web-resource-collection>
   		<auth-constraint>
             <role-name>admin</role-name>

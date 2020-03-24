@@ -21,7 +21,7 @@ public class ChildServiceImpl extends RemoteServiceServlet implements
 		ChildService {
 
 	private static final long serialVersionUID = -6319980504490088717L;
-	private static final String INTERACTION_SERVICE_PATH = "/interactions";
+	private static final String INTERACTION_SERVICE_PATH = "/storeInteraction";
 	private final ChildDsDao childDao;
 	private final BeobachtungDsDao beobachtungsDao;
 	private final AuthorizationServiceImpl authorizationService;

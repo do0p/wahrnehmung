@@ -38,7 +38,7 @@ import at.brandl.lws.notice.shared.validator.GwtBeobachtungValidator;
  */
 public class WahrnehmungsServiceImpl extends RemoteServiceServlet implements WahrnehmungsService {
 
-	private static final String INTERACTION_SERVICE_PATH = "/interactions";
+	private static final String INTERACTION_SERVICE_PATH = "/storeInteraction";
 	private static final Logger LOGGER = Logger.getLogger(WahrnehmungsServiceImpl.class.getCanonicalName());
 	private static final String UPLOAD_URL = "/wahrnehmung/upload";
 	private static final long serialVersionUID = 6513086238987365801L;
