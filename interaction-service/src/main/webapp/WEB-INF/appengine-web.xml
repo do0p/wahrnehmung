@@ -30,7 +30,7 @@
   
   <module>interaction-service</module>
 
-  <instance-class>B2</instance-class>
+  <instance-class>B4</instance-class>
   <basic-scaling>
     <max-instances>1</max-instances>
     <idle-timeout>10m</idle-timeout>
