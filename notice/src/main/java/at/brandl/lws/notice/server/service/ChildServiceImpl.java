@@ -17,11 +17,11 @@ import at.brandl.lws.notice.server.dao.ds.ChildDsDao;
 import at.brandl.lws.notice.shared.service.ChildService;
 import at.brandl.lws.notice.shared.util.Constants;
 
-public class ChildServiceImpl extends RemoteServiceServlet implements
-		ChildService {
+public class ChildServiceImpl extends RemoteServiceServlet implements ChildService {
 
 	private static final long serialVersionUID = -6319980504490088717L;
 	private static final String INTERACTION_SERVICE_PATH = "/storeInteraction";
+	private static final String INTERACTION_ARCHIVE_SERVICE_PATH = "/archiveInteraction";
 	private final ChildDsDao childDao;
 	private final BeobachtungDsDao beobachtungsDao;
 	private final AuthorizationServiceImpl authorizationService;
@@ -42,15 +42,24 @@ public class ChildServiceImpl extends RemoteServiceServlet implements
 	@Override
 	public void storeChild(GwtChild child) {
 		authorizationService.assertCurrentUserIsAdmin();
+		if (child.getArchived() != null && child.getArchived()) {
+			Queue queue = QueueFactory.getQueue(Constants.INTERACTION_QUEUE_NAME);
+			queue.add(TaskOptions.Builder.withUrl(INTERACTION_ARCHIVE_SERVICE_PATH).method(Method.POST)
+					.param("childKey", child.getKey()).header("Host",
+							ModulesServiceFactory.getModulesService().getVersionHostname("interaction-service", null)));
+
+		}
 		childDao.storeChild(child);
 	}
 
 	@Override
 	public void deleteChild(String childKey) throws IllegalArgumentException {
 		authorizationService.assertCurrentUserIsAdmin();
-		
+
 		Queue queue = QueueFactory.getQueue(Constants.INTERACTION_QUEUE_NAME);
-		queue.add(TaskOptions.Builder.withUrl(INTERACTION_SERVICE_PATH).method(Method.DELETE).param("childKey", childKey).header("Host", ModulesServiceFactory.getModulesService().getVersionHostname("interaction-service" ,null)));
+		queue.add(TaskOptions.Builder.withUrl(INTERACTION_SERVICE_PATH).method(Method.DELETE)
+				.param("childKey", childKey).header("Host",
+						ModulesServiceFactory.getModulesService().getVersionHostname("interaction-service", null)));
 
 		beobachtungsDao.deleteAllFromChild(childKey);
 		childDao.deleteChild(childKey);
@@ -62,7 +71,7 @@ public class ChildServiceImpl extends RemoteServiceServlet implements
 	}
 
 	@Override
-	public void addDevelopementDialogueDate(String key, Date date)  throws IllegalArgumentException {
+	public void addDevelopementDialogueDate(String key, Date date) throws IllegalArgumentException {
 		GwtChild child = childDao.getChild(key);
 		child.addDevelopementDialogueDate(date);
 		childDao.storeChild(child);
@@ -73,7 +82,7 @@ public class ChildServiceImpl extends RemoteServiceServlet implements
 		GwtChild child = childDao.getChild(key);
 		child.removeDevelopementDialogueDate(date);
 		childDao.storeChild(child);
-		
+
 	}
 
 }

@@ -4,24 +4,16 @@ import java.io.IOException;
 import java.util.Date;
 
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import at.brandl.lws.notice.dao.DaoRegistry;
-import at.brandl.lws.notice.interaction.dao.InteractionDsDao;
 import at.brandl.lws.notice.shared.util.Constants;
 
-public class StoreInteractionServlet extends HttpServlet {
+public class StoreInteractionServlet extends AbstractInteractionServlet {
 
 	private static final long serialVersionUID = 5495998583956606624L;
 
-	private static final String KEY_PARAM = "childKey";
-
 	private static final String DATE_PARAM = "date";
-
-	private InteractionDsDao interactionDao = DaoRegistry.get(InteractionDsDao.class);
-	// private String appId = SystemProperty.applicationId.get();
 
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -45,7 +37,7 @@ public class StoreInteractionServlet extends HttpServlet {
 		if(date == null) {
 				throw new IllegalArgumentException(DATE_PARAM + " is missing.");
 		}
-		interactionDao.incrementInteraction(childKeys[0], childKeys[1], DateUtils.getStartOfDay(date), 1);
+		getInteractionDao().incrementInteraction(childKeys[0], childKeys[1], DateUtils.getStartOfDay(date), 1);
 	}
 	
 	@Override
@@ -59,19 +51,8 @@ public class StoreInteractionServlet extends HttpServlet {
 		}
 
 		String childKey = req.getParameter(KEY_PARAM);
-		interactionDao.deleteAllInteractions(childKey);
+		getInteractionDao().deleteAllInteractions(childKey);
 	}
-	
-	private Date getDateValue(HttpServletRequest req, String paramName) {
-		String longValue = req.getParameter(paramName);
-		if (longValue != null) {
-			try {
-				return new Date(Long.parseLong(longValue));
-			} catch (NumberFormatException e) {
-				throw new IllegalArgumentException("not a long value");
-			}
-		}
-		return null;
-	}
+
 
 }

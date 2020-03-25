@@ -23,6 +23,15 @@
 		<url-pattern>/storeInteraction</url-pattern>
 	</servlet-mapping> 
 	
+	<servlet>
+		<servlet-name>archiveInteractionsServlet</servlet-name>
+		<servlet-class>at.brandl.lws.notice.interaction.servlet.ArchiveInteractionServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>archiveInteractionsServlet</servlet-name>
+		<url-pattern>/archiveInteraction</url-pattern>
+	</servlet-mapping> 
+	
  	<security-constraint>
 		<web-resource-collection>
 			<web-resource-name>/*</web-resource-name>
@@ -47,6 +56,20 @@
 		</user-data-constraint>
 	</security-constraint>
 
+  	<security-constraint>
+		<web-resource-collection>
+			<web-resource-name>/archiveInteraction</web-resource-name>
+			<url-pattern>/archiveInteraction</url-pattern>
+		</web-resource-collection>
+  		<auth-constraint>
+            <role-name>admin</role-name>
+        </auth-constraint>  
+		<user-data-constraint>
+			<transport-guarantee>CONFIDENTIAL</transport-guarantee>
+		</user-data-constraint>
+		
+	</security-constraint>  
+	
   	<security-constraint>
 		<web-resource-collection>
 			<web-resource-name>/storeInteraction</web-resource-name>

@@ -171,6 +171,7 @@ public class Constants {
 	public static class Interaction {
 
 		public static final String KIND = "InteractionDs";
+		public static final String ARCHIVE_KIND = "InteractionArchiveDs";
 		public static final String DATE = "date";
 		public static final String PARTNER = "partner";
 		public static final String COUNT = "count";
@@ -181,7 +182,7 @@ public class Constants {
 		}
 
 	}
-
+	
 	public static final String MULTIPLE_CHOICE = "multipleChoice";
 	public static final String DOCUMENTATION_FOLDER_NAME = "Berichte";
 	public static final String NOTICE_ROOT_FOLDER_NAME = "Wahrnehmung Dokumente";

@@ -10,9 +10,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.appengine.api.datastore.DatastoreService;
-import com.google.appengine.api.datastore.Entities;
 import com.google.appengine.api.datastore.Entity;
-import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.PreparedQuery;
@@ -24,10 +22,8 @@ import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
 import com.google.appengine.api.datastore.Transaction;
 import com.google.appengine.api.datastore.TransactionOptions;
-import com.google.appengine.api.memcache.MemcacheService;
 
 import at.brandl.lws.notice.dao.AbstractDsDao;
-import at.brandl.lws.notice.dao.CacheEntity;
 import at.brandl.lws.notice.dao.CacheKey;
 import at.brandl.lws.notice.dao.DsUtil;
 import at.brandl.lws.notice.shared.util.Constants;
@@ -95,11 +91,6 @@ public class InteractionDsDao extends AbstractDsDao {
 		}
 		return result;
 	}
-
-
-
-
-
 
 	private Filter createDateFilter(Date from, Date to) {
 
@@ -216,6 +207,14 @@ public class InteractionDsDao extends AbstractDsDao {
 		return entity;
 	}
 
+	private Entity toArchiveEntity(Entity entity) {
+		Entity archiveEntity = new Entity(Interaction.ARCHIVE_KIND, entity.getKey().getParent());
+		archiveEntity.setProperty(Interaction.PARTNER, entity.getProperty(Interaction.PARTNER));
+		archiveEntity.setProperty(Interaction.COUNT, entity.getProperty(Interaction.COUNT));
+		archiveEntity.setProperty(Interaction.DATE, entity.getProperty(Interaction.DATE));
+		return archiveEntity;
+	}
+
 	public void deleteAllInteractions(String keyString) {
 		DatastoreService ds = getDatastoreService();
 		Key childKey = DsUtil.toKey(keyString);
@@ -227,11 +226,11 @@ public class InteractionDsDao extends AbstractDsDao {
 			try {
 				List<Key> toDelete = new ArrayList<Key>();
 
-				for (Entity entity : ds.prepare(createQuery(otherChildKey, childKey)).asIterable()) {
+				for (Entity entity : ds.prepare(createQuery(otherChildKey, childKey, true)).asIterable()) {
 					toDelete.add(entity.getKey());
 				}
 
-				for (Entity entity : ds.prepare(createQuery(childKey, otherChildKey)).asIterable()) {
+				for (Entity entity : ds.prepare(createQuery(childKey, otherChildKey, true)).asIterable()) {
 					toDelete.add(entity.getKey());
 				}
 
@@ -246,10 +245,60 @@ public class InteractionDsDao extends AbstractDsDao {
 		}
 	}
 
-	private Query createQuery(Key childKey, Key otherChildKey) {
-		return new Query(Constants.Interaction.KIND, childKey)
-				.setFilter(new FilterPredicate(Constants.Interaction.PARTNER, FilterOperator.EQUAL, otherChildKey))
-				.setKeysOnly();
+	private Query createQuery(Key childKey, Key otherChildKey, boolean keysOnly) {
+		Query query = new Query(Constants.Interaction.KIND, childKey)
+				.setFilter(new FilterPredicate(Constants.Interaction.PARTNER, FilterOperator.EQUAL, otherChildKey));
+		if(keysOnly) {
+			query.setKeysOnly();
+		}
+		return query;
+	}
+
+	public void archive(String keyString) {
+		DatastoreService ds = getDatastoreService();
+		Key childKey = DsUtil.toKey(keyString);
+		Map<String, Integer> interactions = doGetInteractions(childKey, null, null, ds);
+
+		for (String otherChild : interactions.keySet()) {
+			Key otherChildKey = DsUtil.toKey(otherChild);
+			Transaction transaction = ds.beginTransaction(TransactionOptions.Builder.withXG(true));
+			try {
+				List<Key> toDelete = new ArrayList<Key>();
+
+				for (Entity entity : ds.prepare(createQuery(otherChildKey, childKey, false)).asIterable()) {
+					toDelete.add(entity.getKey());
+					ds.put(toArchiveEntity(entity));
+				}
+
+				for (Entity entity : ds.prepare(createQuery(childKey, otherChildKey, false)).asIterable()) {
+					toDelete.add(entity.getKey());
+					ds.put(toArchiveEntity(entity));
+				}
+
+				ds.delete(toDelete);
+				transaction.commit();
+
+			} finally {
+				if (transaction.isActive()) {
+					transaction.rollback();
+				}
+			}
+		}
+	}
+
+	public Map<String, Integer> getArchivedInteractions(String childKey) {
+		DatastoreService ds = getDatastoreService();
+		Transaction tx = ds.beginTransaction();
+		Query query = new Query(Interaction.ARCHIVE_KIND).setAncestor(DsUtil.toKey(childKey));
+		PreparedQuery preparedQuery = ds.prepare(tx, query);
+
+		Map<String, Integer> result = new HashMap<>();
+		for (Entity interaction : preparedQuery.asIterable(FetchOptions.Builder.withChunkSize(100))) {
+			addToResult(interaction, result);
+		}
+		
+		tx.rollback();
+		return result;
 	}
 
 }
