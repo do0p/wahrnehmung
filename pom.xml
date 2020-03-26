@@ -5,15 +5,15 @@
 
 	<groupId>at.brandl.lws.notice</groupId>
 	<artifactId>parent</artifactId>
-	<version>22-15</version>
+	<version>23-0</version>
 	<packaging>pom</packaging>
 
 	<name>Notice parent</name>
 
 	<properties>
 		<appengine.app.version>${project.version}</appengine.app.version>
-		<appengine.target.version>1.9.64</appengine.target.version>
-		<gwt.target.version>2.7.0</gwt.target.version>
+		<appengine.target.version>1.9.79</appengine.target.version>
+		<gwt.target.version>2.8.2</gwt.target.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
@@ -23,7 +23,7 @@
 			<dependency>
 				<groupId>com.google.guava</groupId>
 				<artifactId>guava-gwt</artifactId>
-				<version>15.0</version>
+				<version>28.2-jre</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.appengine</groupId>

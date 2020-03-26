@@ -1,10 +1,10 @@
 package at.brandl.lws.notice.model;
 
 import java.io.Serializable;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
+
+
 
 public class GwtSection implements Serializable, Comparable<GwtSection> {
 
@@ -78,7 +78,7 @@ public class GwtSection implements Serializable, Comparable<GwtSection> {
 
 	@Override
 	public String toString() {
-		return Objects.toStringHelper(this).add("sectionName", sectionName).add("key", key).add("parentKey", parentKey)
+		return MoreObjects.toStringHelper(this).add("sectionName", sectionName).add("key", key).add("parentKey", parentKey)
 				.add("pos", pos).add("archived", archived).toString();
 	}
 
