@@ -1,0 +1,6 @@
+cron:
+- description: "Entfernen von Duplikaten"
+  url: /cleanUp
+  schedule: every sunday 03:00
+  timezone: Europe/Vienna
+  target: notice-service
