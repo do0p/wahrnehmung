@@ -13,6 +13,7 @@ import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.google.appengine.api.datastore.Entity;
@@ -324,7 +325,10 @@ public class BeobachtungDsDaoTest extends AbstractDsDaoTest {
 	/** 
 	 * When filtering for last development dialogue date, there should
 	 * be no entries returned before may last schoolyear
+	 * 
+	 * This feature is disabled because of a request of Ulli Tinnhofer on 20.12.2020
 	 */
+	@Ignore
 	@Test
 	public void sinceLastDevelopementDialogueButNotBeforeMayOfLastSchoolYear() {
 		

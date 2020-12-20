@@ -335,7 +335,9 @@ public class BeobachtungDsDao extends AbstractDsDao {
 				}
 
 				Date lastDevelopementDialogueDate = child.getLastDevelopementDialogueDate();
-				lastDevelopementDialogueDate = limitPastDate(lastDevelopementDialogueDate);
+				// This feature is disabled because of a request of Ulli Tinnhofer on 20.12.2020. If you reactivate it, also reactivate the test at
+				// at.brandl.lws.notice.server.dao.ds.BeobachtungDsDaoTest.sinceLastDevelopementDialogueButNotBeforeMayOfLastSchoolYear()
+				// lastDevelopementDialogueDate = limitPastDate(lastDevelopementDialogueDate);
 
 				Date[] timeRange = filter.getTimeRange();
 				if (timeRange != null && timeRange.length == 2) {
@@ -364,27 +366,27 @@ public class BeobachtungDsDao extends AbstractDsDao {
 				return true;
 			}
 
-			private Date limitPastDate(Date date) {
-				Date earliestDate = mayOfLastSchoolYear();
-				if (date == null || date.before(earliestDate)) {
-					return earliestDate;
-				}
-				return date;
-			}
+//			private Date limitPastDate(Date date) {
+//				Date earliestDate = mayOfLastSchoolYear();
+//				if (date == null || date.before(earliestDate)) {
+//					return earliestDate;
+//				}
+//				return date;
+//			}
 
-			private Date mayOfLastSchoolYear() {
-				Calendar calendar = new GregorianCalendar();
-				int actualMonth = calendar.get(Calendar.MONTH);
-				int actualYear = calendar.get(Calendar.YEAR);
-				if (actualMonth < 8) {
-					calendar.set(Calendar.YEAR, actualYear - 1);
-				}
-				calendar.set(Calendar.MONTH, 4);
-				calendar.set(Calendar.DAY_OF_MONTH, 1);
-				calendar.set(Calendar.HOUR, 0);
-				calendar.set(Calendar.MINUTE, 0);
-				return calendar.getTime();
-			}
+//			private Date mayOfLastSchoolYear() {
+//				Calendar calendar = new GregorianCalendar();
+//				int actualMonth = calendar.get(Calendar.MONTH);
+//				int actualYear = calendar.get(Calendar.YEAR);
+//				if (actualMonth < 8) {
+//					calendar.set(Calendar.YEAR, actualYear - 1);
+//				}
+//				calendar.set(Calendar.MONTH, 4);
+//				calendar.set(Calendar.DAY_OF_MONTH, 1);
+//				calendar.set(Calendar.HOUR, 0);
+//				calendar.set(Calendar.MINUTE, 0);
+//				return calendar.getTime();
+//			}
 
 			private Date last(Date date1, Date date2) {
 				return date1.before(date2) ? date2 : date1;

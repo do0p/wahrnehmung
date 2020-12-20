@@ -6,7 +6,7 @@
 		<groupId>at.brandl.lws.notice</groupId>
 		<artifactId>parent</artifactId>
 		<relativePath>../</relativePath>
-		<version>23-1</version>
+		<version>23-2</version>
 	</parent>
 
 	<artifactId>appengine-modules-ear</artifactId>
