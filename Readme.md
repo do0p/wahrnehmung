@@ -6,6 +6,6 @@
 
 # Deploy
 
-gcloud config configurations list
-gcloud config configurations activate [configuration]
-gcloud app deploy -v [version] [build folder in target e.g. target/notice-23-2]
+* gcloud config configurations list
+* gcloud config configurations activate [configuration]
+* gcloud app deploy -v [version] [build folder in target e.g. target/notice-23-2]
