@@ -33,7 +33,7 @@ public class ChildAdmin extends AbstractAdminTab {
 
 	public static final String PAGE_NAME = "ChildAdmin";
 	private static final int VISIBLE_CHILDREN = 20;
-	private static final int MAX_YEARS_IN_SCHOOL = 15;
+	private static final int MAX_YEARS_IN_SCHOOL = 16;
 
 	private final ChildServiceAsync childService = GWT
 			.create(ChildService.class);
@@ -66,11 +66,12 @@ public class ChildAdmin extends AbstractAdminTab {
 			beginYearMap.put(Long.valueOf(beginYear), i);
 			beginYearBox.addItem(beginYear);
 
-			String beginGrade = Integer.toString(i + 1);
-			beginGradeMap.put(Long.valueOf(beginGrade), i);
-			beginGradeBox.addItem(beginGrade);
+			beginGradeMap.put(Long.valueOf(i), i);
+			beginGradeBox.addItem(Integer.toString(i));
 		}
 
+		beginGradeBox.setSelectedIndex(1);
+		
 		initChild();
 
 		decisionBox = new DecisionBox();
@@ -223,7 +224,7 @@ public class ChildAdmin extends AbstractAdminTab {
 		lnBox.setValue(null);
 		bdBox.setValue(null);
 		beginYearBox.setSelectedIndex(0);
-		beginGradeBox.setSelectedIndex(0);
+		beginGradeBox.setSelectedIndex(1);
 		archivedBox.setValue(false);
 		int selectedIndex = children.getSelectedIndex();
 		if(selectedIndex >= 0) {
